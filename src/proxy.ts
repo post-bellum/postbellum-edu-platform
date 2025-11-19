@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { authConfig } from "@/lib/supabase/config";
 import type { Database } from "@/types/database.types";
 
-export async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
