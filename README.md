@@ -42,11 +42,19 @@ src/
 
 ## Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in your values:
+Create a `.env.local` file in the root directory with your Supabase credentials:
 
 ```bash
-cp .env.example .env.local
+# .env.local
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
+
+Get these values from your Supabase project:
+1. Go to https://app.supabase.com
+2. Select your project
+3. Go to Settings → API
+4. Copy your Project URL and anon/public key
 
 ## Features
 

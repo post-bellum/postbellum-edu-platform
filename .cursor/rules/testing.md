@@ -9,25 +9,30 @@
 ## Test Organization
 ```
 tests/
-├── e2e/                    # End-to-end tests
+├── e2e/                   # End-to-end tests
 │   ├── auth/              # Authentication flows
 │   │   ├── login.spec.ts
 │   │   ├── register.spec.ts
 │   │   └── logout.spec.ts
 │   ├── lessons/           # Lesson features
 │   │   ├── browse.spec.ts
-│   │   ├── search.spec.ts
-│   │   └── favorites.spec.ts
-│   └── editor/            # Editor features
-│       ├── create.spec.ts
-│       └── edit.spec.ts
-├── unit/                  # Unit tests
-│   ├── components/        # Component tests
-│   ├── hooks/            # Custom hook tests
-│   └── utils/            # Utility tests
-└── integration/          # Integration tests
-    ├── api/              # API route tests
-    └── supabase/         # Database tests
+│   │   ├── detail.spec.ts
+│   │   ├── kahoot.spec.ts
+│   │   ├── features.spec.ts
+│   │   └── documents.spec.ts
+│   └── editor/           # Editor features
+│   │   ├── status.spec.ts
+│   │   ├── review.spec.ts
+│   │   ├── download.spec.ts
+│   │   ├── check.spec.ts
+│   │   └── edit.spec.ts
+│   └── profile/          # Profile features
+│   │   └── settings.spec.ts
+│   │   └── documents.spec.ts
+│   └── landing/          # Landing features
+│   │   └── newsletter.spec.ts
+│   │   └── privacy.spec.ts
+│   │   └── policy.spec.ts
 ```
 
 ## Element Selection Strategy
