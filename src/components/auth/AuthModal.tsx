@@ -9,9 +9,10 @@ import { LoginModal } from "./LoginModal"
 import { RegisterModal } from "./RegisterModal"
 import { OTPModal } from "./OTPModal"
 import { CompleteRegistrationModal } from "./CompleteRegistrationModal"
+import { SuccessModal } from "./SuccessModal"
 import Image from "next/image"
 
-type AuthStep = "login" | "register" | "otp" | "complete"
+type AuthStep = "login" | "register" | "complete" | "otp" | "success"
 
 interface AuthModalProps {
   open: boolean
@@ -36,17 +37,22 @@ export function AuthModal({ open, onOpenChange, defaultStep = "login" }: AuthMod
   }
 
   const handleRegisterSuccess = () => {
-    // After registration, go to OTP verification
-    setStep("otp")
-  }
-
-  const handleOTPSuccess = () => {
-    // After OTP verification, go to complete registration
+    // After registration, go to complete registration
     setStep("complete")
   }
 
   const handleCompleteRegistrationSuccess = () => {
-    // Close modal and complete the flow
+    // After completing registration, go to OTP verification
+    setStep("otp")
+  }
+
+  const handleOTPSuccess = () => {
+    // After OTP verification, show success checkmark
+    setStep("success")
+  }
+
+  const handleSuccessComplete = () => {
+    // Close modal after viewing success message
     onOpenChange(false)
     // TODO: Redirect to dashboard or update app state
   }
@@ -77,18 +83,22 @@ export function AuthModal({ open, onOpenChange, defaultStep = "login" }: AuthMod
           />
         )}
 
-        {step === "otp" && (
-          <OTPModal
-            email={email}
-            onSuccess={handleOTPSuccess}
-            onBack={() => setStep("register")}
-          />
-        )}
-
         {step === "complete" && (
           <CompleteRegistrationModal
             onSuccess={handleCompleteRegistrationSuccess}
           />
+        )}
+
+        {step === "otp" && (
+          <OTPModal
+            email={email}
+            onSuccess={handleOTPSuccess}
+            onBack={() => setStep("complete")}
+          />
+        )}
+
+        {step === "success" && (
+          <SuccessModal onSuccess={handleSuccessComplete} />
         )}
       </DialogContent>
     </Dialog>
