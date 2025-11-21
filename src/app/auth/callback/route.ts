@@ -8,10 +8,17 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    
+    if (error) {
+      console.error("OAuth callback error:", error)
+      // Redirect to home page with error (you can add error handling UI later)
+      return NextResponse.redirect(`${origin}/?error=auth_failed`)
+    }
   }
 
-  // URL to redirect to after sign in process completes
+  // Redirect to home page
+  // The home page will automatically check if the user needs to complete registration
   return NextResponse.redirect(`${origin}/`)
 }
 

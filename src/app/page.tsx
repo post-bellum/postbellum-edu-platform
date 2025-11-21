@@ -1,19 +1,55 @@
 "use client"
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
-import { AuthModal } from "@/components/auth";
+import { AuthModal, CompleteRegistrationModal } from "@/components/auth";
+import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { useAuth } from "@/lib/supabase/hooks/useAuth";
 import { logout } from "@/lib/oauth-helpers";
+import { hasCompletedRegistration, getUserProfile } from "@/lib/supabase/user-profile";
+
+// Map category values to display labels
+const CATEGORY_LABELS: Record<string, string> = {
+  student: "student/ka",
+  parent: "rodič",
+  educational_professional: "odborná veřejnost ve vzdělávání (metodik/metodička, konzultant/ka, ...)",
+  ngo_worker: "pracovník/pracovnice v neziskovém a nevládním sektoru",
+  public_sector_worker: "pracovník/pracovnice ve státním sektoru",
+  other: "ostatní",
+};
 
 export default function Home() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [showCompleteRegistration, setShowCompleteRegistration] = useState(false);
+  const [userProfile, setUserProfile] = useState<{
+    userType?: string;
+    schoolName?: string | null;
+    category?: string | null;
+  } | null>(null);
   const { user, loading, isLoggedIn } = useAuth();
+
+  // Check if user needs to complete registration and fetch profile
+  useEffect(() => {
+    async function checkRegistration() {
+      if (isLoggedIn && !loading) {
+        const completed = await hasCompletedRegistration();
+        if (!completed) {
+          setShowCompleteRegistration(true);
+        } else {
+          // Fetch user profile data
+          const profile = await getUserProfile();
+          setUserProfile(profile);
+        }
+      }
+    }
+    checkRegistration();
+  }, [isLoggedIn, loading]);
 
   const handleAuthAction = async () => {
     if (isLoggedIn) {
       await logout();
+      setUserProfile(null); // Clear profile on logout
     } else {
       setAuthModalOpen(true);
     }
@@ -50,9 +86,36 @@ export default function Home() {
               </Button>
               
               {isLoggedIn && (
-                <p className="text-sm text-gray-600">
-                  Přihlášen jako: {user?.email}
-                </p>
+                <div className="text-center space-y-2 max-w-md">
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <p className="text-sm text-gray-600">
+                      Přihlášen jako
+                    </p>
+                    <p className="text-base font-medium text-gray-900">
+                      {user?.email}
+                    </p>
+                    {userProfile?.userType && (
+                      <div className="pt-2 border-t border-gray-200">
+                        {userProfile.userType === "teacher" ? (
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium text-primary">
+                              Učitel
+                            </p>
+                            {userProfile.schoolName && (
+                              <p className="text-sm text-gray-600">
+                                {userProfile.schoolName}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-600">
+                            {userProfile.category ? CATEGORY_LABELS[userProfile.category] || userProfile.category : 'Nejsem učitel'}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </>
           )}
@@ -64,6 +127,31 @@ export default function Home() {
         onOpenChange={setAuthModalOpen}
         defaultStep="login"
       />
+
+      <Dialog 
+        open={showCompleteRegistration} 
+        onOpenChange={(open) => {
+          // Prevent closing the dialog - user must complete registration
+          if (!open) return;
+          setShowCompleteRegistration(open);
+        }}
+      >
+        <DialogContent 
+          className="sm:max-w-[500px]" 
+          hideCloseButton
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <CompleteRegistrationModal 
+            onSuccess={async () => {
+              setShowCompleteRegistration(false);
+              // Refresh user profile after completion
+              const profile = await getUserProfile();
+              setUserProfile(profile);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

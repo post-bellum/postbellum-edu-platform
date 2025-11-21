@@ -39,7 +39,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          category: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
+          created_at: string | null
+          email: string | null
+          email_consent: boolean | null
+          id: string
+          registration_completed: boolean | null
+          school_name: string | null
+          updated_at: string | null
+          user_type: "teacher" | "not-teacher"
+        }
+        Insert: {
+          category?: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
+          created_at?: string | null
+          email?: string | null
+          email_consent?: boolean | null
+          id: string
+          registration_completed?: boolean | null
+          school_name?: string | null
+          updated_at?: string | null
+          user_type: "teacher" | "not-teacher"
+        }
+        Update: {
+          category?: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
+          created_at?: string | null
+          email?: string | null
+          email_consent?: boolean | null
+          id?: string
+          registration_completed?: boolean | null
+          school_name?: string | null
+          updated_at?: string | null
+          user_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
