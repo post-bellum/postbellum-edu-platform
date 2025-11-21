@@ -1,22 +1,40 @@
+import { createClient } from "@/lib/supabase/client"
+import type { Provider } from "@supabase/supabase-js"
+
 type OAuthProvider = "google" | "microsoft"
+
+// Map our provider names to Supabase provider names
+const PROVIDER_MAP: Record<OAuthProvider, Provider> = {
+  google: "google",
+  microsoft: "azure",
+} as const
 
 export async function handleOAuthLogin(provider: OAuthProvider) {
   try {
-    // TODO: Implement Supabase OAuth
-    console.log(`OAuth login with ${provider}`)
+    const supabase = createClient()
+    const supabaseProvider = PROVIDER_MAP[provider]
     
-    // Example implementation:
-    // const supabase = createClient()
-    // await supabase.auth.signInWithOAuth({
-    //   provider: provider === 'google' ? 'google' : 'azure',
-    //   options: {
-    //     redirectTo: `${window.location.origin}/auth/callback`
-    //   }
-    // })
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: supabaseProvider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        skipBrowserRedirect: false,
+      }
+    })
+
+    if (error) {
+      console.error(`OAuth login error (${provider}):`, error)
+      throw error
+    }
+
+    return data
   } catch (error) {
     console.error(`OAuth login error (${provider}):`, error)
     throw error
   }
 }
+
+// Re-export client auth helpers for convenience
+export { logout, getCurrentUser, isLoggedIn } from "@/lib/supabase/auth-helpers-client"
 
 
