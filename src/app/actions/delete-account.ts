@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { logger } from '@/lib/logger'
 
 /**
  * Delete user account (server action)
@@ -15,7 +16,7 @@ export async function deleteAccountAction() {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!supabaseUrl) {
-      console.error('Missing NEXT_PUBLIC_SUPABASE_URL')
+      logger.error('Missing NEXT_PUBLIC_SUPABASE_URL')
       return {
         success: false,
         error: 'Server configuration error: Missing Supabase URL'
@@ -23,7 +24,7 @@ export async function deleteAccountAction() {
     }
 
     if (!serviceRoleKey) {
-      console.error('Missing SUPABASE_SERVICE_ROLE_KEY - required for account deletion')
+      logger.error('Missing SUPABASE_SERVICE_ROLE_KEY - required for account deletion')
       return {
         success: false,
         error: 'Server not configured for account deletion. Please contact administrator.'
@@ -94,7 +95,7 @@ export async function deleteAccountAction() {
     )
 
     if (deleteError) {
-      console.error('Error deleting user:', deleteError)
+      logger.error('Error deleting user', deleteError)
       return { 
         success: false, 
         error: deleteError.message 
@@ -106,7 +107,7 @@ export async function deleteAccountAction() {
 
     return { success: true }
   } catch (error) {
-    console.error('Error in deleteAccountAction:', error)
+    logger.error('Error in deleteAccountAction', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error' 

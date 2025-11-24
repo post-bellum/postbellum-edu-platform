@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from "./client"
+import { logger } from "@/lib/logger"
 
 /**
  * Sign up with email and password
@@ -24,7 +25,7 @@ export async function signUpWithEmail(email: string, password: string) {
 
     return { data, error: null }
   } catch (error) {
-    console.error("Sign up error:", error)
+    logger.error("Sign up error", error)
     return { data: null, error }
   }
 }
@@ -48,7 +49,7 @@ export async function signInWithEmail(email: string, password: string) {
 
     return { data, error: null }
   } catch (error) {
-    console.error("Sign in error:", error)
+    logger.error("Sign in error", error)
     return { data: null, error }
   }
 }
@@ -72,7 +73,7 @@ export async function verifyOTP(email: string, token: string) {
 
     return { data, error: null }
   } catch (error) {
-    console.error("OTP verification error:", error)
+    logger.error("OTP verification error", error)
     return { data: null, error }
   }
 }
@@ -95,7 +96,7 @@ export async function resendOTP(email: string) {
 
     return { data, error: null }
   } catch (error) {
-    console.error("Resend OTP error:", error)
+    logger.error("Resend OTP error", error)
     return { data: null, error }
   }
 }
@@ -117,7 +118,7 @@ export async function sendPasswordResetEmail(email: string) {
 
     return { data, error: null }
   } catch (error) {
-    console.error("Password reset email error:", error)
+    logger.error("Password reset email error", error)
     return { data: null, error }
   }
 }
@@ -139,7 +140,7 @@ export async function updatePassword(newPassword: string) {
 
     return { data, error: null }
   } catch (error) {
-    console.error("Update password error:", error)
+    logger.error("Update password error", error)
     return { data: null, error }
   }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { createClient } from "./client"
+import { logger } from "@/lib/logger"
 
 /**
  * Get display name from OAuth user metadata
@@ -40,7 +41,7 @@ export async function getDisplayNameFromAuth(): Promise<string> {
     
     return ""
   } catch (error) {
-    console.error("Error getting display name from auth:", error)
+    logger.error("Error getting display name from auth", error)
     return ""
   }
 }
@@ -54,7 +55,7 @@ export async function getUserEmail(): Promise<string | null> {
     const { data: { user } } = await supabase.auth.getUser()
     return user?.email || null
   } catch (error) {
-    console.error("Error getting user email:", error)
+    logger.error("Error getting user email", error)
     return null
   }
 }

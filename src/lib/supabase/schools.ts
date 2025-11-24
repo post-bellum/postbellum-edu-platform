@@ -1,5 +1,6 @@
 import { createClient } from "./client"
 import type { AutocompleteOption } from "@/components/ui/Autocomplete"
+import { logger } from "@/lib/logger"
 
 export interface School {
   schoolId: number
@@ -29,7 +30,7 @@ export async function searchSchools(
     .limit(limit)
 
   if (error) {
-    console.error("Error searching schools:", error)
+    logger.error("Error searching schools", error)
     throw error
   }
 
@@ -59,7 +60,7 @@ export async function getSchoolById(schoolId: number): Promise<School | null> {
     .single()
 
   if (error) {
-    console.error("Error getting school:", error)
+    logger.error("Error getting school", error)
     return null
   }
 

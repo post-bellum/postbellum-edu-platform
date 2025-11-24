@@ -18,6 +18,7 @@ import { useAuth } from "@/lib/supabase/hooks/useAuth"
 import { useRouter } from "next/navigation"
 import { getGravatarUrl } from "@/lib/gravatar"
 import { AUTH_CONSTANTS } from "@/lib/constants"
+import { logger } from "@/lib/logger"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -60,7 +61,7 @@ export default function ProfilePage() {
           setEmail(profile.email || "")
         }
       } catch (err) {
-        console.error("Error loading profile:", err)
+        logger.error("Error loading profile", err)
         setError("Nepodařilo se načíst profil")
       } finally {
         setIsLoading(false)
@@ -82,7 +83,7 @@ export default function ProfilePage() {
       setSuccess("Zobrazované jméno bylo úspěšně uloženo")
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      console.error("Error saving display name:", err)
+      logger.error("Error saving display name", err)
       setError("Nepodařilo se uložit zobrazované jméno")
     } finally {
       setIsSaving(false)
@@ -102,7 +103,7 @@ export default function ProfilePage() {
       setSuccess("Název školy byl úspěšně uložen")
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      console.error("Error saving school name:", err)
+      logger.error("Error saving school name", err)
       setError("Nepodařilo se uložit název školy")
     } finally {
       setIsSaving(false)
@@ -128,7 +129,7 @@ export default function ProfilePage() {
       // Redirect to home (after sign out)
       router.push("/")
     } catch (err) {
-      console.error("Error deleting account:", err)
+      logger.error("Error deleting account", err)
       setError("Nepodařilo se odstranit účet. Zkuste to prosím znovu nebo kontaktujte podporu.")
       setIsDeleting(false)
       setShowDeleteDialog(false)

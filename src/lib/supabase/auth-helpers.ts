@@ -2,6 +2,7 @@ import { createClient } from "./server";
 import { redirect } from "next/navigation";
 import { authConfig } from "./config";
 import { cache } from "react";
+import { logger } from "@/lib/logger";
 
 // Cache the user data for the duration of the request
 export const getUser = cache(async () => {
@@ -12,7 +13,7 @@ export const getUser = cache(async () => {
   } = await supabase.auth.getUser();
 
   if (error) {
-    console.error("Error fetching user:", error.message);
+    logger.error("Error fetching user", error);
     return null;
   }
 
@@ -27,7 +28,7 @@ export const getSession = cache(async () => {
   } = await supabase.auth.getSession();
 
   if (error) {
-    console.error("Error fetching session:", error.message);
+    logger.error("Error fetching session", error);
     return null;
   }
 
@@ -49,7 +50,7 @@ export async function signOut() {
   const { error } = await supabase.auth.signOut();
   
   if (error) {
-    console.error("Error signing out:", error.message);
+    logger.error("Error signing out", error);
     throw new Error("Failed to sign out");
   }
   

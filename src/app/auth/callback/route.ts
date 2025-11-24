@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
+import { logger } from "@/lib/logger"
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -10,7 +11,7 @@ export async function GET(request: Request) {
 
   // Check for OAuth provider errors
   if (error) {
-    console.error("OAuth provider error:", error, errorDescription)
+    logger.error("OAuth provider error", { error, errorDescription })
     return NextResponse.redirect(`${origin}/?error=${error}&description=${encodeURIComponent(errorDescription || '')}`)
   }
 
@@ -19,11 +20,11 @@ export async function GET(request: Request) {
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
     
     if (exchangeError) {
-      console.error("OAuth callback error:", exchangeError)
+      logger.error("OAuth callback error", exchangeError)
       return NextResponse.redirect(`${origin}/?error=auth_failed&message=${encodeURIComponent(exchangeError.message)}`)
     }
 
-    console.log("OAuth success! User:", data.user?.email)
+    logger.info("OAuth authentication successful")
   }
 
   // Redirect to home page

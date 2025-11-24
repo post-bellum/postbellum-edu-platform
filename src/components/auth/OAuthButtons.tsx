@@ -4,14 +4,20 @@ import * as React from "react"
 import { Button } from "@/components/ui/Button"
 import { GoogleIcon, MicrosoftIcon } from "@/components/ui/Icons"
 import { handleOAuthLogin } from "@/lib/oauth-helpers"
+import { logger } from "@/lib/logger"
 
 export function OAuthButtons() {
   const [isLoading, setIsLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
   const onOAuthClick = async (provider: "google" | "microsoft") => {
     setIsLoading(true)
+    setError(null)
     try {
       await handleOAuthLogin(provider)
+    } catch (error) {
+      logger.error(`OAuth login failed (${provider})`, error)
+      setError("Přihlášení se nezdařilo. Zkuste to prosím znovu.")
     } finally {
       setIsLoading(false)
     }
@@ -24,6 +30,11 @@ export function OAuthButtons() {
 
   return (
     <div className="space-y-3">
+      {error && (
+        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+          {error}
+        </div>
+      )}
       {providers.map((provider) => (
         <Button
           key={provider.id}

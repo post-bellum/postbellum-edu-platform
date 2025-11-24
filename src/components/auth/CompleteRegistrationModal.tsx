@@ -19,6 +19,7 @@ import { completeRegistration } from "@/lib/supabase/user-profile"
 import { searchSchools } from "@/lib/supabase/schools"
 import { getDisplayNameFromAuth } from "@/lib/supabase/user-helpers"
 import { AUTH_CONSTANTS } from "@/lib/constants"
+import { logger } from "@/lib/logger"
 
 interface CompleteRegistrationModalProps {
   onSuccess: () => void
@@ -85,7 +86,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
       // After successful completion:
       onSuccess()
     } catch (error) {
-      console.error("Complete registration error:", error)
+      logger.error("Complete registration error", error)
       const errorMessage = error instanceof Error ? error.message : "Neznámá chyba"
       setError(`Chyba: ${errorMessage}. Zkuste to prosím znovu nebo kontaktujte podporu.`)
     } finally {

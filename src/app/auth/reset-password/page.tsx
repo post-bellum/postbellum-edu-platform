@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
         router.push("/")
       }, 2000)
     } catch (error) {
-      console.error("Password reset error:", error)
+      // Error already logged by updatePassword function
       setError("Při změně hesla došlo k chybě. Zkuste to prosím znovu.")
     } finally {
       setIsLoading(false)

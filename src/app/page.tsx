@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/supabase/hooks/useAuth";
 import { logout } from "@/lib/oauth-helpers";
 import { hasCompletedRegistration, getUserProfile } from "@/lib/supabase/user-profile";
 import { CATEGORY_LABELS } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 
 export default function Home() {
   const router = useRouter();
@@ -24,20 +25,29 @@ export default function Home() {
 
   // Check if user needs to complete registration and fetch profile
   useEffect(() => {
-    let isMounted = true; // Prevent race conditions
+    const abortController = new AbortController();
     
     async function checkRegistration() {
       if (isLoggedIn && !loading) {
-        const completed = await hasCompletedRegistration();
-        if (!isMounted) return; // Component unmounted, don't update state
-        
-        if (!completed) {
-          setShowCompleteRegistration(true);
-        } else {
-          // Fetch user profile data
-          const profile = await getUserProfile();
-          if (!isMounted) return; // Component unmounted, don't update state
-          setUserProfile(profile);
+        try {
+          const completed = await hasCompletedRegistration();
+          
+          if (abortController.signal.aborted) return;
+          
+          if (!completed) {
+            setShowCompleteRegistration(true);
+          } else {
+            // Fetch user profile data
+            const profile = await getUserProfile();
+            
+            if (abortController.signal.aborted) return;
+            
+            setUserProfile(profile);
+          }
+        } catch (error) {
+          if (!abortController.signal.aborted) {
+            logger.error("Error checking registration", error);
+          }
         }
       }
     }
@@ -45,7 +55,7 @@ export default function Home() {
     checkRegistration();
     
     return () => {
-      isMounted = false; // Cleanup on unmount
+      abortController.abort();
     };
   }, [isLoggedIn, loading]);
 

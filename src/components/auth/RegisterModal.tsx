@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/Checkbox"
 import { OAuthButtons } from "./OAuthButtons"
 import { signUpWithEmail, getErrorMessage } from "@/lib/supabase/email-auth"
 import { validatePassword, passwordsMatch } from "@/lib/validation"
+import { logger } from "@/lib/logger"
 
 interface RegisterModalProps {
   onSwitchToLogin: () => void
@@ -70,7 +71,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps
       // After successful registration, move to OTP verification
       onSuccess(email)
     } catch (error) {
-      console.error("Registration error:", error)
+      logger.error("Registration error", error)
       setError("Při registraci došlo k chybě. Zkuste to prosím znovu.")
     } finally {
       setIsLoading(false)

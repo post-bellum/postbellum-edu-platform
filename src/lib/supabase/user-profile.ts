@@ -25,7 +25,7 @@ export async function hasCompletedRegistration(): Promise<boolean> {
     
     return profile?.registration_completed === true
   } catch (error) {
-    console.error("Error checking registration status:", error)
+    logger.error("Error checking registration status", error)
     return false
   }
 }

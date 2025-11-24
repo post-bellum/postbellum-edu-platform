@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client"
 import type { Provider } from "@supabase/supabase-js"
+import { logger } from "@/lib/logger"
 
 type OAuthProvider = "google" | "microsoft"
 
@@ -25,13 +26,16 @@ export async function handleOAuthLogin(provider: OAuthProvider) {
     })
 
     if (error) {
-      console.error(`OAuth login error (${provider}):`, error)
+      logger.error(`OAuth login error (${provider})`, error)
       throw error
     }
 
     return data
   } catch (error) {
-    console.error(`OAuth login error (${provider}):`, error)
+    // Only log if it's not a Supabase error (already logged above)
+    if (error && typeof error === 'object' && !('message' in error)) {
+      logger.error(`OAuth login unexpected error (${provider})`, error)
+    }
     throw error
   }
 }

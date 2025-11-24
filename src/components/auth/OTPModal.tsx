@@ -4,6 +4,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/Button"
 import { InputOTP } from "@/components/ui/InputOTP"
 import { verifyOTP, resendOTP, getErrorMessage } from "@/lib/supabase/email-auth"
+import { logger } from "@/lib/logger"
 
 interface OTPModalProps {
   email: string
@@ -51,7 +52,7 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
       // After successful verification:
       onSuccess()
     } catch (error) {
-      console.error("OTP verification error:", error)
+      logger.error("OTP verification error", error)
       setError("Neplatný kód. Zkuste to prosím znovu.")
     } finally {
       setIsLoading(false)
@@ -78,7 +79,7 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
       setCanResend(false)
       setTimeout(() => setResendSuccess(false), 3000) // Hide message after 3s
     } catch (error) {
-      console.error("Resend OTP error:", error)
+      logger.error("Resend OTP error", error)
       setError("Nepodařilo se odeslat nový kód. Zkuste to prosím znovu.")
     } finally {
       setIsLoading(false)

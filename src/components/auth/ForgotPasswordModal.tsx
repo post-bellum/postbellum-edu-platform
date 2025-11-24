@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { sendPasswordResetEmail, getErrorMessage } from "@/lib/supabase/email-auth"
+import { logger } from "@/lib/logger"
 
 interface ForgotPasswordModalProps {
   onBack: () => void
@@ -31,7 +32,7 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
 
       setSuccess(true)
     } catch (error) {
-      console.error("Password reset error:", error)
+      logger.error("Password reset error", error)
       setError("Při odesílání emailu došlo k chybě. Zkuste to prosím znovu.")
     } finally {
       setIsLoading(false)

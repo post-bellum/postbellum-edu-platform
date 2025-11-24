@@ -7,14 +7,28 @@
 export function sanitizeInput(input: string): string {
   if (!input) return input
   
-  return input
-    // Remove HTML tags
-    .replace(/<[^>]*>/g, '')
-    // Remove script-like patterns
+  // Remove null bytes
+  let sanitized = input.replace(/\0/g, '')
+  
+  // Remove HTML tags
+  sanitized = sanitized.replace(/<[^>]*>/g, '')
+  
+  // Remove script-like patterns (improved)
+  sanitized = sanitized
     .replace(/javascript:/gi, '')
+    .replace(/data:text\/html/gi, '')
+    .replace(/vbscript:/gi, '')
     .replace(/on\w+\s*=/gi, '')
-    // Trim whitespace
-    .trim()
+  
+  // Remove HTML entity encodings that could be used for XSS
+  sanitized = sanitized
+    .replace(/&#x[\da-f]+;/gi, '')
+    .replace(/&#\d+;/g, '')
+  
+  // Trim whitespace
+  sanitized = sanitized.trim()
+  
+  return sanitized
 }
 
 /**

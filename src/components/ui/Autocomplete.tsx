@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Input } from "@/components/ui/Input"
 import { cn } from "@/lib/utils"
+import { logger } from "@/lib/logger"
 
 export interface AutocompleteOption {
   value: string
@@ -66,7 +67,8 @@ export function Autocomplete({
         setIsOpen(results.length > 0)
         setHighlightedIndex(-1)
       } catch (error) {
-        console.error("Autocomplete search error:", error)
+        // Log error but don't show to user - autocomplete failures are non-critical
+        logger.error("Autocomplete search error", error)
         setOptions([])
         setIsOpen(false)
       } finally {

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/Label"
 import { Checkbox } from "@/components/ui/Checkbox"
 import { OAuthButtons } from "./OAuthButtons"
 import { signInWithEmail, getErrorMessage } from "@/lib/supabase/email-auth"
+import { logger } from "@/lib/logger"
 
 interface LoginModalProps {
   onSwitchToRegister: () => void
@@ -42,7 +43,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword }: 
       // After successful login
       onSuccess?.()
     } catch (error) {
-      console.error("Login error:", error)
+      logger.error("Login error", error)
       setError("Při přihlášení došlo k chybě. Zkuste to prosím znovu.")
     } finally {
       setIsLoading(false)
