@@ -32,14 +32,16 @@ const NON_TEACHER_OPTIONS = [
 export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationModalProps) {
   const [userType, setUserType] = React.useState<"teacher" | "not-teacher">("not-teacher")
   const [schoolName, setSchoolName] = React.useState("")
+  const [category, setCategory] = React.useState<string>("")
   const [emailConsent, setEmailConsent] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
-  // Clear school name when switching between teacher and not-teacher
+  // Clear fields when switching between teacher and not-teacher
   const handleUserTypeChange = (value: string) => {
     setUserType(value as "teacher" | "not-teacher")
-    setSchoolName("") // Reset selection when changing user type
+    setSchoolName("") // Reset school name
+    setCategory("") // Reset category
   }
 
   const handleComplete = async (e: React.FormEvent) => {
@@ -48,10 +50,18 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
     setError(null)
     
     try {
+      // Validate based on user type
+      if (userType === "teacher" && !schoolName.trim()) {
+        throw new Error("Název školy je povinný")
+      }
+      if (userType === "not-teacher" && !category) {
+        throw new Error("Kategorie je povinná")
+      }
+
       await completeRegistration({
         userType,
-        schoolName: userType === "teacher" ? schoolName : undefined,
-        category: userType === "not-teacher" ? schoolName as "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" : undefined,
+        schoolName: userType === "teacher" ? schoolName.trim() : undefined,
+        category: userType === "not-teacher" ? category as "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" : undefined,
         emailConsent,
       })
       
@@ -114,8 +124,8 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
                 Kategorie <span className="text-red-500">*</span>
               </Label>
               <Select
-                value={schoolName}
-                onValueChange={setSchoolName}
+                value={category}
+                onValueChange={setCategory}
                 disabled={isLoading}
               >
                 <SelectTrigger id="organization-type">
@@ -158,7 +168,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
         <Button 
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
-          disabled={isLoading || !schoolName}
+          disabled={isLoading || (userType === "teacher" ? !schoolName.trim() : !category)}
         >
           {isLoading ? "Dokončování..." : "Dokončit"}
         </Button>
