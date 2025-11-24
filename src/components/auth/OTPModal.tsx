@@ -17,8 +17,8 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState("")
   const [resendSuccess, setResendSuccess] = React.useState(false)
-  const [countdown, setCountdown] = React.useState(0)
-  const [canResend, setCanResend] = React.useState(true)
+  const [countdown, setCountdown] = React.useState(60) // Start countdown immediately
+  const [canResend, setCanResend] = React.useState(false) // Disable resend initially
 
   // Countdown timer for resend (only when countdown > 0)
   React.useEffect(() => {
