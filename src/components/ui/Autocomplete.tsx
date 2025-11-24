@@ -47,6 +47,7 @@ export function Autocomplete({
   const [isOpen, setIsOpen] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [highlightedIndex, setHighlightedIndex] = React.useState(-1)
+  const [isFocused, setIsFocused] = React.useState(false)
   const containerRef = React.useRef<HTMLDivElement>(null)
   const inputRef = React.useRef<HTMLInputElement>(null)
   const listRef = React.useRef<HTMLUListElement>(null)
@@ -59,12 +60,20 @@ export function Autocomplete({
       return
     }
 
+    // Only search if input is focused
+    if (!isFocused) {
+      return
+    }
+
     setIsLoading(true)
     const timer = setTimeout(async () => {
       try {
         const results = await onSearch(inputValue)
         setOptions(results)
-        setIsOpen(results.length > 0)
+        // Only open if still focused
+        if (isFocused) {
+          setIsOpen(results.length > 0)
+        }
         setHighlightedIndex(-1)
       } catch (error) {
         // Log error but don't show to user - autocomplete failures are non-critical
@@ -77,7 +86,7 @@ export function Autocomplete({
     }, debounceMs)
 
     return () => clearTimeout(timer)
-  }, [inputValue, minChars, debounceMs, onSearch])
+  }, [inputValue, minChars, debounceMs, onSearch, isFocused])
 
   // Sync external value changes
   React.useEffect(() => {
@@ -89,6 +98,7 @@ export function Autocomplete({
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false)
+        setIsFocused(false)
       }
     }
 
@@ -172,9 +182,17 @@ export function Autocomplete({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         onFocus={() => {
+          setIsFocused(true)
           if (options.length > 0 && inputValue.length >= minChars) {
             setIsOpen(true)
           }
+        }}
+        onBlur={() => {
+          setIsFocused(false)
+          // Delay closing to allow option selection
+          setTimeout(() => {
+            setIsOpen(false)
+          }, 200)
         }}
         disabled={disabled}
         required={required}
