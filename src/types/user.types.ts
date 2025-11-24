@@ -1,6 +1,7 @@
 export interface UserProfile {
   id: string
   email: string
+  display_name: string | null
   user_type: "teacher" | "not-teacher"
   school_name: string | null
   category: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
@@ -11,6 +12,7 @@ export interface UserProfile {
 }
 
 export interface CompleteRegistrationData {
+  displayName?: string  // Optional display name (from OAuth or manual input)
   userType: "teacher" | "not-teacher"
   schoolName?: string  // For teachers
   category?: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other"  // For non-teachers

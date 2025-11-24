@@ -14,7 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select"
+import { Autocomplete } from "@/components/ui/Autocomplete"
 import { completeRegistration } from "@/lib/supabase/user-profile"
+import { searchSchools } from "@/lib/supabase/schools"
+import { getDisplayNameFromAuth } from "@/lib/supabase/user-helpers"
 
 interface CompleteRegistrationModalProps {
   onSuccess: () => void
@@ -31,11 +34,23 @@ const NON_TEACHER_OPTIONS = [
 
 export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationModalProps) {
   const [userType, setUserType] = React.useState<"teacher" | "not-teacher">("not-teacher")
+  const [displayName, setDisplayName] = React.useState("")
   const [schoolName, setSchoolName] = React.useState("")
   const [category, setCategory] = React.useState<string>("")
   const [emailConsent, setEmailConsent] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+
+  // Pre-fill display name from OAuth if available
+  React.useEffect(() => {
+    const loadDisplayName = async () => {
+      const name = await getDisplayNameFromAuth()
+      if (name) {
+        setDisplayName(name)
+      }
+    }
+    loadDisplayName()
+  }, [])
 
   // Clear fields when switching between teacher and not-teacher
   const handleUserTypeChange = (value: string) => {
@@ -59,6 +74,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
       }
 
       await completeRegistration({
+        displayName: displayName.trim() || undefined,
         userType,
         schoolName: userType === "teacher" ? schoolName.trim() : undefined,
         category: userType === "not-teacher" ? category as "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" : undefined,
@@ -84,6 +100,25 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
       </p>
 
       <form onSubmit={handleComplete} className="space-y-6">
+        {/* Display Name Field */}
+        <div className="space-y-2">
+          <Label htmlFor="display-name">
+            Zobrazované jméno
+          </Label>
+          <Input
+            id="display-name"
+            type="text"
+            placeholder="Vaše jméno (volitelné)"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            maxLength={32}
+            disabled={isLoading}
+          />
+          <p className="text-xs text-gray-500">
+            Toto jméno se zobrazí v profilu. Můžete jej změnit kdykoli v nastavení. Maximum 32 znaků.
+          </p>
+        </div>
+
         <div className="space-y-4">
           <RadioGroup value={userType} onValueChange={handleUserTypeChange}>
             <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-all">
@@ -107,14 +142,18 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
               <Label htmlFor="school-name">
                 Název školy <span className="text-red-500">*</span>
               </Label>
-              <Input
+              <Autocomplete
                 id="school-name"
-                type="text"
-                placeholder="Hledat školu"
+                placeholder="Začněte psát název školy..."
                 value={schoolName}
-                onChange={(e) => setSchoolName(e.target.value)}
+                onChange={setSchoolName}
+                onSearch={searchSchools}
                 required
                 disabled={isLoading}
+                minChars={2}
+                debounceMs={300}
+                emptyMessage="Žádné školy nenalezeny"
+                loadingMessage="Hledám školy..."
                 rightIcon={<SearchIcon />}
               />
             </>

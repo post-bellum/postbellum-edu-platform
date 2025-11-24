@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT,
+  display_name TEXT,
   user_type TEXT NOT NULL CHECK (user_type IN ('teacher', 'not-teacher')),
   
   -- For teachers: actual school name
@@ -21,7 +22,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   CONSTRAINT check_teacher_data CHECK (
     (user_type = 'teacher' AND school_name IS NOT NULL AND category IS NULL) OR
     (user_type = 'not-teacher' AND category IS NOT NULL AND school_name IS NULL)
-  )
+  ),
+  
+  -- Ensure display name is not too long (max 32 characters)
+  CONSTRAINT display_name_length CHECK (length(display_name) <= 32)
 );
 
 -- Enable Row Level Security
@@ -51,6 +55,7 @@ CREATE INDEX IF NOT EXISTS idx_profiles_user_type ON public.profiles(user_type);
 CREATE INDEX IF NOT EXISTS idx_profiles_category ON public.profiles(category);
 CREATE INDEX IF NOT EXISTS idx_profiles_created_at ON public.profiles(created_at);
 CREATE INDEX IF NOT EXISTS idx_profiles_email_consent ON public.profiles(email_consent);
+CREATE INDEX IF NOT EXISTS idx_profiles_display_name ON public.profiles(display_name);
 
 -- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
@@ -73,6 +78,7 @@ GRANT SELECT ON public.profiles TO service_role;
 
 -- Add helpful comments
 COMMENT ON TABLE public.profiles IS 'User profile data collected during registration. Single source of truth for all user information.';
+COMMENT ON COLUMN public.profiles.display_name IS 'User display name - can be pre-filled from OAuth or set manually. Maximum 32 characters. Editable in profile settings.';
 COMMENT ON COLUMN public.profiles.school_name IS 'School name for teachers only (NULL for non-teachers)';
 COMMENT ON COLUMN public.profiles.category IS 'Category for non-teachers only: student, parent, educational_professional, ngo_worker, public_sector_worker, or other (NULL for teachers)';
 

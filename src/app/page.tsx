@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { AuthModal, CompleteRegistrationModal, OAuthErrorDisplay } from "@/components/auth";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
@@ -20,6 +21,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export default function Home() {
+  const router = useRouter();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [showCompleteRegistration, setShowCompleteRegistration] = useState(false);
   const [userProfile, setUserProfile] = useState<{
@@ -90,7 +92,7 @@ export default function Home() {
               </Button>
               
               {isLoggedIn && (
-                <div className="text-center space-y-2 max-w-md">
+                <div className="text-center space-y-4 max-w-md">
                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <p className="text-sm text-gray-600">
                       Přihlášen jako
@@ -119,6 +121,13 @@ export default function Home() {
                       </div>
                     )}
                   </div>
+                  <Button 
+                    variant="outline"
+                    onClick={() => router.push('/profile')}
+                    className="w-full"
+                  >
+                    Upravit profil
+                  </Button>
                 </div>
               )}
             </>

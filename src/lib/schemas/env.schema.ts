@@ -11,8 +11,9 @@ export const envSchema = z.object({
     .string()
     .min(1, "Supabase anon key is required"),
   
-  // Optional service role key for server-side operations
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  // Service role key for server-side admin operations (e.g., account deletion)
+  // Required in production, optional in development
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, "Service role key is required for admin operations").optional(),
   
   // Node environment
   NODE_ENV: z
