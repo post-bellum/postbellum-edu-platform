@@ -1,6 +1,7 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
+import { OAUTH_ERROR_MESSAGES } from "@/lib/constants"
 
 /**
  * Displays OAuth error messages from URL search params
@@ -13,14 +14,18 @@ export function OAuthErrorDisplay() {
 
   if (!oauthError) return null
 
+  // Get user-friendly Czech error message
+  const friendlyError = OAUTH_ERROR_MESSAGES[oauthError] || 
+    'Došlo k neočekávané chybě při přihlášení. Zkuste to prosím znovu.'
+
   return (
     <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md">
       <p className="text-sm font-medium text-red-800">
-        Chyba přihlášení: {oauthError}
+        {friendlyError}
       </p>
       {errorMessage && (
         <p className="text-xs text-red-600 mt-1">
-          {decodeURIComponent(errorMessage)}
+          Detaily: {decodeURIComponent(errorMessage)}
         </p>
       )}
     </div>

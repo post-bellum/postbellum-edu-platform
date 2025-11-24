@@ -1,7 +1,6 @@
 "use client"
 
 import { deleteAccountAction } from "@/app/actions/delete-account"
-import { createClient } from "./client"
 
 /**
  * Delete user account (client-side wrapper)
@@ -25,11 +24,15 @@ export async function deleteUserAccount(): Promise<void> {
 
 /**
  * Check if account can be deleted
- * You might want to add conditions here, such as:
- * - User must not have active subscriptions
- * - User must not be the owner of certain resources
- * - etc.
+ * Future implementation: Add checks for:
+ * - Active subscriptions
+ * - Owned resources that need transfer
+ * - Pending operations
+ * 
+ * Currently always returns true for logged-in users.
+ * Uncomment and implement when needed.
  */
+/*
 export async function canDeleteAccount(): Promise<{ 
   canDelete: boolean
   reason?: string 
@@ -42,19 +45,26 @@ export async function canDeleteAccount(): Promise<{
       return { canDelete: false, reason: "Not logged in" }
     }
 
-    // Add any additional checks here
-    // For example:
-    // - Check if user has active subscriptions
-    // - Check if user owns any resources that need to be transferred
-    // - etc.
+    // TODO: Add your business logic checks here
+    // Example:
+    // const { data: subscriptions } = await supabase
+    //   .from('subscriptions')
+    //   .select('*')
+    //   .eq('user_id', user.id)
+    //   .eq('status', 'active')
+    // 
+    // if (subscriptions && subscriptions.length > 0) {
+    //   return { canDelete: false, reason: "Active subscription exists" }
+    // }
 
     return { canDelete: true }
   } catch (error) {
-    console.error("Error checking if account can be deleted:", error)
+    logger.error("Error checking if account can be deleted:", error)
     return { 
       canDelete: false, 
       reason: "Error checking account status" 
     }
   }
 }
+*/
 

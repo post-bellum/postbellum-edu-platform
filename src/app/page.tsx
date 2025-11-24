@@ -9,16 +9,7 @@ import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { useAuth } from "@/lib/supabase/hooks/useAuth";
 import { logout } from "@/lib/oauth-helpers";
 import { hasCompletedRegistration, getUserProfile } from "@/lib/supabase/user-profile";
-
-// Map category values to display labels
-const CATEGORY_LABELS: Record<string, string> = {
-  student: "student/ka",
-  parent: "rodič",
-  educational_professional: "odborná veřejnost ve vzdělávání (metodik/metodička, konzultant/ka, ...)",
-  ngo_worker: "pracovník/pracovnice v neziskovém a nevládním sektoru",
-  public_sector_worker: "pracovník/pracovnice ve státním sektoru",
-  other: "ostatní",
-};
+import { CATEGORY_LABELS } from "@/lib/constants";
 
 export default function Home() {
   const router = useRouter();
@@ -33,19 +24,29 @@ export default function Home() {
 
   // Check if user needs to complete registration and fetch profile
   useEffect(() => {
+    let isMounted = true; // Prevent race conditions
+    
     async function checkRegistration() {
       if (isLoggedIn && !loading) {
         const completed = await hasCompletedRegistration();
+        if (!isMounted) return; // Component unmounted, don't update state
+        
         if (!completed) {
           setShowCompleteRegistration(true);
         } else {
           // Fetch user profile data
           const profile = await getUserProfile();
+          if (!isMounted) return; // Component unmounted, don't update state
           setUserProfile(profile);
         }
       }
     }
+    
     checkRegistration();
+    
+    return () => {
+      isMounted = false; // Cleanup on unmount
+    };
   }, [isLoggedIn, loading]);
 
   const handleAuthAction = async () => {

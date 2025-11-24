@@ -18,6 +18,7 @@ import { Autocomplete } from "@/components/ui/Autocomplete"
 import { completeRegistration } from "@/lib/supabase/user-profile"
 import { searchSchools } from "@/lib/supabase/schools"
 import { getDisplayNameFromAuth } from "@/lib/supabase/user-helpers"
+import { AUTH_CONSTANTS } from "@/lib/constants"
 
 interface CompleteRegistrationModalProps {
   onSuccess: () => void
@@ -111,11 +112,11 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
             placeholder="Vaše jméno (volitelné)"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            maxLength={32}
+            maxLength={AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH}
             disabled={isLoading}
           />
           <p className="text-xs text-gray-500">
-            Toto jméno se zobrazí v profilu. Můžete jej změnit kdykoli v nastavení. Maximum 32 znaků.
+            Toto jméno se zobrazí v profilu. Můžete jej změnit kdykoli v nastavení. Maximum {AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH} znaků.
           </p>
         </div>
 

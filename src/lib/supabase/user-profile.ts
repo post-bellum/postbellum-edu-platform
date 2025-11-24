@@ -2,6 +2,9 @@
 
 import { createClient } from "./client"
 import type { CompleteRegistrationData } from "@/types/user.types"
+import { sanitizeInput } from "@/lib/sanitize"
+import { logger } from "@/lib/logger"
+import { AUTH_CONSTANTS } from "@/lib/constants"
 
 /**
  * Check if current user has completed registration
@@ -49,9 +52,13 @@ export async function completeRegistration(data: CompleteRegistrationData): Prom
     }
     
     // Validate display name length if provided
-    if (data.displayName && data.displayName.length > 32) {
-      throw new Error("Display name must be 32 characters or less")
+    if (data.displayName && data.displayName.length > AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH) {
+      throw new Error(`Display name must be ${AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH} characters or less`)
     }
+    
+    // Sanitize inputs to prevent XSS
+    const sanitizedDisplayName = data.displayName ? sanitizeInput(data.displayName.trim()) : null
+    const sanitizedSchoolName = data.schoolName ? sanitizeInput(data.schoolName.trim()) : null
     
     // Save to profiles table (single source of truth)
     const { error } = await supabase
@@ -59,9 +66,9 @@ export async function completeRegistration(data: CompleteRegistrationData): Prom
       .upsert({
         id: user.id,
         email: user.email,
-        display_name: data.displayName?.trim() || null,
+        display_name: sanitizedDisplayName,
         user_type: data.userType,
-        school_name: data.userType === 'teacher' ? data.schoolName : null,
+        school_name: data.userType === 'teacher' ? sanitizedSchoolName : null,
         category: data.userType === 'not-teacher' ? data.category : null,
         email_consent: data.emailConsent,
         registration_completed: true,
@@ -70,12 +77,12 @@ export async function completeRegistration(data: CompleteRegistrationData): Prom
       })
     
     if (error) {
-      console.error("Error saving profile:", error)
+      logger.error("Error saving profile:", error)
       throw error
     }
     
   } catch (error) {
-    console.error("Error completing registration:", error)
+    logger.error("Error completing registration:", error)
     throw error
   }
 }
@@ -98,7 +105,7 @@ export async function getUserProfile() {
       .single()
     
     if (error) {
-      console.error("Error fetching profile:", error)
+      logger.error("Error fetching profile:", error)
       return null
     }
     
@@ -115,7 +122,7 @@ export async function getUserProfile() {
       registrationCompleted: profile.registration_completed,
     }
   } catch (error) {
-    console.error("Error getting user profile:", error)
+    logger.error("Error getting user profile:", error)
     return null
   }
 }
@@ -134,21 +141,24 @@ export async function updateDisplayName(displayName: string): Promise<void> {
     }
     
     // Validate display name length
-    if (displayName.length > 32) {
-      throw new Error("Display name must be 32 characters or less")
+    if (displayName.length > AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH) {
+      throw new Error(`Display name must be ${AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH} characters or less`)
     }
+    
+    // Sanitize input
+    const sanitized = sanitizeInput(displayName.trim()) || null
     
     const { error } = await supabase
       .from('profiles')
-      .update({ display_name: displayName.trim() || null })
+      .update({ display_name: sanitized })
       .eq('id', user.id)
     
     if (error) {
-      console.error("Error updating display name:", error)
+      logger.error("Error updating display name:", error)
       throw error
     }
   } catch (error) {
-    console.error("Error updating display name:", error)
+    logger.error("Error updating display name:", error)
     throw error
   }
 }
@@ -171,20 +181,22 @@ export async function updateProfile(updates: {
     }
     
     // Validate display name length if provided
-    if (updates.displayName !== undefined && updates.displayName.length > 32) {
-      throw new Error("Display name must be 32 characters or less")
+    if (updates.displayName !== undefined && updates.displayName.length > AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH) {
+      throw new Error(`Display name must be ${AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH} characters or less`)
     }
     
     const updateData: Record<string, unknown> = {}
     
     if (updates.displayName !== undefined) {
-      updateData.display_name = updates.displayName.trim() || null
+      const sanitized = sanitizeInput(updates.displayName.trim())
+      updateData.display_name = sanitized || null
     }
     if (updates.emailConsent !== undefined) {
       updateData.email_consent = updates.emailConsent
     }
     if (updates.schoolName !== undefined) {
-      updateData.school_name = updates.schoolName.trim() || null
+      const sanitized = sanitizeInput(updates.schoolName.trim())
+      updateData.school_name = sanitized || null
     }
     
     const { error } = await supabase
@@ -193,11 +205,11 @@ export async function updateProfile(updates: {
       .eq('id', user.id)
     
     if (error) {
-      console.error("Error updating profile:", error)
+      logger.error("Error updating profile:", error)
       throw error
     }
   } catch (error) {
-    console.error("Error updating profile:", error)
+    logger.error("Error updating profile:", error)
     throw error
   }
 }

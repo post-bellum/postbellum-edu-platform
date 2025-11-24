@@ -16,6 +16,8 @@ import { searchSchools } from "@/lib/supabase/schools"
 import { deleteUserAccount } from "@/lib/supabase/account-deletion"
 import { useAuth } from "@/lib/supabase/hooks/useAuth"
 import { useRouter } from "next/navigation"
+import { getGravatarUrl } from "@/lib/gravatar"
+import { AUTH_CONSTANTS } from "@/lib/constants"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -107,17 +109,12 @@ export default function ProfilePage() {
     }
   }
 
-  // Get Gravatar URL
-  const getGravatarUrl = (email: string, size: number = 80): string => {
-    // Simple hash function for demo - use crypto-js/md5 in production
-    const hash = email.toLowerCase().trim()
-    return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon`
-  }
+  // Gravatar URL is now handled by the imported utility function
 
   // Delete account
   const handleDeleteAccount = async () => {
-    if (deleteConfirmation !== "ODSTRANIT") {
-      setError("Pro potvrzení zadejte prosím 'ODSTRANIT'")
+    if (deleteConfirmation !== AUTH_CONSTANTS.DELETE_ACCOUNT_CONFIRMATION) {
+      setError(`Pro potvrzení zadejte prosím '${AUTH_CONSTANTS.DELETE_ACCOUNT_CONFIRMATION}'`)
       return
     }
 
@@ -264,12 +261,12 @@ export default function ProfilePage() {
             placeholder="Vaše jméno"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            maxLength={32}
+            maxLength={AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH}
             disabled={isSaving}
           />
           <p className="text-xs text-gray-500">
-            Maximální povolená délka je 32 znaků.
-            {displayName.length > 0 && ` (${displayName.length}/32)`}
+            Maximální povolená délka je {AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH} znaků.
+            {displayName.length > 0 && ` (${displayName.length}/${AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH})`}
           </p>
         </div>
         <Button 
@@ -318,12 +315,12 @@ export default function ProfilePage() {
 
             <div className="space-y-2">
               <Label htmlFor="delete-confirmation" className="text-sm font-medium">
-                Pro potvrzení napište: <span className="font-mono font-bold">ODSTRANIT</span>
+                Pro potvrzení napište: <span className="font-mono font-bold">{AUTH_CONSTANTS.DELETE_ACCOUNT_CONFIRMATION}</span>
               </Label>
               <Input
                 id="delete-confirmation"
                 type="text"
-                placeholder="Napište ODSTRANIT"
+                placeholder={`Napište ${AUTH_CONSTANTS.DELETE_ACCOUNT_CONFIRMATION}`}
                 value={deleteConfirmation}
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
                 disabled={isDeleting}
@@ -353,7 +350,7 @@ export default function ProfilePage() {
               <Button
                 className="flex-1 bg-red-600 text-white hover:bg-red-700"
                 onClick={handleDeleteAccount}
-                disabled={isDeleting || deleteConfirmation !== "ODSTRANIT"}
+                disabled={isDeleting || deleteConfirmation !== AUTH_CONSTANTS.DELETE_ACCOUNT_CONFIRMATION}
               >
                 {isDeleting ? "Odstraňuji..." : "Odstranit účet"}
               </Button>
