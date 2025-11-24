@@ -17,3 +17,13 @@ export interface CompleteRegistrationData {
   emailConsent: boolean
 }
 
+export interface PasswordValidationResult {
+  isValid: boolean
+  errors: string[]
+}
+
+export interface AuthError {
+  message: string
+  status?: number
+}
+

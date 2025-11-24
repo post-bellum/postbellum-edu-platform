@@ -6,29 +6,44 @@ import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Checkbox } from "@/components/ui/Checkbox"
 import { OAuthButtons } from "./OAuthButtons"
+import { signInWithEmail, getErrorMessage } from "@/lib/supabase/email-auth"
 
 interface LoginModalProps {
   onSwitchToRegister: () => void
   onSuccess?: () => void
+  onForgotPassword?: () => void
 }
 
-export function LoginModal({ onSwitchToRegister, onSuccess }: LoginModalProps) {
+export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword }: LoginModalProps) {
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [termsAccepted, setTermsAccepted] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     setIsLoading(true)
     
     try {
-      // TODO: Implement Supabase login logic
-      console.log("Login:", { email, password })
-      // After successful login:
-      // onSuccess?.()
+      const { data, error: signInError } = await signInWithEmail(email, password)
+      
+      if (signInError) {
+        setError(getErrorMessage(signInError))
+        return
+      }
+
+      if (!data || !data.user) {
+        setError("Přihlášení se nezdařilo")
+        return
+      }
+
+      // After successful login
+      onSuccess?.()
     } catch (error) {
       console.error("Login error:", error)
+      setError("Při přihlášení došlo k chybě. Zkuste to prosím znovu.")
     } finally {
       setIsLoading(false)
     }
@@ -64,7 +79,18 @@ export function LoginModal({ onSwitchToRegister, onSuccess }: LoginModalProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Heslo</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Heslo</Label>
+            {onForgotPassword && (
+              <button
+                type="button"
+                onClick={onForgotPassword}
+                className="text-xs text-primary hover:text-primary-hover hover:underline cursor-pointer"
+              >
+                Zapomenuté heslo?
+              </button>
+            )}
+          </div>
           <Input
             id="password"
             type="password"
@@ -74,8 +100,13 @@ export function LoginModal({ onSwitchToRegister, onSuccess }: LoginModalProps) {
             required
             disabled={isLoading}
           />
-          <p className="text-xs text-text-secondary">Minimálně 8 znaků.</p>
         </div>
+
+        {error && (
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+            {error}
+          </div>
+        )}
 
         <div className="flex items-center space-x-2">
           <Checkbox

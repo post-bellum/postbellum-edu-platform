@@ -6,29 +6,72 @@ import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Checkbox } from "@/components/ui/Checkbox"
 import { OAuthButtons } from "./OAuthButtons"
+import { signUpWithEmail, getErrorMessage } from "@/lib/supabase/email-auth"
+import { validatePassword, passwordsMatch } from "@/lib/validation"
 
 interface RegisterModalProps {
   onSwitchToLogin: () => void
-  onSuccess: () => void
+  onSuccess: (email: string) => void
 }
 
 export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps) {
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
+  const [confirmPassword, setConfirmPassword] = React.useState("")
   const [termsAccepted, setTermsAccepted] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
+  const [passwordErrors, setPasswordErrors] = React.useState<string[]>([])
+  const [passwordTouched, setPasswordTouched] = React.useState(false)
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = React.useState(false)
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value)
+    if (passwordTouched) {
+      const validation = validatePassword(value)
+      setPasswordErrors(validation.errors)
+    }
+  }
+
+  const handlePasswordBlur = () => {
+    setPasswordTouched(true)
+    const validation = validatePassword(password)
+    setPasswordErrors(validation.errors)
+  }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     setIsLoading(true)
     
     try {
-      // TODO: Implement Supabase registration logic
-      console.log("Register:", { email, password })
+      // Validate password
+      const validation = validatePassword(password)
+      if (!validation.isValid) {
+        setPasswordErrors(validation.errors)
+        setError(validation.errors[0])
+        return
+      }
+
+      // Check passwords match
+      if (!passwordsMatch(password, confirmPassword)) {
+        setError("Hesla se neshodují")
+        return
+      }
+
+      // Register with Supabase
+      const { error: signUpError } = await signUpWithEmail(email, password)
+      
+      if (signUpError) {
+        setError(getErrorMessage(signUpError))
+        return
+      }
+
       // After successful registration, move to OTP verification
-      onSuccess()
+      onSuccess(email)
     } catch (error) {
       console.error("Registration error:", error)
+      setError("Při registraci došlo k chybě. Zkuste to prosím znovu.")
     } finally {
       setIsLoading(false)
     }
@@ -73,12 +116,47 @@ export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps
             type="password"
             placeholder="Heslo"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => handlePasswordChange(e.target.value)}
+            onBlur={handlePasswordBlur}
             required
             disabled={isLoading}
           />
-          <p className="text-xs text-text-secondary">Minimálně 8 znaků.</p>
+          {passwordTouched && passwordErrors.length > 0 && (
+            <ul className="text-xs text-red-600 space-y-1">
+              {passwordErrors.map((err, index) => (
+                <li key={index}>• {err}</li>
+              ))}
+            </ul>
+          )}
+          {!passwordTouched && (
+            <p className="text-xs text-text-secondary">
+              Minimálně 8 znaků, velké a malé písmeno, číslo
+            </p>
+          )}
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Zopakujte heslo</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="Zopakujte heslo"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            onBlur={() => setConfirmPasswordTouched(true)}
+            required
+            disabled={isLoading}
+          />
+          {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
+            <p className="text-xs text-red-600">Hesla se neshodují</p>
+          )}
+        </div>
+
+        {error && (
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+            {error}
+          </div>
+        )}
 
         <div className="flex items-center space-x-2">
           <Checkbox

@@ -8,11 +8,10 @@ import {
 import { LoginModal } from "./LoginModal"
 import { RegisterModal } from "./RegisterModal"
 import { OTPModal } from "./OTPModal"
-import { CompleteRegistrationModal } from "./CompleteRegistrationModal"
-import { SuccessModal } from "./SuccessModal"
+import { ForgotPasswordModal } from "./ForgotPasswordModal"
 import Image from "next/image"
 
-type AuthStep = "login" | "register" | "complete" | "otp" | "success"
+type AuthStep = "login" | "register" | "otp" | "forgot-password"
 
 interface AuthModalProps {
   open: boolean
@@ -33,28 +32,18 @@ export function AuthModal({ open, onOpenChange, defaultStep = "login" }: AuthMod
 
   const handleLoginSuccess = () => {
     onOpenChange(false)
-    // TODO: Redirect or update app state
   }
 
-  const handleRegisterSuccess = () => {
-    // After registration, go to complete registration
-    setStep("complete")
-  }
-
-  const handleCompleteRegistrationSuccess = () => {
-    // After completing registration, go to OTP verification
+  const handleRegisterSuccess = (registrationEmail: string) => {
+    // After registration, go to OTP verification
+    setEmail(registrationEmail)
     setStep("otp")
   }
 
   const handleOTPSuccess = () => {
-    // After OTP verification, show success checkmark
-    setStep("success")
-  }
-
-  const handleSuccessComplete = () => {
-    // Close modal after viewing success message
+    // After OTP verification, close modal and let home page handle registration completion
+    // This keeps the flow consistent with OAuth users
     onOpenChange(false)
-    // TODO: Redirect to dashboard or update app state
   }
 
   return (
@@ -73,6 +62,7 @@ export function AuthModal({ open, onOpenChange, defaultStep = "login" }: AuthMod
           <LoginModal
             onSwitchToRegister={() => setStep("register")}
             onSuccess={handleLoginSuccess}
+            onForgotPassword={() => setStep("forgot-password")}
           />
         )}
 
@@ -83,22 +73,18 @@ export function AuthModal({ open, onOpenChange, defaultStep = "login" }: AuthMod
           />
         )}
 
-        {step === "complete" && (
-          <CompleteRegistrationModal
-            onSuccess={handleCompleteRegistrationSuccess}
-          />
-        )}
-
         {step === "otp" && (
           <OTPModal
             email={email}
             onSuccess={handleOTPSuccess}
-            onBack={() => setStep("complete")}
+            onBack={() => setStep("register")}
           />
         )}
 
-        {step === "success" && (
-          <SuccessModal onSuccess={handleSuccessComplete} />
+        {step === "forgot-password" && (
+          <ForgotPasswordModal
+            onBack={() => setStep("login")}
+          />
         )}
       </DialogContent>
     </Dialog>
