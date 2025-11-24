@@ -4,17 +4,26 @@ import { NextResponse } from "next/server"
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
+  const error = requestUrl.searchParams.get("error")
+  const errorDescription = requestUrl.searchParams.get("error_description")
   const origin = requestUrl.origin
+
+  // Check for OAuth provider errors
+  if (error) {
+    console.error("OAuth provider error:", error, errorDescription)
+    return NextResponse.redirect(`${origin}/?error=${error}&description=${encodeURIComponent(errorDescription || '')}`)
+  }
 
   if (code) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
     
-    if (error) {
-      console.error("OAuth callback error:", error)
-      // Redirect to home page with error (you can add error handling UI later)
-      return NextResponse.redirect(`${origin}/?error=auth_failed`)
+    if (exchangeError) {
+      console.error("OAuth callback error:", exchangeError)
+      return NextResponse.redirect(`${origin}/?error=auth_failed&message=${encodeURIComponent(exchangeError.message)}`)
     }
+
+    console.log("OAuth success! User:", data.user?.email)
   }
 
   // Redirect to home page

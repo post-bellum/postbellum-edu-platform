@@ -19,6 +19,8 @@ export async function handleOAuthLogin(provider: OAuthProvider) {
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
         skipBrowserRedirect: false,
+        // Azure-specific scopes
+        scopes: provider === 'microsoft' ? 'email profile openid' : undefined,
       }
     })
 

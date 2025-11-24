@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { AuthModal, CompleteRegistrationModal } from "@/components/auth";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
@@ -28,6 +29,9 @@ export default function Home() {
     category?: string | null;
   } | null>(null);
   const { user, loading, isLoggedIn } = useAuth();
+  const searchParams = useSearchParams();
+  const oauthError = searchParams.get('error');
+  const errorMessage = searchParams.get('message') || searchParams.get('description');
 
   // Check if user needs to complete registration and fetch profile
   useEffect(() => {
@@ -68,6 +72,19 @@ export default function Home() {
             style={{ width: 'auto', height: 'auto', maxWidth: '400px' }}
           />
           
+          {oauthError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md">
+              <p className="text-sm font-medium text-red-800">
+                Chyba přihlášení: {oauthError}
+              </p>
+              {errorMessage && (
+                <p className="text-xs text-red-600 mt-1">
+                  {decodeURIComponent(errorMessage)}
+                </p>
+              )}
+            </div>
+          )}
+
           {loading ? (
             <Button size="lg" disabled variant="default">
               Načítání...
