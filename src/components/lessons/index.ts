@@ -3,4 +3,8 @@ export { LessonMaterialsSection } from './LessonMaterialsSection'
 export { AdditionalActivitiesSection } from './AdditionalActivitiesSection'
 export { TagsSelector } from './TagsSelector'
 export { DeleteLessonButton } from './DeleteLessonButton'
+export { LessonMaterialForm } from './LessonMaterialForm'
+export { LessonMaterialsManager } from './LessonMaterialsManager'
+export { AdditionalActivityForm } from './AdditionalActivityForm'
+export { AdditionalActivitiesManager } from './AdditionalActivitiesManager'
 
