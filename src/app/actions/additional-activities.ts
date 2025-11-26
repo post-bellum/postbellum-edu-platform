@@ -6,56 +6,35 @@ import {
   updateAdditionalActivity,
   deleteAdditionalActivity,
 } from '@/lib/supabase/additional-activities'
-import type {
-  CreateAdditionalActivityInput,
-  UpdateAdditionalActivityInput,
-} from '@/types/lesson.types'
 import { logger } from '@/lib/logger'
-import { sanitizeInput } from '@/lib/sanitize'
-import { isValidUUID, isValidUrl } from '@/lib/validation'
+import { isValidUUID } from '@/lib/validation'
+import {
+  createAdditionalActivitySchema,
+  updateAdditionalActivitySchema,
+  parseFormDataForAdditionalActivity,
+} from '@/lib/schemas/lesson.schema'
 
 export async function createAdditionalActivityAction(formData: FormData) {
   try {
-    const lessonId = formData.get('lesson_id') as string
-    const title = formData.get('title') as string
-    const description = formData.get('description') as string || undefined
-    const imageUrl = formData.get('image_url') as string || undefined
-
-    // Validate required fields
-    if (!lessonId || !isValidUUID(lessonId)) {
-      return {
-        success: false,
-        error: 'Neplatné ID lekce',
-      }
-    }
-
-    if (!title || !title.trim()) {
-      return {
-        success: false,
-        error: 'Název aktivity je povinný',
-      }
-    }
-
-    // Validate image URL if provided
-    if (imageUrl && !isValidUrl(imageUrl)) {
-      return {
-        success: false,
-        error: 'Neplatná URL adresa obrázku',
-      }
-    }
-
-    // Sanitize all text inputs
-    const input: CreateAdditionalActivityInput = {
-      lesson_id: lessonId,
-      title: sanitizeInput(title.trim()),
-      description: description ? sanitizeInput(description.trim()) : undefined,
-      image_url: imageUrl ? sanitizeInput(imageUrl.trim()) : undefined,
-    }
-
-    const activity = await createAdditionalActivity(input)
+    // Parse FormData into object format expected by Zod
+    const rawData = parseFormDataForAdditionalActivity(formData)
     
-    revalidatePath(`/lessons/${input.lesson_id}`)
-    revalidatePath(`/lessons/${input.lesson_id}/edit`)
+    // Validate and sanitize using Zod schema
+    const result = createAdditionalActivitySchema.safeParse(rawData)
+    
+    if (!result.success) {
+      // Return first error message from Zod
+      const firstError = result.error.issues[0]
+      return {
+        success: false,
+        error: firstError?.message || 'Neplatná data formuláře',
+      }
+    }
+
+    const activity = await createAdditionalActivity(result.data)
+    
+    revalidatePath(`/lessons/${result.data.lesson_id}`)
+    revalidatePath(`/lessons/${result.data.lesson_id}/edit`)
     
     return {
       success: true,
@@ -80,26 +59,22 @@ export async function updateAdditionalActivityAction(activityId: string, formDat
       }
     }
 
-    const title = formData.get('title') as string || undefined
-    const description = formData.get('description') as string || undefined
-    const imageUrl = formData.get('image_url') as string || undefined
-
-    // Validate image URL if provided
-    if (imageUrl && !isValidUrl(imageUrl)) {
+    // Parse FormData into object format expected by Zod
+    const rawData = parseFormDataForAdditionalActivity(formData)
+    
+    // Validate and sanitize using Zod schema
+    const result = updateAdditionalActivitySchema.safeParse(rawData)
+    
+    if (!result.success) {
+      // Return first error message from Zod
+      const firstError = result.error.issues[0]
       return {
         success: false,
-        error: 'Neplatná URL adresa obrázku',
+        error: firstError?.message || 'Neplatná data formuláře',
       }
     }
 
-    // Sanitize all text inputs
-    const input: UpdateAdditionalActivityInput = {
-      title: title ? sanitizeInput(title.trim()) : undefined,
-      description: description ? sanitizeInput(description.trim()) : undefined,
-      image_url: imageUrl ? sanitizeInput(imageUrl.trim()) : undefined,
-    }
-
-    const activity = await updateAdditionalActivity(activityId, input)
+    const activity = await updateAdditionalActivity(activityId, result.data)
     
     revalidatePath(`/lessons/${activity.lesson_id}`)
     revalidatePath(`/lessons/${activity.lesson_id}/edit`)
@@ -150,4 +125,6 @@ export async function deleteAdditionalActivityAction(activityId: string, lessonI
     }
   }
 }
+
+
 

@@ -51,7 +51,18 @@ export function validateEmail(email: string): boolean {
 }
 
 /**
+ * Simple validation helpers for quick checks
+ * For form validation with detailed error messages, use Zod schemas from @/lib/schemas
+ * 
+ * These helpers are useful for:
+ * - Quick boolean checks in conditional logic
+ * - Pre-validation before Zod parsing
+ * - Simple utility functions
+ */
+
+/**
  * Validate UUID format
+ * For form validation, use z.string().uuid() from Zod instead
  */
 export function isValidUUID(str: string): boolean {
   if (!str || typeof str !== 'string') return false
@@ -61,6 +72,7 @@ export function isValidUUID(str: string): boolean {
 
 /**
  * Validate URL format
+ * For form validation, use z.string().url() from Zod instead
  */
 export function isValidUrl(url: string): boolean {
   if (!url || typeof url !== 'string') return false
@@ -74,6 +86,7 @@ export function isValidUrl(url: string): boolean {
 
 /**
  * Validate Vimeo URL format
+ * For form validation, use the vimeoUrlSchema from @/lib/schemas/lesson.schema instead
  */
 export function isValidVimeoUrl(url: string): boolean {
   if (!isValidUrl(url)) return false

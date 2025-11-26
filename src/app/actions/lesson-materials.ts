@@ -6,65 +6,35 @@ import {
   updateLessonMaterial,
   deleteLessonMaterial,
 } from '@/lib/supabase/lesson-materials'
-import type {
-  CreateLessonMaterialInput,
-  UpdateLessonMaterialInput,
-} from '@/types/lesson.types'
 import { logger } from '@/lib/logger'
-import { sanitizeInput } from '@/lib/sanitize'
 import { isValidUUID } from '@/lib/validation'
+import {
+  createLessonMaterialSchema,
+  updateLessonMaterialSchema,
+  parseFormDataForLessonMaterial,
+} from '@/lib/schemas/lesson.schema'
 
 export async function createLessonMaterialAction(formData: FormData) {
   try {
-    const lessonId = formData.get('lesson_id') as string
-    const title = formData.get('title') as string
-    const description = formData.get('description') as string || undefined
-    const content = formData.get('content') as string || undefined
-    const specification = formData.get('specification') as CreateLessonMaterialInput['specification'] || undefined
-    const duration = formData.get('duration') as string || undefined
-
-    // Validate required fields
-    if (!lessonId || !isValidUUID(lessonId)) {
-      return {
-        success: false,
-        error: 'Neplatné ID lekce',
-      }
-    }
-
-    if (!title || !title.trim()) {
-      return {
-        success: false,
-        error: 'Název materiálu je povinný',
-      }
-    }
-
-    // Validate duration if provided
-    let durationValue: CreateLessonMaterialInput['duration'] | undefined
-    if (duration) {
-      const parsed = parseInt(duration)
-      if (![30, 45, 90].includes(parsed)) {
-        return {
-          success: false,
-          error: 'Neplatná délka materiálu (povolené hodnoty: 30, 45, 90)',
-        }
-      }
-      durationValue = parsed as CreateLessonMaterialInput['duration']
-    }
-
-    // Sanitize all text inputs
-    const input: CreateLessonMaterialInput = {
-      lesson_id: lessonId,
-      title: sanitizeInput(title.trim()),
-      description: description ? sanitizeInput(description.trim()) : undefined,
-      content: content ? sanitizeInput(content.trim()) : undefined,
-      specification,
-      duration: durationValue,
-    }
-
-    const material = await createLessonMaterial(input)
+    // Parse FormData into object format expected by Zod
+    const rawData = parseFormDataForLessonMaterial(formData)
     
-    revalidatePath(`/lessons/${input.lesson_id}`)
-    revalidatePath(`/lessons/${input.lesson_id}/edit`)
+    // Validate and sanitize using Zod schema
+    const result = createLessonMaterialSchema.safeParse(rawData)
+    
+    if (!result.success) {
+      // Return first error message from Zod
+      const firstError = result.error.issues[0]
+      return {
+        success: false,
+        error: firstError?.message || 'Neplatná data formuláře',
+      }
+    }
+
+    const material = await createLessonMaterial(result.data)
+    
+    revalidatePath(`/lessons/${result.data.lesson_id}`)
+    revalidatePath(`/lessons/${result.data.lesson_id}/edit`)
     
     return {
       success: true,
@@ -89,35 +59,22 @@ export async function updateLessonMaterialAction(materialId: string, formData: F
       }
     }
 
-    const title = formData.get('title') as string || undefined
-    const description = formData.get('description') as string || undefined
-    const content = formData.get('content') as string || undefined
-    const specification = formData.get('specification') as UpdateLessonMaterialInput['specification'] || undefined
-    const duration = formData.get('duration') as string || undefined
-
-    // Validate duration if provided
-    let durationValue: UpdateLessonMaterialInput['duration'] | undefined
-    if (duration) {
-      const parsed = parseInt(duration)
-      if (![30, 45, 90].includes(parsed)) {
-        return {
-          success: false,
-          error: 'Neplatná délka materiálu (povolené hodnoty: 30, 45, 90)',
-        }
+    // Parse FormData into object format expected by Zod
+    const rawData = parseFormDataForLessonMaterial(formData)
+    
+    // Validate and sanitize using Zod schema
+    const result = updateLessonMaterialSchema.safeParse(rawData)
+    
+    if (!result.success) {
+      // Return first error message from Zod
+      const firstError = result.error.issues[0]
+      return {
+        success: false,
+        error: firstError?.message || 'Neplatná data formuláře',
       }
-      durationValue = parsed as UpdateLessonMaterialInput['duration']
     }
 
-    // Sanitize all text inputs
-    const input: UpdateLessonMaterialInput = {
-      title: title ? sanitizeInput(title.trim()) : undefined,
-      description: description ? sanitizeInput(description.trim()) : undefined,
-      content: content ? sanitizeInput(content.trim()) : undefined,
-      specification,
-      duration: durationValue,
-    }
-
-    const material = await updateLessonMaterial(materialId, input)
+    const material = await updateLessonMaterial(materialId, result.data)
     
     revalidatePath(`/lessons/${material.lesson_id}`)
     revalidatePath(`/lessons/${material.lesson_id}/edit`)

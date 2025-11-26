@@ -58,67 +58,20 @@ export interface LessonWithRelations extends Lesson {
   additional_activities?: AdditionalActivity[]
 }
 
-export interface CreateLessonInput {
-  vimeo_video_url?: string
-  title: string
-  description?: string
-  duration?: string
-  rvp_connection?: string[]
-  period?: string
-  target_group?: string
-  lesson_type?: string
-  publication_date?: string
-  published?: boolean
-  tag_ids?: string[]
-}
-
-export interface UpdateLessonInput {
-  vimeo_video_url?: string
-  title?: string
-  description?: string
-  duration?: string
-  rvp_connection?: string[]
-  period?: string
-  target_group?: string
-  lesson_type?: string
-  publication_date?: string
-  published?: boolean
-  tag_ids?: string[]
-}
+// Input types are now defined in @/lib/schemas/lesson.schema.ts using Zod
+// Re-exported here for backward compatibility
+export type {
+  CreateLessonInput,
+  UpdateLessonInput,
+  CreateLessonMaterialInput,
+  UpdateLessonMaterialInput,
+  CreateAdditionalActivityInput,
+  UpdateAdditionalActivityInput,
+} from '@/lib/schemas/lesson.schema'
 
 export interface UserFavorite {
   user_id: string
   lesson_id: string
   created_at: string
-}
-
-export interface CreateLessonMaterialInput {
-  lesson_id: string
-  title: string
-  description?: string
-  content?: string
-  specification?: LessonSpecification
-  duration?: LessonDuration
-}
-
-export interface UpdateLessonMaterialInput {
-  title?: string
-  description?: string
-  content?: string
-  specification?: LessonSpecification
-  duration?: LessonDuration
-}
-
-export interface CreateAdditionalActivityInput {
-  lesson_id: string
-  title: string
-  description?: string
-  image_url?: string
-}
-
-export interface UpdateAdditionalActivityInput {
-  title?: string
-  description?: string
-  image_url?: string
 }
 

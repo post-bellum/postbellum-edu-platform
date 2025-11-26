@@ -7,76 +7,32 @@ import {
   updateLesson,
   deleteLesson,
 } from '@/lib/supabase/lessons'
-import type {
-  CreateLessonInput,
-  UpdateLessonInput,
-} from '@/types/lesson.types'
 import { logger } from '@/lib/logger'
-import { sanitizeInput } from '@/lib/sanitize'
-import { isValidUUID, isValidVimeoUrl } from '@/lib/validation'
+import { isValidUUID } from '@/lib/validation'
+import {
+  createLessonSchema,
+  updateLessonSchema,
+  parseFormDataForLesson,
+} from '@/lib/schemas/lesson.schema'
 
 export async function createLessonAction(formData: FormData) {
   try {
-    const title = formData.get('title') as string
-    const vimeoVideoUrl = formData.get('vimeo_video_url') as string || undefined
-    const description = formData.get('description') as string || undefined
-    const duration = formData.get('duration') as string || undefined
-    const period = formData.get('period') as string || undefined
-    const targetGroup = formData.get('target_group') as string || undefined
-    const lessonType = formData.get('lesson_type') as string || undefined
-    const publicationDate = formData.get('publication_date') as string || undefined
-    const rvpConnection = formData.get('rvp_connection') as string || undefined
-    const tagIds = formData.get('tag_ids') as string || undefined
-
-    // Validate required fields
-    if (!title || !title.trim()) {
+    // Parse FormData into object format expected by Zod
+    const rawData = parseFormDataForLesson(formData, false)
+    
+    // Validate and sanitize using Zod schema
+    const result = createLessonSchema.safeParse(rawData)
+    
+    if (!result.success) {
+      // Return first error message from Zod
+      const firstError = result.error.issues[0]
       return {
         success: false,
-        error: 'Název lekce je povinný',
+        error: firstError?.message || 'Neplatná data formuláře',
       }
     }
 
-    // Validate Vimeo URL if provided
-    if (vimeoVideoUrl && !isValidVimeoUrl(vimeoVideoUrl)) {
-      return {
-        success: false,
-        error: 'Neplatná Vimeo URL adresa',
-      }
-    }
-
-    // Validate tag IDs if provided
-    if (tagIds) {
-      const tagIdArray = tagIds.split(',').filter(Boolean)
-      for (const tagId of tagIdArray) {
-        if (!isValidUUID(tagId.trim())) {
-          return {
-            success: false,
-            error: 'Neplatné ID tagu',
-          }
-        }
-      }
-    }
-
-    // Sanitize all text inputs
-    const input: CreateLessonInput = {
-      title: sanitizeInput(title.trim()),
-      vimeo_video_url: vimeoVideoUrl ? sanitizeInput(vimeoVideoUrl.trim()) : undefined,
-      description: description ? sanitizeInput(description.trim()) : undefined,
-      duration: duration ? sanitizeInput(duration.trim()) : undefined,
-      period: period ? sanitizeInput(period.trim()) : undefined,
-      target_group: targetGroup ? sanitizeInput(targetGroup.trim()) : undefined,
-      lesson_type: lessonType ? sanitizeInput(lessonType.trim()) : undefined,
-      publication_date: publicationDate ? publicationDate.trim() : undefined,
-      published: formData.get('published') === 'true' || formData.get('published') === 'on',
-      rvp_connection: rvpConnection
-        ? rvpConnection.split(',').map(s => sanitizeInput(s.trim())).filter(Boolean)
-        : undefined,
-      tag_ids: tagIds
-        ? tagIds.split(',').map(s => s.trim()).filter(Boolean).filter(id => isValidUUID(id))
-        : undefined,
-    }
-
-    const lesson = await createLesson(input)
+    const lesson = await createLesson(result.data)
     
     revalidatePath('/lessons')
     revalidatePath(`/lessons/${lesson.id}`)
@@ -104,60 +60,22 @@ export async function updateLessonAction(lessonId: string, formData: FormData) {
       }
     }
 
-    const title = formData.get('title') as string || undefined
-    const vimeoVideoUrl = formData.get('vimeo_video_url') as string || undefined
-    const description = formData.get('description') as string || undefined
-    const duration = formData.get('duration') as string || undefined
-    const period = formData.get('period') as string || undefined
-    const targetGroup = formData.get('target_group') as string || undefined
-    const lessonType = formData.get('lesson_type') as string || undefined
-    const publicationDate = formData.get('publication_date') as string || undefined
-    const rvpConnection = formData.get('rvp_connection') as string || undefined
-    const tagIds = formData.get('tag_ids') as string || undefined
-
-    // Validate Vimeo URL if provided
-    if (vimeoVideoUrl && !isValidVimeoUrl(vimeoVideoUrl)) {
+    // Parse FormData into object format expected by Zod
+    const rawData = parseFormDataForLesson(formData, true)
+    
+    // Validate and sanitize using Zod schema
+    const result = updateLessonSchema.safeParse(rawData)
+    
+    if (!result.success) {
+      // Return first error message from Zod
+      const firstError = result.error.issues[0]
       return {
         success: false,
-        error: 'Neplatná Vimeo URL adresa',
+        error: firstError?.message || 'Neplatná data formuláře',
       }
     }
 
-    // Validate tag IDs if provided
-    if (tagIds) {
-      const tagIdArray = tagIds.split(',').filter(Boolean)
-      for (const tagId of tagIdArray) {
-        if (!isValidUUID(tagId.trim())) {
-          return {
-            success: false,
-            error: 'Neplatné ID tagu',
-          }
-        }
-      }
-    }
-
-    // Sanitize all text inputs
-    const input: UpdateLessonInput = {
-      title: title ? sanitizeInput(title.trim()) : undefined,
-      vimeo_video_url: vimeoVideoUrl ? sanitizeInput(vimeoVideoUrl.trim()) : undefined,
-      description: description ? sanitizeInput(description.trim()) : undefined,
-      duration: duration ? sanitizeInput(duration.trim()) : undefined,
-      period: period ? sanitizeInput(period.trim()) : undefined,
-      target_group: targetGroup ? sanitizeInput(targetGroup.trim()) : undefined,
-      lesson_type: lessonType ? sanitizeInput(lessonType.trim()) : undefined,
-      publication_date: publicationDate ? publicationDate.trim() : undefined,
-      published: formData.get('published') !== null 
-        ? (formData.get('published') === 'true' || formData.get('published') === 'on')
-        : undefined,
-      rvp_connection: rvpConnection
-        ? rvpConnection.split(',').map(s => sanitizeInput(s.trim())).filter(Boolean)
-        : undefined,
-      tag_ids: tagIds
-        ? tagIds.split(',').map(s => s.trim()).filter(Boolean).filter(id => isValidUUID(id))
-        : undefined,
-    }
-
-    const lesson = await updateLesson(lessonId, input)
+    const lesson = await updateLesson(lessonId, result.data)
     
     revalidatePath('/lessons')
     revalidatePath(`/lessons/${lesson.id}`)
