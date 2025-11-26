@@ -1,0 +1,7 @@
+export { AlertMessage } from "./AlertMessage"
+export { UserTypeSection } from "./UserTypeSection"
+export { SchoolNameSection } from "./SchoolNameSection"
+export { AvatarSection } from "./AvatarSection"
+export { DisplayNameSection } from "./DisplayNameSection"
+export { DeleteAccountSection } from "./DeleteAccountSection"
+

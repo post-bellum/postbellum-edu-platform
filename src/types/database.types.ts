@@ -39,7 +39,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          category: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
+          created_at: string | null
+          display_name: string | null
+          email: string | null
+          email_consent: boolean | null
+          id: string
+          registration_completed: boolean | null
+          school_name: string | null
+          updated_at: string | null
+          user_type: "teacher" | "not-teacher"
+        }
+        Insert: {
+          category?: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
+          created_at?: string | null
+          display_name?: string | null
+          email?: string | null
+          email_consent?: boolean | null
+          id: string
+          registration_completed?: boolean | null
+          school_name?: string | null
+          updated_at?: string | null
+          user_type: "teacher" | "not-teacher"
+        }
+        Update: {
+          category?: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
+          created_at?: string | null
+          display_name?: string | null
+          email?: string | null
+          email_consent?: boolean | null
+          id?: string
+          registration_completed?: boolean | null
+          school_name?: string | null
+          updated_at?: string | null
+          user_type?: string
+        }
+        Relationships: []
+      }
+      schools: {
+        Row: {
+          schoolId: number
+          RED_IZO: number | null
+          IČO: number | null
+          Území: string | null
+          Kraj: string | null
+          "Okres/Obvod": string | null
+          "ORP Název": string | null
+          "Plný název": string | null
+          "Zkrácený název": string | null
+          Ulice: string | null
+          "Č. p.": number | null
+          "Č. or.": string | null
+          "Část obce": string | null
+          PSČ: number | null
+          Místo: string | null
+          "Kód RÚIAN": number | null
+          "Email 1": string | null
+        }
+        Insert: {
+          schoolId?: number
+          RED_IZO?: number | null
+          IČO?: number | null
+          Území?: string | null
+          Kraj?: string | null
+          "Okres/Obvod"?: string | null
+          "ORP Název"?: string | null
+          "Plný název"?: string | null
+          "Zkrácený název"?: string | null
+          Ulice?: string | null
+          "Č. p."?: number | null
+          "Č. or."?: string | null
+          "Část obce"?: string | null
+          PSČ?: number | null
+          Místo?: string | null
+          "Kód RÚIAN"?: number | null
+          "Email 1"?: string | null
+        }
+        Update: {
+          schoolId?: number
+          RED_IZO?: number | null
+          IČO?: number | null
+          Území?: string | null
+          Kraj?: string | null
+          "Okres/Obvod"?: string | null
+          "ORP Název"?: string | null
+          "Plný název"?: string | null
+          "Zkrácený název"?: string | null
+          Ulice?: string | null
+          "Č. p."?: number | null
+          "Č. or."?: string | null
+          "Část obce"?: string | null
+          PSČ?: number | null
+          Místo?: string | null
+          "Kód RÚIAN"?: number | null
+          "Email 1"?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

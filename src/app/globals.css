@@ -1,3 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #075985;
+  --color-primary-hover: #0c4a6e;
+  --color-text: #18181B;
+  --color-text-secondary: #71717A;
+}
