@@ -131,7 +131,7 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
                 )}
               </h3>
 
-              {materials[0].description && (
+              {materials[0].description && materials[0].description.trim() && (
                 <div className="mb-4">
                   <h4 className="font-medium mb-2">Obsahuje:</h4>
                   <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">

@@ -12,32 +12,68 @@ import type {
   UpdateLessonInput,
 } from '@/types/lesson.types'
 import { logger } from '@/lib/logger'
+import { sanitizeInput } from '@/lib/sanitize'
+import { isValidUUID, isValidVimeoUrl } from '@/lib/validation'
 
 export async function createLessonAction(formData: FormData) {
   try {
-    const input: CreateLessonInput = {
-      title: formData.get('title') as string,
-      vimeo_video_url: formData.get('vimeo_video_url') as string || undefined,
-      description: formData.get('description') as string || undefined,
-      duration: formData.get('duration') as string || undefined,
-      period: formData.get('period') as string || undefined,
-      target_group: formData.get('target_group') as string || undefined,
-      lesson_type: formData.get('lesson_type') as string || undefined,
-      publication_date: formData.get('publication_date') as string || undefined,
-      published: formData.get('published') === 'true' || formData.get('published') === 'on',
-      rvp_connection: formData.get('rvp_connection') 
-        ? (formData.get('rvp_connection') as string).split(',').map(s => s.trim()).filter(Boolean)
-        : undefined,
-      tag_ids: formData.get('tag_ids')
-        ? (formData.get('tag_ids') as string).split(',').filter(Boolean)
-        : undefined,
-    }
+    const title = formData.get('title') as string
+    const vimeoVideoUrl = formData.get('vimeo_video_url') as string || undefined
+    const description = formData.get('description') as string || undefined
+    const duration = formData.get('duration') as string || undefined
+    const period = formData.get('period') as string || undefined
+    const targetGroup = formData.get('target_group') as string || undefined
+    const lessonType = formData.get('lesson_type') as string || undefined
+    const publicationDate = formData.get('publication_date') as string || undefined
+    const rvpConnection = formData.get('rvp_connection') as string || undefined
+    const tagIds = formData.get('tag_ids') as string || undefined
 
-    if (!input.title) {
+    // Validate required fields
+    if (!title || !title.trim()) {
       return {
         success: false,
         error: 'Název lekce je povinný',
       }
+    }
+
+    // Validate Vimeo URL if provided
+    if (vimeoVideoUrl && !isValidVimeoUrl(vimeoVideoUrl)) {
+      return {
+        success: false,
+        error: 'Neplatná Vimeo URL adresa',
+      }
+    }
+
+    // Validate tag IDs if provided
+    if (tagIds) {
+      const tagIdArray = tagIds.split(',').filter(Boolean)
+      for (const tagId of tagIdArray) {
+        if (!isValidUUID(tagId.trim())) {
+          return {
+            success: false,
+            error: 'Neplatné ID tagu',
+          }
+        }
+      }
+    }
+
+    // Sanitize all text inputs
+    const input: CreateLessonInput = {
+      title: sanitizeInput(title.trim()),
+      vimeo_video_url: vimeoVideoUrl ? sanitizeInput(vimeoVideoUrl.trim()) : undefined,
+      description: description ? sanitizeInput(description.trim()) : undefined,
+      duration: duration ? sanitizeInput(duration.trim()) : undefined,
+      period: period ? sanitizeInput(period.trim()) : undefined,
+      target_group: targetGroup ? sanitizeInput(targetGroup.trim()) : undefined,
+      lesson_type: lessonType ? sanitizeInput(lessonType.trim()) : undefined,
+      publication_date: publicationDate ? publicationDate.trim() : undefined,
+      published: formData.get('published') === 'true' || formData.get('published') === 'on',
+      rvp_connection: rvpConnection
+        ? rvpConnection.split(',').map(s => sanitizeInput(s.trim())).filter(Boolean)
+        : undefined,
+      tag_ids: tagIds
+        ? tagIds.split(',').map(s => s.trim()).filter(Boolean).filter(id => isValidUUID(id))
+        : undefined,
     }
 
     const lesson = await createLesson(input)
@@ -60,23 +96,64 @@ export async function createLessonAction(formData: FormData) {
 
 export async function updateLessonAction(lessonId: string, formData: FormData) {
   try {
+    // Validate lesson ID
+    if (!lessonId || !isValidUUID(lessonId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID lekce',
+      }
+    }
+
+    const title = formData.get('title') as string || undefined
+    const vimeoVideoUrl = formData.get('vimeo_video_url') as string || undefined
+    const description = formData.get('description') as string || undefined
+    const duration = formData.get('duration') as string || undefined
+    const period = formData.get('period') as string || undefined
+    const targetGroup = formData.get('target_group') as string || undefined
+    const lessonType = formData.get('lesson_type') as string || undefined
+    const publicationDate = formData.get('publication_date') as string || undefined
+    const rvpConnection = formData.get('rvp_connection') as string || undefined
+    const tagIds = formData.get('tag_ids') as string || undefined
+
+    // Validate Vimeo URL if provided
+    if (vimeoVideoUrl && !isValidVimeoUrl(vimeoVideoUrl)) {
+      return {
+        success: false,
+        error: 'Neplatná Vimeo URL adresa',
+      }
+    }
+
+    // Validate tag IDs if provided
+    if (tagIds) {
+      const tagIdArray = tagIds.split(',').filter(Boolean)
+      for (const tagId of tagIdArray) {
+        if (!isValidUUID(tagId.trim())) {
+          return {
+            success: false,
+            error: 'Neplatné ID tagu',
+          }
+        }
+      }
+    }
+
+    // Sanitize all text inputs
     const input: UpdateLessonInput = {
-      title: formData.get('title') as string || undefined,
-      vimeo_video_url: formData.get('vimeo_video_url') as string || undefined,
-      description: formData.get('description') as string || undefined,
-      duration: formData.get('duration') as string || undefined,
-      period: formData.get('period') as string || undefined,
-      target_group: formData.get('target_group') as string || undefined,
-      lesson_type: formData.get('lesson_type') as string || undefined,
-      publication_date: formData.get('publication_date') as string || undefined,
+      title: title ? sanitizeInput(title.trim()) : undefined,
+      vimeo_video_url: vimeoVideoUrl ? sanitizeInput(vimeoVideoUrl.trim()) : undefined,
+      description: description ? sanitizeInput(description.trim()) : undefined,
+      duration: duration ? sanitizeInput(duration.trim()) : undefined,
+      period: period ? sanitizeInput(period.trim()) : undefined,
+      target_group: targetGroup ? sanitizeInput(targetGroup.trim()) : undefined,
+      lesson_type: lessonType ? sanitizeInput(lessonType.trim()) : undefined,
+      publication_date: publicationDate ? publicationDate.trim() : undefined,
       published: formData.get('published') !== null 
         ? (formData.get('published') === 'true' || formData.get('published') === 'on')
         : undefined,
-      rvp_connection: formData.get('rvp_connection')
-        ? (formData.get('rvp_connection') as string).split(',').map(s => s.trim()).filter(Boolean)
+      rvp_connection: rvpConnection
+        ? rvpConnection.split(',').map(s => sanitizeInput(s.trim())).filter(Boolean)
         : undefined,
-      tag_ids: formData.get('tag_ids')
-        ? (formData.get('tag_ids') as string).split(',').filter(Boolean)
+      tag_ids: tagIds
+        ? tagIds.split(',').map(s => s.trim()).filter(Boolean).filter(id => isValidUUID(id))
         : undefined,
     }
 
@@ -100,6 +177,14 @@ export async function updateLessonAction(lessonId: string, formData: FormData) {
 
 export async function deleteLessonAction(lessonId: string) {
   try {
+    // Validate lesson ID
+    if (!lessonId || !isValidUUID(lessonId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID lekce',
+      }
+    }
+
     await deleteLesson(lessonId)
     
     revalidatePath('/lessons')

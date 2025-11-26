@@ -287,7 +287,12 @@ export async function createLesson(input: CreateLessonInput): Promise<Lesson> {
 
       if (tagsError) {
         logger.error("Error adding tags to lesson:", tagsError)
-        // Don't throw - lesson was created successfully
+        // Rollback lesson creation if tags fail
+        await supabase
+          .from('lessons')
+          .delete()
+          .eq('id', lesson.id)
+        throw new Error(`Lekce byla vytvořena, ale nepodařilo se přidat tagy: ${tagsError.message}`)
       }
     }
 

@@ -11,21 +11,45 @@ import type {
   UpdateAdditionalActivityInput,
 } from '@/types/lesson.types'
 import { logger } from '@/lib/logger'
+import { sanitizeInput } from '@/lib/sanitize'
+import { isValidUUID, isValidUrl } from '@/lib/validation'
 
 export async function createAdditionalActivityAction(formData: FormData) {
   try {
-    const input: CreateAdditionalActivityInput = {
-      lesson_id: formData.get('lesson_id') as string,
-      title: formData.get('title') as string,
-      description: formData.get('description') as string || undefined,
-      image_url: formData.get('image_url') as string || undefined,
-    }
+    const lessonId = formData.get('lesson_id') as string
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string || undefined
+    const imageUrl = formData.get('image_url') as string || undefined
 
-    if (!input.lesson_id || !input.title) {
+    // Validate required fields
+    if (!lessonId || !isValidUUID(lessonId)) {
       return {
         success: false,
-        error: 'ID lekce a název jsou povinné',
+        error: 'Neplatné ID lekce',
       }
+    }
+
+    if (!title || !title.trim()) {
+      return {
+        success: false,
+        error: 'Název aktivity je povinný',
+      }
+    }
+
+    // Validate image URL if provided
+    if (imageUrl && !isValidUrl(imageUrl)) {
+      return {
+        success: false,
+        error: 'Neplatná URL adresa obrázku',
+      }
+    }
+
+    // Sanitize all text inputs
+    const input: CreateAdditionalActivityInput = {
+      lesson_id: lessonId,
+      title: sanitizeInput(title.trim()),
+      description: description ? sanitizeInput(description.trim()) : undefined,
+      image_url: imageUrl ? sanitizeInput(imageUrl.trim()) : undefined,
     }
 
     const activity = await createAdditionalActivity(input)
@@ -48,10 +72,31 @@ export async function createAdditionalActivityAction(formData: FormData) {
 
 export async function updateAdditionalActivityAction(activityId: string, formData: FormData) {
   try {
+    // Validate activity ID
+    if (!activityId || !isValidUUID(activityId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID aktivity',
+      }
+    }
+
+    const title = formData.get('title') as string || undefined
+    const description = formData.get('description') as string || undefined
+    const imageUrl = formData.get('image_url') as string || undefined
+
+    // Validate image URL if provided
+    if (imageUrl && !isValidUrl(imageUrl)) {
+      return {
+        success: false,
+        error: 'Neplatná URL adresa obrázku',
+      }
+    }
+
+    // Sanitize all text inputs
     const input: UpdateAdditionalActivityInput = {
-      title: formData.get('title') as string || undefined,
-      description: formData.get('description') as string || undefined,
-      image_url: formData.get('image_url') as string || undefined,
+      title: title ? sanitizeInput(title.trim()) : undefined,
+      description: description ? sanitizeInput(description.trim()) : undefined,
+      image_url: imageUrl ? sanitizeInput(imageUrl.trim()) : undefined,
     }
 
     const activity = await updateAdditionalActivity(activityId, input)
@@ -74,6 +119,21 @@ export async function updateAdditionalActivityAction(activityId: string, formDat
 
 export async function deleteAdditionalActivityAction(activityId: string, lessonId: string) {
   try {
+    // Validate IDs
+    if (!activityId || !isValidUUID(activityId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID aktivity',
+      }
+    }
+
+    if (!lessonId || !isValidUUID(lessonId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID lekce',
+      }
+    }
+
     await deleteAdditionalActivity(activityId)
     
     revalidatePath(`/lessons/${lessonId}`)

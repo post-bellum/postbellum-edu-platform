@@ -11,25 +11,54 @@ import type {
   UpdateLessonMaterialInput,
 } from '@/types/lesson.types'
 import { logger } from '@/lib/logger'
+import { sanitizeInput } from '@/lib/sanitize'
+import { isValidUUID } from '@/lib/validation'
 
 export async function createLessonMaterialAction(formData: FormData) {
   try {
-    const input: CreateLessonMaterialInput = {
-      lesson_id: formData.get('lesson_id') as string,
-      title: formData.get('title') as string,
-      description: formData.get('description') as string || undefined,
-      content: formData.get('content') as string || undefined,
-      specification: formData.get('specification') as CreateLessonMaterialInput['specification'] || undefined,
-      duration: formData.get('duration') 
-        ? parseInt(formData.get('duration') as string) as CreateLessonMaterialInput['duration']
-        : undefined,
-    }
+    const lessonId = formData.get('lesson_id') as string
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string || undefined
+    const content = formData.get('content') as string || undefined
+    const specification = formData.get('specification') as CreateLessonMaterialInput['specification'] || undefined
+    const duration = formData.get('duration') as string || undefined
 
-    if (!input.lesson_id || !input.title) {
+    // Validate required fields
+    if (!lessonId || !isValidUUID(lessonId)) {
       return {
         success: false,
-        error: 'ID lekce a název jsou povinné',
+        error: 'Neplatné ID lekce',
       }
+    }
+
+    if (!title || !title.trim()) {
+      return {
+        success: false,
+        error: 'Název materiálu je povinný',
+      }
+    }
+
+    // Validate duration if provided
+    let durationValue: CreateLessonMaterialInput['duration'] | undefined
+    if (duration) {
+      const parsed = parseInt(duration)
+      if (![30, 45, 90].includes(parsed)) {
+        return {
+          success: false,
+          error: 'Neplatná délka materiálu (povolené hodnoty: 30, 45, 90)',
+        }
+      }
+      durationValue = parsed as CreateLessonMaterialInput['duration']
+    }
+
+    // Sanitize all text inputs
+    const input: CreateLessonMaterialInput = {
+      lesson_id: lessonId,
+      title: sanitizeInput(title.trim()),
+      description: description ? sanitizeInput(description.trim()) : undefined,
+      content: content ? sanitizeInput(content.trim()) : undefined,
+      specification,
+      duration: durationValue,
     }
 
     const material = await createLessonMaterial(input)
@@ -52,14 +81,40 @@ export async function createLessonMaterialAction(formData: FormData) {
 
 export async function updateLessonMaterialAction(materialId: string, formData: FormData) {
   try {
+    // Validate material ID
+    if (!materialId || !isValidUUID(materialId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID materiálu',
+      }
+    }
+
+    const title = formData.get('title') as string || undefined
+    const description = formData.get('description') as string || undefined
+    const content = formData.get('content') as string || undefined
+    const specification = formData.get('specification') as UpdateLessonMaterialInput['specification'] || undefined
+    const duration = formData.get('duration') as string || undefined
+
+    // Validate duration if provided
+    let durationValue: UpdateLessonMaterialInput['duration'] | undefined
+    if (duration) {
+      const parsed = parseInt(duration)
+      if (![30, 45, 90].includes(parsed)) {
+        return {
+          success: false,
+          error: 'Neplatná délka materiálu (povolené hodnoty: 30, 45, 90)',
+        }
+      }
+      durationValue = parsed as UpdateLessonMaterialInput['duration']
+    }
+
+    // Sanitize all text inputs
     const input: UpdateLessonMaterialInput = {
-      title: formData.get('title') as string || undefined,
-      description: formData.get('description') as string || undefined,
-      content: formData.get('content') as string || undefined,
-      specification: formData.get('specification') as UpdateLessonMaterialInput['specification'] || undefined,
-      duration: formData.get('duration')
-        ? parseInt(formData.get('duration') as string) as UpdateLessonMaterialInput['duration']
-        : undefined,
+      title: title ? sanitizeInput(title.trim()) : undefined,
+      description: description ? sanitizeInput(description.trim()) : undefined,
+      content: content ? sanitizeInput(content.trim()) : undefined,
+      specification,
+      duration: durationValue,
     }
 
     const material = await updateLessonMaterial(materialId, input)
@@ -82,6 +137,21 @@ export async function updateLessonMaterialAction(materialId: string, formData: F
 
 export async function deleteLessonMaterialAction(materialId: string, lessonId: string) {
   try {
+    // Validate IDs
+    if (!materialId || !isValidUUID(materialId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID materiálu',
+      }
+    }
+
+    if (!lessonId || !isValidUUID(lessonId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID lekce',
+      }
+    }
+
     await deleteLessonMaterial(materialId)
     
     revalidatePath(`/lessons/${lessonId}`)

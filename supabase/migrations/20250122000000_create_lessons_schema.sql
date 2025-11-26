@@ -352,19 +352,20 @@ CREATE TRIGGER set_additional_activities_updated_at
   EXECUTE FUNCTION public.handle_updated_at();
 
 -- Grant permissions
+-- Public can only SELECT (RLS policies will filter to published content)
 GRANT SELECT ON public.tags TO public;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.tags TO authenticated;
-
 GRANT SELECT ON public.lessons TO public;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.lessons TO authenticated;
-
 GRANT SELECT ON public.lesson_tags TO public;
-GRANT SELECT, INSERT, DELETE ON public.lesson_tags TO authenticated;
-
 GRANT SELECT ON public.lesson_materials TO public;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.lesson_materials TO authenticated;
-
 GRANT SELECT ON public.additional_activities TO public;
+
+-- Authenticated users can SELECT all (RLS will filter based on published status)
+-- INSERT/UPDATE/DELETE permissions are granted but RLS policies restrict to admins only
+-- Note: GRANT defines what operations can be attempted; RLS policies filter which rows can be accessed
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.tags TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.lessons TO authenticated;
+GRANT SELECT, INSERT, DELETE ON public.lesson_tags TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.lesson_materials TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.additional_activities TO authenticated;
 
 -- Add helpful comments

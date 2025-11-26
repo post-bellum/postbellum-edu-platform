@@ -50,4 +50,35 @@ export function validateEmail(email: string): boolean {
   return emailRegex.test(email)
 }
 
+/**
+ * Validate UUID format
+ */
+export function isValidUUID(str: string): boolean {
+  if (!str || typeof str !== 'string') return false
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(str.trim())
+}
+
+/**
+ * Validate URL format
+ */
+export function isValidUrl(url: string): boolean {
+  if (!url || typeof url !== 'string') return false
+  try {
+    const urlObj = new URL(url.trim())
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Validate Vimeo URL format
+ */
+export function isValidVimeoUrl(url: string): boolean {
+  if (!isValidUrl(url)) return false
+  const vimeoRegex = /^https?:\/\/(www\.)?(vimeo\.com|player\.vimeo\.com)/
+  return vimeoRegex.test(url.trim())
+}
+
 
