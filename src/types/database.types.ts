@@ -39,38 +39,209 @@ export type Database = {
   }
   public: {
     Tables: {
+      additional_activities: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          lesson_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          lesson_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          lesson_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "additional_activities_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_materials: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          description: string | null
+          duration: number | null
+          id: string
+          lesson_id: string
+          specification: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: number | null
+          id?: string
+          lesson_id: string
+          specification?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: number | null
+          id?: string
+          lesson_id?: string
+          specification?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_materials_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_tags: {
+        Row: {
+          lesson_id: string
+          tag_id: string
+        }
+        Insert: {
+          lesson_id: string
+          tag_id: string
+        }
+        Update: {
+          lesson_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_tags_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          duration: string | null
+          id: string
+          lesson_type: string | null
+          period: string | null
+          publication_date: string | null
+          rvp_connection: string[] | null
+          target_group: string | null
+          title: string
+          updated_at: string | null
+          vimeo_video_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration?: string | null
+          id?: string
+          lesson_type?: string | null
+          period?: string | null
+          publication_date?: string | null
+          rvp_connection?: string[] | null
+          target_group?: string | null
+          title: string
+          updated_at?: string | null
+          vimeo_video_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration?: string | null
+          id?: string
+          lesson_type?: string | null
+          period?: string | null
+          publication_date?: string | null
+          rvp_connection?: string[] | null
+          target_group?: string | null
+          title?: string
+          updated_at?: string | null
+          vimeo_video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
-          category: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
+          category: string | null
           created_at: string | null
           display_name: string | null
           email: string | null
           email_consent: boolean | null
           id: string
+          is_admin: boolean
           registration_completed: boolean | null
           school_name: string | null
           updated_at: string | null
-          user_type: "teacher" | "not-teacher"
+          user_type: string
         }
         Insert: {
-          category?: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
+          category?: string | null
           created_at?: string | null
           display_name?: string | null
           email?: string | null
           email_consent?: boolean | null
           id: string
+          is_admin?: boolean
           registration_completed?: boolean | null
           school_name?: string | null
           updated_at?: string | null
-          user_type: "teacher" | "not-teacher"
+          user_type: string
         }
         Update: {
-          category?: "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" | null
+          category?: string | null
           created_at?: string | null
           display_name?: string | null
           email?: string | null
           email_consent?: boolean | null
           id?: string
+          is_admin?: boolean
           registration_completed?: boolean | null
           school_name?: string | null
           updated_at?: string | null
@@ -80,61 +251,79 @@ export type Database = {
       }
       schools: {
         Row: {
-          schoolId: number
-          RED_IZO: number | null
+          "Č. or.": string | null
+          "Č. p.": number | null
+          "Část obce": string | null
+          "Email 1": string | null
           IČO: number | null
-          Území: string | null
+          "Kód RÚIAN": number | null
           Kraj: string | null
+          Místo: string | null
           "Okres/Obvod": string | null
           "ORP Název": string | null
           "Plný název": string | null
-          "Zkrácený název": string | null
-          Ulice: string | null
-          "Č. p.": number | null
-          "Č. or.": string | null
-          "Část obce": string | null
           PSČ: number | null
-          Místo: string | null
-          "Kód RÚIAN": number | null
-          "Email 1": string | null
+          RED_IZO: number | null
+          schoolId: number
+          Ulice: string | null
+          Území: string | null
+          "Zkrácený název": string | null
         }
         Insert: {
-          schoolId?: number
-          RED_IZO?: number | null
+          "Č. or."?: string | null
+          "Č. p."?: number | null
+          "Část obce"?: string | null
+          "Email 1"?: string | null
           IČO?: number | null
-          Území?: string | null
+          "Kód RÚIAN"?: number | null
           Kraj?: string | null
+          Místo?: string | null
           "Okres/Obvod"?: string | null
           "ORP Název"?: string | null
           "Plný název"?: string | null
-          "Zkrácený název"?: string | null
-          Ulice?: string | null
-          "Č. p."?: number | null
-          "Č. or."?: string | null
-          "Část obce"?: string | null
           PSČ?: number | null
-          Místo?: string | null
-          "Kód RÚIAN"?: number | null
-          "Email 1"?: string | null
+          RED_IZO?: number | null
+          schoolId?: number
+          Ulice?: string | null
+          Území?: string | null
+          "Zkrácený název"?: string | null
         }
         Update: {
-          schoolId?: number
-          RED_IZO?: number | null
+          "Č. or."?: string | null
+          "Č. p."?: number | null
+          "Část obce"?: string | null
+          "Email 1"?: string | null
           IČO?: number | null
-          Území?: string | null
+          "Kód RÚIAN"?: number | null
           Kraj?: string | null
+          Místo?: string | null
           "Okres/Obvod"?: string | null
           "ORP Název"?: string | null
           "Plný název"?: string | null
-          "Zkrácený název"?: string | null
-          Ulice?: string | null
-          "Č. p."?: number | null
-          "Č. or."?: string | null
-          "Část obce"?: string | null
           PSČ?: number | null
-          Místo?: string | null
-          "Kód RÚIAN"?: number | null
-          "Email 1"?: string | null
+          RED_IZO?: number | null
+          schoolId?: number
+          Ulice?: string | null
+          Území?: string | null
+          "Zkrácený název"?: string | null
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          title?: string
         }
         Relationships: []
       }

@@ -1,0 +1,153 @@
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { getLessonById } from '@/lib/supabase/lessons'
+import { isAdmin } from '@/lib/supabase/admin-helpers'
+import { Button } from '@/components/ui/Button'
+import { Edit, ArrowLeft } from 'lucide-react'
+import { LessonMaterialsSection } from '@/components/lessons/LessonMaterialsSection'
+import { AdditionalActivitiesSection } from '@/components/lessons/AdditionalActivitiesSection'
+import { DeleteLessonButton } from '@/components/lessons/DeleteLessonButton'
+
+interface LessonPageProps {
+  params: Promise<{ id: string }>
+}
+
+export default async function LessonPage({ params }: LessonPageProps) {
+  const { id } = await params
+  const admin = await isAdmin()
+  
+  const lesson = await getLessonById(id)
+
+  if (!lesson) {
+    notFound()
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <Link href="/lessons">
+          <Button variant="ghost" size="sm" className="mb-4">
+            <ArrowLeft />
+            Zpět na seznam lekcí
+          </Button>
+        </Link>
+        {admin && (
+          <div className="flex items-center justify-between">
+            <h1 className="text-4xl font-bold">{lesson.title}</h1>
+            <div className="flex gap-2">
+              <Link href={`/lessons/${id}/edit`}>
+                <Button>
+                  <Edit />
+                  Upravit lekci
+                </Button>
+              </Link>
+              <DeleteLessonButton lessonId={id} lessonTitle={lesson.title} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Video */}
+          {lesson.vimeo_video_url && (
+            <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+              <p className="text-gray-500">Video placeholder - Vimeo URL: {lesson.vimeo_video_url}</p>
+            </div>
+          )}
+
+          {/* Lesson Materials */}
+          <LessonMaterialsSection materials={lesson.materials || []} />
+
+          {/* Additional Activities */}
+          <AdditionalActivitiesSection activities={lesson.additional_activities || []} />
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Základní informace o lekci</h2>
+            
+            {lesson.description && (
+              <div className="mb-4">
+                <h3 className="font-medium mb-2">Popis lekce</h3>
+                <p className="text-gray-600 text-sm">{lesson.description}</p>
+              </div>
+            )}
+
+            {lesson.duration && (
+              <div className="mb-4">
+                <h3 className="font-medium mb-2">Délka lekce</h3>
+                <p className="text-gray-600 text-sm">{lesson.duration}</p>
+              </div>
+            )}
+
+            {lesson.rvp_connection && lesson.rvp_connection.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-medium mb-2">Napojení na RVP</h3>
+                <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
+                  {lesson.rvp_connection.map((rvp, idx) => (
+                    <li key={idx}>{rvp}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {lesson.period && (
+              <div className="mb-4">
+                <h3 className="font-medium mb-2">Období</h3>
+                <p className="text-gray-600 text-sm">{lesson.period}</p>
+              </div>
+            )}
+
+            {lesson.target_group && (
+              <div className="mb-4">
+                <h3 className="font-medium mb-2">Cílová skupina</h3>
+                <p className="text-gray-600 text-sm">{lesson.target_group}</p>
+              </div>
+            )}
+
+            {lesson.lesson_type && (
+              <div className="mb-4">
+                <h3 className="font-medium mb-2">Typ lekce</h3>
+                <p className="text-gray-600 text-sm">{lesson.lesson_type}</p>
+              </div>
+            )}
+
+            {lesson.publication_date && (
+              <div className="mb-4">
+                <h3 className="font-medium mb-2">Datum publikování lekce</h3>
+                <p className="text-gray-600 text-sm">
+                  {new Date(lesson.publication_date).toLocaleDateString('cs-CZ', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+            )}
+
+            {lesson.tags && lesson.tags.length > 0 && (
+              <div>
+                <h3 className="font-medium mb-2">Tagy</h3>
+                <div className="flex flex-wrap gap-2">
+                  {lesson.tags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                    >
+                      {tag.title}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+

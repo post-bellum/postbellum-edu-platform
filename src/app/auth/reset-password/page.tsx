@@ -68,7 +68,7 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push("/")
       }, 2000)
-    } catch (error) {
+    } catch {
       // Error already logged by updatePassword function
       setError("Při změně hesla došlo k chybě. Zkuste to prosím znovu.")
     } finally {

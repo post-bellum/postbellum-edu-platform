@@ -29,7 +29,7 @@ export function useProfile(isLoggedIn: boolean) {
         if (profileData) {
           setProfile({
             displayName: profileData.displayName || "",
-            userType: profileData.userType,
+            userType: profileData.userType as "teacher" | "not-teacher",
             schoolName: profileData.schoolName || "",
             email: profileData.email || "",
           })
