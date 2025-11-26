@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { getAdditionalActivities } from "@/lib/supabase/additional-activities-client"
 import { deleteAdditionalActivityAction } from "@/app/actions/additional-activities"
 import type { AdditionalActivity } from "@/types/lesson.types"
 import { Button } from "@/components/ui/Button"
@@ -26,7 +25,6 @@ export function AdditionalActivitiesManager({
   lessonId,
   initialActivities = [],
 }: AdditionalActivitiesManagerProps) {
-  const router = useRouter()
   const [activities, setActivities] = React.useState<AdditionalActivity[]>(initialActivities)
   const [isFormOpen, setIsFormOpen] = React.useState(false)
   const [editingActivity, setEditingActivity] = React.useState<AdditionalActivity | undefined>()
@@ -36,19 +34,8 @@ export function AdditionalActivitiesManager({
 
   const loadActivities = React.useCallback(async () => {
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('additional_activities')
-        .select('*')
-        .eq('lesson_id', lessonId)
-        .order('created_at', { ascending: true })
-
-      if (error) {
-        console.error("Error loading activities:", error)
-        return
-      }
-
-      setActivities((data || []) as AdditionalActivity[])
+      const data = await getAdditionalActivities(lessonId)
+      setActivities(data)
     } catch (error) {
       console.error("Error loading activities:", error)
     }

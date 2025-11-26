@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { useActionState } from "react"
 import {
   createLessonMaterialAction,
@@ -10,7 +9,6 @@ import {
 import type {
   LessonMaterial,
   LessonSpecification,
-  LessonDuration,
 } from "@/types/lesson.types"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -47,7 +45,6 @@ export function LessonMaterialForm({
   material,
   onSuccess,
 }: LessonMaterialFormProps) {
-  const router = useRouter()
   const isEditing = !!material
 
   const [title, setTitle] = React.useState(material?.title || "")

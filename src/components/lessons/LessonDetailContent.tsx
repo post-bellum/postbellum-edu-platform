@@ -2,28 +2,40 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getLessonById } from '@/lib/supabase/lessons'
 import { isAdmin } from '@/lib/supabase/admin-helpers'
+import { isLessonFavorited } from '@/lib/supabase/favorites'
 import { Button } from '@/components/ui/Button'
-import { Edit, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { LessonMaterialsSection } from '@/components/lessons/LessonMaterialsSection'
 import { AdditionalActivitiesSection } from '@/components/lessons/AdditionalActivitiesSection'
-import { DeleteLessonButton } from '@/components/lessons/DeleteLessonButton'
+import { AdminControls } from '@/components/lessons/AdminControls'
+import { FavoriteButton } from '@/components/lessons/FavoriteButton'
 
-interface LessonPageProps {
-  params: Promise<{ id: string }>
+interface LessonDetailContentProps {
+  id: string
+  usePublicClient?: boolean // Use public client for static generation
 }
 
-export default async function LessonPage({ params }: LessonPageProps) {
-  const { id } = await params
-  const admin = await isAdmin()
+export async function LessonDetailContent({ id, usePublicClient = false }: LessonDetailContentProps) {
+  // Only check admin if not using public client (for private routes)
+  const admin = usePublicClient ? false : await isAdmin()
   
-  const lesson = await getLessonById(id)
+  const [lesson, isFavorited] = await Promise.all([
+    getLessonById(id, usePublicClient),
+    // isLessonFavorited handles non-authenticated users gracefully (returns false)
+    // Skip favorite check for public client (static pages)
+    usePublicClient ? Promise.resolve(false) : isLessonFavorited(id).catch(() => false)
+  ])
 
+  // RLS policies ensure that:
+  // - Public users can only access published lessons (getLessonById returns null for unpublished)
+  // - Authenticated users can access all lessons
+  // So if lesson is null, it means either it doesn't exist or user doesn't have access
   if (!lesson) {
     notFound()
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <>
       {/* Header */}
       <div className="mb-6">
         <Link href="/lessons">
@@ -32,20 +44,14 @@ export default async function LessonPage({ params }: LessonPageProps) {
             Zpět na seznam lekcí
           </Button>
         </Link>
-        {admin && (
-          <div className="flex items-center justify-between">
-            <h1 className="text-4xl font-bold">{lesson.title}</h1>
-            <div className="flex gap-2">
-              <Link href={`/lessons/${id}/edit`}>
-                <Button>
-                  <Edit />
-                  Upravit lekci
-                </Button>
-              </Link>
-              <DeleteLessonButton lessonId={id} lessonTitle={lesson.title} />
-            </div>
-          </div>
-        )}
+        <div className="flex items-center justify-between">
+          <h1 className="text-4xl font-bold">{lesson.title}</h1>
+          {usePublicClient ? (
+            <AdminControls lessonId={id} lessonTitle={lesson.title} showEditButton={true} />
+          ) : admin ? (
+            <AdminControls lessonId={id} lessonTitle={lesson.title} showEditButton={true} />
+          ) : null}
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -88,7 +94,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
               <div className="mb-4">
                 <h3 className="font-medium mb-2">Napojení na RVP</h3>
                 <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
-                  {lesson.rvp_connection.map((rvp, idx) => (
+                  {lesson.rvp_connection.map((rvp: string, idx: number) => (
                     <li key={idx}>{rvp}</li>
                   ))}
                 </ul>
@@ -130,10 +136,10 @@ export default async function LessonPage({ params }: LessonPageProps) {
             )}
 
             {lesson.tags && lesson.tags.length > 0 && (
-              <div>
+              <div className="mb-4">
                 <h3 className="font-medium mb-2">Tagy</h3>
                 <div className="flex flex-wrap gap-2">
-                  {lesson.tags.map((tag) => (
+                  {lesson.tags.map((tag: { id: string; title: string }) => (
                     <span
                       key={tag.id}
                       className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
@@ -144,10 +150,15 @@ export default async function LessonPage({ params }: LessonPageProps) {
                 </div>
               </div>
             )}
+
+            {/* Favorite Button */}
+            <div className="pt-4 border-t">
+              <FavoriteButton lessonId={id} initialIsFavorited={isFavorited} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

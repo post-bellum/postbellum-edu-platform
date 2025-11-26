@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { deleteLessonMaterialAction } from "@/app/actions/lesson-materials"
 import type { LessonMaterial, LessonSpecification, LessonDuration } from "@/types/lesson.types"
@@ -38,7 +37,6 @@ export function LessonMaterialsManager({
   lessonId,
   initialMaterials = [],
 }: LessonMaterialsManagerProps) {
-  const router = useRouter()
   const [materials, setMaterials] = React.useState<LessonMaterial[]>(initialMaterials)
   const [isFormOpen, setIsFormOpen] = React.useState(false)
   const [editingMaterial, setEditingMaterial] = React.useState<LessonMaterial | undefined>()

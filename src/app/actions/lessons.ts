@@ -24,6 +24,7 @@ export async function createLessonAction(formData: FormData) {
       target_group: formData.get('target_group') as string || undefined,
       lesson_type: formData.get('lesson_type') as string || undefined,
       publication_date: formData.get('publication_date') as string || undefined,
+      published: formData.get('published') === 'true' || formData.get('published') === 'on',
       rvp_connection: formData.get('rvp_connection') 
         ? (formData.get('rvp_connection') as string).split(',').map(s => s.trim()).filter(Boolean)
         : undefined,
@@ -68,6 +69,9 @@ export async function updateLessonAction(lessonId: string, formData: FormData) {
       target_group: formData.get('target_group') as string || undefined,
       lesson_type: formData.get('lesson_type') as string || undefined,
       publication_date: formData.get('publication_date') as string || undefined,
+      published: formData.get('published') !== null 
+        ? (formData.get('published') === 'true' || formData.get('published') === 'on')
+        : undefined,
       rvp_connection: formData.get('rvp_connection')
         ? (formData.get('rvp_connection') as string).split(',').map(s => s.trim()).filter(Boolean)
         : undefined,

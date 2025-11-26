@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Textarea } from "@/components/ui/Textarea"
+import { Checkbox } from "@/components/ui/Checkbox"
 import { TagsSelector } from "./TagsSelector"
 
 interface LessonFormProps {
@@ -36,18 +37,27 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
   const [selectedTagIds, setSelectedTagIds] = React.useState<string[]>(
     lesson?.tags?.map(t => t.id) || []
   )
+  const [published, setPublished] = React.useState(lesson?.published ?? false)
 
   const action = isEditing
     ? async (_prevState: unknown, formData: FormData) => {
         formData.append("tag_ids", selectedTagIds.join(","))
+        formData.append("published", published ? "true" : "false")
         return updateLessonAction(lesson.id, formData)
       }
     : async (_prevState: unknown, formData: FormData) => {
         formData.append("tag_ids", selectedTagIds.join(","))
+        formData.append("published", published ? "true" : "false")
         return createLessonAction(formData)
       }
 
   const [state, formAction] = useActionState(action, null)
+
+  React.useEffect(() => {
+    if (lesson) {
+      setPublished(lesson.published ?? false)
+    }
+  }, [lesson])
 
   React.useEffect(() => {
     if (state?.success && state.data) {
@@ -174,6 +184,17 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
           selectedTagIds={selectedTagIds}
           onSelectionChange={setSelectedTagIds}
         />
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="published"
+          checked={published}
+          onCheckedChange={(checked) => setPublished(checked === true)}
+        />
+        <Label htmlFor="published" className="cursor-pointer">
+          Publikovat lekci (viditelná pro všechny)
+        </Label>
       </div>
 
       <div className="flex gap-4">

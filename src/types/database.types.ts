@@ -161,6 +161,7 @@ export type Database = {
           lesson_type: string | null
           period: string | null
           publication_date: string | null
+          published: boolean
           rvp_connection: string[] | null
           target_group: string | null
           title: string
@@ -176,6 +177,7 @@ export type Database = {
           lesson_type?: string | null
           period?: string | null
           publication_date?: string | null
+          published?: boolean
           rvp_connection?: string[] | null
           target_group?: string | null
           title: string
@@ -191,6 +193,7 @@ export type Database = {
           lesson_type?: string | null
           period?: string | null
           publication_date?: string | null
+          published?: boolean
           rvp_connection?: string[] | null
           target_group?: string | null
           title?: string
@@ -326,6 +329,39 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      user_favorites: {
+        Row: {
+          created_at: string | null
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorites_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -1,41 +1,24 @@
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getLessons } from '@/lib/supabase/lessons'
-import { isAdmin } from '@/lib/supabase/admin-helpers'
-import { Button } from '@/components/ui/Button'
-import { Plus } from 'lucide-react'
-import { DeleteLessonButton } from '@/components/lessons/DeleteLessonButton'
+import { AdminControls } from '@/components/lessons/AdminControls'
 
-export default async function LessonsPage() {
-  const admin = await isAdmin()
-  
-  if (!admin) {
-    redirect('/')
-  }
-
-  const lessons = await getLessons()
+export async function LessonsList() {
+  const lessons = await getLessons({ published_only: true, usePublicClient: true })
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold mb-2">Lekce</h1>
           <p className="text-gray-600">Správa vzdělávacích lekcí</p>
         </div>
-        <Link href="/lessons/new">
-          <Button>
-            <Plus />
-            Nová lekce
-          </Button>
-        </Link>
+        <AdminControls showNewButton />
       </div>
 
       {lessons.length === 0 ? (
         <div className="text-center py-12 border border-gray-200 rounded-lg">
           <p className="text-gray-500 mb-4">Zatím nejsou žádné lekce</p>
-          <Link href="/lessons/new">
-            <Button>Vytvořit první lekci</Button>
-          </Link>
+          <AdminControls showNewButton />
         </div>
       ) : (
         <div className="grid gap-4">
@@ -59,20 +42,13 @@ export default async function LessonsPage() {
                     )}
                   </div>
                 </Link>
-                <div className="ml-4 flex gap-2">
-                  <Link href={`/lessons/${lesson.id}/edit`}>
-                    <Button variant="outline" size="sm">
-                      Upravit
-                    </Button>
-                  </Link>
-                  <DeleteLessonButton lessonId={lesson.id} lessonTitle={lesson.title} />
-                </div>
+                <AdminControls lessonId={lesson.id} lessonTitle={lesson.title} />
               </div>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </>
   )
 }
 

@@ -18,6 +18,7 @@ export interface Lesson {
   target_group: string | null
   lesson_type: string | null
   publication_date: string | null // ISO date string
+  published: boolean
   created_by: string | null
   created_at: string
   updated_at: string
@@ -67,6 +68,7 @@ export interface CreateLessonInput {
   target_group?: string
   lesson_type?: string
   publication_date?: string
+  published?: boolean
   tag_ids?: string[]
 }
 
@@ -80,7 +82,14 @@ export interface UpdateLessonInput {
   target_group?: string
   lesson_type?: string
   publication_date?: string
+  published?: boolean
   tag_ids?: string[]
+}
+
+export interface UserFavorite {
+  user_id: string
+  lesson_id: string
+  created_at: string
 }
 
 export interface CreateLessonMaterialInput {

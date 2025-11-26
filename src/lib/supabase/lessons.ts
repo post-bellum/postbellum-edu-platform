@@ -1,8 +1,10 @@
 "use server"
 
 import { createClient } from "./server"
+import { createPublicClient } from "./public"
 import { requireAdmin } from "./admin-helpers"
 import { logger } from "@/lib/logger"
+import type { Database } from "@/types/database.types"
 import type { 
   Lesson, 
   LessonWithRelations,
@@ -11,23 +13,44 @@ import type {
   Tag
 } from "@/types/lesson.types"
 
+type LessonRow = Database['public']['Tables']['lessons']['Row']
+
 /**
  * Get all lessons with optional filters
+ * RLS policies automatically handle:
+ * - Public users: only see published lessons
+ * - Authenticated users: see all lessons (RLS allows authenticated to see all)
+ * 
+ * Note: For admin-only views, use published_only: false explicitly
  */
 export async function getLessons(filters?: {
   period?: string
   target_group?: string
   tag_id?: string
+  published_only?: boolean
+  usePublicClient?: boolean // Use public client (no cookies) for static pages
 }): Promise<Lesson[]> {
   try {
-    const supabase = await createClient()
+    // Use public client for static pages (no cookies needed)
+    // RLS policies still work - public users only see published content
+    const supabase = filters?.usePublicClient 
+      ? createPublicClient()
+      : await createClient()
     
     // If filtering by tag_id, we need to use a different query structure
     if (filters?.tag_id) {
-      const { data, error } = await supabase
+      let query = supabase
         .from('lesson_tags')
         .select('lesson_id, lessons(*)')
         .eq('tag_id', filters.tag_id)
+      
+      // If explicitly requesting only published, add filter
+      // Otherwise, RLS will handle it automatically
+      if (filters?.published_only === true) {
+        query = query.eq('lessons.published', true)
+      }
+      
+      const { data, error } = await query
       
       if (error) {
         logger.error("Error fetching lessons by tag:", error)
@@ -35,14 +58,19 @@ export async function getLessons(filters?: {
       }
       
       // Extract lessons from the joined data
+      type LessonTagJoin = {
+        lesson_id: string
+        lessons: LessonRow | null
+      }
+      
       const lessons = (data || [])
-        .map((item) => {
+        .map((item: LessonTagJoin) => {
           const lesson = item.lessons
           if (!lesson) return null
-          // Convert database type to our Lesson type
           return {
             ...lesson,
             rvp_connection: lesson.rvp_connection || [],
+            published: lesson.published ?? false,
           } as Lesson
         })
         .filter((lesson): lesson is Lesson => lesson !== null)
@@ -71,6 +99,12 @@ export async function getLessons(filters?: {
       .order('publication_date', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
 
+    // If explicitly requesting only published, add filter
+    // Otherwise, RLS will handle it automatically based on user role
+    if (filters?.published_only === true) {
+      query = query.eq('published', true)
+    }
+
     if (filters?.period) {
       query = query.eq('period', filters.period)
     }
@@ -85,7 +119,13 @@ export async function getLessons(filters?: {
       throw error
     }
 
-    return (data || []) as Lesson[]
+    // Convert to Lesson type with published field
+    // RLS policies have already filtered the results appropriately
+    return (data || []).map((lesson: LessonRow) => ({
+      ...lesson,
+      published: lesson.published ?? false,
+      rvp_connection: lesson.rvp_connection || [],
+    })) as Lesson[]
   } catch (error) {
     logger.error("Error fetching lessons:", error)
     throw error
@@ -93,11 +133,54 @@ export async function getLessons(filters?: {
 }
 
 /**
- * Get a single lesson by ID with all relations
+ * Get multiple lessons by their IDs
+ * RLS policies automatically handle access control
  */
-export async function getLessonById(id: string): Promise<LessonWithRelations | null> {
+export async function getLessonsByIds(ids: string[]): Promise<Lesson[]> {
   try {
+    if (ids.length === 0) return []
+    
     const supabase = await createClient()
+    
+    const { data, error } = await supabase
+      .from('lessons')
+      .select('*')
+      .in('id', ids)
+      .order('publication_date', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      logger.error("Error fetching lessons by IDs:", error)
+      throw error
+    }
+
+    return (data || []).map((lesson: LessonRow) => ({
+      ...lesson,
+      published: lesson.published ?? false,
+      rvp_connection: lesson.rvp_connection || [],
+    })) as Lesson[]
+  } catch (error) {
+    logger.error("Error fetching lessons by IDs:", error)
+    throw error
+  }
+}
+
+/**
+ * Get a single lesson by ID with all relations
+ * RLS policies automatically handle:
+ * - Public users: can only access published lessons (will return null if unpublished)
+ * - Authenticated users: can access all lessons
+ */
+export async function getLessonById(
+  id: string, 
+  usePublicClient?: boolean
+): Promise<LessonWithRelations | null> {
+  try {
+    // Use public client for static generation (no cookies)
+    // RLS policies still work - public users only see published lessons
+    const supabase = usePublicClient 
+      ? createPublicClient()
+      : await createClient()
     
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
@@ -113,6 +196,7 @@ export async function getLessonById(id: string): Promise<LessonWithRelations | n
     if (!lesson) return null
 
     // Fetch related data
+    // RLS policies on related tables will automatically filter based on lesson published status
     const [tagsResult, materialsResult, activitiesResult] = await Promise.all([
       supabase
         .from('lesson_tags')
@@ -146,6 +230,8 @@ export async function getLessonById(id: string): Promise<LessonWithRelations | n
 
     return {
       ...lesson,
+      published: lesson.published ?? false,
+      rvp_connection: lesson.rvp_connection || [],
       tags,
       materials,
       additional_activities: activities

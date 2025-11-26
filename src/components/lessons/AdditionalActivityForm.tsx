@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { useActionState } from "react"
 import {
   createAdditionalActivityAction,
@@ -36,7 +35,6 @@ export function AdditionalActivityForm({
   activity,
   onSuccess,
 }: AdditionalActivityFormProps) {
-  const router = useRouter()
   const isEditing = !!activity
 
   const [title, setTitle] = React.useState(activity?.title || "")
