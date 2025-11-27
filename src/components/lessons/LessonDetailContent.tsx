@@ -59,8 +59,21 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
         <div className="lg:col-span-2 space-y-6">
           {/* Video */}
           {lesson.vimeo_video_url && (
-            <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-              <p className="text-gray-500">Video placeholder - Vimeo URL: {lesson.vimeo_video_url}</p>
+            <div className="relative rounded-lg overflow-hidden bg-gray-100" style={{ paddingTop: '56.25%' }}>
+              <iframe
+                src={lesson.vimeo_video_url}
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%'
+                }}
+                title={lesson.title}
+              />
             </div>
           )}
 
