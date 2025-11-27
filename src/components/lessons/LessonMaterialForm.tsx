@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
 import { Textarea } from "@/components/ui/Textarea"
+import { RichTextEditor } from "@/components/editor/RichTextEditor"
 import {
   Dialog,
   DialogContent,
@@ -106,7 +107,7 @@ export function LessonMaterialForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Upravit materiál" : "Nový materiál"}
@@ -150,15 +151,14 @@ export function LessonMaterialForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Obsah (markdown)</Label>
-            <Textarea
-              id="content"
-              name="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={8}
-              placeholder="Obsah materiálu v markdown formátu..."
+            <Label htmlFor="content">Obsah</Label>
+            <RichTextEditor
+              content={content}
+              onChange={setContent}
+              placeholder="Začněte psát obsah materiálu... Můžete kopírovat z Wordu nebo Google Docs."
             />
+            {/* Hidden input for form submission */}
+            <input type="hidden" name="content" value={content} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { sanitizeInput } from "@/lib/sanitize"
+import { sanitizeInput, sanitizeHTML } from "@/lib/sanitize"
 
 /**
  * UUID validation helper for Zod
@@ -201,9 +201,9 @@ export const createLessonMaterialSchema = z.object({
     .transform((val) => val ? sanitizeString(val) : undefined),
   content: z
     .string()
-    .max(10000, "Obsah může mít maximálně 10000 znaků")
+    .max(50000, "Obsah může mít maximálně 50000 znaků")
     .optional()
-    .transform((val) => val ? sanitizeString(val) : undefined),
+    .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
   specification: lessonSpecificationSchema.optional(),
   duration: z
     .union([z.literal(30), z.literal(45), z.literal(90)])
@@ -227,9 +227,9 @@ export const updateLessonMaterialSchema = z.object({
     .transform((val) => val ? sanitizeString(val) : undefined),
   content: z
     .string()
-    .max(10000, "Obsah může mít maximálně 10000 znaků")
+    .max(50000, "Obsah může mít maximálně 50000 znaků")
     .optional()
-    .transform((val) => val ? sanitizeString(val) : undefined),
+    .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
   specification: lessonSpecificationSchema.optional(),
   duration: z
     .union([z.literal(30), z.literal(45), z.literal(90)])

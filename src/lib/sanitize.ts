@@ -1,3 +1,5 @@
+import DOMPurify from 'isomorphic-dompurify'
+
 /**
  * Basic input sanitization to prevent XSS attacks
  * Removes potentially dangerous characters and HTML tags
@@ -29,6 +31,33 @@ export function sanitizeInput(input: string): string {
   sanitized = sanitized.trim()
   
   return sanitized
+}
+
+/**
+ * Sanitize HTML content to prevent XSS attacks while preserving safe formatting
+ * Allows safe HTML tags for rich text content (paragraphs, headings, lists, formatting, links, images)
+ * @param html - HTML string to sanitize
+ * @returns Sanitized HTML string
+ */
+export function sanitizeHTML(html: string): string {
+  if (!html) return html
+
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'code', 'pre',
+    ],
+    ALLOWED_ATTR: [
+      'href', 'target', 'rel', 'src', 'alt', 'title', 'class',
+    ],
+    ALLOW_DATA_ATTR: false,
+    // Ensure links open safely
+    ADD_ATTR: ['target'],
+    // Add rel="noopener noreferrer" to external links
+    ADD_TAGS: [],
+    // Remove all style attributes
+    FORBID_ATTR: ['style', 'onerror', 'onload'],
+  })
 }
 
 /**

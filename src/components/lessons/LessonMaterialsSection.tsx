@@ -4,6 +4,7 @@ import * as React from "react"
 import { LessonMaterial, LessonSpecification, LessonDuration } from "@/types/lesson.types"
 import { Button } from "@/components/ui/Button"
 import { Eye, Download, Edit } from "lucide-react"
+import { LessonMaterialViewModal } from "./LessonMaterialViewModal"
 
 interface LessonMaterialsSectionProps {
   materials: LessonMaterial[]
@@ -24,6 +25,8 @@ const durationLabels: Record<LessonDuration, string> = {
 export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProps) {
   const [selectedSpecification, setSelectedSpecification] = React.useState<LessonSpecification | null>(null)
   const [selectedDuration, setSelectedDuration] = React.useState<LessonDuration | null>(null)
+  const [viewModalOpen, setViewModalOpen] = React.useState(false)
+  const [selectedMaterial, setSelectedMaterial] = React.useState<LessonMaterial | null>(null)
 
   // Filter materials based on selected specification and duration
   const filteredMaterials = React.useMemo(() => {
@@ -143,7 +146,14 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
               )}
 
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setSelectedMaterial(materials[0])
+                    setViewModalOpen(true)
+                  }}
+                >
                   <Eye />
                   Zobrazit
                 </Button>
@@ -159,6 +169,16 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
             </div>
           ))}
         </div>
+      )}
+
+      {/* View Modal */}
+      {selectedMaterial && (
+        <LessonMaterialViewModal
+          open={viewModalOpen}
+          onOpenChange={setViewModalOpen}
+          title={selectedMaterial.title}
+          content={selectedMaterial.content}
+        />
       )}
     </div>
   )
