@@ -70,6 +70,7 @@ export async function completeRegistration(data: CompleteRegistrationData): Prom
         user_type: data.userType,
         school_name: data.userType === 'teacher' ? sanitizedSchoolName : null,
         category: data.userType === 'not-teacher' ? data.category : null,
+        terms_accepted: data.termsAccepted,
         email_consent: data.emailConsent,
         registration_completed: true,
       }, {
@@ -118,6 +119,7 @@ export async function getUserProfile() {
       userType: profile.user_type,
       schoolName: profile.school_name,
       category: profile.category,
+      termsAccepted: profile.terms_accepted,
       emailConsent: profile.email_consent,
       registrationCompleted: profile.registration_completed,
     }

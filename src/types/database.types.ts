@@ -221,6 +221,7 @@ export type Database = {
           is_admin: boolean
           registration_completed: boolean | null
           school_name: string | null
+          terms_accepted: boolean
           updated_at: string | null
           user_type: string
         }
@@ -234,6 +235,7 @@ export type Database = {
           is_admin?: boolean
           registration_completed?: boolean | null
           school_name?: string | null
+          terms_accepted?: boolean
           updated_at?: string | null
           user_type: string
         }
@@ -247,6 +249,7 @@ export type Database = {
           is_admin?: boolean
           registration_completed?: boolean | null
           school_name?: string | null
+          terms_accepted?: boolean
           updated_at?: string | null
           user_type?: string
         }
