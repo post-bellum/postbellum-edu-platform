@@ -4,7 +4,6 @@ import * as React from "react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Label } from "@/components/ui/Label"
-import { Checkbox } from "@/components/ui/Checkbox"
 import { OAuthButtons } from "./OAuthButtons"
 import { signUpWithEmail, getErrorMessage } from "@/lib/supabase/email-auth"
 import { validatePassword, passwordsMatch } from "@/lib/validation"
@@ -19,7 +18,6 @@ export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [confirmPassword, setConfirmPassword] = React.useState("")
-  const [termsAccepted, setTermsAccepted] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [passwordErrors, setPasswordErrors] = React.useState<string[]>([])
@@ -159,25 +157,10 @@ export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps
           </div>
         )}
 
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="terms"
-            checked={termsAccepted}
-            onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-            disabled={isLoading}
-          />
-          <label
-            htmlFor="terms"
-            className="text-sm font-medium leading-none cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Souhlasím s podmínkami používání
-          </label>
-        </div>
-
         <Button 
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
-          disabled={isLoading || !termsAccepted}
+          disabled={isLoading}
         >
           {isLoading ? "Registrace..." : "Zaregistrovat se"}
         </Button>

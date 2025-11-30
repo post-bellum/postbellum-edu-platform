@@ -39,6 +39,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
   const [displayName, setDisplayName] = React.useState("")
   const [schoolName, setSchoolName] = React.useState("")
   const [category, setCategory] = React.useState<string>("")
+  const [termsAccepted, setTermsAccepted] = React.useState(false)
   const [emailConsent, setEmailConsent] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -75,11 +76,16 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
         throw new Error("Kategorie je povinná")
       }
 
+      if (!termsAccepted) {
+        throw new Error("Musíte souhlasit s podmínkami používání")
+      }
+
       await completeRegistration({
         displayName: displayName.trim() || undefined,
         userType,
         schoolName: userType === "teacher" ? schoolName.trim() : undefined,
         category: userType === "not-teacher" ? category as "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" : undefined,
+        termsAccepted,
         emailConsent,
       })
       
@@ -184,20 +190,38 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
           )}
         </div>
 
-        <div className="flex items-start space-x-2 pt-2">
-          <Checkbox
-            id="email-consent"
-            checked={emailConsent}
-            onCheckedChange={(checked) => setEmailConsent(checked as boolean)}
-            disabled={isLoading}
-            className="mt-0.5"
-          />
-          <label
-            htmlFor="email-consent"
-            className="text-sm leading-relaxed cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Souhlasím se zasíláním informačních e-mailů.
-          </label>
+        <div className="space-y-2 pt-2">
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="terms"
+              checked={termsAccepted}
+              onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+              disabled={isLoading}
+              className="mt-0.5"
+            />
+            <label
+              htmlFor="terms"
+              className="text-sm leading-relaxed cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Souhlasím s podmínkami používání <span className="text-red-500">*</span>
+            </label>
+          </div>
+
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="email-consent"
+              checked={emailConsent}
+              onCheckedChange={(checked) => setEmailConsent(checked as boolean)}
+              disabled={isLoading}
+              className="mt-0.5"
+            />
+            <label
+              htmlFor="email-consent"
+              className="text-sm leading-relaxed cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Souhlasím se zasíláním informačních e-mailů.
+            </label>
+          </div>
         </div>
 
         {error && (
@@ -209,7 +233,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
         <Button 
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
-          disabled={isLoading || (userType === "teacher" ? !schoolName.trim() : !category)}
+          disabled={isLoading || !termsAccepted || (userType === "teacher" ? !schoolName.trim() : !category)}
         >
           {isLoading ? "Dokončování..." : "Dokončit"}
         </Button>
