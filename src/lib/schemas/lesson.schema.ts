@@ -150,7 +150,7 @@ export const updateLessonSchema = z.object({
 
 /**
  * Helper to parse FormData into object for lesson schemas
- * Converts empty strings to null/undefined for proper Zod validation
+ * Converts empty strings to undefined for optional fields, empty string for required fields
  */
 export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
   const publishedValue = formData.get('published')
@@ -159,21 +159,28 @@ export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
   const rvpConnection = formData.get('rvp_connection') as string | null
   const tagIds = formData.get('tag_ids') as string | null
   
-  // Helper to convert empty strings to null for optional fields
-  const getValue = (key: string) => {
+  // Helper to convert empty strings to undefined for optional fields
+  // Zod's .optional() expects undefined, not null
+  // For required fields, return empty string so Zod can validate with .min(1)
+  const getOptionalValue = (key: string) => {
     const value = formData.get(key) as string | null
-    return value && value.trim() ? value : null
+    return value && value.trim() ? value : undefined
+  }
+  
+  const getRequiredValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    return value ?? ''
   }
   
   return {
-    title: getValue('title'),
-    vimeo_video_url: getValue('vimeo_video_url'),
-    description: getValue('description'),
-    duration: getValue('duration'),
-    period: getValue('period'),
-    target_group: getValue('target_group'),
-    lesson_type: getValue('lesson_type'),
-    publication_date: getValue('publication_date'),
+    title: getRequiredValue('title'),
+    vimeo_video_url: getOptionalValue('vimeo_video_url'),
+    description: getOptionalValue('description'),
+    duration: getOptionalValue('duration'),
+    period: getOptionalValue('period'),
+    target_group: getOptionalValue('target_group'),
+    lesson_type: getOptionalValue('lesson_type'),
+    publication_date: getOptionalValue('publication_date'),
     published: isUpdate && publishedValue === null ? undefined : published,
     rvp_connection: rvpConnection && rvpConnection.trim()
       ? rvpConnection.split(',').map(s => s.trim()).filter(Boolean)
@@ -274,43 +281,55 @@ export const updateAdditionalActivitySchema = z.object({
 
 /**
  * Helper to parse FormData into object for lesson material schemas
- * Converts empty strings to null/undefined for proper Zod validation
+ * Converts empty strings to undefined for proper Zod validation
  */
 export function parseFormDataForLessonMaterial(formData: FormData) {
   const duration = formData.get('duration') as string | null
   
-  // Helper to convert empty strings to null for optional fields
-  const getValue = (key: string) => {
+  // Helper to convert empty strings to undefined for optional fields
+  // Zod's .optional() expects undefined, not null
+  const getOptionalValue = (key: string) => {
     const value = formData.get(key) as string | null
-    return value && value.trim() ? value : null
+    return value && value.trim() ? value : undefined
+  }
+  
+  const getRequiredValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    return value ?? ''
   }
   
   return {
-    lesson_id: getValue('lesson_id'),
-    title: getValue('title'),
-    description: getValue('description'),
-    content: getValue('content'),
-    specification: getValue('specification'),
+    lesson_id: getRequiredValue('lesson_id'),
+    title: getRequiredValue('title'),
+    description: getOptionalValue('description'),
+    content: getOptionalValue('content'),
+    specification: getOptionalValue('specification'),
     duration: duration && duration.trim() ? parseInt(duration) : undefined,
   }
 }
 
 /**
  * Helper to parse FormData into object for additional activity schemas
- * Converts empty strings to null/undefined for proper Zod validation
+ * Converts empty strings to undefined for proper Zod validation
  */
 export function parseFormDataForAdditionalActivity(formData: FormData) {
-  // Helper to convert empty strings to null for optional fields
-  const getValue = (key: string) => {
+  // Helper to convert empty strings to undefined for optional fields
+  // Zod's .optional() expects undefined, not null
+  const getOptionalValue = (key: string) => {
     const value = formData.get(key) as string | null
-    return value && value.trim() ? value : null
+    return value && value.trim() ? value : undefined
+  }
+  
+  const getRequiredValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    return value ?? ''
   }
   
   return {
-    lesson_id: getValue('lesson_id'),
-    title: getValue('title'),
-    description: getValue('description'),
-    image_url: getValue('image_url'),
+    lesson_id: getRequiredValue('lesson_id'),
+    title: getRequiredValue('title'),
+    description: getOptionalValue('description'),
+    image_url: getOptionalValue('image_url'),
   }
 }
 

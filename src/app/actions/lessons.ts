@@ -108,6 +108,15 @@ export async function deleteLessonAction(lessonId: string) {
     revalidatePath('/lessons')
     redirect('/lessons')
   } catch (error) {
+    // Next.js redirect() throws a special error that should be re-thrown
+    // Check if it's a redirect error by checking the digest property
+    if (error && typeof error === 'object' && 'digest' in error) {
+      const digest = String(error.digest)
+      if (digest.startsWith('NEXT_REDIRECT')) {
+        throw error // Re-throw redirect errors so Next.js can handle them
+      }
+    }
+    
     logger.error('Error deleting lesson', error)
     return {
       success: false,
