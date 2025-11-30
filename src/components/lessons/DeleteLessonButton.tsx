@@ -30,8 +30,9 @@ export function DeleteLessonButton({ lessonId, lessonTitle }: DeleteLessonButton
     try {
       await deleteLessonAction(lessonId)
       setOpen(false)
-      router.push("/lessons")
-      router.refresh()
+      React.startTransition(() => {
+        router.push("/lessons")
+      })
     } catch (error) {
       console.error("Error deleting lesson:", error)
       setIsDeleting(false)

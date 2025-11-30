@@ -61,10 +61,13 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
 
   React.useEffect(() => {
     if (state?.success && state.data) {
-      router.push(`/lessons/${state.data.id}`)
-      router.refresh()
+      // Redirect to edit page for newly created lessons (which are unpublished by default)
+      // This ensures admins can view/edit their newly created lessons
+      React.startTransition(() => {
+        router.push(`/lessons/${state.data.id}/edit`)
+      })
     }
-  }, [state, router])
+  }, [state])
 
   return (
     <form action={formAction} className="space-y-6">

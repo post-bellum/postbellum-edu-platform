@@ -1,9 +1,18 @@
 import Link from 'next/link'
 import { getLessons } from '@/lib/supabase/lessons'
 import { AdminControls } from '@/components/lessons/AdminControls'
+import { isAdmin } from '@/lib/supabase/admin-helpers'
 
 export async function LessonsList() {
-  const lessons = await getLessons({ published_only: true, usePublicClient: true })
+  // Check if user is admin to show unpublished lessons
+  const admin = await isAdmin()
+  
+  // If admin, fetch all lessons (including unpublished) using authenticated client
+  // Otherwise, fetch only published lessons using public client
+  const lessons = await getLessons({ 
+    published_only: !admin, 
+    usePublicClient: !admin 
+  })
 
   return (
     <>
@@ -25,11 +34,22 @@ export async function LessonsList() {
           {lessons.map((lesson) => (
             <div
               key={lesson.id}
-              className="p-6 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all"
+              className={`p-6 border rounded-lg hover:border-primary hover:shadow-md transition-all ${
+                !lesson.published 
+                  ? 'border-orange-300 bg-orange-50' 
+                  : 'border-gray-200'
+              }`}
             >
               <div className="flex items-start justify-between">
                 <Link href={`/lessons/${lesson.id}`} className="flex-1">
-                  <h2 className="text-xl font-semibold mb-2">{lesson.title}</h2>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h2 className="text-xl font-semibold">{lesson.title}</h2>
+                    {!lesson.published && (
+                      <span className="px-2 py-1 text-xs font-medium bg-orange-200 text-orange-800 rounded">
+                        Nepublikováno
+                      </span>
+                    )}
+                  </div>
                   {lesson.description && (
                     <p className="text-gray-600 mb-2 line-clamp-2">{lesson.description}</p>
                   )}

@@ -16,7 +16,8 @@ interface LessonDetailContentProps {
 }
 
 export async function LessonDetailContent({ id, usePublicClient = false }: LessonDetailContentProps) {
-  // Only check admin if not using public client (for private routes)
+  // Check admin status - admins can see unpublished lessons
+  // Note: usePublicClient is now controlled by the page component based on admin status
   const admin = usePublicClient ? false : await isAdmin()
   
   const [lesson, isFavorited] = await Promise.all([
@@ -45,7 +46,14 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
           </Button>
         </Link>
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-bold">{lesson.title}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-4xl font-bold">{lesson.title}</h1>
+            {!lesson.published && (
+              <span className="px-3 py-1 text-sm font-medium bg-orange-200 text-orange-800 rounded">
+                Nepublikováno
+              </span>
+            )}
+          </div>
           {usePublicClient ? (
             <AdminControls lessonId={id} lessonTitle={lesson.title} showEditButton={true} />
           ) : admin ? (
