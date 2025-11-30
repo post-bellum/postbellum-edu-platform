@@ -1,4 +1,4 @@
-import DOMPurify from 'isomorphic-dompurify'
+import sanitizeHtml from 'sanitize-html'
 
 /**
  * Basic input sanitization to prevent XSS attacks
@@ -42,21 +42,32 @@ export function sanitizeInput(input: string): string {
 export function sanitizeHTML(html: string): string {
   if (!html) return html
 
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
+  return sanitizeHtml(html, {
+    allowedTags: [
       'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
       'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'code', 'pre',
     ],
-    ALLOWED_ATTR: [
-      'href', 'target', 'rel', 'src', 'alt', 'title', 'class',
-    ],
-    ALLOW_DATA_ATTR: false,
-    // Ensure links open safely
-    ADD_ATTR: ['target'],
-    // Add rel="noopener noreferrer" to external links
-    ADD_TAGS: [],
-    // Remove all style attributes
-    FORBID_ATTR: ['style', 'onerror', 'onload'],
+    allowedAttributes: {
+      'a': ['href', 'target', 'rel', 'title', 'class'],
+      'img': ['src', 'alt', 'title', 'class'],
+      '*': ['class'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto'],
+    // Transform tags to add security attributes
+    transformTags: {
+      'a': (tagName, attribs) => {
+        return {
+          tagName,
+          attribs: {
+            ...attribs,
+            target: '_blank',
+            rel: 'noopener noreferrer',
+          },
+        }
+      },
+    },
+    // Remove style attributes
+    disallowedTagsMode: 'discard',
   })
 }
 
@@ -80,4 +91,3 @@ export function sanitizeInputs<T extends Record<string, string | undefined | nul
   
   return sanitized
 }
-
