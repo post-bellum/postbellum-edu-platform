@@ -25,8 +25,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
   const [lesson, isFavorited, user] = await Promise.all([
     getLessonById(id, usePublicClient),
     // isLessonFavorited handles non-authenticated users gracefully (returns false)
-    // Skip favorite check for public client (static pages)
-    usePublicClient ? Promise.resolve(false) : isLessonFavorited(id).catch(() => false),
+    isLessonFavorited(id).catch(() => false),
     // Check if user is logged in - always check regardless of usePublicClient
     getUser().catch(() => null)
   ])
