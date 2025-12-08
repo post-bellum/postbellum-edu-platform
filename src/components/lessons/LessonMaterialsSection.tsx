@@ -1,10 +1,13 @@
 "use client"
 
 import * as React from "react"
+import { useRouter, usePathname } from "next/navigation"
 import { LessonMaterial, LessonSpecification, LessonDuration } from "@/types/lesson.types"
 import { Button } from "@/components/ui/Button"
 import { Eye, Download, Edit } from "lucide-react"
 import { LessonMaterialViewModal } from "./LessonMaterialViewModal"
+import { AuthModal } from "@/components/auth"
+import { useAuth } from "@/lib/supabase/hooks/useAuth"
 
 interface LessonMaterialsSectionProps {
   materials: LessonMaterial[]
@@ -23,10 +26,30 @@ const durationLabels: Record<LessonDuration, string> = {
 }
 
 export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const { isLoggedIn } = useAuth()
+  
   const [selectedSpecification, setSelectedSpecification] = React.useState<LessonSpecification>('1st_grade_elementary')
   const [selectedDuration, setSelectedDuration] = React.useState<LessonDuration>(30)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [selectedMaterial, setSelectedMaterial] = React.useState<LessonMaterial | null>(null)
+  const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false)
+
+  const handleAuthModalClose = (open: boolean) => {
+    setIsAuthModalOpen(open)
+    if (!open) {
+      router.refresh()
+    }
+  }
+
+  const requireAuth = (action: () => void) => {
+    if (isLoggedIn) {
+      action()
+    } else {
+      setIsAuthModalOpen(true)
+    }
+  }
 
   // Filter materials based on selected specification and duration
   const filteredMaterials = React.useMemo(() => {
@@ -129,19 +152,31 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => {
+                  onClick={() => requireAuth(() => {
                     setSelectedMaterial(materials[0])
                     setViewModalOpen(true)
-                  }}
+                  })}
                 >
                   <Eye />
                   Zobrazit
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => requireAuth(() => {
+                    // TODO: Implement download functionality
+                  })}
+                >
                   <Download />
                   Stáhnout PDF
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => requireAuth(() => {
+                    // TODO: Implement edit functionality
+                  })}
+                >
                   <Edit />
                   Upravit
                 </Button>
@@ -160,6 +195,14 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
           content={selectedMaterial.content}
         />
       )}
+
+      {/* Auth Modal for non-logged users */}
+      <AuthModal 
+        open={isAuthModalOpen} 
+        onOpenChange={handleAuthModalClose}
+        defaultStep="login"
+        returnTo={pathname}
+      />
     </div>
   )
 }
