@@ -23,18 +23,18 @@ const durationLabels: Record<LessonDuration, string> = {
 }
 
 export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProps) {
-  const [selectedSpecification, setSelectedSpecification] = React.useState<LessonSpecification | null>(null)
-  const [selectedDuration, setSelectedDuration] = React.useState<LessonDuration | null>(null)
+  const [selectedSpecification, setSelectedSpecification] = React.useState<LessonSpecification>('1st_grade_elementary')
+  const [selectedDuration, setSelectedDuration] = React.useState<LessonDuration>(30)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [selectedMaterial, setSelectedMaterial] = React.useState<LessonMaterial | null>(null)
 
   // Filter materials based on selected specification and duration
   const filteredMaterials = React.useMemo(() => {
     return materials.filter((material) => {
-      if (selectedSpecification && material.specification !== selectedSpecification) {
+      if (material.specification !== selectedSpecification) {
         return false
       }
-      if (selectedDuration && material.duration !== selectedDuration) {
+      if (material.duration !== selectedDuration) {
         return false
       }
       return true
@@ -59,18 +59,8 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
       <h2 className="text-2xl font-semibold">Materiály k lekci</h2>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-4 items-center">
+      <div className="flex flex-wrap justify-between items-center">
         <div className="flex gap-2">
-          <button
-            onClick={() => setSelectedSpecification(null)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              selectedSpecification === null
-                ? 'bg-primary text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Vše
-          </button>
           {Object.entries(specificationLabels).map(([value, label]) => (
             <button
               key={value}
@@ -87,16 +77,6 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
         </div>
 
         <div className="flex gap-2">
-          <button
-            onClick={() => setSelectedDuration(null)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              selectedDuration === null
-                ? 'bg-primary text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Vše
-          </button>
           {Object.entries(durationLabels).map(([value, label]) => (
             <button
               key={value}
