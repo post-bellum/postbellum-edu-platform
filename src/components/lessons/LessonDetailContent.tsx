@@ -3,12 +3,14 @@ import Link from 'next/link'
 import { getLessonById } from '@/lib/supabase/lessons'
 import { isAdmin } from '@/lib/supabase/admin-helpers'
 import { isLessonFavorited } from '@/lib/supabase/favorites'
+import { getUser } from '@/lib/supabase/auth-helpers'
 import { Button } from '@/components/ui/Button'
 import { ArrowLeft } from 'lucide-react'
 import { LessonMaterialsSection } from '@/components/lessons/LessonMaterialsSection'
 import { AdditionalActivitiesSection } from '@/components/lessons/AdditionalActivitiesSection'
 import { AdminControls } from '@/components/lessons/AdminControls'
 import { FavoriteButton } from '@/components/lessons/FavoriteButton'
+import { FavoriteCTA } from '@/components/lessons/FavoriteCTA'
 
 interface LessonDetailContentProps {
   id: string
@@ -20,11 +22,13 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
   // Note: usePublicClient is now controlled by the page component based on admin status
   const admin = usePublicClient ? false : await isAdmin()
   
-  const [lesson, isFavorited] = await Promise.all([
+  const [lesson, isFavorited, user] = await Promise.all([
     getLessonById(id, usePublicClient),
     // isLessonFavorited handles non-authenticated users gracefully (returns false)
     // Skip favorite check for public client (static pages)
-    usePublicClient ? Promise.resolve(false) : isLessonFavorited(id).catch(() => false)
+    usePublicClient ? Promise.resolve(false) : isLessonFavorited(id).catch(() => false),
+    // Check if user is logged in - always check regardless of usePublicClient
+    getUser().catch(() => null)
   ])
 
   // RLS policies ensure that:
@@ -172,10 +176,14 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
               </div>
             )}
 
-            {/* Favorite Button */}
-            <div className="pt-4 border-t">
-              <FavoriteButton lessonId={id} initialIsFavorited={isFavorited} />
-            </div>
+            {/* Favorite Button or CTA */}
+            {user ? (
+              <div className="pt-4 border-t">
+                <FavoriteButton lessonId={id} initialIsFavorited={isFavorited} />
+              </div>
+            ) : (
+              <FavoriteCTA />
+            )}
           </div>
         </div>
       </div>
