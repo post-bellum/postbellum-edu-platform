@@ -40,6 +40,7 @@ export function LessonMaterialsManager({
   const [materials, setMaterials] = React.useState<LessonMaterial[]>(initialMaterials)
   const [isFormOpen, setIsFormOpen] = React.useState(false)
   const [editingMaterial, setEditingMaterial] = React.useState<LessonMaterial | undefined>()
+  const [formKey, setFormKey] = React.useState(0)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [materialToDelete, setMaterialToDelete] = React.useState<LessonMaterial | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -72,11 +73,13 @@ export function LessonMaterialsManager({
 
   const handleAdd = () => {
     setEditingMaterial(undefined)
+    setFormKey(k => k + 1)
     setIsFormOpen(true)
   }
 
   const handleEdit = (material: LessonMaterial) => {
     setEditingMaterial(material)
+    setFormKey(k => k + 1)
     setIsFormOpen(true)
   }
 
@@ -101,9 +104,9 @@ export function LessonMaterialsManager({
     }
   }
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = React.useCallback(() => {
     loadMaterials()
-  }
+  }, [loadMaterials])
 
   return (
     <div className="space-y-4">
@@ -169,6 +172,7 @@ export function LessonMaterialsManager({
       )}
 
       <LessonMaterialForm
+        key={formKey}
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         lessonId={lessonId}
