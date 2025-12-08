@@ -12,9 +12,10 @@ import { logger } from "@/lib/logger"
 interface RegisterModalProps {
   onSwitchToLogin: () => void
   onSuccess: (email: string) => void
+  returnTo?: string
 }
 
-export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps) {
+export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: RegisterModalProps) {
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [confirmPassword, setConfirmPassword] = React.useState("")
@@ -83,7 +84,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps
         Začněte tím, že vyplníte své údaje. Váš účet vám umožní upravovat materiály, ukládat vlastní lekce a hodnotit obsah.
       </p>
 
-      <OAuthButtons />
+      <OAuthButtons returnTo={returnTo} />
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">

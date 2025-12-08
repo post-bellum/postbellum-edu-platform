@@ -10,15 +10,25 @@ const PROVIDER_MAP: Record<OAuthProvider, Provider> = {
   microsoft: "azure",
 } as const
 
-export async function handleOAuthLogin(provider: OAuthProvider) {
+interface OAuthOptions {
+  returnTo?: string
+}
+
+export async function handleOAuthLogin(provider: OAuthProvider, options?: OAuthOptions) {
   try {
     const supabase = createClient()
     const supabaseProvider = PROVIDER_MAP[provider]
     
+    // Build callback URL with optional returnTo parameter
+    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    if (options?.returnTo) {
+      callbackUrl.searchParams.set('returnTo', options.returnTo)
+    }
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: supabaseProvider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
         skipBrowserRedirect: false,
         // Azure-specific scopes
         scopes: provider === 'microsoft' ? 'email profile openid' : undefined,

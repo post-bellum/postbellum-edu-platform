@@ -17,9 +17,10 @@ interface AuthModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   defaultStep?: AuthStep
+  returnTo?: string
 }
 
-export function AuthModal({ open, onOpenChange, defaultStep = "login" }: AuthModalProps) {
+export function AuthModal({ open, onOpenChange, defaultStep = "login", returnTo }: AuthModalProps) {
   const [step, setStep] = React.useState<AuthStep>(defaultStep)
   const [email, setEmail] = React.useState("")
 
@@ -63,6 +64,7 @@ export function AuthModal({ open, onOpenChange, defaultStep = "login" }: AuthMod
             onSwitchToRegister={() => setStep("register")}
             onSuccess={handleLoginSuccess}
             onForgotPassword={() => setStep("forgot-password")}
+            returnTo={returnTo}
           />
         )}
 
@@ -70,6 +72,7 @@ export function AuthModal({ open, onOpenChange, defaultStep = "login" }: AuthMod
           <RegisterModal
             onSwitchToLogin={() => setStep("login")}
             onSuccess={handleRegisterSuccess}
+            returnTo={returnTo}
           />
         )}
 

@@ -1,13 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { AuthModal } from "@/components/auth"
 import { Lock } from "lucide-react"
 
 export function FavoriteCTA() {
   const router = useRouter()
+  const pathname = usePathname()
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false)
 
   const handleModalClose = (open: boolean) => {
@@ -47,6 +48,7 @@ export function FavoriteCTA() {
         open={isAuthModalOpen} 
         onOpenChange={handleModalClose}
         defaultStep="register"
+        returnTo={pathname}
       />
     </>
   )

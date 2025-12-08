@@ -6,7 +6,11 @@ import { GoogleIcon, MicrosoftIcon } from "@/components/ui/Icons"
 import { handleOAuthLogin } from "@/lib/oauth-helpers"
 import { logger } from "@/lib/logger"
 
-export function OAuthButtons() {
+interface OAuthButtonsProps {
+  returnTo?: string
+}
+
+export function OAuthButtons({ returnTo }: OAuthButtonsProps) {
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -14,7 +18,7 @@ export function OAuthButtons() {
     setIsLoading(true)
     setError(null)
     try {
-      await handleOAuthLogin(provider)
+      await handleOAuthLogin(provider, { returnTo })
     } catch (error) {
       logger.error(`OAuth login failed (${provider})`, error)
       setError("Přihlášení se nezdařilo. Zkuste to prosím znovu.")

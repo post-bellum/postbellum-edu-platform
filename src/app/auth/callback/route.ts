@@ -7,7 +7,14 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get("code")
   const error = requestUrl.searchParams.get("error")
   const errorDescription = requestUrl.searchParams.get("error_description")
+  const returnTo = requestUrl.searchParams.get("returnTo")
   const origin = requestUrl.origin
+
+  // Validate returnTo to prevent open redirect attacks
+  // Only allow relative paths starting with /
+  const safeReturnTo = returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') 
+    ? returnTo 
+    : '/'
 
   // Check for OAuth provider errors
   if (error) {
@@ -24,12 +31,12 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/?error=auth_failed&message=${encodeURIComponent(exchangeError.message)}`)
     }
 
-    logger.info("OAuth authentication successful")
+    logger.info("OAuth authentication successful", { returnTo: safeReturnTo })
   }
 
-  // Redirect to home page
-  // The home page will automatically check if the user needs to complete registration
-  return NextResponse.redirect(`${origin}/`)
+  // Redirect to the original page or home page
+  // The destination page will automatically check if the user needs to complete registration
+  return NextResponse.redirect(`${origin}${safeReturnTo}`)
 }
 
 

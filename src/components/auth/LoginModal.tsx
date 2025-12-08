@@ -12,9 +12,10 @@ interface LoginModalProps {
   onSwitchToRegister: () => void
   onSuccess?: () => void
   onForgotPassword?: () => void
+  returnTo?: string
 }
 
-export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword }: LoginModalProps) {
+export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, returnTo }: LoginModalProps) {
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(false)
@@ -52,7 +53,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword }: 
     <div className="flex flex-col">
       <h2 className="text-3xl font-bold text-center mb-6 text-text">Přihlásit</h2>
 
-      <OAuthButtons />
+      <OAuthButtons returnTo={returnTo} />
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
