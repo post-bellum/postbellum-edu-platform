@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getLessonById } from '@/lib/supabase/lessons'
-import { isAdmin } from '@/lib/supabase/admin-helpers'
 import { isLessonFavorited } from '@/lib/supabase/favorites'
 import { getUser } from '@/lib/supabase/auth-helpers'
 import { Button } from '@/components/ui/Button'
@@ -18,10 +17,6 @@ interface LessonDetailContentProps {
 }
 
 export async function LessonDetailContent({ id, usePublicClient = false }: LessonDetailContentProps) {
-  // Check admin status - admins can see unpublished lessons
-  // Note: usePublicClient is now controlled by the page component based on admin status
-  const admin = usePublicClient ? false : await isAdmin()
-  
   const [lesson, isFavorited, user] = await Promise.all([
     getLessonById(id, usePublicClient),
     // isLessonFavorited handles non-authenticated users gracefully (returns false)
@@ -57,11 +52,8 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
               </span>
             )}
           </div>
-          {usePublicClient ? (
-            <AdminControls lessonId={id} lessonTitle={lesson.title} showEditButton={true} />
-          ) : admin ? (
-            <AdminControls lessonId={id} lessonTitle={lesson.title} showEditButton={true} />
-          ) : null}
+          {/* AdminControls handles its own visibility via client-side admin check */}
+          <AdminControls lessonId={id} lessonTitle={lesson.title} showEditButton={true} />
         </div>
       </div>
 

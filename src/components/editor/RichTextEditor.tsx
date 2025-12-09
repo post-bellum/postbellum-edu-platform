@@ -24,6 +24,7 @@ import {
   Image as ImageIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 
 interface RichTextEditorProps {
   content: string
@@ -109,7 +110,7 @@ export function RichTextEditor({
                   }
                 })
                 .catch((error) => {
-                  console.error('Error uploading image:', error)
+                  logger.error('Error uploading image', error)
                 })
               
               return true
@@ -150,7 +151,7 @@ export function RichTextEditor({
                   return null
                 })
                 .catch((error) => {
-                  console.error('Error processing image from HTML:', error)
+                  logger.error('Error processing image from HTML', error)
                   return null
                 })
             })

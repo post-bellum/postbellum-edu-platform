@@ -163,9 +163,8 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => requireAuth(() => {
-                    // TODO: Implement download functionality
-                  })}
+                  disabled
+                  title="Připravujeme"
                 >
                   <Download />
                   Stáhnout PDF
@@ -173,9 +172,8 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => requireAuth(() => {
-                    // TODO: Implement edit functionality
-                  })}
+                  disabled
+                  title="Připravujeme"
                 >
                   <Edit />
                   Upravit
