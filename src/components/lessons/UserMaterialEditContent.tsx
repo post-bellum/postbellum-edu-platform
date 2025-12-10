@@ -251,7 +251,7 @@ export function UserMaterialEditContent({
       {/* Two Column Layout */}
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Main Editor - Left Side */}
-        <div className="flex-1 lg:flex-[2]">
+        <div className="flex-1 lg:flex-2 lg:w-0">
           <RichTextEditor
             content={content}
             onChange={handleContentChange}
@@ -261,7 +261,7 @@ export function UserMaterialEditContent({
         </div>
 
         {/* Sidebar - Right Side */}
-        <div className="flex-1 lg:flex-[1] lg:max-w-sm">
+        <div className="flex-1 lg:flex-1 lg:max-w-sm lg:sticky lg:top-20 lg:self-start">
           <MaterialEditSidebar lesson={lesson} />
         </div>
       </div>

@@ -62,9 +62,9 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="flex-1 lg:w-0 space-y-6">
           {/* Video */}
           {lesson.vimeo_video_url && (
             <LessonVideoEmbed videoUrl={lesson.vimeo_video_url} title={lesson.title} />
@@ -83,7 +83,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="lg:w-80 lg:shrink-0 lg:sticky lg:top-20 lg:self-start">
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <LessonDetailInfo lesson={lesson}>
               {/* Favorite Button or CTA */}
