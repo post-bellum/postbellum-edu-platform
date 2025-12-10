@@ -35,7 +35,6 @@ const imageUrlSchema = z
  * Lesson specification enum
  */
 export const lessonSpecificationSchema = z.enum([
-  '1st_grade_elementary',
   '2nd_grade_elementary',
   'high_school',
 ])
@@ -333,6 +332,63 @@ export function parseFormDataForAdditionalActivity(formData: FormData) {
   }
 }
 
+/**
+ * Create user lesson material schema (for user copies of lesson materials)
+ */
+export const createUserLessonMaterialSchema = z.object({
+  source_material_id: uuidSchema,
+  lesson_id: uuidSchema,
+  title: z
+    .string()
+    .min(1, 'Název materiálu je povinný')
+    .max(500, 'Název materiálu může mít maximálně 500 znaků')
+    .transform(sanitizeString),
+  content: z
+    .string()
+    .max(50000, 'Obsah může mít maximálně 50000 znaků')
+    .optional()
+    .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
+})
+
+/**
+ * Update user lesson material schema
+ */
+export const updateUserLessonMaterialSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Název materiálu je povinný')
+    .max(500, 'Název materiálu může mít maximálně 500 znaků')
+    .transform(sanitizeString)
+    .optional(),
+  content: z
+    .string()
+    .max(50000, 'Obsah může mít maximálně 50000 znaků')
+    .optional()
+    .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
+})
+
+/**
+ * Helper to parse FormData into object for user lesson material schemas
+ */
+export function parseFormDataForUserLessonMaterial(formData: FormData) {
+  const getOptionalValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    return value && value.trim() ? value : undefined
+  }
+  
+  const getRequiredValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    return value ?? ''
+  }
+  
+  return {
+    source_material_id: getRequiredValue('source_material_id'),
+    lesson_id: getRequiredValue('lesson_id'),
+    title: getRequiredValue('title'),
+    content: getOptionalValue('content'),
+  }
+}
+
 // Export types
 export type CreateLessonInput = z.infer<typeof createLessonSchema>
 export type UpdateLessonInput = z.infer<typeof updateLessonSchema>
@@ -340,4 +396,6 @@ export type CreateLessonMaterialInput = z.infer<typeof createLessonMaterialSchem
 export type UpdateLessonMaterialInput = z.infer<typeof updateLessonMaterialSchema>
 export type CreateAdditionalActivityInput = z.infer<typeof createAdditionalActivitySchema>
 export type UpdateAdditionalActivityInput = z.infer<typeof updateAdditionalActivitySchema>
+export type CreateUserLessonMaterialInput = z.infer<typeof createUserLessonMaterialSchema>
+export type UpdateUserLessonMaterialInput = z.infer<typeof updateUserLessonMaterialSchema>
 

@@ -2,10 +2,11 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getLessonById } from '@/lib/supabase/lessons'
 import { isLessonFavorited } from '@/lib/supabase/favorites'
+import { getUserLessonMaterials } from '@/lib/supabase/user-lesson-materials'
 import { getUser } from '@/lib/supabase/auth-helpers'
 import { Button } from '@/components/ui/Button'
 import { ArrowLeft } from 'lucide-react'
-import { LessonMaterialsSection } from '@/components/lessons/LessonMaterialsSection'
+import { LessonMaterialsWrapper } from '@/components/lessons/LessonMaterialsWrapper'
 import { AdditionalActivitiesSection } from '@/components/lessons/AdditionalActivitiesSection'
 import { AdminControls } from '@/components/lessons/AdminControls'
 import { FavoriteButton } from '@/components/lessons/FavoriteButton'
@@ -17,12 +18,14 @@ interface LessonDetailContentProps {
 }
 
 export async function LessonDetailContent({ id, usePublicClient = false }: LessonDetailContentProps) {
-  const [lesson, isFavorited, user] = await Promise.all([
+  const [lesson, isFavorited, user, userMaterials] = await Promise.all([
     getLessonById(id, usePublicClient),
     // isLessonFavorited handles non-authenticated users gracefully (returns false)
     isLessonFavorited(id).catch(() => false),
     // Check if user is logged in - always check regardless of usePublicClient
-    getUser().catch(() => null)
+    getUser().catch(() => null),
+    // Fetch user's custom lesson materials
+    getUserLessonMaterials(id).catch(() => [])
   ])
 
   // RLS policies ensure that:
@@ -80,8 +83,13 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
             </div>
           )}
 
-          {/* Lesson Materials */}
-          <LessonMaterialsSection materials={lesson.materials || []} />
+          {/* Lesson Materials with User Custom Materials */}
+          <LessonMaterialsWrapper
+            materials={lesson.materials || []}
+            initialUserMaterials={userMaterials}
+            lessonId={id}
+            isLoggedIn={!!user}
+          />
 
           {/* Additional Activities */}
           <AdditionalActivitiesSection activities={lesson.additional_activities || []} />

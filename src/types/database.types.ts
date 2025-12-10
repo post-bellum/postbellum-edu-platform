@@ -366,6 +366,61 @@ export type Database = {
           },
         ]
       }
+      user_lesson_materials: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string
+          lesson_id: string
+          source_material_id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id: string
+          source_material_id: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string
+          source_material_id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'user_lesson_materials_lesson_id_fkey'
+            columns: ['lesson_id']
+            isOneToOne: false
+            referencedRelation: 'lessons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'user_lesson_materials_source_material_id_fkey'
+            columns: ['source_material_id']
+            isOneToOne: false
+            referencedRelation: 'lesson_materials'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'user_lesson_materials_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
