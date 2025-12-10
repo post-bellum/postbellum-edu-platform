@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import * as React from 'react'
 import { FavoritesList } from '@/components/favorites/FavoritesList'
 
 // Private route - requires authentication
@@ -19,10 +19,9 @@ export default function FavoritesPage() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-4xl font-bold mb-8">Oblíbené lekce</h1>
-      <Suspense fallback={<FavoritesLoading />}>
+      <React.Suspense fallback={<FavoritesLoading />}>
         <FavoritesList />
-      </Suspense>
+      </React.Suspense>
     </div>
   )
 }
-

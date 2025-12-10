@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { deleteLessonAction } from "@/app/actions/lessons"
-import { Button } from "@/components/ui/Button"
+import * as React from 'react'
+import { useRouter } from 'next/navigation'
+import { deleteLessonAction } from '@/app/actions/lessons'
+import { Button } from '@/components/ui/Button'
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/Dialog"
-import { Trash2 } from "lucide-react"
+} from '@/components/ui/Dialog'
+import { Trash2 } from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 interface DeleteLessonButtonProps {
   lessonId: string
@@ -31,10 +32,10 @@ export function DeleteLessonButton({ lessonId, lessonTitle }: DeleteLessonButton
       await deleteLessonAction(lessonId)
       setOpen(false)
       React.startTransition(() => {
-        router.push("/lessons")
+        router.push('/lessons')
       })
     } catch (error) {
-      console.error("Error deleting lesson:", error)
+      logger.error('Error deleting lesson:', error)
       setIsDeleting(false)
     }
   }
@@ -67,11 +68,10 @@ export function DeleteLessonButton({ lessonId, lessonTitle }: DeleteLessonButton
             onClick={handleDelete}
             disabled={isDeleting}
           >
-            {isDeleting ? "Mazání..." : "Smazat"}
+            {isDeleting ? 'Mazání...' : 'Smazat'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
-

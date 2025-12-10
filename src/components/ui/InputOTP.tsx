@@ -1,15 +1,15 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from 'react'
+import { cn } from '@/lib/utils'
 
 export interface InputOTPProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   length?: number
   onChange?: (value: string) => void
 }
 
 const InputOTP = React.forwardRef<HTMLDivElement, InputOTPProps>(
   ({ length = 6, onChange, className, ...props }, ref) => {
-    const [otp, setOtp] = React.useState<string[]>(Array(length).fill(""))
+    const [otp, setOtp] = React.useState<string[]>(Array(length).fill(''))
     const inputRefs = React.useRef<(HTMLInputElement | null)[]>([])
 
     const handleChange = (index: number, value: string) => {
@@ -21,7 +21,7 @@ const InputOTP = React.forwardRef<HTMLDivElement, InputOTPProps>(
       setOtp(newOtp)
 
       // Call onChange with the complete value
-      onChange?.(newOtp.join(""))
+      onChange?.(newOtp.join(''))
 
       // Auto-focus next input
       if (value && index < length - 1) {
@@ -33,24 +33,24 @@ const InputOTP = React.forwardRef<HTMLDivElement, InputOTPProps>(
       index: number,
       e: React.KeyboardEvent<HTMLInputElement>
     ) => {
-      if (e.key === "Backspace" && !otp[index] && index > 0) {
+      if (e.key === 'Backspace' && !otp[index] && index > 0) {
         inputRefs.current[index - 1]?.focus()
       }
     }
 
     const handlePaste = (e: React.ClipboardEvent) => {
       e.preventDefault()
-      const pastedData = e.clipboardData.getData("text/plain").slice(0, length)
+      const pastedData = e.clipboardData.getData('text/plain').slice(0, length)
       const newOtp = [...otp]
 
-      pastedData.split("").forEach((char, index) => {
+      pastedData.split('').forEach((char, index) => {
         if (/^\d$/.test(char) && index < length) {
           newOtp[index] = char
         }
       })
 
       setOtp(newOtp)
-      onChange?.(newOtp.join(""))
+      onChange?.(newOtp.join(''))
 
       // Focus the next empty input or the last one
       const nextEmptyIndex = newOtp.findIndex((val) => !val)
@@ -59,7 +59,7 @@ const InputOTP = React.forwardRef<HTMLDivElement, InputOTPProps>(
     }
 
     return (
-      <div ref={ref} className={cn("flex gap-2", className)}>
+      <div ref={ref} className={cn('flex gap-2', className)}>
         {Array.from({ length }).map((_, index) => (
           <input
             key={index}
@@ -81,7 +81,7 @@ const InputOTP = React.forwardRef<HTMLDivElement, InputOTPProps>(
     )
   }
 )
-InputOTP.displayName = "InputOTP"
+InputOTP.displayName = 'InputOTP'
 
 export { InputOTP }
 

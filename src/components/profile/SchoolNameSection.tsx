@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { Autocomplete } from "@/components/ui/Autocomplete"
-import { SearchIcon } from "@/components/ui/Icons"
-import { searchSchools } from "@/lib/supabase/schools"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { Autocomplete } from '@/components/ui/Autocomplete'
+import { SearchIcon } from '@/components/ui/Icons'
+import { searchSchools } from '@/lib/supabase/schools'
 
 interface SchoolNameSectionProps {
   /** Current school name */
@@ -47,7 +47,7 @@ export function SchoolNameSection({
         disabled={isSaving || !schoolName.trim()}
         className="bg-primary text-white hover:bg-primary-hover"
       >
-        {isSaving ? "Ukládám..." : "Uložit"}
+        {isSaving ? 'Ukládám...' : 'Uložit'}
       </Button>
     </div>
   )

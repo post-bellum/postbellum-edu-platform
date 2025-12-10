@@ -1,15 +1,15 @@
-"use client"
+'use client'
 
-import * as React from "react"
+import * as React from 'react'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
-import { Button } from "@/components/ui/Button"
-import { sanitizeHTML } from "@/lib/sanitize"
+} from '@/components/ui/Dialog'
+import { Button } from '@/components/ui/Button'
+import { sanitizeHTML } from '@/lib/sanitize'
 
 interface LessonMaterialViewModalProps {
   open: boolean
@@ -25,12 +25,12 @@ export function LessonMaterialViewModal({
   content,
 }: LessonMaterialViewModalProps) {
   const sanitizedContent = React.useMemo(() => {
-    if (!content) return ""
+    if (!content) return ''
     return sanitizeHTML(content)
   }, [content])
 
   const handlePrint = () => {
-    const printWindow = window.open("", "_blank")
+    const printWindow = window.open('', '_blank')
     if (!printWindow) return
 
     printWindow.document.write(`

@@ -1,7 +1,7 @@
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { AUTH_CONSTANTS } from "@/lib/constants"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { AUTH_CONSTANTS } from '@/lib/constants'
 
 interface DisplayNameSectionProps {
   /** Current display name */
@@ -45,7 +45,7 @@ export function DisplayNameSection({
         disabled={isSaving}
         className="bg-primary text-white hover:bg-primary-hover"
       >
-        {isSaving ? "Ukládám..." : "Uložit"}
+        {isSaving ? 'Ukládám...' : 'Uložit'}
       </Button>
     </div>
   )

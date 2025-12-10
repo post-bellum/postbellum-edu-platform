@@ -12,10 +12,9 @@ export function createPublicClient() {
 
   if (!url || !anonKey) {
     throw new Error(
-      "Missing Supabase environment variables. Please check your .env.local file."
+      'Missing Supabase environment variables. Please check your .env.local file.'
     )
   }
 
   return createSupabaseClient<Database>(url, anonKey)
 }
-

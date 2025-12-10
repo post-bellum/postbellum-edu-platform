@@ -1,13 +1,13 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { OAuthButtons } from "./OAuthButtons"
-import { signUpWithEmail, getErrorMessage } from "@/lib/supabase/email-auth"
-import { validatePassword, passwordsMatch } from "@/lib/validation"
-import { logger } from "@/lib/logger"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { OAuthButtons } from './OAuthButtons'
+import { signUpWithEmail, getErrorMessage } from '@/lib/supabase/email-auth'
+import { validatePassword, passwordsMatch } from '@/lib/validation'
+import { logger } from '@/lib/logger'
 
 interface RegisterModalProps {
   onSwitchToLogin: () => void
@@ -16,9 +16,9 @@ interface RegisterModalProps {
 }
 
 export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: RegisterModalProps) {
-  const [email, setEmail] = React.useState("")
-  const [password, setPassword] = React.useState("")
-  const [confirmPassword, setConfirmPassword] = React.useState("")
+  const [email, setEmail] = React.useState('')
+  const [password, setPassword] = React.useState('')
+  const [confirmPassword, setConfirmPassword] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [passwordErrors, setPasswordErrors] = React.useState<string[]>([])
@@ -55,7 +55,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
 
       // Check passwords match
       if (!passwordsMatch(password, confirmPassword)) {
-        setError("Hesla se neshodují")
+        setError('Hesla se neshodují')
         return
       }
 
@@ -70,8 +70,8 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
       // After successful registration, move to OTP verification
       onSuccess(email)
     } catch (error) {
-      logger.error("Registration error", error)
-      setError("Při registraci došlo k chybě. Zkuste to prosím znovu.")
+      logger.error('Registration error', error)
+      setError('Při registraci došlo k chybě. Zkuste to prosím znovu.')
     } finally {
       setIsLoading(false)
     }
@@ -163,13 +163,13 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
           disabled={isLoading}
         >
-          {isLoading ? "Registrace..." : "Zaregistrovat se"}
+          {isLoading ? 'Registrace...' : 'Zaregistrovat se'}
         </Button>
       </form>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-text-secondary">
-          Už máte účet?{" "}
+          Už máte účet?{' '}
           <button
             type="button"
             onClick={onSwitchToLogin}

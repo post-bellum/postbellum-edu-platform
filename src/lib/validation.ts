@@ -14,19 +14,19 @@ export function validatePassword(password: string): PasswordValidationResult {
   const errors: string[] = []
 
   if (password.length < 8) {
-    errors.push("Heslo musí mít alespoň 8 znaků")
+    errors.push('Heslo musí mít alespoň 8 znaků')
   }
 
   if (!/[A-Z]/.test(password)) {
-    errors.push("Heslo musí obsahovat alespoň jedno velké písmeno")
+    errors.push('Heslo musí obsahovat alespoň jedno velké písmeno')
   }
 
   if (!/[a-z]/.test(password)) {
-    errors.push("Heslo musí obsahovat alespoň jedno malé písmeno")
+    errors.push('Heslo musí obsahovat alespoň jedno malé písmeno')
   }
 
   if (!/[0-9]/.test(password)) {
-    errors.push("Heslo musí obsahovat alespoň jedno číslo")
+    errors.push('Heslo musí obsahovat alespoň jedno číslo')
   }
 
   return {

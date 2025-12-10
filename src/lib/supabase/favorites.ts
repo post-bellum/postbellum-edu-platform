@@ -1,7 +1,7 @@
-"use server"
+'use server'
 
-import { createClient } from "./server"
-import { logger } from "@/lib/logger"
+import { createClient } from './server'
+import { logger } from '@/lib/logger'
 
 /**
  * Check if a lesson is favorited by the current user
@@ -21,13 +21,13 @@ export async function isLessonFavorited(lessonId: string): Promise<boolean> {
       .single()
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-      logger.error("Error checking favorite:", error)
+      logger.error('Error checking favorite:', error)
       return false
     }
 
     return !!data
   } catch (error) {
-    logger.error("Error checking favorite:", error)
+    logger.error('Error checking favorite:', error)
     return false
   }
 }
@@ -49,13 +49,13 @@ export async function getUserFavoriteLessonIds(): Promise<string[]> {
       .order('created_at', { ascending: false })
 
     if (error) {
-      logger.error("Error fetching favorites:", error)
+      logger.error('Error fetching favorites:', error)
       return []
     }
 
     return (data || []).map((fav: { lesson_id: string }) => fav.lesson_id)
   } catch (error) {
-    logger.error("Error fetching favorites:", error)
+    logger.error('Error fetching favorites:', error)
     return []
   }
 }
@@ -76,13 +76,13 @@ export async function getFavoriteCount(): Promise<number> {
       .eq('user_id', user.id)
 
     if (error) {
-      logger.error("Error fetching favorite count:", error)
+      logger.error('Error fetching favorite count:', error)
       return 0
     }
 
     return count || 0
   } catch (error) {
-    logger.error("Error fetching favorite count:", error)
+    logger.error('Error fetching favorite count:', error)
     return 0
   }
 }
@@ -96,7 +96,7 @@ export async function addFavorite(lessonId: string): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
-      throw new Error("User must be authenticated")
+      throw new Error('User must be authenticated')
     }
 
     const { error } = await supabase
@@ -107,11 +107,11 @@ export async function addFavorite(lessonId: string): Promise<void> {
       })
 
     if (error) {
-      logger.error("Error adding favorite:", error)
+      logger.error('Error adding favorite:', error)
       throw error
     }
   } catch (error) {
-    logger.error("Error adding favorite:", error)
+    logger.error('Error adding favorite:', error)
     throw error
   }
 }
@@ -125,7 +125,7 @@ export async function removeFavorite(lessonId: string): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
-      throw new Error("User must be authenticated")
+      throw new Error('User must be authenticated')
     }
 
     const { error } = await supabase
@@ -135,11 +135,11 @@ export async function removeFavorite(lessonId: string): Promise<void> {
       .eq('lesson_id', lessonId)
 
     if (error) {
-      logger.error("Error removing favorite:", error)
+      logger.error('Error removing favorite:', error)
       throw error
     }
   } catch (error) {
-    logger.error("Error removing favorite:", error)
+    logger.error('Error removing favorite:', error)
     throw error
   }
 }
@@ -159,7 +159,7 @@ export async function toggleFavorite(lessonId: string): Promise<boolean> {
       return true
     }
   } catch (error) {
-    logger.error("Error toggling favorite:", error)
+    logger.error('Error toggling favorite:', error)
     throw error
   }
 }

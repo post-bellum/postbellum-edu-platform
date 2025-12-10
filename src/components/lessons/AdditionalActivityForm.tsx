@@ -1,16 +1,16 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { useActionState } from "react"
+import * as React from 'react'
+import { useActionState } from 'react'
 import {
   createAdditionalActivityAction,
   updateAdditionalActivityAction,
-} from "@/app/actions/additional-activities"
-import type { AdditionalActivity } from "@/types/lesson.types"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { Textarea } from "@/components/ui/Textarea"
+} from '@/app/actions/additional-activities'
+import type { AdditionalActivity } from '@/types/lesson.types'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { Textarea } from '@/components/ui/Textarea'
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
+} from '@/components/ui/Dialog'
 
 interface AdditionalActivityFormProps {
   open: boolean
@@ -37,16 +37,16 @@ export function AdditionalActivityForm({
 }: AdditionalActivityFormProps) {
   const isEditing = !!activity
 
-  const [title, setTitle] = React.useState(activity?.title || "")
-  const [description, setDescription] = React.useState(activity?.description || "")
-  const [imageUrl, setImageUrl] = React.useState(activity?.image_url || "")
+  const [title, setTitle] = React.useState(activity?.title || '')
+  const [description, setDescription] = React.useState(activity?.description || '')
+  const [imageUrl, setImageUrl] = React.useState(activity?.image_url || '')
 
   // Reset form when modal opens/closes or activity changes
   React.useEffect(() => {
     if (open) {
-      setTitle(activity?.title || "")
-      setDescription(activity?.description || "")
-      setImageUrl(activity?.image_url || "")
+      setTitle(activity?.title || '')
+      setDescription(activity?.description || '')
+      setImageUrl(activity?.image_url || '')
     }
   }, [open, activity])
 
@@ -70,10 +70,10 @@ export function AdditionalActivityForm({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    formData.set("lesson_id", lessonId)
-    formData.set("title", title)
-    formData.set("description", description)
-    formData.set("image_url", imageUrl)
+    formData.set('lesson_id', lessonId)
+    formData.set('title', title)
+    formData.set('description', description)
+    formData.set('image_url', imageUrl)
     // Use startTransition to wrap the async action
     React.startTransition(() => {
       formAction(formData)
@@ -85,12 +85,12 @@ export function AdditionalActivityForm({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Upravit aktivitu" : "Nová aktivita"}
+            {isEditing ? 'Upravit aktivitu' : 'Nová aktivita'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Upravte informace o doplňkové aktivitě"
-              : "Přidejte novou doplňkovou aktivitu k lekci"}
+              ? 'Upravte informace o doplňkové aktivitě'
+              : 'Přidejte novou doplňkovou aktivitu k lekci'}
           </DialogDescription>
         </DialogHeader>
 
@@ -163,7 +163,7 @@ export function AdditionalActivityForm({
               Zrušit
             </Button>
             <Button type="submit">
-              {isEditing ? "Uložit změny" : "Vytvořit aktivitu"}
+              {isEditing ? 'Uložit změny' : 'Vytvořit aktivitu'}
             </Button>
           </DialogFooter>
         </form>

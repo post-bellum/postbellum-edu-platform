@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import * as React from 'react'
 import { LessonDetailContent } from '@/components/lessons/LessonDetailContent'
 import { isAdmin } from '@/lib/supabase/admin-helpers'
 
@@ -35,10 +35,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <Suspense fallback={<LessonDetailLoading />}>
+      <React.Suspense fallback={<LessonDetailLoading />}>
         <LessonDetailContent id={id} usePublicClient={usePublicClient} />
-      </Suspense>
+      </React.Suspense>
     </div>
   )
 }
-

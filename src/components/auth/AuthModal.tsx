@@ -1,17 +1,17 @@
-"use client"
+'use client'
 
-import * as React from "react"
+import * as React from 'react'
 import {
   Dialog,
   DialogContent,
-} from "@/components/ui/Dialog"
-import { LoginModal } from "./LoginModal"
-import { RegisterModal } from "./RegisterModal"
-import { OTPModal } from "./OTPModal"
-import { ForgotPasswordModal } from "./ForgotPasswordModal"
-import Image from "next/image"
+} from '@/components/ui/Dialog'
+import { LoginModal } from './LoginModal'
+import { RegisterModal } from './RegisterModal'
+import { OTPModal } from './OTPModal'
+import { ForgotPasswordModal } from './ForgotPasswordModal'
+import Image from 'next/image'
 
-type AuthStep = "login" | "register" | "otp" | "forgot-password"
+type AuthStep = 'login' | 'register' | 'otp' | 'forgot-password'
 
 interface AuthModalProps {
   open: boolean
@@ -20,9 +20,9 @@ interface AuthModalProps {
   returnTo?: string
 }
 
-export function AuthModal({ open, onOpenChange, defaultStep = "login", returnTo }: AuthModalProps) {
+export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo }: AuthModalProps) {
   const [step, setStep] = React.useState<AuthStep>(defaultStep)
-  const [email, setEmail] = React.useState("")
+  const [email, setEmail] = React.useState('')
 
   // Reset to default step when modal opens
   React.useEffect(() => {
@@ -38,7 +38,7 @@ export function AuthModal({ open, onOpenChange, defaultStep = "login", returnTo 
   const handleRegisterSuccess = (registrationEmail: string) => {
     // After registration, go to OTP verification
     setEmail(registrationEmail)
-    setStep("otp")
+    setStep('otp')
   }
 
   const handleOTPSuccess = () => {
@@ -59,34 +59,34 @@ export function AuthModal({ open, onOpenChange, defaultStep = "login", returnTo 
             priority
           />
       </div>
-        {step === "login" && (
+        {step === 'login' && (
           <LoginModal
-            onSwitchToRegister={() => setStep("register")}
+            onSwitchToRegister={() => setStep('register')}
             onSuccess={handleLoginSuccess}
-            onForgotPassword={() => setStep("forgot-password")}
+            onForgotPassword={() => setStep('forgot-password')}
             returnTo={returnTo}
           />
         )}
 
-        {step === "register" && (
+        {step === 'register' && (
           <RegisterModal
-            onSwitchToLogin={() => setStep("login")}
+            onSwitchToLogin={() => setStep('login')}
             onSuccess={handleRegisterSuccess}
             returnTo={returnTo}
           />
         )}
 
-        {step === "otp" && (
+        {step === 'otp' && (
           <OTPModal
             email={email}
             onSuccess={handleOTPSuccess}
-            onBack={() => setStep("register")}
+            onBack={() => setStep('register')}
           />
         )}
 
-        {step === "forgot-password" && (
+        {step === 'forgot-password' && (
           <ForgotPasswordModal
-            onBack={() => setStep("login")}
+            onBack={() => setStep('login')}
           />
         )}
       </DialogContent>

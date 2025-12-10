@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { useRouter, usePathname } from "next/navigation"
-import { Button } from "@/components/ui/Button"
-import { AuthModal } from "@/components/auth"
-import { Lock } from "lucide-react"
+import * as React from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { Button } from '@/components/ui/Button'
+import { AuthModal } from '@/components/auth'
+import { Lock } from 'lucide-react'
 
 export function FavoriteCTA() {
   const router = useRouter()

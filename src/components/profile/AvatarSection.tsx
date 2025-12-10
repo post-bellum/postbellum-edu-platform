@@ -1,5 +1,5 @@
-import Image from "next/image"
-import { getGravatarUrl } from "@/lib/gravatar"
+import Image from 'next/image'
+import { getGravatarUrl } from '@/lib/gravatar'
 
 interface AvatarSectionProps {
   /** User email for Gravatar */

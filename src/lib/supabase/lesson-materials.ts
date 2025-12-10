@@ -1,15 +1,15 @@
-"use server"
+'use server'
 
-import { createClient } from "./server"
-import { requireAdmin } from "./admin-helpers"
-import { logger } from "@/lib/logger"
+import { createClient } from './server'
+import { requireAdmin } from './admin-helpers'
+import { logger } from '@/lib/logger'
 import type { 
   LessonMaterial,
   CreateLessonMaterialInput,
   UpdateLessonMaterialInput,
   LessonSpecification,
   LessonDuration
-} from "@/types/lesson.types"
+} from '@/types/lesson.types'
 
 /**
  * Get all materials for a lesson
@@ -24,13 +24,13 @@ export async function getLessonMaterials(lessonId: string): Promise<LessonMateri
       .order('created_at', { ascending: true })
 
     if (error) {
-      logger.error("Error fetching lesson materials:", error)
+      logger.error('Error fetching lesson materials:', error)
       throw error
     }
 
     return (data || []) as LessonMaterial[]
   } catch (error) {
-    logger.error("Error fetching lesson materials:", error)
+    logger.error('Error fetching lesson materials:', error)
     throw error
   }
 }
@@ -60,13 +60,13 @@ export async function getLessonMaterialsFiltered(
     const { data, error } = await query.order('created_at', { ascending: true })
 
     if (error) {
-      logger.error("Error fetching filtered lesson materials:", error)
+      logger.error('Error fetching filtered lesson materials:', error)
       throw error
     }
 
     return (data || []) as LessonMaterial[]
   } catch (error) {
-    logger.error("Error fetching filtered lesson materials:", error)
+    logger.error('Error fetching filtered lesson materials:', error)
     throw error
   }
 }
@@ -84,13 +84,13 @@ export async function getLessonMaterialById(id: string): Promise<LessonMaterial 
       .single()
 
     if (error) {
-      logger.error("Error fetching lesson material:", error)
+      logger.error('Error fetching lesson material:', error)
       return null
     }
 
     return data as LessonMaterial
   } catch (error) {
-    logger.error("Error fetching lesson material:", error)
+    logger.error('Error fetching lesson material:', error)
     return null
   }
 }
@@ -110,13 +110,13 @@ export async function createLessonMaterial(input: CreateLessonMaterialInput): Pr
       .single()
 
     if (error) {
-      logger.error("Error creating lesson material:", error)
+      logger.error('Error creating lesson material:', error)
       throw error
     }
 
     return data as LessonMaterial
   } catch (error) {
-    logger.error("Error creating lesson material:", error)
+    logger.error('Error creating lesson material:', error)
     throw error
   }
 }
@@ -140,13 +140,13 @@ export async function updateLessonMaterial(
       .single()
 
     if (error) {
-      logger.error("Error updating lesson material:", error)
+      logger.error('Error updating lesson material:', error)
       throw error
     }
 
     return data as LessonMaterial
   } catch (error) {
-    logger.error("Error updating lesson material:", error)
+    logger.error('Error updating lesson material:', error)
     throw error
   }
 }
@@ -165,11 +165,11 @@ export async function deleteLessonMaterial(id: string): Promise<void> {
       .eq('id', id)
 
     if (error) {
-      logger.error("Error deleting lesson material:", error)
+      logger.error('Error deleting lesson material:', error)
       throw error
     }
   } catch (error) {
-    logger.error("Error deleting lesson material:", error)
+    logger.error('Error deleting lesson material:', error)
     throw error
   }
 }

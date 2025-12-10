@@ -1,6 +1,6 @@
-import { NavigationBar } from "./NavigationBar"
-import { createClient } from "@/lib/supabase/server"
-import { getFavoriteCount } from "@/lib/supabase/favorites"
+import { NavigationBar } from './NavigationBar'
+import { createClient } from '@/lib/supabase/server'
+import { getFavoriteCount } from '@/lib/supabase/favorites'
 
 export async function NavigationBarServer() {
   const supabase = await createClient()

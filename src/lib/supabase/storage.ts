@@ -93,4 +93,3 @@ export function extractFilePathFromUrl(url: string, bucket: string = 'lesson-mat
     return null
   }
 }
-

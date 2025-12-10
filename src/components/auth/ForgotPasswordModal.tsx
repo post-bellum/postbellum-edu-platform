@@ -1,18 +1,18 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { sendPasswordResetEmail, getErrorMessage } from "@/lib/supabase/email-auth"
-import { logger } from "@/lib/logger"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { sendPasswordResetEmail, getErrorMessage } from '@/lib/supabase/email-auth'
+import { logger } from '@/lib/logger'
 
 interface ForgotPasswordModalProps {
   onBack: () => void
 }
 
 export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
-  const [email, setEmail] = React.useState("")
+  const [email, setEmail] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [success, setSuccess] = React.useState(false)
@@ -32,8 +32,8 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
 
       setSuccess(true)
     } catch (error) {
-      logger.error("Password reset error", error)
-      setError("Při odesílání emailu došlo k chybě. Zkuste to prosím znovu.")
+      logger.error('Password reset error', error)
+      setError('Při odesílání emailu došlo k chybě. Zkuste to prosím znovu.')
     } finally {
       setIsLoading(false)
     }
@@ -94,7 +94,7 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
           disabled={isLoading}
         >
-          {isLoading ? "Odesílání..." : "Odeslat odkaz"}
+          {isLoading ? 'Odesílání...' : 'Odeslat odkaz'}
         </Button>
       </form>
 

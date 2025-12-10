@@ -1,20 +1,20 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { useActionState } from "react"
+import * as React from 'react'
+import { useActionState } from 'react'
 import {
   createLessonMaterialAction,
   updateLessonMaterialAction,
-} from "@/app/actions/lesson-materials"
+} from '@/app/actions/lesson-materials'
 import type {
   LessonMaterial,
   LessonSpecification,
-} from "@/types/lesson.types"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { Textarea } from "@/components/ui/Textarea"
-import { RichTextEditor } from "@/components/editor/RichTextEditor"
+} from '@/types/lesson.types'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { Textarea } from '@/components/ui/Textarea'
+import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import {
   Dialog,
   DialogContent,
@@ -22,14 +22,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
+} from '@/components/ui/Dialog'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select"
+} from '@/components/ui/Select'
 
 interface LessonMaterialFormProps {
   open: boolean
@@ -48,24 +48,24 @@ export function LessonMaterialForm({
 }: LessonMaterialFormProps) {
   const isEditing = !!material
 
-  const [title, setTitle] = React.useState(material?.title || "")
-  const [description, setDescription] = React.useState(material?.description || "")
-  const [content, setContent] = React.useState(material?.content || "")
-  const [specification, setSpecification] = React.useState<LessonSpecification | "">(
-    material?.specification || ""
+  const [title, setTitle] = React.useState(material?.title || '')
+  const [description, setDescription] = React.useState(material?.description || '')
+  const [content, setContent] = React.useState(material?.content || '')
+  const [specification, setSpecification] = React.useState<LessonSpecification | ''>(
+    material?.specification || ''
   )
   const [duration, setDuration] = React.useState<string>(
-    material?.duration?.toString() || ""
+    material?.duration?.toString() || ''
   )
 
   // Reset form when modal opens/closes or material changes
   React.useEffect(() => {
     if (open) {
-      setTitle(material?.title || "")
-      setDescription(material?.description || "")
-      setContent(material?.content || "")
-      setSpecification(material?.specification || "")
-      setDuration(material?.duration?.toString() || "")
+      setTitle(material?.title || '')
+      setDescription(material?.description || '')
+      setContent(material?.content || '')
+      setSpecification(material?.specification || '')
+      setDuration(material?.duration?.toString() || '')
     }
   }, [open, material])
 
@@ -89,15 +89,15 @@ export function LessonMaterialForm({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    formData.set("lesson_id", lessonId)
-    formData.set("title", title)
-    formData.set("description", description)
-    formData.set("content", content)
+    formData.set('lesson_id', lessonId)
+    formData.set('title', title)
+    formData.set('description', description)
+    formData.set('content', content)
     if (specification) {
-      formData.set("specification", specification)
+      formData.set('specification', specification)
     }
     if (duration) {
-      formData.set("duration", duration)
+      formData.set('duration', duration)
     }
     // Use startTransition to wrap the async action
     React.startTransition(() => {
@@ -110,12 +110,12 @@ export function LessonMaterialForm({
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Upravit materiál" : "Nový materiál"}
+            {isEditing ? 'Upravit materiál' : 'Nový materiál'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Upravte informace o materiálu k lekci"
-              : "Přidejte nový materiál k lekci"}
+              ? 'Upravte informace o materiálu k lekci'
+              : 'Přidejte nový materiál k lekci'}
           </DialogDescription>
         </DialogHeader>
 
@@ -209,7 +209,7 @@ export function LessonMaterialForm({
               Zrušit
             </Button>
             <Button type="submit">
-              {isEditing ? "Uložit změny" : "Vytvořit materiál"}
+              {isEditing ? 'Uložit změny' : 'Vytvořit materiál'}
             </Button>
           </DialogFooter>
         </form>

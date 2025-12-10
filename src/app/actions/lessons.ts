@@ -124,4 +124,3 @@ export async function deleteLessonAction(lessonId: string) {
     }
   }
 }
-

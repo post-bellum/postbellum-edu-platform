@@ -1,17 +1,17 @@
-"use server"
+'use server'
 
-import { createClient } from "./server"
-import { createPublicClient } from "./public"
-import { requireAdmin } from "./admin-helpers"
-import { logger } from "@/lib/logger"
-import type { Database } from "@/types/database.types"
+import { createClient } from './server'
+import { createPublicClient } from './public'
+import { requireAdmin } from './admin-helpers'
+import { logger } from '@/lib/logger'
+import type { Database } from '@/types/database.types'
 import type { 
   Lesson, 
   LessonWithRelations,
   CreateLessonInput, 
   UpdateLessonInput,
   Tag
-} from "@/types/lesson.types"
+} from '@/types/lesson.types'
 
 type LessonRow = Database['public']['Tables']['lessons']['Row']
 
@@ -53,7 +53,7 @@ export async function getLessons(filters?: {
       const { data, error } = await query
       
       if (error) {
-        logger.error("Error fetching lessons by tag:", error)
+        logger.error('Error fetching lessons by tag:', error)
         throw error
       }
       
@@ -115,7 +115,7 @@ export async function getLessons(filters?: {
     const { data, error } = await query
 
     if (error) {
-      logger.error("Error fetching lessons:", error)
+      logger.error('Error fetching lessons:', error)
       throw error
     }
 
@@ -127,7 +127,7 @@ export async function getLessons(filters?: {
       rvp_connection: lesson.rvp_connection || [],
     })) as Lesson[]
   } catch (error) {
-    logger.error("Error fetching lessons:", error)
+    logger.error('Error fetching lessons:', error)
     throw error
   }
 }
@@ -150,7 +150,7 @@ export async function getLessonsByIds(ids: string[]): Promise<Lesson[]> {
       .order('created_at', { ascending: false })
 
     if (error) {
-      logger.error("Error fetching lessons by IDs:", error)
+      logger.error('Error fetching lessons by IDs:', error)
       throw error
     }
 
@@ -160,7 +160,7 @@ export async function getLessonsByIds(ids: string[]): Promise<Lesson[]> {
       rvp_connection: lesson.rvp_connection || [],
     })) as Lesson[]
   } catch (error) {
-    logger.error("Error fetching lessons by IDs:", error)
+    logger.error('Error fetching lessons by IDs:', error)
     throw error
   }
 }
@@ -189,7 +189,7 @@ export async function getLessonById(
       .single()
 
     if (lessonError) {
-      logger.error("Error fetching lesson:", lessonError)
+      logger.error('Error fetching lesson:', lessonError)
       return null
     }
 
@@ -237,7 +237,7 @@ export async function getLessonById(
       additional_activities: activities
     } as LessonWithRelations
   } catch (error) {
-    logger.error("Error fetching lesson:", error)
+    logger.error('Error fetching lesson:', error)
     return null
   }
 }
@@ -253,7 +253,7 @@ export async function createLesson(input: CreateLessonInput): Promise<Lesson> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
-      throw new Error("User must be authenticated")
+      throw new Error('User must be authenticated')
     }
 
     const { tag_ids, ...lessonData } = input
@@ -270,7 +270,7 @@ export async function createLesson(input: CreateLessonInput): Promise<Lesson> {
       .single()
 
     if (lessonError) {
-      logger.error("Error creating lesson:", lessonError)
+      logger.error('Error creating lesson:', lessonError)
       throw lessonError
     }
 
@@ -286,7 +286,7 @@ export async function createLesson(input: CreateLessonInput): Promise<Lesson> {
         .insert(lessonTags)
 
       if (tagsError) {
-        logger.error("Error adding tags to lesson:", tagsError)
+        logger.error('Error adding tags to lesson:', tagsError)
         // Rollback lesson creation if tags fail
         await supabase
           .from('lessons')
@@ -298,7 +298,7 @@ export async function createLesson(input: CreateLessonInput): Promise<Lesson> {
 
     return lesson as Lesson
   } catch (error) {
-    logger.error("Error creating lesson:", error)
+    logger.error('Error creating lesson:', error)
     throw error
   }
 }
@@ -325,7 +325,7 @@ export async function updateLesson(id: string, input: UpdateLessonInput): Promis
       .single()
 
     if (lessonError) {
-      logger.error("Error updating lesson:", lessonError)
+      logger.error('Error updating lesson:', lessonError)
       throw lessonError
     }
 
@@ -338,7 +338,7 @@ export async function updateLesson(id: string, input: UpdateLessonInput): Promis
         .eq('lesson_id', id)
 
       if (deleteError) {
-        logger.error("Error deleting lesson tags:", deleteError)
+        logger.error('Error deleting lesson tags:', deleteError)
       }
 
       // Insert new tags
@@ -353,14 +353,14 @@ export async function updateLesson(id: string, input: UpdateLessonInput): Promis
           .insert(lessonTags)
 
         if (insertError) {
-          logger.error("Error adding tags to lesson:", insertError)
+          logger.error('Error adding tags to lesson:', insertError)
         }
       }
     }
 
     return lesson as Lesson
   } catch (error) {
-    logger.error("Error updating lesson:", error)
+    logger.error('Error updating lesson:', error)
     throw error
   }
 }
@@ -379,11 +379,11 @@ export async function deleteLesson(id: string): Promise<void> {
       .eq('id', id)
 
     if (error) {
-      logger.error("Error deleting lesson:", error)
+      logger.error('Error deleting lesson:', error)
       throw error
     }
   } catch (error) {
-    logger.error("Error deleting lesson:", error)
+    logger.error('Error deleting lesson:', error)
     throw error
   }
 }

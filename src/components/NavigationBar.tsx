@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
-import Link from "next/link"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { useAuth } from "@/lib/supabase/hooks/useAuth"
-import { getGravatarUrl } from "@/lib/gravatar"
-import { cn } from "@/lib/utils"
+import Link from 'next/link'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import { useAuth } from '@/lib/supabase/hooks/useAuth'
+import { getGravatarUrl } from '@/lib/gravatar'
+import { cn } from '@/lib/utils'
 
 interface NavigationBarProps {
   favoriteCount?: number
@@ -17,17 +17,17 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
   const { user, isLoggedIn } = useAuth()
 
   // Use user email from hook if not provided as prop
-  const email = userEmail || user?.email || ""
+  const email = userEmail || user?.email || ''
 
   const navLinks = [
-    { href: "/", label: "Domov" },
-    { href: "/lessons", label: "Katalog" },
-    { href: "/about", label: "O projektu" },
+    { href: '/', label: 'Domov' },
+    { href: '/lessons', label: 'Katalog' },
+    { href: '/about', label: 'O projektu' },
   ]
 
   const isActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/"
+    if (href === '/') {
+      return pathname === '/'
     }
     return pathname.startsWith(href)
   }
@@ -53,10 +53,10 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-blue-900",
+                  'text-sm font-medium transition-colors hover:text-blue-900',
                   isActive(link.href)
-                    ? "text-blue-900"
-                    : "text-gray-600"
+                    ? 'text-blue-900'
+                    : 'text-gray-600'
                 )}
               >
                 {link.label}
@@ -76,7 +76,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                   <span>Oblíbené lekce</span>
                   {favoriteCount > 0 && (
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-900 text-xs font-medium text-white">
-                      {favoriteCount > 99 ? "99+" : favoriteCount}
+                      {favoriteCount > 99 ? '99+' : favoriteCount}
                     </span>
                   )}
                 </Link>

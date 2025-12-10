@@ -12,10 +12,10 @@ export const supabaseServerConfig = {
 // Auth configuration
 export const authConfig = {
   redirects: {
-    login: "/auth/login",
-    afterLogin: "/dashboard",
-    afterLogout: "/",
-    afterSignup: "/onboarding",
+    login: '/auth/login',
+    afterLogin: '/dashboard',
+    afterLogout: '/',
+    afterSignup: '/onboarding',
   },
-  protectedPaths: ["/dashboard", "/lessons/edit", "/profile"],
+  protectedPaths: ['/dashboard', '/lessons/edit', '/profile'],
 } as const;

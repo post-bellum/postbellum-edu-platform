@@ -1,16 +1,16 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { useActionState } from "react"
-import { createLessonAction, updateLessonAction } from "@/app/actions/lessons"
-import { LessonWithRelations, Tag } from "@/types/lesson.types"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { Textarea } from "@/components/ui/Textarea"
-import { Checkbox } from "@/components/ui/Checkbox"
-import { TagsSelector } from "./TagsSelector"
+import * as React from 'react'
+import { useRouter } from 'next/navigation'
+import { useActionState } from 'react'
+import { createLessonAction, updateLessonAction } from '@/app/actions/lessons'
+import { LessonWithRelations, Tag } from '@/types/lesson.types'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { Textarea } from '@/components/ui/Textarea'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { TagsSelector } from './TagsSelector'
 
 interface LessonFormProps {
   lesson?: LessonWithRelations
@@ -21,18 +21,18 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
   const router = useRouter()
   const isEditing = !!lesson
 
-  const [title, setTitle] = React.useState(lesson?.title || "")
-  const [vimeoVideoUrl, setVimeoVideoUrl] = React.useState(lesson?.vimeo_video_url || "")
-  const [description, setDescription] = React.useState(lesson?.description || "")
-  const [duration, setDuration] = React.useState(lesson?.duration || "")
-  const [period, setPeriod] = React.useState(lesson?.period || "")
-  const [targetGroup, setTargetGroup] = React.useState(lesson?.target_group || "")
-  const [lessonType, setLessonType] = React.useState(lesson?.lesson_type || "")
+  const [title, setTitle] = React.useState(lesson?.title || '')
+  const [vimeoVideoUrl, setVimeoVideoUrl] = React.useState(lesson?.vimeo_video_url || '')
+  const [description, setDescription] = React.useState(lesson?.description || '')
+  const [duration, setDuration] = React.useState(lesson?.duration || '')
+  const [period, setPeriod] = React.useState(lesson?.period || '')
+  const [targetGroup, setTargetGroup] = React.useState(lesson?.target_group || '')
+  const [lessonType, setLessonType] = React.useState(lesson?.lesson_type || '')
   const [publicationDate, setPublicationDate] = React.useState(
-    lesson?.publication_date ? new Date(lesson.publication_date).toISOString().split('T')[0] : ""
+    lesson?.publication_date ? new Date(lesson.publication_date).toISOString().split('T')[0] : ''
   )
   const [rvpConnection, setRvpConnection] = React.useState(
-    lesson?.rvp_connection?.join(", ") || ""
+    lesson?.rvp_connection?.join(', ') || ''
   )
   const [selectedTagIds, setSelectedTagIds] = React.useState<string[]>(
     lesson?.tags?.map(t => t.id) || []
@@ -41,13 +41,13 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
 
   const action = isEditing
     ? async (_prevState: unknown, formData: FormData) => {
-        formData.append("tag_ids", selectedTagIds.join(","))
-        formData.append("published", published ? "true" : "false")
+        formData.append('tag_ids', selectedTagIds.join(','))
+        formData.append('published', published ? 'true' : 'false')
         return updateLessonAction(lesson.id, formData)
       }
     : async (_prevState: unknown, formData: FormData) => {
-        formData.append("tag_ids", selectedTagIds.join(","))
-        formData.append("published", published ? "true" : "false")
+        formData.append('tag_ids', selectedTagIds.join(','))
+        formData.append('published', published ? 'true' : 'false')
         return createLessonAction(formData)
       }
 
@@ -201,7 +201,7 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
       </div>
 
       <div className="flex gap-4">
-        <Button type="submit">{isEditing ? "Uložit změny" : "Vytvořit lekci"}</Button>
+        <Button type="submit">{isEditing ? 'Uložit změny' : 'Vytvořit lekci'}</Button>
         <Button
           type="button"
           variant="outline"

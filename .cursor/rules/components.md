@@ -11,6 +11,25 @@
 - Define return types explicitly for functions
 - Use optional chaining (?.) and nullish coalescing (??)
 
+### Code Style (ESLint Enforced)
+- **Single quotes for JS**: Use single quotes for JavaScript strings (`'hello'`)
+- **Double quotes for JSX**: Use double quotes for JSX attributes (`className="..."`)
+- **Logger utility**: Use `logger.error()`, `logger.warn()`, `logger.info()` instead of `console.error/warn/log`
+- **React imports**: Use namespace import pattern:
+  ```tsx
+  // ✅ Correct
+  import * as React from 'react'
+  
+  function MyComponent() {
+    const [state, setState] = React.useState(false)
+    React.useEffect(() => { ... }, [])
+    return <React.Suspense fallback={...}>...</React.Suspense>
+  }
+  
+  // ❌ Incorrect
+  import { useState, useEffect, Suspense } from 'react'
+  ```
+
 ### React/Next.js Patterns
 - Use Server Components by default (no "use client" directive)
 - Only use Client Components when needed (interactivity, browser APIs)

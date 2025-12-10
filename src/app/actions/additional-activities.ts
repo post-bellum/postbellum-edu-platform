@@ -125,6 +125,3 @@ export async function deleteAdditionalActivityAction(activityId: string, lessonI
     }
   }
 }
-
-
-

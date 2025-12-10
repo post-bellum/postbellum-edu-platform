@@ -1,10 +1,10 @@
-import { z } from "zod"
-import { sanitizeInput, sanitizeHTML } from "@/lib/sanitize"
+import { z } from 'zod'
+import { sanitizeInput, sanitizeHTML } from '@/lib/sanitize'
 
 /**
  * UUID validation helper for Zod
  */
-const uuidSchema = z.string().uuid("Neplatné UUID")
+const uuidSchema = z.string().uuid('Neplatné UUID')
 
 /**
  * Helper to sanitize string inputs
@@ -16,10 +16,10 @@ const sanitizeString = (val: string) => sanitizeInput(val.trim())
  */
 const vimeoUrlSchema = z
   .string()
-  .url("Neplatná URL adresa")
+  .url('Neplatná URL adresa')
   .refine(
     (url) => /^https?:\/\/(www\.)?(vimeo\.com|player\.vimeo\.com)/.test(url),
-    { message: "Musí být platná Vimeo URL adresa" }
+    { message: 'Musí být platná Vimeo URL adresa' }
   )
   .optional()
 
@@ -28,22 +28,22 @@ const vimeoUrlSchema = z
  */
 const imageUrlSchema = z
   .string()
-  .url("Neplatná URL adresa obrázku")
+  .url('Neplatná URL adresa obrázku')
   .optional()
 
 /**
  * Lesson specification enum
  */
 export const lessonSpecificationSchema = z.enum([
-  "1st_grade_elementary",
-  "2nd_grade_elementary",
-  "high_school",
+  '1st_grade_elementary',
+  '2nd_grade_elementary',
+  'high_school',
 ])
 
 /**
  * Lesson duration enum
  */
-export const lessonDurationSchema = z.enum(["30", "45", "90"]).transform(Number)
+export const lessonDurationSchema = z.enum(['30', '45', '90']).transform(Number)
 
 /**
  * Create lesson schema
@@ -53,42 +53,42 @@ export const lessonDurationSchema = z.enum(["30", "45", "90"]).transform(Number)
 export const createLessonSchema = z.object({
   title: z
     .string()
-    .min(1, "Název lekce je povinný")
-    .max(500, "Název lekce může mít maximálně 500 znaků")
+    .min(1, 'Název lekce je povinný')
+    .max(500, 'Název lekce může mít maximálně 500 znaků')
     .transform(sanitizeString),
   vimeo_video_url: vimeoUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
   description: z
     .string()
-    .max(5000, "Popis může mít maximálně 5000 znaků")
+    .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   duration: z
     .string()
-    .max(50, "Délka lekce může mít maximálně 50 znaků")
+    .max(50, 'Délka lekce může mít maximálně 50 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   period: z
     .string()
-    .max(200, "Období může mít maximálně 200 znaků")
+    .max(200, 'Období může mít maximálně 200 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   target_group: z
     .string()
-    .max(200, "Cílová skupina může mít maximálně 200 znaků")
+    .max(200, 'Cílová skupina může mít maximálně 200 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   lesson_type: z
     .string()
-    .max(200, "Typ lekce může mít maximálně 200 znaků")
+    .max(200, 'Typ lekce může mít maximálně 200 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   publication_date: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Neplatný formát data (YYYY-MM-DD)")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Neplatný formát data (YYYY-MM-DD)')
     .optional(),
   published: z.boolean().default(false),
   rvp_connection: z
-    .array(z.string().max(200, "RVP připojení může mít maximálně 200 znaků").transform(sanitizeString))
+    .array(z.string().max(200, 'RVP připojení může mít maximálně 200 znaků').transform(sanitizeString))
     .optional()
     .default([]),
   tag_ids: z
@@ -105,43 +105,43 @@ export const createLessonSchema = z.object({
 export const updateLessonSchema = z.object({
   title: z
     .string()
-    .min(1, "Název lekce je povinný")
-    .max(500, "Název lekce může mít maximálně 500 znaků")
+    .min(1, 'Název lekce je povinný')
+    .max(500, 'Název lekce může mít maximálně 500 znaků')
     .transform(sanitizeString)
     .optional(),
   vimeo_video_url: vimeoUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
   description: z
     .string()
-    .max(5000, "Popis může mít maximálně 5000 znaků")
+    .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   duration: z
     .string()
-    .max(50, "Délka lekce může mít maximálně 50 znaků")
+    .max(50, 'Délka lekce může mít maximálně 50 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   period: z
     .string()
-    .max(200, "Období může mít maximálně 200 znaků")
+    .max(200, 'Období může mít maximálně 200 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   target_group: z
     .string()
-    .max(200, "Cílová skupina může mít maximálně 200 znaků")
+    .max(200, 'Cílová skupina může mít maximálně 200 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   lesson_type: z
     .string()
-    .max(200, "Typ lekce může mít maximálně 200 znaků")
+    .max(200, 'Typ lekce může mít maximálně 200 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   publication_date: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Neplatný formát data (YYYY-MM-DD)")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Neplatný formát data (YYYY-MM-DD)')
     .optional(),
   published: z.boolean().optional(),
   rvp_connection: z
-    .array(z.string().max(200, "RVP připojení může mít maximálně 200 znaků").transform(sanitizeString))
+    .array(z.string().max(200, 'RVP připojení může mít maximálně 200 znaků').transform(sanitizeString))
     .optional(),
   tag_ids: z
     .array(uuidSchema)
@@ -198,17 +198,17 @@ export const createLessonMaterialSchema = z.object({
   lesson_id: uuidSchema,
   title: z
     .string()
-    .min(1, "Název materiálu je povinný")
-    .max(500, "Název materiálu může mít maximálně 500 znaků")
+    .min(1, 'Název materiálu je povinný')
+    .max(500, 'Název materiálu může mít maximálně 500 znaků')
     .transform(sanitizeString),
   description: z
     .string()
-    .max(5000, "Popis může mít maximálně 5000 znaků")
+    .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   content: z
     .string()
-    .max(50000, "Obsah může mít maximálně 50000 znaků")
+    .max(50000, 'Obsah může mít maximálně 50000 znaků')
     .optional()
     .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
   specification: lessonSpecificationSchema.optional(),
@@ -223,18 +223,18 @@ export const createLessonMaterialSchema = z.object({
 export const updateLessonMaterialSchema = z.object({
   title: z
     .string()
-    .min(1, "Název materiálu je povinný")
-    .max(500, "Název materiálu může mít maximálně 500 znaků")
+    .min(1, 'Název materiálu je povinný')
+    .max(500, 'Název materiálu může mít maximálně 500 znaků')
     .transform(sanitizeString)
     .optional(),
   description: z
     .string()
-    .max(5000, "Popis může mít maximálně 5000 znaků")
+    .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   content: z
     .string()
-    .max(50000, "Obsah může mít maximálně 50000 znaků")
+    .max(50000, 'Obsah může mít maximálně 50000 znaků')
     .optional()
     .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
   specification: lessonSpecificationSchema.optional(),
@@ -250,12 +250,12 @@ export const createAdditionalActivitySchema = z.object({
   lesson_id: uuidSchema,
   title: z
     .string()
-    .min(1, "Název aktivity je povinný")
-    .max(500, "Název aktivity může mít maximálně 500 znaků")
+    .min(1, 'Název aktivity je povinný')
+    .max(500, 'Název aktivity může mít maximálně 500 znaků')
     .transform(sanitizeString),
   description: z
     .string()
-    .max(5000, "Popis může mít maximálně 5000 znaků")
+    .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   image_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
@@ -267,13 +267,13 @@ export const createAdditionalActivitySchema = z.object({
 export const updateAdditionalActivitySchema = z.object({
   title: z
     .string()
-    .min(1, "Název aktivity je povinný")
-    .max(500, "Název aktivity může mít maximálně 500 znaků")
+    .min(1, 'Název aktivity je povinný')
+    .max(500, 'Název aktivity může mít maximálně 500 znaků')
     .transform(sanitizeString)
     .optional(),
   description: z
     .string()
-    .max(5000, "Popis může mít maximálně 5000 znaků")
+    .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   image_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),

@@ -1,11 +1,12 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { toggleFavoriteAction } from "@/app/actions/favorites"
-import { Button } from "@/components/ui/Button"
-import { Heart } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from 'react'
+import { useRouter } from 'next/navigation'
+import { toggleFavoriteAction } from '@/app/actions/favorites'
+import { Button } from '@/components/ui/Button'
+import { Heart } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 
 interface FavoriteButtonProps {
   lessonId: string
@@ -31,7 +32,7 @@ export function FavoriteButton({
         router.refresh()
       }
     } catch (error) {
-      console.error("Error toggling favorite:", error)
+      logger.error('Error toggling favorite:', error)
     } finally {
       setIsLoading(false)
     }
@@ -39,7 +40,7 @@ export function FavoriteButton({
 
   return (
     <Button
-      variant={isFavorited ? "default" : "outline"}
+      variant={isFavorited ? 'default' : 'outline'}
       size="sm"
       onClick={handleToggle}
       disabled={isLoading}
@@ -47,12 +48,11 @@ export function FavoriteButton({
     >
       <Heart
         className={cn(
-          "h-4 w-4",
-          isFavorited && "fill-current"
+          'h-4 w-4',
+          isFavorited && 'fill-current'
         )}
       />
-      {isFavorited ? "V oblíbených" : "Přidat do oblíbených"}
+      {isFavorited ? 'V oblíbených' : 'Přidat do oblíbených'}
     </Button>
   )
 }
-

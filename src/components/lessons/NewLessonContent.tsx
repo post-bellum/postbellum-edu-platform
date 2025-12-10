@@ -14,4 +14,3 @@ export async function NewLessonContent() {
 
   return <LessonForm tags={tags} />
 }
-

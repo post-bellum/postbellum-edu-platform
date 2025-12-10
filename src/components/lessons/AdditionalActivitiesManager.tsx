@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { getAdditionalActivities } from "@/lib/supabase/additional-activities-client"
-import { deleteAdditionalActivityAction } from "@/app/actions/additional-activities"
-import type { AdditionalActivity } from "@/types/lesson.types"
-import { Button } from "@/components/ui/Button"
-import { Plus, Edit, Trash2 } from "lucide-react"
-import { AdditionalActivityForm } from "./AdditionalActivityForm"
+import * as React from 'react'
+import { getAdditionalActivities } from '@/lib/supabase/additional-activities-client'
+import { deleteAdditionalActivityAction } from '@/app/actions/additional-activities'
+import type { AdditionalActivity } from '@/types/lesson.types'
+import { Button } from '@/components/ui/Button'
+import { Plus, Edit, Trash2 } from 'lucide-react'
+import { AdditionalActivityForm } from './AdditionalActivityForm'
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
+} from '@/components/ui/Dialog'
+import { logger } from '@/lib/logger'
 
 interface AdditionalActivitiesManagerProps {
   lessonId: string
@@ -37,7 +38,7 @@ export function AdditionalActivitiesManager({
       const data = await getAdditionalActivities(lessonId)
       setActivities(data)
     } catch (error) {
-      console.error("Error loading activities:", error)
+      logger.error('Error loading activities:', error)
     }
   }, [lessonId])
 
@@ -72,7 +73,7 @@ export function AdditionalActivitiesManager({
       setActivityToDelete(null)
       loadActivities()
     } catch (error) {
-      console.error("Error deleting activity:", error)
+      logger.error('Error deleting activity:', error)
     } finally {
       setIsDeleting(false)
     }
@@ -178,7 +179,7 @@ export function AdditionalActivitiesManager({
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
             >
-              {isDeleting ? "Mazání..." : "Smazat"}
+              {isDeleting ? 'Mazání...' : 'Smazat'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -186,4 +187,3 @@ export function AdditionalActivitiesManager({
     </div>
   )
 }
-

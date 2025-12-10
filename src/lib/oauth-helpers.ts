@@ -1,13 +1,13 @@
-import { createClient } from "@/lib/supabase/client"
-import type { Provider } from "@supabase/supabase-js"
-import { logger } from "@/lib/logger"
+import { createClient } from '@/lib/supabase/client'
+import type { Provider } from '@supabase/supabase-js'
+import { logger } from '@/lib/logger'
 
-type OAuthProvider = "google" | "microsoft"
+type OAuthProvider = 'google' | 'microsoft'
 
 // Map our provider names to Supabase provider names
 const PROVIDER_MAP: Record<OAuthProvider, Provider> = {
-  google: "google",
-  microsoft: "azure",
+  google: 'google',
+  microsoft: 'azure',
 } as const
 
 interface OAuthOptions {
@@ -51,6 +51,6 @@ export async function handleOAuthLogin(provider: OAuthProvider, options?: OAuthO
 }
 
 // Re-export client auth helpers for convenience
-export { logout, getCurrentUser, isLoggedIn } from "@/lib/supabase/auth-helpers-client"
+export { logout, getCurrentUser, isLoggedIn } from '@/lib/supabase/auth-helpers-client'
 
 

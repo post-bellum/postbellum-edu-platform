@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { createClient } from "./client"
-import { logger } from "@/lib/logger"
+import { createClient } from './client'
+import { logger } from '@/lib/logger'
 
 /**
  * Get display name from OAuth user metadata
@@ -12,7 +12,7 @@ export async function getDisplayNameFromAuth(): Promise<string> {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     
-    if (!user) return ""
+    if (!user) return ''
     
     // Try to get name from user metadata (OAuth providers)
     const metadata = user.user_metadata
@@ -29,20 +29,20 @@ export async function getDisplayNameFromAuth(): Promise<string> {
     
     // Try first_name + last_name
     if (metadata?.first_name || metadata?.last_name) {
-      const firstName = metadata?.first_name || ""
-      const lastName = metadata?.last_name || ""
+      const firstName = metadata?.first_name || ''
+      const lastName = metadata?.last_name || ''
       return `${firstName} ${lastName}`.trim()
     }
     
     // Fallback to email username (before @)
     if (user.email) {
-      return user.email.split("@")[0]
+      return user.email.split('@')[0]
     }
     
-    return ""
+    return ''
   } catch (error) {
-    logger.error("Error getting display name from auth", error)
-    return ""
+    logger.error('Error getting display name from auth', error)
+    return ''
   }
 }
 
@@ -55,7 +55,7 @@ export async function getUserEmail(): Promise<string | null> {
     const { data: { user } } = await supabase.auth.getUser()
     return user?.email || null
   } catch (error) {
-    logger.error("Error getting user email", error)
+    logger.error('Error getting user email', error)
     return null
   }
 }

@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { createClient } from "./client"
-import { logger } from "@/lib/logger"
+import { createClient } from './client'
+import { logger } from '@/lib/logger'
 
 /**
  * Sign up with email and password
@@ -25,7 +25,7 @@ export async function signUpWithEmail(email: string, password: string) {
 
     return { data, error: null }
   } catch (error) {
-    logger.error("Sign up error", error)
+    logger.error('Sign up error', error)
     return { data: null, error }
   }
 }
@@ -49,7 +49,7 @@ export async function signInWithEmail(email: string, password: string) {
 
     return { data, error: null }
   } catch (error) {
-    logger.error("Sign in error", error)
+    logger.error('Sign in error', error)
     return { data: null, error }
   }
 }
@@ -73,7 +73,7 @@ export async function verifyOTP(email: string, token: string) {
 
     return { data, error: null }
   } catch (error) {
-    logger.error("OTP verification error", error)
+    logger.error('OTP verification error', error)
     return { data: null, error }
   }
 }
@@ -96,7 +96,7 @@ export async function resendOTP(email: string) {
 
     return { data, error: null }
   } catch (error) {
-    logger.error("Resend OTP error", error)
+    logger.error('Resend OTP error', error)
     return { data: null, error }
   }
 }
@@ -118,7 +118,7 @@ export async function sendPasswordResetEmail(email: string) {
 
     return { data, error: null }
   } catch (error) {
-    logger.error("Password reset email error", error)
+    logger.error('Password reset email error', error)
     return { data: null, error }
   }
 }
@@ -140,7 +140,7 @@ export async function updatePassword(newPassword: string) {
 
     return { data, error: null }
   } catch (error) {
-    logger.error("Update password error", error)
+    logger.error('Update password error', error)
     return { data: null, error }
   }
 }
@@ -149,36 +149,36 @@ export async function updatePassword(newPassword: string) {
  * Get Supabase error message in Czech
  */
 export function getErrorMessage(error: unknown): string {
-  if (!error) return "Neznámá chyba"
+  if (!error) return 'Neznámá chyba'
   
   const message = (error && typeof error === 'object' && 'message' in error ? error.message as string : null) 
     || (error && typeof error === 'object' && 'error_description' in error ? (error as Record<string, unknown>).error_description as string : null) 
-    || ""
+    || ''
   
   // Map common Supabase errors to Czech
-  if (message.includes("Invalid login credentials")) {
-    return "Neplatné přihlašovací údaje"
+  if (message.includes('Invalid login credentials')) {
+    return 'Neplatné přihlašovací údaje'
   }
-  if (message.includes("Email not confirmed")) {
-    return "Email nebyl ověřen. Zkontrolujte svou e-mailovou schránku."
+  if (message.includes('Email not confirmed')) {
+    return 'Email nebyl ověřen. Zkontrolujte svou e-mailovou schránku.'
   }
-  if (message.includes("User already registered")) {
-    return "Uživatel s tímto emailem již existuje"
+  if (message.includes('User already registered')) {
+    return 'Uživatel s tímto emailem již existuje'
   }
-  if (message.includes("Password should be at least")) {
-    return "Heslo musí mít alespoň 6 znaků"
+  if (message.includes('Password should be at least')) {
+    return 'Heslo musí mít alespoň 6 znaků'
   }
-  if (message.includes("Unable to validate email")) {
-    return "Neplatný formát emailu"
+  if (message.includes('Unable to validate email')) {
+    return 'Neplatný formát emailu'
   }
-  if (message.includes("Email rate limit exceeded")) {
-    return "Bylo odesláno příliš mnoho emailů. Zkuste to později."
+  if (message.includes('Email rate limit exceeded')) {
+    return 'Bylo odesláno příliš mnoho emailů. Zkuste to později.'
   }
-  if (message.includes("Token has expired")) {
-    return "Platnost odkazu vypršela. Požádejte o nový."
+  if (message.includes('Token has expired')) {
+    return 'Platnost odkazu vypršela. Požádejte o nový.'
   }
   
-  return message || "Neznámá chyba"
+  return message || 'Neznámá chyba'
 }
 
 

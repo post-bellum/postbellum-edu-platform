@@ -1,8 +1,8 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
-import { authConfig } from "@/lib/supabase/config";
-import type { Database } from "@/types/database.types";
-import { logger } from "@/lib/logger";
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
+import { authConfig } from '@/lib/supabase/config';
+import type { Database } from '@/types/database.types';
+import { logger } from '@/lib/logger';
 
 export default async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -13,7 +13,7 @@ export default async function proxy(request: NextRequest) {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !anonKey) {
-    logger.error("Missing Supabase environment variables in middleware");
+    logger.error('Missing Supabase environment variables in middleware');
     return supabaseResponse; // Continue without auth rather than breaking the app
   }
 
@@ -45,7 +45,7 @@ export default async function proxy(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (error) {
-      logger.error("Auth error in middleware", error);
+      logger.error('Auth error in middleware', error);
     }
 
     // Protected routes
@@ -58,7 +58,7 @@ export default async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL(authConfig.redirects.login, request.url));
     }
   } catch (error) {
-    logger.error("Middleware error", error);
+    logger.error('Middleware error', error);
     // Continue without auth rather than breaking the app
   }
 
@@ -74,6 +74,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

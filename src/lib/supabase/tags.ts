@@ -1,9 +1,9 @@
-"use server"
+'use server'
 
-import { createClient } from "./server"
-import { requireAdmin } from "./admin-helpers"
-import { logger } from "@/lib/logger"
-import type { Tag } from "@/types/lesson.types"
+import { createClient } from './server'
+import { requireAdmin } from './admin-helpers'
+import { logger } from '@/lib/logger'
+import type { Tag } from '@/types/lesson.types'
 
 /**
  * Get all tags
@@ -17,13 +17,13 @@ export async function getTags(): Promise<Tag[]> {
       .order('title', { ascending: true })
 
     if (error) {
-      logger.error("Error fetching tags:", error)
+      logger.error('Error fetching tags:', error)
       throw error
     }
 
     return (data || []) as Tag[]
   } catch (error) {
-    logger.error("Error fetching tags:", error)
+    logger.error('Error fetching tags:', error)
     throw error
   }
 }
@@ -41,13 +41,13 @@ export async function getTagById(id: string): Promise<Tag | null> {
       .single()
 
     if (error) {
-      logger.error("Error fetching tag:", error)
+      logger.error('Error fetching tag:', error)
       return null
     }
 
     return data as Tag
   } catch (error) {
-    logger.error("Error fetching tag:", error)
+    logger.error('Error fetching tag:', error)
     return null
   }
 }
@@ -67,13 +67,13 @@ export async function createTag(title: string): Promise<Tag> {
       .single()
 
     if (error) {
-      logger.error("Error creating tag:", error)
+      logger.error('Error creating tag:', error)
       throw error
     }
 
     return data as Tag
   } catch (error) {
-    logger.error("Error creating tag:", error)
+    logger.error('Error creating tag:', error)
     throw error
   }
 }
@@ -94,13 +94,13 @@ export async function updateTag(id: string, title: string): Promise<Tag> {
       .single()
 
     if (error) {
-      logger.error("Error updating tag:", error)
+      logger.error('Error updating tag:', error)
       throw error
     }
 
     return data as Tag
   } catch (error) {
-    logger.error("Error updating tag:", error)
+    logger.error('Error updating tag:', error)
     throw error
   }
 }
@@ -119,11 +119,11 @@ export async function deleteTag(id: string): Promise<void> {
       .eq('id', id)
 
     if (error) {
-      logger.error("Error deleting tag:", error)
+      logger.error('Error deleting tag:', error)
       throw error
     }
   } catch (error) {
-    logger.error("Error deleting tag:", error)
+    logger.error('Error deleting tag:', error)
     throw error
   }
 }
@@ -142,13 +142,13 @@ export async function searchTags(query: string): Promise<Tag[]> {
       .limit(20)
 
     if (error) {
-      logger.error("Error searching tags:", error)
+      logger.error('Error searching tags:', error)
       throw error
     }
 
     return (data || []) as Tag[]
   } catch (error) {
-    logger.error("Error searching tags:", error)
+    logger.error('Error searching tags:', error)
     throw error
   }
 }

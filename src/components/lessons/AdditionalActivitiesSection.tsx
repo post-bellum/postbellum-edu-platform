@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { AdditionalActivity } from "@/types/lesson.types"
-import { Button } from "@/components/ui/Button"
-import { Eye } from "lucide-react"
+import { AdditionalActivity } from '@/types/lesson.types'
+import { Button } from '@/components/ui/Button'
+import { Eye } from 'lucide-react'
 
 interface AdditionalActivitiesSectionProps {
   activities: AdditionalActivity[]

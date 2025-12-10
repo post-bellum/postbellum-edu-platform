@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { createClient } from "@/lib/supabase/client"
-import { deleteLessonMaterialAction } from "@/app/actions/lesson-materials"
-import type { LessonMaterial, LessonSpecification, LessonDuration } from "@/types/lesson.types"
-import { Button } from "@/components/ui/Button"
-import { Plus, Edit, Trash2 } from "lucide-react"
-import { LessonMaterialForm } from "./LessonMaterialForm"
+import * as React from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { deleteLessonMaterialAction } from '@/app/actions/lesson-materials'
+import type { LessonMaterial, LessonSpecification, LessonDuration } from '@/types/lesson.types'
+import { Button } from '@/components/ui/Button'
+import { Plus, Edit, Trash2 } from 'lucide-react'
+import { LessonMaterialForm } from './LessonMaterialForm'
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/Dialog"
+} from '@/components/ui/Dialog'
+import { logger } from '@/lib/logger'
 
 interface LessonMaterialsManagerProps {
   lessonId: string
@@ -55,13 +56,13 @@ export function LessonMaterialsManager({
         .order('created_at', { ascending: true })
 
       if (error) {
-        console.error("Error loading materials:", error)
+        logger.error('Error loading materials:', error)
         return
       }
 
       setMaterials((data || []) as LessonMaterial[])
     } catch (error) {
-      console.error("Error loading materials:", error)
+      logger.error('Error loading materials:', error)
     }
   }, [lessonId])
 
@@ -98,7 +99,7 @@ export function LessonMaterialsManager({
       setMaterialToDelete(null)
       loadMaterials()
     } catch (error) {
-      console.error("Error deleting material:", error)
+      logger.error('Error deleting material:', error)
     } finally {
       setIsDeleting(false)
     }
@@ -201,7 +202,7 @@ export function LessonMaterialsManager({
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
             >
-              {isDeleting ? "Mazání..." : "Smazat"}
+              {isDeleting ? 'Mazání...' : 'Smazat'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -209,4 +210,3 @@ export function LessonMaterialsManager({
     </div>
   )
 }
-

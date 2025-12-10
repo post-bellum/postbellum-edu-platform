@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/supabase/hooks/useAuth"
-import { useProfile } from "@/lib/supabase/hooks/useProfile"
+import * as React from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/supabase/hooks/useAuth'
+import { useProfile } from '@/lib/supabase/hooks/useProfile'
 import {
   AlertMessage,
   UserTypeSection,
@@ -11,7 +11,7 @@ import {
   AvatarSection,
   DisplayNameSection,
   DeleteAccountSection,
-} from "@/components/profile"
+} from '@/components/profile'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -27,8 +27,8 @@ export default function ProfilePage() {
   } = useProfile(isLoggedIn)
 
   // Local state for form inputs
-  const [displayName, setDisplayName] = React.useState("")
-  const [schoolName, setSchoolName] = React.useState("")
+  const [displayName, setDisplayName] = React.useState('')
+  const [schoolName, setSchoolName] = React.useState('')
 
   // Sync local state with profile data
   React.useEffect(() => {
@@ -41,7 +41,7 @@ export default function ProfilePage() {
   // Redirect if not logged in
   React.useEffect(() => {
     if (!authLoading && !isLoggedIn) {
-      router.push("/")
+      router.push('/')
     }
   }, [authLoading, isLoggedIn, router])
 
@@ -79,7 +79,7 @@ export default function ProfilePage() {
       <UserTypeSection userType={profile.userType} />
 
       {/* School Name (for teachers) */}
-      {profile.userType === "teacher" && (
+      {profile.userType === 'teacher' && (
         <SchoolNameSection
           schoolName={schoolName}
           onSchoolNameChange={setSchoolName}

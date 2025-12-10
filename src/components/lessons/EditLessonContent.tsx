@@ -42,4 +42,3 @@ export async function EditLessonContent({ id }: EditLessonContentProps) {
     </div>
   )
 }
-

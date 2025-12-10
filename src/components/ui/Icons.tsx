@@ -1,4 +1,4 @@
-export function GoogleIcon({ className = "w-5 h-5" }: { className?: string }) {
+export function GoogleIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24">
       <path
@@ -21,7 +21,7 @@ export function GoogleIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-export function MicrosoftIcon({ className = "w-5 h-5" }: { className?: string }) {
+export function MicrosoftIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 23 23">
       <path fill="#f3f3f3" d="M0 0h23v23H0z" />
@@ -33,7 +33,7 @@ export function MicrosoftIcon({ className = "w-5 h-5" }: { className?: string })
   );
 }
 
-export function SearchIcon({ className = "w-4 h-4" }: { className?: string }) {
+export function SearchIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -51,7 +51,7 @@ export function SearchIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-export function EyeIcon({ className = "w-4 h-4" }: { className?: string }) {
+export function EyeIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -75,7 +75,7 @@ export function EyeIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-export function EyeOffIcon({ className = "w-4 h-4" }: { className?: string }) {
+export function EyeOffIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -93,7 +93,7 @@ export function EyeOffIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-export function CheckCircleIcon({ className = "w-12 h-12" }: { className?: string }) {
+export function CheckCircleIcon({ className = 'w-12 h-12' }: { className?: string }) {
   return (
     <svg
       className={className}

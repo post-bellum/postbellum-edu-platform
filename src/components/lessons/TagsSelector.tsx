@@ -1,11 +1,12 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Tag } from "@/types/lesson.types"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Plus, X } from "lucide-react"
-import { createTagAction } from "@/app/actions/tags"
+import * as React from 'react'
+import { Tag } from '@/types/lesson.types'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Plus, X } from 'lucide-react'
+import { createTagAction } from '@/app/actions/tags'
+import { logger } from '@/lib/logger'
 
 interface TagsSelectorProps {
   tags: Tag[]
@@ -14,7 +15,7 @@ interface TagsSelectorProps {
 }
 
 export function TagsSelector({ tags, selectedTagIds, onSelectionChange }: TagsSelectorProps) {
-  const [newTagTitle, setNewTagTitle] = React.useState("")
+  const [newTagTitle, setNewTagTitle] = React.useState('')
   const [isCreating, setIsCreating] = React.useState(false)
   const [localTags, setLocalTags] = React.useState<Tag[]>(tags)
 
@@ -39,10 +40,10 @@ export function TagsSelector({ tags, selectedTagIds, onSelectionChange }: TagsSe
       if (result.success && result.data) {
         setLocalTags([...localTags, result.data])
         onSelectionChange([...selectedTagIds, result.data.id])
-        setNewTagTitle("")
+        setNewTagTitle('')
       }
     } catch (error) {
-      console.error("Error creating tag:", error)
+      logger.error('Error creating tag:', error)
     } finally {
       setIsCreating(false)
     }
@@ -98,7 +99,7 @@ export function TagsSelector({ tags, selectedTagIds, onSelectionChange }: TagsSe
           onChange={(e) => setNewTagTitle(e.target.value)}
           placeholder="Nový tag..."
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === 'Enter') {
               e.preventDefault()
               handleCreateTag()
             }
@@ -117,4 +118,3 @@ export function TagsSelector({ tags, selectedTagIds, onSelectionChange }: TagsSe
     </div>
   )
 }
-

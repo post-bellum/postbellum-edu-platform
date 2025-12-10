@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import * as React from 'react'
 import { redirect } from 'next/navigation'
 import { isAdmin } from '@/lib/supabase/admin-helpers'
 import { EditLessonContent } from '@/components/lessons/EditLessonContent'
@@ -32,10 +32,9 @@ export default async function EditLessonPage({ params }: EditLessonPageProps) {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <h1 className="text-4xl font-bold">Upravit lekci</h1>
-      <Suspense fallback={<EditLessonLoading />}>
+      <React.Suspense fallback={<EditLessonLoading />}>
         <EditLessonContent id={id} />
-      </Suspense>
+      </React.Suspense>
     </div>
   )
 }
-

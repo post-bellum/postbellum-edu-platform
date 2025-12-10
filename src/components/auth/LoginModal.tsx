@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { OAuthButtons } from "./OAuthButtons"
-import { signInWithEmail, getErrorMessage } from "@/lib/supabase/email-auth"
-import { logger } from "@/lib/logger"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { OAuthButtons } from './OAuthButtons'
+import { signInWithEmail, getErrorMessage } from '@/lib/supabase/email-auth'
+import { logger } from '@/lib/logger'
 
 interface LoginModalProps {
   onSwitchToRegister: () => void
@@ -16,8 +16,8 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, returnTo }: LoginModalProps) {
-  const [email, setEmail] = React.useState("")
-  const [password, setPassword] = React.useState("")
+  const [email, setEmail] = React.useState('')
+  const [password, setPassword] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -35,15 +35,15 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
       }
 
       if (!data || !data.user) {
-        setError("Přihlášení se nezdařilo")
+        setError('Přihlášení se nezdařilo')
         return
       }
 
       // After successful login
       onSuccess?.()
     } catch (error) {
-      logger.error("Login error", error)
-      setError("Při přihlášení došlo k chybě. Zkuste to prosím znovu.")
+      logger.error('Login error', error)
+      setError('Při přihlášení došlo k chybě. Zkuste to prosím znovu.')
     } finally {
       setIsLoading(false)
     }
@@ -113,13 +113,13 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
           disabled={isLoading}
         >
-          {isLoading ? "Přihlašování..." : "Přihlásit"}
+          {isLoading ? 'Přihlašování...' : 'Přihlásit'}
         </Button>
       </form>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-text-secondary">
-          Jeste nemáte účet?{" "}
+          Jeste nemáte účet?{' '}
           <button
             type="button"
             onClick={onSwitchToRegister}

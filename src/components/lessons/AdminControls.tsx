@@ -1,11 +1,11 @@
-"use client"
+'use client'
 
+import * as React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Plus, Edit } from 'lucide-react'
 import { DeleteLessonButton } from '@/components/lessons/DeleteLessonButton'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
-import { useEffect, useState } from 'react'
 
 interface AdminControlsProps {
   lessonId?: string
@@ -21,10 +21,10 @@ export function AdminControls({
   showEditButton = false 
 }: AdminControlsProps) {
   const { isLoggedIn } = useAuth()
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = React.useState(false)
+  const [loading, setLoading] = React.useState(true)
 
-  useEffect(() => {
+  React.useEffect(() => {
     async function checkAdmin() {
       if (!isLoggedIn) {
         setLoading(false)
@@ -81,4 +81,3 @@ export function AdminControls({
     </>
   )
 }
-
