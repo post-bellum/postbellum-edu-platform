@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { formatDateLong } from '@/lib/utils'
 import { getLessonById } from '@/lib/supabase/lessons'
 import { isLessonFavorited } from '@/lib/supabase/favorites'
 import { getUserLessonMaterials } from '@/lib/supabase/user-lesson-materials'
@@ -12,6 +11,8 @@ import { AdditionalActivitiesSection } from '@/components/lessons/AdditionalActi
 import { AdminControls } from '@/components/lessons/AdminControls'
 import { FavoriteButton } from '@/components/lessons/FavoriteButton'
 import { FavoriteCTA } from '@/components/lessons/FavoriteCTA'
+import { LessonVideoEmbed } from '@/components/lessons/LessonVideoEmbed'
+import { LessonDetailInfo } from '@/components/lessons/LessonDetailInfo'
 
 interface LessonDetailContentProps {
   id: string
@@ -66,22 +67,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
         <div className="lg:col-span-2 space-y-6">
           {/* Video */}
           {lesson.vimeo_video_url && (
-            <div className="relative rounded-lg overflow-hidden bg-gray-100" style={{ paddingTop: '56.25%' }}>
-              <iframe
-                src={lesson.vimeo_video_url}
-                frameBorder="0"
-                allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%'
-                }}
-                title={lesson.title}
-              />
-            </div>
+            <LessonVideoEmbed videoUrl={lesson.vimeo_video_url} title={lesson.title} />
           )}
 
           {/* Lesson Materials with User Custom Materials */}
@@ -99,87 +85,14 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
         {/* Sidebar */}
         <div className="space-y-6">
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Základní informace o lekci</h2>
-            
-            {lesson.description && (
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Popis lekce</h3>
-                <p className="text-gray-600 text-sm">{lesson.description}</p>
-              </div>
-            )}
-
-            {lesson.duration && (
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Délka lekce</h3>
-                <p className="text-gray-600 text-sm">{lesson.duration}</p>
-              </div>
-            )}
-
-            {lesson.rvp_connection && lesson.rvp_connection.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Napojení na RVP</h3>
-                <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
-                  {lesson.rvp_connection.map((rvp: string, idx: number) => (
-                    <li key={idx}>{rvp}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {lesson.period && (
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Období</h3>
-                <p className="text-gray-600 text-sm">{lesson.period}</p>
-              </div>
-            )}
-
-            {lesson.target_group && (
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Cílová skupina</h3>
-                <p className="text-gray-600 text-sm">{lesson.target_group}</p>
-              </div>
-            )}
-
-            {lesson.lesson_type && (
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Typ lekce</h3>
-                <p className="text-gray-600 text-sm">{lesson.lesson_type}</p>
-              </div>
-            )}
-
-            {lesson.publication_date && (
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Datum publikování lekce</h3>
-                <p className="text-gray-600 text-sm">
-                  {formatDateLong(lesson.publication_date)}
-                </p>
-              </div>
-            )}
-
-            {lesson.tags && lesson.tags.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Tagy</h3>
-                <div className="flex flex-wrap gap-2">
-                  {lesson.tags.map((tag: { id: string; title: string }) => (
-                    <span
-                      key={tag.id}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                    >
-                      {tag.title}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Favorite Button or CTA */}
-            {user ? (
-              <div className="pt-4 border-t">
+            <LessonDetailInfo lesson={lesson}>
+              {/* Favorite Button or CTA */}
+              {user ? (
                 <FavoriteButton lessonId={id} initialIsFavorited={isFavorited} />
-              </div>
-            ) : (
-              <FavoriteCTA />
-            )}
+              ) : (
+                <FavoriteCTA />
+              )}
+            </LessonDetailInfo>
           </div>
         </div>
       </div>
