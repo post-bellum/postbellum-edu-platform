@@ -24,6 +24,9 @@ interface UserMaterialEditContentProps {
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
+// Auto-save configuration
+const AUTO_SAVE_DELAY_MS = 1000
+
 export function UserMaterialEditContent({
   material: initialMaterial,
   lesson,
@@ -78,7 +81,7 @@ export function UserMaterialEditContent({
     // Set new timeout for auto-save
     saveTimeoutRef.current = setTimeout(() => {
       saveChanges(newTitle, content)
-    }, 1000)
+    }, AUTO_SAVE_DELAY_MS)
   }
 
   // Auto-save on content change
@@ -93,16 +96,26 @@ export function UserMaterialEditContent({
     // Set new timeout for auto-save
     saveTimeoutRef.current = setTimeout(() => {
       saveChanges(title, newContent)
-    }, 1000)
+    }, AUTO_SAVE_DELAY_MS)
   }
 
-  // Cleanup timeout on unmount
+  // Cleanup and save on unmount if there are unsaved changes
   React.useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
       }
+      
+      // Trigger final save if there are unsaved changes
+      if (title !== lastSavedRef.current.title || content !== lastSavedRef.current.content) {
+        // Use a synchronous approach for unmount - create FormData and trigger action
+        const formData = new FormData()
+        formData.set('title', title)
+        formData.set('content', content)
+        updateUserLessonMaterialAction(initialMaterial.id, formData)
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleDeleteConfirm = async () => {
@@ -112,6 +125,7 @@ export function UserMaterialEditContent({
     if (result.success) {
       router.push(`/lessons/${lesson.id}`)
     } else {
+      // TODO: Replace alert with toast notification system for better UX
       alert(result.error || 'Chyba při mazání materiálu')
       setIsDeleting(false)
       setDeleteDialogOpen(false)
@@ -126,6 +140,7 @@ export function UserMaterialEditContent({
       // Navigate to the new duplicate
       router.push(`/lessons/${lesson.id}/materials/${result.data.id}`)
     } else {
+      // TODO: Replace alert with toast notification system for better UX
       alert(result.error || 'Chyba při duplikování materiálu')
     }
     setIsDuplicating(false)

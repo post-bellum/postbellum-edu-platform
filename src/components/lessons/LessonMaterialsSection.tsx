@@ -64,6 +64,7 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
       // Navigate to the edit page
       router.push(`/lessons/${lessonId}/materials/${result.data.id}`)
     } else if (!result.success) {
+      // TODO: Replace alert with toast notification system for better UX
       alert(result.error || 'Chyba při vytváření kopie materiálu')
       setIsCopying(null)
     }

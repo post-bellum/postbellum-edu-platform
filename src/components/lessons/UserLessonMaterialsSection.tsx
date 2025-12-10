@@ -47,6 +47,7 @@ export function UserLessonMaterialsSection({
       onMaterialDeleted?.(materialToDelete)
       setDeleteDialogOpen(false)
     } else {
+      // TODO: Replace alert with toast notification system for better UX
       alert(result.error || 'Chyba při mazání materiálu')
     }
     
