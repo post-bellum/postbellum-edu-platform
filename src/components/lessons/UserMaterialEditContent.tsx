@@ -189,70 +189,69 @@ export function UserMaterialEditContent({
         </Link>
       </div>
 
+      {/* Title and Actions - Full Width Header */}
+      <div className="flex flex-wrap items-end gap-4 mb-6">
+        <div className="flex-1 min-w-[200px]">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+            Název
+          </label>
+          <Input
+            id="title"
+            value={title}
+            onChange={handleTitleChange}
+            placeholder="Název materiálu"
+            className="max-w-md"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          {getSaveStatusDisplay()}
+
+          <Button
+            variant="outline"
+            size="sm"
+            disabled
+            title="Připravujeme"
+          >
+            <Download className="w-4 h-4" />
+            Stáhnout PDF
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewModalOpen(true)}
+          >
+            <Eye className="w-4 h-4" />
+            Zobrazit
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDuplicate}
+            disabled={isDuplicating}
+          >
+            <Copy className="w-4 h-4" />
+            {isDuplicating ? 'Duplikuji...' : 'Duplikovat'}
+          </Button>
+
+          <Button
+            variant="destructive"
+            size="icon"
+            onClick={() => setDeleteDialogOpen(true)}
+            disabled={isDeleting}
+            title="Smazat"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
       {/* Two Column Layout */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Main Editor - Left Side */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Title and Actions */}
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                Název
-              </label>
-              <Input
-                id="title"
-                value={title}
-                onChange={handleTitleChange}
-                placeholder="Název materiálu"
-                className="max-w-md"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              {getSaveStatusDisplay()}
-
-              <Button
-                variant="outline"
-                size="sm"
-                disabled
-                title="Připravujeme"
-              >
-                <Download className="w-4 h-4" />
-                Stáhnout PDF
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewModalOpen(true)}
-              >
-                <Eye className="w-4 h-4" />
-                Zobrazit
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDuplicate}
-                disabled={isDuplicating}
-              >
-                <Copy className="w-4 h-4" />
-                {isDuplicating ? 'Duplikuji...' : 'Duplikovat'}
-              </Button>
-
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => setDeleteDialogOpen(true)}
-                disabled={isDeleting}
-                title="Smazat"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Rich Text Editor */}
+        <div className="flex-1 lg:flex-[2]">
           <RichTextEditor
             content={content}
             onChange={handleContentChange}
@@ -262,7 +261,7 @@ export function UserMaterialEditContent({
         </div>
 
         {/* Sidebar - Right Side */}
-        <div className="lg:col-span-1">
+        <div className="flex-1 lg:flex-[1] lg:max-w-sm">
           <MaterialEditSidebar lesson={lesson} />
         </div>
       </div>
