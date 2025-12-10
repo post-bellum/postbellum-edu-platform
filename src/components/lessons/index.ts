@@ -13,4 +13,8 @@ export { LessonsList } from './LessonsList'
 export { NewLessonContent } from './NewLessonContent'
 export { LessonDetailContent } from './LessonDetailContent'
 export { EditLessonContent } from './EditLessonContent'
+export { UserLessonMaterialsSection } from './UserLessonMaterialsSection'
+export { UserLessonMaterialEditModal } from './UserLessonMaterialEditModal'
+export { LessonMaterialsWrapper } from './LessonMaterialsWrapper'
+export { UserMaterialEditContent } from './UserMaterialEditContent'
 
