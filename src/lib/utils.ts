@@ -13,4 +13,12 @@ export function formatDate(dateString: string) {
   })
 }
 
+export function formatDateLong(dateString: string) {
+  return new Date(dateString).toLocaleDateString('cs-CZ', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
 
