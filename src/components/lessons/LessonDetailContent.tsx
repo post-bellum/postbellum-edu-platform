@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { formatDateLong } from '@/lib/utils'
 import { getLessonById } from '@/lib/supabase/lessons'
 import { isLessonFavorited } from '@/lib/supabase/favorites'
 import { getUserLessonMaterials } from '@/lib/supabase/user-lesson-materials'
@@ -150,11 +151,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
               <div className="mb-4">
                 <h3 className="font-medium mb-2">Datum publikování lekce</h3>
                 <p className="text-gray-600 text-sm">
-                  {new Date(lesson.publication_date).toLocaleDateString('cs-CZ', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                  {formatDateLong(lesson.publication_date)}
                 </p>
               </div>
             )}

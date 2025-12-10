@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { formatDate } from '@/lib/utils'
 import { getLessons } from '@/lib/supabase/lessons'
 import { AdminControls } from '@/components/lessons/AdminControls'
 import { isAdmin } from '@/lib/supabase/admin-helpers'
@@ -58,7 +59,7 @@ export async function LessonsList() {
                     {lesson.duration && <span>• {lesson.duration}</span>}
                     {lesson.target_group && <span>• {lesson.target_group}</span>}
                     {lesson.publication_date && (
-                      <span>• Publikováno: {new Date(lesson.publication_date).toLocaleDateString('cs-CZ')}</span>
+                      <span>• Publikováno: {formatDate(lesson.publication_date)}</span>
                     )}
                   </div>
                 </Link>
