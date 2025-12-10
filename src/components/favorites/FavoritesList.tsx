@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { formatDate } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
 import { getUserFavoriteLessonIds } from '@/lib/supabase/favorites'
 import { getLessonsByIds } from '@/lib/supabase/lessons'
@@ -60,7 +61,7 @@ export async function FavoritesList() {
               {lesson.duration && <span>• {lesson.duration}</span>}
               {lesson.target_group && <span>• {lesson.target_group}</span>}
               {lesson.publication_date && (
-                <span>• Publikováno: {new Date(lesson.publication_date).toLocaleDateString('cs-CZ')}</span>
+                <span>• Publikováno: {formatDate(lesson.publication_date)}</span>
               )}
             </div>
           </Link>

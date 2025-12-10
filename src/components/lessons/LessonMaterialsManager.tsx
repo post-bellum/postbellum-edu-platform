@@ -23,7 +23,6 @@ interface LessonMaterialsManagerProps {
 }
 
 const specificationLabels: Record<LessonSpecification, string> = {
-  '1st_grade_elementary': '1. stupeň ZŠ',
   '2nd_grade_elementary': '2. stupeň ZŠ',
   'high_school': 'Střední školy',
 }
