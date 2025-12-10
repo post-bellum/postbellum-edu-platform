@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { createClient } from "./client"
-import type { CompleteRegistrationData } from "@/types/user.types"
-import { sanitizeInput } from "@/lib/sanitize"
-import { logger } from "@/lib/logger"
-import { AUTH_CONSTANTS } from "@/lib/constants"
+import { createClient } from './client'
+import type { CompleteRegistrationData } from '@/types/user.types'
+import { sanitizeInput } from '@/lib/sanitize'
+import { logger } from '@/lib/logger'
+import { AUTH_CONSTANTS } from '@/lib/constants'
 
 /**
  * Check if current user has completed registration
@@ -25,7 +25,7 @@ export async function hasCompletedRegistration(): Promise<boolean> {
     
     return profile?.registration_completed === true
   } catch (error) {
-    logger.error("Error checking registration status", error)
+    logger.error('Error checking registration status', error)
     return false
   }
 }
@@ -40,15 +40,15 @@ export async function completeRegistration(data: CompleteRegistrationData): Prom
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
-      throw new Error("No user logged in")
+      throw new Error('No user logged in')
     }
     
     // Validate data based on user type
     if (data.userType === 'teacher' && !data.schoolName) {
-      throw new Error("School name is required for teachers")
+      throw new Error('School name is required for teachers')
     }
     if (data.userType === 'not-teacher' && !data.category) {
-      throw new Error("Category is required for non-teachers")
+      throw new Error('Category is required for non-teachers')
     }
     
     // Validate display name length if provided
@@ -70,6 +70,7 @@ export async function completeRegistration(data: CompleteRegistrationData): Prom
         user_type: data.userType,
         school_name: data.userType === 'teacher' ? sanitizedSchoolName : null,
         category: data.userType === 'not-teacher' ? data.category : null,
+        terms_accepted: data.termsAccepted,
         email_consent: data.emailConsent,
         registration_completed: true,
       }, {
@@ -77,12 +78,12 @@ export async function completeRegistration(data: CompleteRegistrationData): Prom
       })
     
     if (error) {
-      logger.error("Error saving profile:", error)
+      logger.error('Error saving profile:', error)
       throw error
     }
     
   } catch (error) {
-    logger.error("Error completing registration:", error)
+    logger.error('Error completing registration:', error)
     throw error
   }
 }
@@ -105,7 +106,7 @@ export async function getUserProfile() {
       .single()
     
     if (error) {
-      logger.error("Error fetching profile:", error)
+      logger.error('Error fetching profile:', error)
       return null
     }
     
@@ -118,11 +119,12 @@ export async function getUserProfile() {
       userType: profile.user_type,
       schoolName: profile.school_name,
       category: profile.category,
+      termsAccepted: profile.terms_accepted,
       emailConsent: profile.email_consent,
       registrationCompleted: profile.registration_completed,
     }
   } catch (error) {
-    logger.error("Error getting user profile:", error)
+    logger.error('Error getting user profile:', error)
     return null
   }
 }
@@ -137,7 +139,7 @@ export async function updateDisplayName(displayName: string): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
-      throw new Error("No user logged in")
+      throw new Error('No user logged in')
     }
     
     // Validate display name length
@@ -154,11 +156,11 @@ export async function updateDisplayName(displayName: string): Promise<void> {
       .eq('id', user.id)
     
     if (error) {
-      logger.error("Error updating display name:", error)
+      logger.error('Error updating display name:', error)
       throw error
     }
   } catch (error) {
-    logger.error("Error updating display name:", error)
+    logger.error('Error updating display name:', error)
     throw error
   }
 }
@@ -177,7 +179,7 @@ export async function updateProfile(updates: {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
-      throw new Error("No user logged in")
+      throw new Error('No user logged in')
     }
     
     // Validate display name length if provided
@@ -205,11 +207,11 @@ export async function updateProfile(updates: {
       .eq('id', user.id)
     
     if (error) {
-      logger.error("Error updating profile:", error)
+      logger.error('Error updating profile:', error)
       throw error
     }
   } catch (error) {
-    logger.error("Error updating profile:", error)
+    logger.error('Error updating profile:', error)
     throw error
   }
 }

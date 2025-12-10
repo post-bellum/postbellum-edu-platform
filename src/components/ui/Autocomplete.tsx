@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Input } from "@/components/ui/Input"
-import { cn } from "@/lib/utils"
-import { logger } from "@/lib/logger"
+import * as React from 'react'
+import { Input } from '@/components/ui/Input'
+import { cn } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 
 export interface AutocompleteOption {
   value: string
@@ -37,8 +37,8 @@ export function Autocomplete({
   required = false,
   minChars = 2,
   debounceMs = 300,
-  emptyMessage = "Žádné výsledky",
-  loadingMessage = "Vyhledávání...",
+  emptyMessage = 'Žádné výsledky',
+  loadingMessage = 'Vyhledávání...',
   rightIcon,
   className,
 }: AutocompleteProps) {
@@ -77,7 +77,7 @@ export function Autocomplete({
         setHighlightedIndex(-1)
       } catch (error) {
         // Log error but don't show to user - autocomplete failures are non-critical
-        logger.error("Autocomplete search error", error)
+        logger.error('Autocomplete search error', error)
         setOptions([])
         setIsOpen(false)
       } finally {
@@ -102,8 +102,8 @@ export function Autocomplete({
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,35 +121,35 @@ export function Autocomplete({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!isOpen || options.length === 0) {
-      if (e.key === "ArrowDown" && inputValue.length >= minChars) {
+      if (e.key === 'ArrowDown' && inputValue.length >= minChars) {
         setIsOpen(true)
       }
       return
     }
 
     switch (e.key) {
-      case "ArrowDown":
+      case 'ArrowDown':
         e.preventDefault()
         setHighlightedIndex((prev) => 
           prev < options.length - 1 ? prev + 1 : prev
         )
         break
-      case "ArrowUp":
+      case 'ArrowUp':
         e.preventDefault()
         setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1))
         break
-      case "Enter":
+      case 'Enter':
         e.preventDefault()
         if (highlightedIndex >= 0 && highlightedIndex < options.length) {
           handleSelectOption(options[highlightedIndex])
         }
         break
-      case "Escape":
+      case 'Escape':
         e.preventDefault()
         setIsOpen(false)
         setHighlightedIndex(-1)
         break
-      case "Tab":
+      case 'Tab':
         setIsOpen(false)
         setHighlightedIndex(-1)
         break
@@ -162,8 +162,8 @@ export function Autocomplete({
       const highlightedElement = listRef.current.children[highlightedIndex] as HTMLElement
       if (highlightedElement) {
         highlightedElement.scrollIntoView({
-          block: "nearest",
-          behavior: "smooth",
+          block: 'nearest',
+          behavior: 'smooth',
         })
       }
     }
@@ -172,7 +172,7 @@ export function Autocomplete({
   const showDropdown = isOpen && (isLoading || options.length > 0 || inputValue.length >= minChars)
 
   return (
-    <div ref={containerRef} className={cn("relative", className)}>
+    <div ref={containerRef} className={cn('relative', className)}>
       <Input
         ref={inputRef}
         id={id}
@@ -230,10 +230,10 @@ export function Autocomplete({
                 role="option"
                 aria-selected={index === highlightedIndex}
                 className={cn(
-                  "px-4 py-2 cursor-pointer transition-colors",
+                  'px-4 py-2 cursor-pointer transition-colors',
                   index === highlightedIndex
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-gray-50 text-gray-900"
+                    ? 'bg-primary/10 text-primary'
+                    : 'hover:bg-gray-50 text-gray-900'
                 )}
                 onClick={() => handleSelectOption(option)}
                 onMouseEnter={() => setHighlightedIndex(index)}

@@ -1,24 +1,23 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { Checkbox } from "@/components/ui/Checkbox"
-import { OAuthButtons } from "./OAuthButtons"
-import { signInWithEmail, getErrorMessage } from "@/lib/supabase/email-auth"
-import { logger } from "@/lib/logger"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { OAuthButtons } from './OAuthButtons'
+import { signInWithEmail, getErrorMessage } from '@/lib/supabase/email-auth'
+import { logger } from '@/lib/logger'
 
 interface LoginModalProps {
   onSwitchToRegister: () => void
   onSuccess?: () => void
   onForgotPassword?: () => void
+  returnTo?: string
 }
 
-export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword }: LoginModalProps) {
-  const [email, setEmail] = React.useState("")
-  const [password, setPassword] = React.useState("")
-  const [termsAccepted, setTermsAccepted] = React.useState(false)
+export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, returnTo }: LoginModalProps) {
+  const [email, setEmail] = React.useState('')
+  const [password, setPassword] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -36,15 +35,15 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword }: 
       }
 
       if (!data || !data.user) {
-        setError("Přihlášení se nezdařilo")
+        setError('Přihlášení se nezdařilo')
         return
       }
 
       // After successful login
       onSuccess?.()
     } catch (error) {
-      logger.error("Login error", error)
-      setError("Při přihlášení došlo k chybě. Zkuste to prosím znovu.")
+      logger.error('Login error', error)
+      setError('Při přihlášení došlo k chybě. Zkuste to prosím znovu.')
     } finally {
       setIsLoading(false)
     }
@@ -54,7 +53,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword }: 
     <div className="flex flex-col">
       <h2 className="text-3xl font-bold text-center mb-6 text-text">Přihlásit</h2>
 
-      <OAuthButtons />
+      <OAuthButtons returnTo={returnTo} />
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
@@ -109,33 +108,18 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword }: 
           </div>
         )}
 
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="terms"
-            checked={termsAccepted}
-            onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-            disabled={isLoading}
-          />
-          <label
-            htmlFor="terms"
-            className="text-sm font-medium leading-none cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Souhlasím s podmínkami používání
-          </label>
-        </div>
-
         <Button 
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
-          disabled={isLoading || !termsAccepted}
+          disabled={isLoading}
         >
-          {isLoading ? "Přihlašování..." : "Přihlásit"}
+          {isLoading ? 'Přihlašování...' : 'Přihlásit'}
         </Button>
       </form>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-text-secondary">
-          Jeste nemáte účet?{" "}
+          Jeste nemáte účet?{' '}
           <button
             type="button"
             onClick={onSwitchToRegister}

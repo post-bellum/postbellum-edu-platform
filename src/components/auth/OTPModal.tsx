@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { InputOTP } from "@/components/ui/InputOTP"
-import { verifyOTP, resendOTP, getErrorMessage } from "@/lib/supabase/email-auth"
-import { logger } from "@/lib/logger"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { InputOTP } from '@/components/ui/InputOTP'
+import { verifyOTP, resendOTP, getErrorMessage } from '@/lib/supabase/email-auth'
+import { logger } from '@/lib/logger'
 
 interface OTPModalProps {
   email: string
@@ -13,9 +13,9 @@ interface OTPModalProps {
 }
 
 export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
-  const [otp, setOtp] = React.useState("")
+  const [otp, setOtp] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
-  const [error, setError] = React.useState("")
+  const [error, setError] = React.useState('')
   const [resendSuccess, setResendSuccess] = React.useState(false)
   const [countdown, setCountdown] = React.useState(60) // Start countdown immediately
   const [canResend, setCanResend] = React.useState(false) // Disable resend initially
@@ -34,12 +34,12 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
     e.preventDefault()
     
     if (otp.length !== 6) {
-      setError("Zadejte prosím celý 6místný kód")
+      setError('Zadejte prosím celý 6místný kód')
       return
     }
 
     setIsLoading(true)
-    setError("")
+    setError('')
     
     try {
       const { error: verifyError } = await verifyOTP(email, otp)
@@ -52,8 +52,8 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
       // After successful verification:
       onSuccess()
     } catch (error) {
-      logger.error("OTP verification error", error)
-      setError("Neplatný kód. Zkuste to prosím znovu.")
+      logger.error('OTP verification error', error)
+      setError('Neplatný kód. Zkuste to prosím znovu.')
     } finally {
       setIsLoading(false)
     }
@@ -63,7 +63,7 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
     if (!canResend) return
     
     setIsLoading(true)
-    setError("")
+    setError('')
     setResendSuccess(false)
     
     try {
@@ -79,8 +79,8 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
       setCanResend(false)
       setTimeout(() => setResendSuccess(false), 3000) // Hide message after 3s
     } catch (error) {
-      logger.error("Resend OTP error", error)
-      setError("Nepodařilo se odeslat nový kód. Zkuste to prosím znovu.")
+      logger.error('Resend OTP error', error)
+      setError('Nepodařilo se odeslat nový kód. Zkuste to prosím znovu.')
     } finally {
       setIsLoading(false)
     }
@@ -90,7 +90,7 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
     <div className="flex flex-col">
       <h2 className="text-3xl font-bold text-center mb-2 text-text">Ověřte svůj email</h2>
       <p className="text-sm text-center text-text-secondary mb-8">
-        Poslali jsme 6místný ověřovací kód na adresu{" "}
+        Poslali jsme 6místný ověřovací kód na adresu{' '}
         <span className="font-medium text-text">{email}</span>
       </p>
 
@@ -111,13 +111,13 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
           disabled={isLoading || otp.length !== 6}
         >
-          {isLoading ? "Ověřování..." : "Ověřit"}
+          {isLoading ? 'Ověřování...' : 'Ověřit'}
         </Button>
       </form>
 
       <div className="mt-6 text-center space-y-2">
         <p className="text-sm text-text-secondary">
-          Nedostali jste kód?{" "}
+          Nedostali jste kód?{' '}
           {canResend ? (
             <button
               type="button"

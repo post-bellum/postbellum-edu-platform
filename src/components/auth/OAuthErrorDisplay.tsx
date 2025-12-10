@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { useSearchParams } from "next/navigation"
-import { OAUTH_ERROR_MESSAGES } from "@/lib/constants"
+import { useSearchParams } from 'next/navigation'
+import { OAUTH_ERROR_MESSAGES } from '@/lib/constants'
 
 /**
  * Displays OAuth error messages from URL search params

@@ -1,25 +1,24 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { Checkbox } from "@/components/ui/Checkbox"
-import { OAuthButtons } from "./OAuthButtons"
-import { signUpWithEmail, getErrorMessage } from "@/lib/supabase/email-auth"
-import { validatePassword, passwordsMatch } from "@/lib/validation"
-import { logger } from "@/lib/logger"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { OAuthButtons } from './OAuthButtons'
+import { signUpWithEmail, getErrorMessage } from '@/lib/supabase/email-auth'
+import { validatePassword, passwordsMatch } from '@/lib/validation'
+import { logger } from '@/lib/logger'
 
 interface RegisterModalProps {
   onSwitchToLogin: () => void
   onSuccess: (email: string) => void
+  returnTo?: string
 }
 
-export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps) {
-  const [email, setEmail] = React.useState("")
-  const [password, setPassword] = React.useState("")
-  const [confirmPassword, setConfirmPassword] = React.useState("")
-  const [termsAccepted, setTermsAccepted] = React.useState(false)
+export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: RegisterModalProps) {
+  const [email, setEmail] = React.useState('')
+  const [password, setPassword] = React.useState('')
+  const [confirmPassword, setConfirmPassword] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [passwordErrors, setPasswordErrors] = React.useState<string[]>([])
@@ -56,7 +55,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps
 
       // Check passwords match
       if (!passwordsMatch(password, confirmPassword)) {
-        setError("Hesla se neshodují")
+        setError('Hesla se neshodují')
         return
       }
 
@@ -71,8 +70,8 @@ export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps
       // After successful registration, move to OTP verification
       onSuccess(email)
     } catch (error) {
-      logger.error("Registration error", error)
-      setError("Při registraci došlo k chybě. Zkuste to prosím znovu.")
+      logger.error('Registration error', error)
+      setError('Při registraci došlo k chybě. Zkuste to prosím znovu.')
     } finally {
       setIsLoading(false)
     }
@@ -85,7 +84,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps
         Začněte tím, že vyplníte své údaje. Váš účet vám umožní upravovat materiály, ukládat vlastní lekce a hodnotit obsah.
       </p>
 
-      <OAuthButtons />
+      <OAuthButtons returnTo={returnTo} />
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
@@ -159,33 +158,18 @@ export function RegisterModal({ onSwitchToLogin, onSuccess }: RegisterModalProps
           </div>
         )}
 
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="terms"
-            checked={termsAccepted}
-            onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-            disabled={isLoading}
-          />
-          <label
-            htmlFor="terms"
-            className="text-sm font-medium leading-none cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Souhlasím s podmínkami používání
-          </label>
-        </div>
-
         <Button 
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
-          disabled={isLoading || !termsAccepted}
+          disabled={isLoading}
         >
-          {isLoading ? "Registrace..." : "Zaregistrovat se"}
+          {isLoading ? 'Registrace...' : 'Zaregistrovat se'}
         </Button>
       </form>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-text-secondary">
-          Už máte účet?{" "}
+          Už máte účet?{' '}
           <button
             type="button"
             onClick={onSwitchToLogin}

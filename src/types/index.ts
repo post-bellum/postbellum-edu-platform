@@ -1,4 +1,5 @@
 export * from './database.types';
+export * from './lesson.types';
 
 // Additional app-specific types
 export interface User {

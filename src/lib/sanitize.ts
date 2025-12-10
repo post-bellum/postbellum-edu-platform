@@ -1,3 +1,5 @@
+import sanitizeHtml from 'sanitize-html'
+
 /**
  * Basic input sanitization to prevent XSS attacks
  * Removes potentially dangerous characters and HTML tags
@@ -32,6 +34,44 @@ export function sanitizeInput(input: string): string {
 }
 
 /**
+ * Sanitize HTML content to prevent XSS attacks while preserving safe formatting
+ * Allows safe HTML tags for rich text content (paragraphs, headings, lists, formatting, links, images)
+ * @param html - HTML string to sanitize
+ * @returns Sanitized HTML string
+ */
+export function sanitizeHTML(html: string): string {
+  if (!html) return html
+
+  return sanitizeHtml(html, {
+    allowedTags: [
+      'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'code', 'pre',
+    ],
+    allowedAttributes: {
+      'a': ['href', 'target', 'rel', 'title', 'class'],
+      'img': ['src', 'alt', 'title', 'class'],
+      '*': ['class'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto'],
+    // Transform tags to add security attributes
+    transformTags: {
+      'a': (tagName, attribs) => {
+        return {
+          tagName,
+          attribs: {
+            ...attribs,
+            target: '_blank',
+            rel: 'noopener noreferrer',
+          },
+        }
+      },
+    },
+    // Remove style attributes
+    disallowedTagsMode: 'discard',
+  })
+}
+
+/**
  * Sanitize multiple inputs
  * @param inputs - Object with string values to sanitize
  * @returns Object with sanitized values
@@ -51,4 +91,3 @@ export function sanitizeInputs<T extends Record<string, string | undefined | nul
   
   return sanitized
 }
-

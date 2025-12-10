@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { getUserProfile, updateProfile } from "@/lib/supabase/user-profile"
-import { logger } from "@/lib/logger"
+import * as React from 'react'
+import { getUserProfile, updateProfile } from '@/lib/supabase/user-profile'
+import { logger } from '@/lib/logger'
 
 interface ProfileData {
   displayName: string
-  userType: "teacher" | "not-teacher"
+  userType: 'teacher' | 'not-teacher'
   schoolName: string
   email: string
 }
@@ -28,15 +28,15 @@ export function useProfile(isLoggedIn: boolean) {
         const profileData = await getUserProfile()
         if (profileData) {
           setProfile({
-            displayName: profileData.displayName || "",
-            userType: profileData.userType,
-            schoolName: profileData.schoolName || "",
-            email: profileData.email || "",
+            displayName: profileData.displayName || '',
+            userType: profileData.userType as 'teacher' | 'not-teacher',
+            schoolName: profileData.schoolName || '',
+            email: profileData.email || '',
           })
         }
       } catch (err) {
-        logger.error("Error loading profile", err)
-        setError("Nepodařilo se načíst profil")
+        logger.error('Error loading profile', err)
+        setError('Nepodařilo se načíst profil')
       } finally {
         setIsLoading(false)
       }
@@ -53,11 +53,11 @@ export function useProfile(isLoggedIn: boolean) {
     try {
       await updateProfile({ displayName: displayName.trim() })
       setProfile((prev) => prev ? { ...prev, displayName: displayName.trim() } : null)
-      setSuccess("Zobrazované jméno bylo úspěšně uloženo")
+      setSuccess('Zobrazované jméno bylo úspěšně uloženo')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      logger.error("Error saving display name", err)
-      setError("Nepodařilo se uložit zobrazované jméno")
+      logger.error('Error saving display name', err)
+      setError('Nepodařilo se uložit zobrazované jméno')
     } finally {
       setIsSaving(false)
     }
@@ -72,11 +72,11 @@ export function useProfile(isLoggedIn: boolean) {
     try {
       await updateProfile({ schoolName: schoolName.trim() })
       setProfile((prev) => prev ? { ...prev, schoolName: schoolName.trim() } : null)
-      setSuccess("Název školy byl úspěšně uložen")
+      setSuccess('Název školy byl úspěšně uložen')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      logger.error("Error saving school name", err)
-      setError("Nepodařilo se uložit název školy")
+      logger.error('Error saving school name', err)
+      setError('Nepodařilo se uložit název školy')
     } finally {
       setIsSaving(false)
     }

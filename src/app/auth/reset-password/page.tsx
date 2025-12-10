@@ -1,18 +1,18 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { updatePassword, getErrorMessage } from "@/lib/supabase/email-auth"
-import { validatePassword, passwordsMatch } from "@/lib/validation"
+import * as React from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { updatePassword, getErrorMessage } from '@/lib/supabase/email-auth'
+import { validatePassword, passwordsMatch } from '@/lib/validation'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const [password, setPassword] = React.useState("")
-  const [confirmPassword, setConfirmPassword] = React.useState("")
+  const [password, setPassword] = React.useState('')
+  const [confirmPassword, setConfirmPassword] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [success, setSuccess] = React.useState(false)
@@ -50,7 +50,7 @@ export default function ResetPasswordPage() {
 
       // Check passwords match
       if (!passwordsMatch(password, confirmPassword)) {
-        setError("Hesla se neshodují")
+        setError('Hesla se neshodují')
         return
       }
 
@@ -66,11 +66,11 @@ export default function ResetPasswordPage() {
       
       // Redirect to home after 2 seconds
       setTimeout(() => {
-        router.push("/")
+        router.push('/')
       }, 2000)
-    } catch (error) {
+    } catch {
       // Error already logged by updatePassword function
-      setError("Při změně hesla došlo k chybě. Zkuste to prosím znovu.")
+      setError('Při změně hesla došlo k chybě. Zkuste to prosím znovu.')
     } finally {
       setIsLoading(false)
     }
@@ -179,7 +179,7 @@ export default function ResetPasswordPage() {
             className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
             disabled={isLoading}
           >
-            {isLoading ? "Ukládání..." : "Změnit heslo"}
+            {isLoading ? 'Ukládání...' : 'Změnit heslo'}
           </Button>
         </form>
       </div>

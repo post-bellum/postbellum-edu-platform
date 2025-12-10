@@ -1,24 +1,34 @@
-import { createClient } from "@/lib/supabase/client"
-import type { Provider } from "@supabase/supabase-js"
-import { logger } from "@/lib/logger"
+import { createClient } from '@/lib/supabase/client'
+import type { Provider } from '@supabase/supabase-js'
+import { logger } from '@/lib/logger'
 
-type OAuthProvider = "google" | "microsoft"
+type OAuthProvider = 'google' | 'microsoft'
 
 // Map our provider names to Supabase provider names
 const PROVIDER_MAP: Record<OAuthProvider, Provider> = {
-  google: "google",
-  microsoft: "azure",
+  google: 'google',
+  microsoft: 'azure',
 } as const
 
-export async function handleOAuthLogin(provider: OAuthProvider) {
+interface OAuthOptions {
+  returnTo?: string
+}
+
+export async function handleOAuthLogin(provider: OAuthProvider, options?: OAuthOptions) {
   try {
     const supabase = createClient()
     const supabaseProvider = PROVIDER_MAP[provider]
     
+    // Build callback URL with optional returnTo parameter
+    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    if (options?.returnTo) {
+      callbackUrl.searchParams.set('returnTo', options.returnTo)
+    }
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: supabaseProvider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
         skipBrowserRedirect: false,
         // Azure-specific scopes
         scopes: provider === 'microsoft' ? 'email profile openid' : undefined,
@@ -41,6 +51,6 @@ export async function handleOAuthLogin(provider: OAuthProvider) {
 }
 
 // Re-export client auth helpers for convenience
-export { logout, getCurrentUser, isLoggedIn } from "@/lib/supabase/auth-helpers-client"
+export { logout, getCurrentUser, isLoggedIn } from '@/lib/supabase/auth-helpers-client'
 
 

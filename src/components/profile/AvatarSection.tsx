@@ -1,4 +1,5 @@
-import { getGravatarUrl } from "@/lib/gravatar"
+import Image from 'next/image'
+import { getGravatarUrl } from '@/lib/gravatar'
 
 interface AvatarSectionProps {
   /** User email for Gravatar */
@@ -13,9 +14,11 @@ export function AvatarSection({ email }: AvatarSectionProps) {
         Avatar je vaše profilová fotka - každý, kdo navštíví váš profil, uvidí tuto fotku.
       </p>
       <div className="flex items-center space-x-4">
-        <img
+        <Image
           src={getGravatarUrl(email)}
           alt="Profile avatar"
+          width={80}
+          height={80}
           className="w-20 h-20 rounded-full"
         />
         <div className="space-y-2">

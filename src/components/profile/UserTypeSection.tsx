@@ -1,9 +1,9 @@
-import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup"
-import { Label } from "@/components/ui/Label"
+import { RadioGroup, RadioGroupItem } from '@/components/ui/RadioGroup'
+import { Label } from '@/components/ui/Label'
 
 interface UserTypeSectionProps {
   /** Current user type */
-  userType: "teacher" | "not-teacher"
+  userType: 'teacher' | 'not-teacher'
 }
 
 export function UserTypeSection({ userType }: UserTypeSectionProps) {

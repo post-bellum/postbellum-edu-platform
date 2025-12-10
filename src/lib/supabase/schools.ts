@@ -1,13 +1,13 @@
-import { createClient } from "./client"
-import type { AutocompleteOption } from "@/components/ui/Autocomplete"
-import { logger } from "@/lib/logger"
+import { createClient } from './client'
+import type { AutocompleteOption } from '@/components/ui/Autocomplete'
+import { logger } from '@/lib/logger'
 
 export interface School {
   schoolId: number
-  "Plný název": string | null
-  "Zkrácený název": string | null
-  "Místo": string | null
-  "Kraj": string | null
+  'Plný název': string | null
+  'Zkrácený název': string | null
+  'Místo': string | null
+  'Kraj': string | null
 }
 
 /**
@@ -23,14 +23,14 @@ export async function searchSchools(
   const supabase = createClient()
 
   const { data, error } = await supabase
-    .from("schools")
+    .from('schools')
     .select(`schoolId, "Plný název", "Zkrácený název", "Místo", "Kraj"`)
-    .ilike("Plný název", `%${query}%`)
-    .order("Plný název", { ascending: true })
+    .ilike('Plný název', `%${query}%`)
+    .order('Plný název', { ascending: true })
     .limit(limit)
 
   if (error) {
-    logger.error("Error searching schools", error)
+    logger.error('Error searching schools', error)
     throw error
   }
 
@@ -40,8 +40,8 @@ export async function searchSchools(
 
   return data.map((school) => ({
     value: school.schoolId.toString(),
-    label: school["Plný název"] || "",
-    subtitle: [school["Místo"], school["Kraj"]].filter(Boolean).join(", "),
+    label: school['Plný název'] || '',
+    subtitle: [school['Místo'], school['Kraj']].filter(Boolean).join(', '),
   }))
 }
 
@@ -54,13 +54,13 @@ export async function getSchoolById(schoolId: number): Promise<School | null> {
   const supabase = createClient()
 
   const { data, error } = await supabase
-    .from("schools")
+    .from('schools')
     .select(`schoolId, "Plný název", "Zkrácený název", "Místo", "Kraj"`)
-    .eq("schoolId", schoolId)
+    .eq('schoolId', schoolId)
     .single()
 
   if (error) {
-    logger.error("Error getting school", error)
+    logger.error('Error getting school', error)
     return null
   }
 

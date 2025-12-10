@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { createClient } from "./client"
-import type { User } from "@supabase/supabase-js"
-import { logger } from "@/lib/logger"
+import { createClient } from './client'
+import type { User } from '@supabase/supabase-js'
+import { logger } from '@/lib/logger'
 
 /**
  * Get the current logged-in user (client-side)
@@ -14,13 +14,13 @@ export async function getCurrentUser(): Promise<User | null> {
     const { data: { user }, error } = await supabase.auth.getUser()
     
     if (error) {
-      logger.error("Error fetching user", error)
+      logger.error('Error fetching user', error)
       return null
     }
     
     return user
   } catch (error) {
-    logger.error("Error in getCurrentUser", error)
+    logger.error('Error in getCurrentUser', error)
     return null
   }
 }
@@ -35,13 +35,13 @@ export async function getCurrentSession() {
     const { data: { session }, error } = await supabase.auth.getSession()
     
     if (error) {
-      logger.error("Error fetching session", error)
+      logger.error('Error fetching session', error)
       return null
     }
     
     return session
   } catch (error) {
-    logger.error("Error in getCurrentSession", error)
+    logger.error('Error in getCurrentSession', error)
     return null
   }
 }
@@ -63,14 +63,14 @@ export async function logout() {
     const { error } = await supabase.auth.signOut()
     
     if (error) {
-      logger.error("Error signing out", error)
-      throw new Error("Failed to sign out")
+      logger.error('Error signing out', error)
+      throw new Error('Failed to sign out')
     }
     
     // Redirect to home page after logout
-    window.location.href = "/"
+    window.location.href = '/'
   } catch (error) {
-    logger.error("Error in logout", error)
+    logger.error('Error in logout', error)
     throw error
   }
 }

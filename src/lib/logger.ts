@@ -1,6 +1,9 @@
+/* eslint-disable no-console */
 /**
  * Logger utility for consistent logging across the application
  * In production, you can integrate with services like Sentry, LogRocket, etc.
+ * 
+ * Note: This file uses console methods intentionally as it's the logger implementation.
  */
 
 type LogLevel = 'info' | 'warn' | 'error' | 'debug'

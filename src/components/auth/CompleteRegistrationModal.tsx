@@ -1,44 +1,45 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup"
-import { Checkbox } from "@/components/ui/Checkbox"
-import { SearchIcon } from "@/components/ui/Icons"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/RadioGroup'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { SearchIcon } from '@/components/ui/Icons'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select"
-import { Autocomplete } from "@/components/ui/Autocomplete"
-import { completeRegistration } from "@/lib/supabase/user-profile"
-import { searchSchools } from "@/lib/supabase/schools"
-import { getDisplayNameFromAuth } from "@/lib/supabase/user-helpers"
-import { AUTH_CONSTANTS } from "@/lib/constants"
-import { logger } from "@/lib/logger"
+} from '@/components/ui/Select'
+import { Autocomplete } from '@/components/ui/Autocomplete'
+import { completeRegistration } from '@/lib/supabase/user-profile'
+import { searchSchools } from '@/lib/supabase/schools'
+import { getDisplayNameFromAuth } from '@/lib/supabase/user-helpers'
+import { AUTH_CONSTANTS } from '@/lib/constants'
+import { logger } from '@/lib/logger'
 
 interface CompleteRegistrationModalProps {
   onSuccess: () => void
 }
 
 const NON_TEACHER_OPTIONS = [
-  { value: "student", label: "student/ka" },
-  { value: "parent", label: "rodič" },
-  { value: "educational_professional", label: "odborná veřejnost ve vzdělávání (metodik/metodička, konzultant/ka, ...)" },
-  { value: "ngo_worker", label: "pracovník/pracovnice v neziskovém a nevládním sektoru" },
-  { value: "public_sector_worker", label: "pracovník/pracovnice ve státním sektoru" },
-  { value: "other", label: "ostatní" },
+  { value: 'student', label: 'student/ka' },
+  { value: 'parent', label: 'rodič' },
+  { value: 'educational_professional', label: 'odborná veřejnost ve vzdělávání (metodik/metodička, konzultant/ka, ...)' },
+  { value: 'ngo_worker', label: 'pracovník/pracovnice v neziskovém a nevládním sektoru' },
+  { value: 'public_sector_worker', label: 'pracovník/pracovnice ve státním sektoru' },
+  { value: 'other', label: 'ostatní' },
 ] as const
 
 export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationModalProps) {
-  const [userType, setUserType] = React.useState<"teacher" | "not-teacher">("not-teacher")
-  const [displayName, setDisplayName] = React.useState("")
-  const [schoolName, setSchoolName] = React.useState("")
-  const [category, setCategory] = React.useState<string>("")
+  const [userType, setUserType] = React.useState<'teacher' | 'not-teacher'>('not-teacher')
+  const [displayName, setDisplayName] = React.useState('')
+  const [schoolName, setSchoolName] = React.useState('')
+  const [category, setCategory] = React.useState<string>('')
+  const [termsAccepted, setTermsAccepted] = React.useState(false)
   const [emailConsent, setEmailConsent] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -56,9 +57,9 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
 
   // Clear fields when switching between teacher and not-teacher
   const handleUserTypeChange = (value: string) => {
-    setUserType(value as "teacher" | "not-teacher")
-    setSchoolName("") // Reset school name
-    setCategory("") // Reset category
+    setUserType(value as 'teacher' | 'not-teacher')
+    setSchoolName('') // Reset school name
+    setCategory('') // Reset category
   }
 
   const handleComplete = async (e: React.FormEvent) => {
@@ -68,26 +69,31 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
     
     try {
       // Validate based on user type
-      if (userType === "teacher" && !schoolName.trim()) {
-        throw new Error("Název školy je povinný")
+      if (userType === 'teacher' && !schoolName.trim()) {
+        throw new Error('Název školy je povinný')
       }
-      if (userType === "not-teacher" && !category) {
-        throw new Error("Kategorie je povinná")
+      if (userType === 'not-teacher' && !category) {
+        throw new Error('Kategorie je povinná')
+      }
+
+      if (!termsAccepted) {
+        throw new Error('Musíte souhlasit s podmínkami používání')
       }
 
       await completeRegistration({
         displayName: displayName.trim() || undefined,
         userType,
-        schoolName: userType === "teacher" ? schoolName.trim() : undefined,
-        category: userType === "not-teacher" ? category as "student" | "parent" | "educational_professional" | "ngo_worker" | "public_sector_worker" | "other" : undefined,
+        schoolName: userType === 'teacher' ? schoolName.trim() : undefined,
+        category: userType === 'not-teacher' ? category as 'student' | 'parent' | 'educational_professional' | 'ngo_worker' | 'public_sector_worker' | 'other' : undefined,
+        termsAccepted,
         emailConsent,
       })
       
       // After successful completion:
       onSuccess()
     } catch (error) {
-      logger.error("Complete registration error", error)
-      const errorMessage = error instanceof Error ? error.message : "Neznámá chyba"
+      logger.error('Complete registration error', error)
+      const errorMessage = error instanceof Error ? error.message : 'Neznámá chyba'
       setError(`Chyba: ${errorMessage}. Zkuste to prosím znovu nebo kontaktujte podporu.`)
     } finally {
       setIsLoading(false)
@@ -139,7 +145,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
         </div>
 
         <div className="space-y-2">
-          {userType === "teacher" ? (
+          {userType === 'teacher' ? (
             <>
               <Label htmlFor="school-name">
                 Název školy <span className="text-red-500">*</span>
@@ -184,20 +190,38 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
           )}
         </div>
 
-        <div className="flex items-start space-x-2 pt-2">
-          <Checkbox
-            id="email-consent"
-            checked={emailConsent}
-            onCheckedChange={(checked) => setEmailConsent(checked as boolean)}
-            disabled={isLoading}
-            className="mt-0.5"
-          />
-          <label
-            htmlFor="email-consent"
-            className="text-sm leading-relaxed cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Souhlasím se zasíláním informačních e-mailů.
-          </label>
+        <div className="space-y-2 pt-2">
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="terms"
+              checked={termsAccepted}
+              onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+              disabled={isLoading}
+              className="mt-0.5"
+            />
+            <label
+              htmlFor="terms"
+              className="text-sm leading-relaxed cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Souhlasím s podmínkami používání <span className="text-red-500">*</span>
+            </label>
+          </div>
+
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="email-consent"
+              checked={emailConsent}
+              onCheckedChange={(checked) => setEmailConsent(checked as boolean)}
+              disabled={isLoading}
+              className="mt-0.5"
+            />
+            <label
+              htmlFor="email-consent"
+              className="text-sm leading-relaxed cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Souhlasím se zasíláním informačních e-mailů.
+            </label>
+          </div>
         </div>
 
         {error && (
@@ -209,9 +233,9 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
         <Button 
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
-          disabled={isLoading || (userType === "teacher" ? !schoolName.trim() : !category)}
+          disabled={isLoading || !termsAccepted || (userType === 'teacher' ? !schoolName.trim() : !category)}
         >
-          {isLoading ? "Dokončování..." : "Dokončit"}
+          {isLoading ? 'Dokončování...' : 'Dokončit'}
         </Button>
       </form>
     </div>

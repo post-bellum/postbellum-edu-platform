@@ -1,31 +1,35 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { GoogleIcon, MicrosoftIcon } from "@/components/ui/Icons"
-import { handleOAuthLogin } from "@/lib/oauth-helpers"
-import { logger } from "@/lib/logger"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { GoogleIcon, MicrosoftIcon } from '@/components/ui/Icons'
+import { handleOAuthLogin } from '@/lib/oauth-helpers'
+import { logger } from '@/lib/logger'
 
-export function OAuthButtons() {
+interface OAuthButtonsProps {
+  returnTo?: string
+}
+
+export function OAuthButtons({ returnTo }: OAuthButtonsProps) {
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
-  const onOAuthClick = async (provider: "google" | "microsoft") => {
+  const onOAuthClick = async (provider: 'google' | 'microsoft') => {
     setIsLoading(true)
     setError(null)
     try {
-      await handleOAuthLogin(provider)
+      await handleOAuthLogin(provider, { returnTo })
     } catch (error) {
       logger.error(`OAuth login failed (${provider})`, error)
-      setError("Přihlášení se nezdařilo. Zkuste to prosím znovu.")
+      setError('Přihlášení se nezdařilo. Zkuste to prosím znovu.')
     } finally {
       setIsLoading(false)
     }
   }
 
   const providers = [
-    { id: "google" as const, icon: <GoogleIcon />, text: "Přihlásit se pomocí Google" },
-    { id: "microsoft" as const, icon: <MicrosoftIcon />, text: "Přihlásit se pomocí Microsoft účtu" },
+    { id: 'google' as const, icon: <GoogleIcon />, text: 'Přihlásit se pomocí Google' },
+    { id: 'microsoft' as const, icon: <MicrosoftIcon />, text: 'Přihlásit se pomocí Microsoft účtu' },
   ]
 
   return (

@@ -36,4 +36,3 @@ export async function hasGravatar(email: string): Promise<boolean> {
     return false
   }
 }
-

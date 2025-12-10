@@ -1,16 +1,16 @@
-"use client"
+'use client'
 
-import Image from "next/image";
-import { useState, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { AuthModal, CompleteRegistrationModal, OAuthErrorDisplay } from "@/components/auth";
-import { Dialog, DialogContent } from "@/components/ui/Dialog";
-import { useAuth } from "@/lib/supabase/hooks/useAuth";
-import { logout } from "@/lib/oauth-helpers";
-import { hasCompletedRegistration, getUserProfile } from "@/lib/supabase/user-profile";
-import { CATEGORY_LABELS } from "@/lib/constants";
-import { logger } from "@/lib/logger";
+import Image from 'next/image';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { AuthModal, CompleteRegistrationModal, OAuthErrorDisplay } from '@/components/auth';
+import { Dialog, DialogContent } from '@/components/ui/Dialog';
+import { useAuth } from '@/lib/supabase/hooks/useAuth';
+import { logout } from '@/lib/oauth-helpers';
+import { hasCompletedRegistration, getUserProfile } from '@/lib/supabase/user-profile';
+import { CATEGORY_LABELS } from '@/lib/constants';
+import { logger } from '@/lib/logger';
 
 export default function Home() {
   const router = useRouter();
@@ -46,7 +46,7 @@ export default function Home() {
           }
         } catch (error) {
           if (!abortController.signal.aborted) {
-            logger.error("Error checking registration", error);
+            logger.error('Error checking registration', error);
           }
         }
       }
@@ -70,8 +70,8 @@ export default function Home() {
 
   return (
     <>
-      <main className="min-h-screen flex items-center justify-center p-8">
-        <div className="flex flex-col items-center gap-8">
+      <main className="min-h-screen p-8">
+        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] gap-8">
           <Image
             src="/logo.svg"
             alt="Post Bellum logo"
@@ -94,11 +94,11 @@ export default function Home() {
               <Button 
                 size="lg" 
                 onClick={handleAuthAction}
-                variant={isLoggedIn ? "outline" : "default"}
+                variant={isLoggedIn ? 'outline' : 'default'}
               >
                 {isLoggedIn 
                   ? `Odhlásit se (${user?.email})`
-                  : "Přihlásit se / Registrovat"
+                  : 'Přihlásit se / Registrovat'
                 }
               </Button>
               
@@ -113,7 +113,7 @@ export default function Home() {
                     </p>
                     {userProfile?.userType && (
                       <div className="pt-2 border-t border-gray-200">
-                        {userProfile.userType === "teacher" ? (
+                        {userProfile.userType === 'teacher' ? (
                           <div className="space-y-1">
                             <p className="text-sm font-medium text-primary">
                               Učitel

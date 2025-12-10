@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { deleteAccountAction } from "@/app/actions/delete-account"
-import { logger } from "@/lib/logger"
+import { deleteAccountAction } from '@/app/actions/delete-account'
+import { logger } from '@/lib/logger'
 
 /**
  * Delete user account (client-side wrapper)
@@ -15,10 +15,10 @@ export async function deleteUserAccount(): Promise<void> {
     const result = await deleteAccountAction()
     
     if (!result.success) {
-      throw new Error(result.error || "Failed to delete account")
+      throw new Error(result.error || 'Failed to delete account')
     }
   } catch (error) {
-    logger.error("Error deleting account", error)
+    logger.error('Error deleting account', error)
     throw error
   }
 }

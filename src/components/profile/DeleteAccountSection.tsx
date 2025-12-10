@@ -1,17 +1,17 @@
-import * as React from "react"
-import { Button } from "@/components/ui/Button"
-import { Dialog, DialogContent } from "@/components/ui/Dialog"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
-import { AUTH_CONSTANTS } from "@/lib/constants"
-import { deleteUserAccount } from "@/lib/supabase/account-deletion"
-import { logger } from "@/lib/logger"
-import { useRouter } from "next/navigation"
+import * as React from 'react'
+import { Button } from '@/components/ui/Button'
+import { Dialog, DialogContent } from '@/components/ui/Dialog'
+import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
+import { AUTH_CONSTANTS } from '@/lib/constants'
+import { deleteUserAccount } from '@/lib/supabase/account-deletion'
+import { logger } from '@/lib/logger'
+import { useRouter } from 'next/navigation'
 
 export function DeleteAccountSection() {
   const router = useRouter()
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
-  const [deleteConfirmation, setDeleteConfirmation] = React.useState("")
+  const [deleteConfirmation, setDeleteConfirmation] = React.useState('')
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -26,19 +26,19 @@ export function DeleteAccountSection() {
     
     try {
       await deleteUserAccount()
-      router.push("/")
+      router.push('/')
     } catch (err) {
-      logger.error("Error deleting account", err)
-      setError("Nepodařilo se odstranit účet. Zkuste to prosím znovu nebo kontaktujte podporu.")
+      logger.error('Error deleting account', err)
+      setError('Nepodařilo se odstranit účet. Zkuste to prosím znovu nebo kontaktujte podporu.')
       setIsDeleting(false)
       setShowDeleteDialog(false)
-      setDeleteConfirmation("")
+      setDeleteConfirmation('')
     }
   }
 
   const handleCancel = () => {
     setShowDeleteDialog(false)
-    setDeleteConfirmation("")
+    setDeleteConfirmation('')
     setError(null)
   }
 
@@ -112,7 +112,7 @@ export function DeleteAccountSection() {
                 onClick={handleDeleteAccount}
                 disabled={isDeleting || deleteConfirmation !== AUTH_CONSTANTS.DELETE_ACCOUNT_CONFIRMATION}
               >
-                {isDeleting ? "Odstraňuji..." : "Odstranit účet"}
+                {isDeleting ? 'Odstraňuji...' : 'Odstranit účet'}
               </Button>
             </div>
           </div>
