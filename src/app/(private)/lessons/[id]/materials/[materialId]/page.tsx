@@ -37,8 +37,7 @@ export default async function UserMaterialEditPage({ params }: UserMaterialEditP
     <div className="max-w-7xl mx-auto p-6">
       <UserMaterialEditContent
         material={material}
-        lessonId={lessonId}
-        lessonTitle={lesson.title}
+        lesson={lesson}
       />
     </div>
   )
