@@ -106,6 +106,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
+            data-testid="register-email-input"
           />
         </div>
 
@@ -120,6 +121,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
             onBlur={handlePasswordBlur}
             required
             disabled={isLoading}
+            data-testid="register-password-input"
           />
           {passwordTouched && passwordErrors.length > 0 && (
             <ul className="text-xs text-red-600 space-y-1">
@@ -146,6 +148,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
             onBlur={() => setConfirmPasswordTouched(true)}
             required
             disabled={isLoading}
+            data-testid="register-confirm-password-input"
           />
           {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
             <p className="text-xs text-red-600">Hesla se neshodují</p>

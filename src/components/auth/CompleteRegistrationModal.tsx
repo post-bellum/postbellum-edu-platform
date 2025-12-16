@@ -121,6 +121,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
             onChange={(e) => setDisplayName(e.target.value)}
             maxLength={AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH}
             disabled={isLoading}
+            data-testid="complete-registration-display-name-input"
           />
           <p className="text-xs text-gray-500">
             Toto jméno se zobrazí v profilu. Můžete jej změnit kdykoli v nastavení. Maximum {AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH} znaků.
@@ -163,6 +164,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
                 emptyMessage="Žádné školy nenalezeny"
                 loadingMessage="Hledám školy..."
                 rightIcon={<SearchIcon />}
+                data-testid="complete-registration-school-name-input"
               />
             </>
           ) : (
@@ -175,7 +177,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
                 onValueChange={setCategory}
                 disabled={isLoading}
               >
-                <SelectTrigger id="organization-type">
+                <SelectTrigger id="organization-type" data-testid="complete-registration-category-select">
                   <SelectValue placeholder="Vyberte kategorii" />
                 </SelectTrigger>
                 <SelectContent>

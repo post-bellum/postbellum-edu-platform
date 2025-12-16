@@ -95,6 +95,7 @@ export default function Home() {
                 size="lg" 
                 onClick={handleAuthAction}
                 variant={isLoggedIn ? 'outline' : 'default'}
+                data-testid={isLoggedIn ? 'logout-button' : 'login-register-button'}
               >
                 {isLoggedIn 
                   ? `Odhlásit se (${user?.email})`
@@ -136,6 +137,7 @@ export default function Home() {
                     variant="outline"
                     onClick={() => router.push('/profile')}
                     className="w-full"
+                    data-testid="edit-profile-button"
                   >
                     Upravit profil
                   </Button>

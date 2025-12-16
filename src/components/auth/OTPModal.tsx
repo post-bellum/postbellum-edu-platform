@@ -96,7 +96,7 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
 
       <form onSubmit={handleVerify} className="space-y-6">
         <div className="flex flex-col items-center space-y-4">
-          <InputOTP length={6} onChange={setOtp} />
+          <InputOTP length={6} onChange={setOtp} data-testid="otp-input" />
           
           {error && (
             <p className="text-sm text-red-600">{error}</p>

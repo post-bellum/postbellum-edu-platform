@@ -136,6 +136,7 @@ export default function ResetPasswordPage() {
               onBlur={handlePasswordBlur}
               required
               disabled={isLoading}
+              data-testid="reset-password-new-password-input"
             />
             {passwordTouched && passwordErrors.length > 0 && (
               <ul className="text-xs text-red-600 space-y-1">
@@ -162,6 +163,7 @@ export default function ResetPasswordPage() {
               onBlur={() => setConfirmPasswordTouched(true)}
               required
               disabled={isLoading}
+              data-testid="reset-password-confirm-password-input"
             />
             {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
               <p className="text-xs text-red-600">Hesla se neshodují</p>
@@ -178,6 +180,7 @@ export default function ResetPasswordPage() {
             type="submit" 
             className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
             disabled={isLoading}
+            data-testid="reset-password-submit-button"
           >
             {isLoading ? 'Ukládání...' : 'Změnit heslo'}
           </Button>

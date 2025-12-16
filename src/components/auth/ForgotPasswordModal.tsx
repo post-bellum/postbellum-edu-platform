@@ -81,6 +81,7 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
+            data-testid="forgot-password-email-input"
           />
         </div>
 

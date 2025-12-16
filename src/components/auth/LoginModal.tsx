@@ -75,6 +75,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
+            data-testid="login-email-input"
           />
         </div>
 
@@ -100,6 +101,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={isLoading}
+            data-testid="login-password-input"
           />
         </div>
 
