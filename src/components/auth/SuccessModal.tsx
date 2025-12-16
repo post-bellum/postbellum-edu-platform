@@ -22,6 +22,7 @@ export function SuccessModal({ onSuccess }: SuccessModalProps) {
         onClick={onSuccess}
         className="mt-4"
         size="lg"
+        data-testid="success-continue-button"
       >
         Pokračovat na dashboard
       </Button>

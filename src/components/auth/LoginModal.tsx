@@ -86,6 +86,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
                 type="button"
                 onClick={onForgotPassword}
                 className="text-xs text-primary hover:text-primary-hover hover:underline cursor-pointer"
+                data-testid="forgot-password-link"
               >
                 Zapomenuté heslo?
               </button>
@@ -112,6 +113,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
           disabled={isLoading}
+          data-testid="login-submit-button"
         >
           {isLoading ? 'Přihlašování...' : 'Přihlásit'}
         </Button>
@@ -124,6 +126,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
             type="button"
             onClick={onSwitchToRegister}
             className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer transition-colors"
+            data-testid="switch-to-register-button"
           >
             Zaregistrovat se
           </button>

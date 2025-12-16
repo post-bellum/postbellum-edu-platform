@@ -162,6 +162,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
           disabled={isLoading}
+          data-testid="register-submit-button"
         >
           {isLoading ? 'Registrace...' : 'Zaregistrovat se'}
         </Button>
@@ -174,6 +175,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
             type="button"
             onClick={onSwitchToLogin}
             className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer transition-colors"
+            data-testid="switch-to-login-button"
           >
             Přihlaste se
           </button>

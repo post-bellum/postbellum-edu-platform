@@ -110,6 +110,7 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
           disabled={isLoading || otp.length !== 6}
+          data-testid="otp-verify-button"
         >
           {isLoading ? 'Ověřování...' : 'Ověřit'}
         </Button>
@@ -124,6 +125,7 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
               onClick={handleResend}
               disabled={isLoading}
               className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="otp-resend-button"
             >
               Odeslat znovu
             </button>
@@ -137,6 +139,7 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
           type="button"
           onClick={onBack}
           className="text-sm text-text-secondary hover:text-text cursor-pointer transition-colors"
+          data-testid="otp-back-button"
         >
           ← Zpět na registraci
         </button>

@@ -51,6 +51,7 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
         <Button 
           onClick={onBack}
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
+          data-testid="forgot-password-success-back-button"
         >
           Zpět na přihlášení
         </Button>
@@ -93,6 +94,7 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
           disabled={isLoading}
+          data-testid="forgot-password-submit-button"
         >
           {isLoading ? 'Odesílání...' : 'Odeslat odkaz'}
         </Button>
@@ -103,6 +105,7 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
           type="button"
           onClick={onBack}
           className="text-sm text-text-secondary hover:text-text cursor-pointer transition-colors"
+          data-testid="forgot-password-back-button"
         >
           ← Zpět na přihlášení
         </button>

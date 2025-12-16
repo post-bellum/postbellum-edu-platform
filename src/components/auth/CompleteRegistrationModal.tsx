@@ -129,14 +129,14 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
 
         <div className="space-y-4">
           <RadioGroup value={userType} onValueChange={handleUserTypeChange}>
-            <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-all">
-              <RadioGroupItem value="teacher" id="teacher" />
+            <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-all" data-testid="teacher-radio-option">
+              <RadioGroupItem value="teacher" id="teacher" data-testid="teacher-radio" />
               <Label htmlFor="teacher" className="flex-1 cursor-pointer font-normal select-none">
                 Jsem učitel
               </Label>
             </div>
-            <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-all">
-              <RadioGroupItem value="not-teacher" id="not-teacher" />
+            <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-all" data-testid="not-teacher-radio-option">
+              <RadioGroupItem value="not-teacher" id="not-teacher" data-testid="not-teacher-radio" />
               <Label htmlFor="not-teacher" className="flex-1 cursor-pointer font-normal select-none">
                 Nejsem učitel
               </Label>
@@ -198,6 +198,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
               onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
               disabled={isLoading}
               className="mt-0.5"
+              data-testid="terms-checkbox"
             />
             <label
               htmlFor="terms"
@@ -214,6 +215,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
               onCheckedChange={(checked) => setEmailConsent(checked as boolean)}
               disabled={isLoading}
               className="mt-0.5"
+              data-testid="email-consent-checkbox"
             />
             <label
               htmlFor="email-consent"
@@ -234,6 +236,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
           type="submit" 
           className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
           disabled={isLoading || !termsAccepted || (userType === 'teacher' ? !schoolName.trim() : !category)}
+          data-testid="complete-registration-submit-button"
         >
           {isLoading ? 'Dokončování...' : 'Dokončit'}
         </Button>

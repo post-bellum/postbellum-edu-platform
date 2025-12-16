@@ -47,6 +47,7 @@ export function OAuthButtons({ returnTo }: OAuthButtonsProps) {
           className="w-full h-12 hover:bg-gray-50 transition-colors"
           onClick={() => onOAuthClick(provider.id)}
           disabled={isLoading}
+          data-testid={`oauth-${provider.id}-button`}
         >
           {provider.icon}
           {provider.text}
