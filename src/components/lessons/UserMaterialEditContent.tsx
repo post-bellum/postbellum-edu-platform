@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Download, Eye, Copy, Trash2, Check, Loader2 } from 'lucide-react'
+import { ArrowLeft, Download, Eye, Trash2, Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -13,7 +13,6 @@ import { MaterialEditSidebar } from './MaterialEditSidebar'
 import {
   updateUserLessonMaterialAction,
   deleteUserLessonMaterialAction,
-  copyLessonMaterialAction,
 } from '@/app/actions/user-lesson-materials'
 import type { UserLessonMaterial, LessonWithRelations } from '@/types/lesson.types'
 
@@ -38,7 +37,6 @@ export function UserMaterialEditContent({
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
-  const [isDuplicating, setIsDuplicating] = React.useState(false)
 
   // Debounced auto-save
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
@@ -130,20 +128,6 @@ export function UserMaterialEditContent({
       setIsDeleting(false)
       setDeleteDialogOpen(false)
     }
-  }
-
-  const handleDuplicate = async () => {
-    setIsDuplicating(true)
-    const result = await copyLessonMaterialAction(initialMaterial.source_material_id, lesson.id)
-
-    if (result.success && result.data) {
-      // Navigate to the new duplicate
-      router.push(`/lessons/${lesson.id}/materials/${result.data.id}`)
-    } else {
-      // TODO: Replace alert with toast notification system for better UX
-      alert(result.error || 'Chyba při duplikování materiálu')
-    }
-    setIsDuplicating(false)
   }
 
   const getSaveStatusDisplay = () => {
@@ -239,16 +223,6 @@ export function UserMaterialEditContent({
           >
             <Eye className="w-4 h-4" />
             Zobrazit
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDuplicate}
-            disabled={isDuplicating}
-          >
-            <Copy className="w-4 h-4" />
-            {isDuplicating ? 'Duplikuji...' : 'Duplikovat'}
           </Button>
 
           <Button

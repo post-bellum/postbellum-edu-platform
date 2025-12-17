@@ -2,12 +2,13 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { Eye, Download, Pencil, Trash2, FileText, FileSpreadsheet } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Eye, Download, Copy, Pencil, Trash2, FileText, FileSpreadsheet } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { formatDate } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
-import { deleteUserLessonMaterialAction } from '@/app/actions/user-lesson-materials'
+import { deleteUserLessonMaterialAction, copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
 interface UserLessonMaterialsSectionProps {
@@ -21,11 +22,13 @@ export function UserLessonMaterialsSection({
   lessonId,
   onMaterialDeleted,
 }: UserLessonMaterialsSectionProps) {
+  const router = useRouter()
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [selectedMaterial, setSelectedMaterial] = React.useState<UserLessonMaterial | null>(null)
   const [materialToDelete, setMaterialToDelete] = React.useState<string | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
+  const [duplicatingMaterialId, setDuplicatingMaterialId] = React.useState<string | null>(null)
 
   const handleView = (material: UserLessonMaterial) => {
     setSelectedMaterial(material)
@@ -35,6 +38,19 @@ export function UserLessonMaterialsSection({
   const handleDeleteClick = (materialId: string) => {
     setMaterialToDelete(materialId)
     setDeleteDialogOpen(true)
+  }
+
+  const handleDuplicate = async (material: UserLessonMaterial) => {
+    setDuplicatingMaterialId(material.id)
+    const result = await copyLessonMaterialAction(material.source_material_id, lessonId)
+
+    if (result.success && result.data) {
+      router.push(`/lessons/${lessonId}/materials/${result.data.id}`)
+    } else {
+      // TODO: Replace alert with toast notification system for better UX
+      alert(result.error || 'Chyba při duplikování materiálu')
+    }
+    setDuplicatingMaterialId(null)
   }
 
   const handleDeleteConfirm = async () => {
@@ -113,6 +129,15 @@ export function UserLessonMaterialsSection({
                       title="Stáhnout (připravujeme)"
                     >
                       <Download className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDuplicate(material)}
+                      disabled={duplicatingMaterialId === material.id}
+                      title="Duplikovat"
+                    >
+                      <Copy className="w-4 h-4" />
                     </Button>
                     <Link href={`/lessons/${lessonId}/materials/${material.id}`}>
                       <Button
