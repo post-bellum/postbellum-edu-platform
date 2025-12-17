@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { InputOTP } from '@/components/ui/InputOTP'
 import { verifyOTP, resendOTP, getErrorMessage } from '@/lib/supabase/email-auth'
@@ -8,11 +9,13 @@ import { logger } from '@/lib/logger'
 
 interface OTPModalProps {
   email: string
+  password?: string // For QA bypass
   onSuccess: () => void
   onBack: () => void
 }
 
-export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
+export function OTPModal({ email, password, onSuccess, onBack }: OTPModalProps) {
+  const router = useRouter()
   const [otp, setOtp] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState('')
@@ -42,10 +45,22 @@ export function OTPModal({ email, onSuccess, onBack }: OTPModalProps) {
     setError('')
     
     try {
-      const { error: verifyError } = await verifyOTP(email, otp)
+      // Pass password for QA bypass functionality
+      const result = await verifyOTP(email, otp, password)
       
-      if (verifyError) {
-        setError(getErrorMessage(verifyError))
+      if (result.error) {
+        setError(getErrorMessage(result.error))
+        return
+      }
+
+      // For QA bypass, refresh the page to pick up new session cookies
+      if (result.isQABypass) {
+        logger.info('QA verification successful, refreshing page')
+        onSuccess()
+        // Use router.refresh() to refresh server components and pick up new cookies
+        router.refresh()
+        // Also reload to ensure client state is updated
+        window.location.reload()
         return
       }
 

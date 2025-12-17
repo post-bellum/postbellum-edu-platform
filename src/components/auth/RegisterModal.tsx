@@ -11,7 +11,7 @@ import { logger } from '@/lib/logger'
 
 interface RegisterModalProps {
   onSwitchToLogin: () => void
-  onSuccess: (email: string) => void
+  onSuccess: (email: string, password: string) => void
   returnTo?: string
 }
 
@@ -68,7 +68,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
       }
 
       // After successful registration, move to OTP verification
-      onSuccess(email)
+      onSuccess(email, password)
     } catch (error) {
       logger.error('Registration error', error)
       setError('Při registraci došlo k chybě. Zkuste to prosím znovu.')

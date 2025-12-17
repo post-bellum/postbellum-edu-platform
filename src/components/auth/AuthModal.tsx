@@ -23,11 +23,13 @@ interface AuthModalProps {
 export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo }: AuthModalProps) {
   const [step, setStep] = React.useState<AuthStep>(defaultStep)
   const [email, setEmail] = React.useState('')
+  const [password, setPassword] = React.useState('')
 
   // Reset to default step when modal opens
   React.useEffect(() => {
     if (open) {
       setStep(defaultStep)
+      setPassword('') // Clear password when modal opens for security
     }
   }, [open, defaultStep])
 
@@ -35,9 +37,10 @@ export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo 
     onOpenChange(false)
   }
 
-  const handleRegisterSuccess = (registrationEmail: string) => {
+  const handleRegisterSuccess = (registrationEmail: string, registrationPassword: string) => {
     // After registration, go to OTP verification
     setEmail(registrationEmail)
+    setPassword(registrationPassword) // Store password for QA bypass
     setStep('otp')
   }
 
@@ -79,6 +82,7 @@ export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo 
         {step === 'otp' && (
           <OTPModal
             email={email}
+            password={password}
             onSuccess={handleOTPSuccess}
             onBack={() => setStep('register')}
           />

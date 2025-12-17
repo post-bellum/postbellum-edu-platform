@@ -2,13 +2,85 @@
 
 import { createClient } from './client'
 import { logger } from '@/lib/logger'
+import { qaSignUpAction, qaVerifyOTPAction } from '@/app/actions/qa-auth'
+
+/**
+ * QA Testing Configuration
+ * Configure via environment variables:
+ * - NEXT_PUBLIC_QA_EMAIL_PATTERN: Regex pattern for QA emails (e.g., "\\+qa" matches test+qa@example.com)
+ * - NEXT_PUBLIC_QA_OTP_CODE: 6-digit OTP code that bypasses verification (e.g., "111111")
+ * 
+ * When both are set:
+ * - QA emails are created with auto-confirmed email (no verification email sent)
+ * - Use the QA OTP code to complete verification and get a valid session
+ */
+function getQAConfig() {
+  const pattern = process.env.NEXT_PUBLIC_QA_EMAIL_PATTERN
+  const code = process.env.NEXT_PUBLIC_QA_OTP_CODE
+  
+  if (!pattern || !code) {
+    return null
+  }
+  
+  try {
+    return {
+      emailPattern: new RegExp(pattern, 'i'),
+      otpCode: code,
+    }
+  } catch {
+    logger.error('Invalid QA email pattern regex', { pattern })
+    return null
+  }
+}
+
+/**
+ * Check if email is a QA test email
+ */
+export function isQAEmail(email: string): boolean {
+  const config = getQAConfig()
+  if (!config) return false
+  return config.emailPattern.test(email)
+}
+
+/**
+ * Check if OTP code is the QA bypass code
+ */
+function isQAOTPCode(token: string): boolean {
+  const config = getQAConfig()
+  if (!config) return false
+  return token === config.otpCode
+}
 
 /**
  * Sign up with email and password
  * Sends verification email automatically
+ * 
+ * For QA emails matching NEXT_PUBLIC_QA_EMAIL_PATTERN:
+ * - User is created with auto-confirmed email (no verification email sent)
+ * - Use NEXT_PUBLIC_QA_OTP_CODE to complete verification
  */
 export async function signUpWithEmail(email: string, password: string) {
   try {
+    const qaConfig = getQAConfig()
+    
+    // QA bypass: Use server action to create user with confirmed email
+    if (qaConfig && isQAEmail(email)) {
+      logger.info('QA email signup - using server action (no email sent)', { 
+        email, 
+        otpCode: qaConfig.otpCode 
+      })
+      
+      const result = await qaSignUpAction(email, password)
+      
+      if (!result.success) {
+        throw new Error(result.error || 'QA signup failed')
+      }
+      
+      // Return success - user is created with confirmed email
+      return { data: { user: null, session: null }, error: null, isQA: true }
+    }
+    
+    // Regular signup - sends verification email
     const supabase = createClient()
     
     const { data, error } = await supabase.auth.signUp({
@@ -56,9 +128,25 @@ export async function signInWithEmail(email: string, password: string) {
 
 /**
  * Verify OTP code
+ * For QA emails, accepts the configured QA OTP code and creates a valid session
  */
-export async function verifyOTP(email: string, token: string) {
+export async function verifyOTP(email: string, token: string, _password?: string) {
   try {
+    // QA bypass: Use server action to verify and create session
+    if (isQAEmail(email) && isQAOTPCode(token)) {
+      logger.info('QA email verification - using server action', { email })
+      
+      const result = await qaVerifyOTPAction(email, token)
+      
+      if (!result.success) {
+        throw new Error(result.error || 'QA verification failed')
+      }
+      
+      logger.info('QA user verified with valid session', { email, hasSession: result.session })
+      return { data: { user: { id: result.userId }, session: result.session }, error: null, isQABypass: true }
+    }
+    
+    // Regular OTP verification
     const supabase = createClient()
     
     const { data, error } = await supabase.auth.verifyOtp({
@@ -80,9 +168,17 @@ export async function verifyOTP(email: string, token: string) {
 
 /**
  * Resend OTP code
+ * For QA emails, skips actual email sending
  */
 export async function resendOTP(email: string) {
   try {
+    // Skip resend for QA emails - they don't need the actual email
+    const qaConfig = getQAConfig()
+    if (qaConfig && isQAEmail(email)) {
+      logger.info('QA email resend skipped', { email, otpCode: qaConfig.otpCode })
+      return { data: { messageId: 'qa-bypass' }, error: null }
+    }
+    
     const supabase = createClient()
     
     const { data, error } = await supabase.auth.resend({

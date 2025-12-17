@@ -18,7 +18,7 @@ export async function isAdmin(): Promise<boolean> {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
     
     if (error) {
       logger.error('Error checking admin status:', error)

@@ -18,6 +18,12 @@ export const envSchema = z.object({
   // Required in production, optional in development
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'Service role key is required for admin operations').optional(),
   
+  // QA Testing Configuration (optional)
+  // Pattern to match QA emails (e.g., "\\+qa" matches emails like test+qa@example.com)
+  NEXT_PUBLIC_QA_EMAIL_PATTERN: z.string().optional(),
+  // OTP code that bypasses verification for QA emails
+  NEXT_PUBLIC_QA_OTP_CODE: z.string().length(6).optional(),
+  
   // Node environment
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
