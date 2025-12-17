@@ -9,6 +9,7 @@ import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { AuthModal } from '@/components/auth'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
+import { ErrorDialog } from '@/components/ui/ErrorDialog'
 
 interface LessonMaterialsSectionProps {
   materials: LessonMaterial[]
@@ -38,6 +39,8 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
   const [selectedMaterial, setSelectedMaterial] = React.useState<LessonMaterial | null>(null)
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false)
   const [isCopying, setIsCopying] = React.useState<string | null>(null)
+  const [errorDialogOpen, setErrorDialogOpen] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const handleAuthModalClose = (open: boolean) => {
     setIsAuthModalOpen(open)
@@ -64,8 +67,8 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
       // Navigate to the edit page
       router.push(`/lessons/${lessonId}/materials/${result.data.id}`)
     } else if (!result.success) {
-      // TODO: Replace alert with toast notification system for better UX
-      alert(result.error || 'Chyba při vytváření kopie materiálu')
+      setErrorMessage(result.error || 'Chyba při vytváření kopie materiálu')
+      setErrorDialogOpen(true)
       setIsCopying(null)
     }
   }
@@ -219,6 +222,12 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
         onOpenChange={handleAuthModalClose}
         defaultStep="login"
         returnTo={pathname}
+      />
+
+      <ErrorDialog
+        open={errorDialogOpen}
+        onOpenChange={setErrorDialogOpen}
+        message={errorMessage}
       />
     </div>
   )

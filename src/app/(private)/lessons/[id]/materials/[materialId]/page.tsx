@@ -28,6 +28,11 @@ export default async function UserMaterialEditPage({ params }: UserMaterialEditP
     notFound()
   }
 
+  // Ensure the material belongs to this lesson
+  if (material.lesson_id !== lessonId) {
+    notFound()
+  }
+
   // Verify the material belongs to the current user
   if (material.user_id !== user.id) {
     notFound()

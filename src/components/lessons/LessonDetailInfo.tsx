@@ -13,30 +13,32 @@ export function LessonDetailInfo({ lesson, children, variant = 'default' }: Less
   const titleClass = isCompact ? 'text-lg' : 'text-xl'
   const headingClass = isCompact ? 'text-sm' : 'font-medium'
   const tagClass = isCompact ? 'px-2 py-1 text-xs' : 'px-3 py-1 text-sm'
+  const titleMargin = isCompact ? 'mb-3' : 'mb-4'
+  const headingMargin = isCompact ? 'mb-1' : 'mb-2'
 
   return (
     <>
-      <h2 className={`${titleClass} font-semibold mb-${isCompact ? '3' : '4'}`}>
+      <h2 className={`${titleClass} font-semibold ${titleMargin}`}>
         Základní informace o lekci
       </h2>
       
       {lesson.description && (
         <div className="mb-4">
-          <h3 className={`${headingClass} mb-${isCompact ? '1' : '2'}`}>Popis lekce</h3>
+          <h3 className={`${headingClass} ${headingMargin}`}>Popis lekce</h3>
           <p className="text-gray-600 text-sm">{lesson.description}</p>
         </div>
       )}
 
       {lesson.duration && (
         <div className="mb-4">
-          <h3 className={`${headingClass} mb-${isCompact ? '1' : '2'}`}>Délka lekce</h3>
+          <h3 className={`${headingClass} ${headingMargin}`}>Délka lekce</h3>
           <p className="text-gray-600 text-sm">{lesson.duration}</p>
         </div>
       )}
 
       {lesson.rvp_connection && lesson.rvp_connection.length > 0 && (
         <div className="mb-4">
-          <h3 className={`${headingClass} mb-${isCompact ? '1' : '2'}`}>Napojení na RVP</h3>
+          <h3 className={`${headingClass} ${headingMargin}`}>Napojení na RVP</h3>
           <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
             {lesson.rvp_connection.map((rvp: string, idx: number) => (
               <li key={idx}>{rvp}</li>
@@ -47,28 +49,28 @@ export function LessonDetailInfo({ lesson, children, variant = 'default' }: Less
 
       {lesson.period && (
         <div className="mb-4">
-          <h3 className={`${headingClass} mb-${isCompact ? '1' : '2'}`}>Období</h3>
+          <h3 className={`${headingClass} ${headingMargin}`}>Období</h3>
           <p className="text-gray-600 text-sm">{lesson.period}</p>
         </div>
       )}
 
       {lesson.target_group && (
         <div className="mb-4">
-          <h3 className={`${headingClass} mb-${isCompact ? '1' : '2'}`}>Cílová skupina</h3>
+          <h3 className={`${headingClass} ${headingMargin}`}>Cílová skupina</h3>
           <p className="text-gray-600 text-sm">{lesson.target_group}</p>
         </div>
       )}
 
       {lesson.lesson_type && (
         <div className="mb-4">
-          <h3 className={`${headingClass} mb-${isCompact ? '1' : '2'}`}>Typ lekce</h3>
+          <h3 className={`${headingClass} ${headingMargin}`}>Typ lekce</h3>
           <p className="text-gray-600 text-sm">{lesson.lesson_type}</p>
         </div>
       )}
 
       {lesson.publication_date && (
         <div className="mb-4">
-          <h3 className={`${headingClass} mb-${isCompact ? '1' : '2'}`}>Datum publikování lekce</h3>
+          <h3 className={`${headingClass} ${headingMargin}`}>Datum publikování lekce</h3>
           <p className="text-gray-600 text-sm">
             {formatDateLong(lesson.publication_date)}
           </p>

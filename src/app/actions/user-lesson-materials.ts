@@ -44,6 +44,14 @@ export async function copyLessonMaterialAction(sourceMaterialId: string, lessonI
       }
     }
 
+    // Ensure source material belongs to the provided lesson
+    if (sourceMaterial.lesson_id !== lessonId) {
+      return {
+        success: false,
+        error: 'Materiál nepatří k vybrané lekci',
+      }
+    }
+
     // Create the user copy
     const input = {
       source_material_id: sourceMaterialId,

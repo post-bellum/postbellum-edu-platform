@@ -40,31 +40,54 @@ export function UserMaterialEditContent({
 
   // Debounced auto-save
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const pendingSaveRef = React.useRef<Promise<void> | null>(null)
   const lastSavedRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
 
-  const saveChanges = React.useCallback(async (newTitle: string, newContent: string) => {
+  const saveChanges = React.useCallback((newTitle: string, newContent: string) => {
     // Skip if nothing changed
     if (newTitle === lastSavedRef.current.title && newContent === lastSavedRef.current.content) {
-      return
+      return Promise.resolve()
     }
 
-    setSaveStatus('saving')
+    const doSave = async () => {
+      setSaveStatus('saving')
 
-    const formData = new FormData()
-    formData.set('title', newTitle)
-    formData.set('content', newContent)
+      const formData = new FormData()
+      formData.set('title', newTitle)
+      formData.set('content', newContent)
 
-    const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
+      const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
 
-    if (result.success) {
-      setSaveStatus('saved')
-      lastSavedRef.current = { title: newTitle, content: newContent }
-      // Reset to idle after 2 seconds
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    } else {
-      setSaveStatus('error')
+      if (result.success) {
+        setSaveStatus('saved')
+        lastSavedRef.current = { title: newTitle, content: newContent }
+        // Reset to idle after 2 seconds
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        setSaveStatus('error')
+      }
     }
+
+    const promise = doSave().finally(() => {
+      pendingSaveRef.current = null
+    })
+    pendingSaveRef.current = promise
+    return promise
   }, [initialMaterial.id])
+
+  const flushPendingSave = React.useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+      saveTimeoutRef.current = null
+    }
+    // Trigger an immediate save if something changed and nothing is currently in-flight
+    if (!pendingSaveRef.current &&
+      (title !== lastSavedRef.current.title || content !== lastSavedRef.current.content)
+    ) {
+      pendingSaveRef.current = saveChanges(title, content)
+    }
+    return pendingSaveRef.current
+  }, [content, saveChanges, title])
 
   // Auto-save on title change
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,21 +123,10 @@ export function UserMaterialEditContent({
   // Cleanup and save on unmount if there are unsaved changes
   React.useEffect(() => {
     return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-      
-      // Trigger final save if there are unsaved changes
-      if (title !== lastSavedRef.current.title || content !== lastSavedRef.current.content) {
-        // Use a synchronous approach for unmount - create FormData and trigger action
-        const formData = new FormData()
-        formData.set('title', title)
-        formData.set('content', content)
-        updateUserLessonMaterialAction(initialMaterial.id, formData)
-      }
+      // Flush any debounced save before unmount; fire-and-forget the promise
+      void flushPendingSave()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [flushPendingSave])
 
   const handleDeleteConfirm = async () => {
     setIsDeleting(true)

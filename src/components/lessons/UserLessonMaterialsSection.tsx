@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { deleteUserLessonMaterialAction, copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import type { UserLessonMaterial } from '@/types/lesson.types'
+import { ErrorDialog } from '@/components/ui/ErrorDialog'
 
 interface UserLessonMaterialsSectionProps {
   materials: UserLessonMaterial[]
@@ -29,6 +30,8 @@ export function UserLessonMaterialsSection({
   const [materialToDelete, setMaterialToDelete] = React.useState<string | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [duplicatingMaterialId, setDuplicatingMaterialId] = React.useState<string | null>(null)
+  const [errorDialogOpen, setErrorDialogOpen] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const handleView = (material: UserLessonMaterial) => {
     setSelectedMaterial(material)
@@ -47,8 +50,8 @@ export function UserLessonMaterialsSection({
     if (result.success && result.data) {
       router.push(`/lessons/${lessonId}/materials/${result.data.id}`)
     } else {
-      // TODO: Replace alert with toast notification system for better UX
-      alert(result.error || 'Chyba při duplikování materiálu')
+      setErrorMessage(result.error || 'Chyba při duplikování materiálu')
+      setErrorDialogOpen(true)
     }
     setDuplicatingMaterialId(null)
   }
@@ -63,8 +66,8 @@ export function UserLessonMaterialsSection({
       onMaterialDeleted?.(materialToDelete)
       setDeleteDialogOpen(false)
     } else {
-      // TODO: Replace alert with toast notification system for better UX
-      alert(result.error || 'Chyba při mazání materiálu')
+      setErrorMessage(result.error || 'Chyba při mazání materiálu')
+      setErrorDialogOpen(true)
     }
     
     setIsDeleting(false)
@@ -190,6 +193,12 @@ export function UserLessonMaterialsSection({
         variant="destructive"
         isLoading={isDeleting}
         onConfirm={handleDeleteConfirm}
+      />
+
+      <ErrorDialog
+        open={errorDialogOpen}
+        onOpenChange={setErrorDialogOpen}
+        message={errorMessage}
       />
     </div>
   )
