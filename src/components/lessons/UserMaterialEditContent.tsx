@@ -41,83 +41,104 @@ export function UserMaterialEditContent({
   // Debounced auto-save
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
   const pendingSaveRef = React.useRef<Promise<void> | null>(null)
+  const queuedSaveRef = React.useRef(false)
   const lastSavedRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
+  const latestDraftRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
 
-  const saveChanges = React.useCallback((newTitle: string, newContent: string) => {
+  const saveChanges = React.useCallback(async (newTitle: string, newContent: string) => {
     // Skip if nothing changed
     if (newTitle === lastSavedRef.current.title && newContent === lastSavedRef.current.content) {
+      return
+    }
+
+    setSaveStatus('saving')
+
+    const formData = new FormData()
+    formData.set('title', newTitle)
+    formData.set('content', newContent)
+
+    const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
+
+    if (result.success) {
+      setSaveStatus('saved')
+      lastSavedRef.current = { title: newTitle, content: newContent }
+      // Reset to idle after 2 seconds
+      setTimeout(() => setSaveStatus('idle'), 2000)
+    } else {
+      setSaveStatus('error')
+    }
+  }, [initialMaterial.id])
+
+  // Ensures only one request is in flight; new changes queue another save
+  const attemptSave = React.useCallback(function runSave() {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+      saveTimeoutRef.current = null
+    }
+
+    // If a save is already running, queue another run with the latest draft
+    if (pendingSaveRef.current) {
+      queuedSaveRef.current = true
+      return pendingSaveRef.current
+    }
+
+    const { title: draftTitle, content: draftContent } = latestDraftRef.current
+
+    // Nothing to save
+    if (draftTitle === lastSavedRef.current.title && draftContent === lastSavedRef.current.content) {
       return Promise.resolve()
     }
 
-    const doSave = async () => {
-      setSaveStatus('saving')
-
-      const formData = new FormData()
-      formData.set('title', newTitle)
-      formData.set('content', newContent)
-
-      const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
-
-      if (result.success) {
-        setSaveStatus('saved')
-        lastSavedRef.current = { title: newTitle, content: newContent }
-        // Reset to idle after 2 seconds
-        setTimeout(() => setSaveStatus('idle'), 2000)
-      } else {
-        setSaveStatus('error')
-      }
-    }
-
-    const promise = doSave().finally(() => {
+    const promise = saveChanges(draftTitle, draftContent).finally(() => {
       pendingSaveRef.current = null
+
+      // If changes happened during the previous request, save again with the newest draft
+      if (queuedSaveRef.current) {
+        queuedSaveRef.current = false
+        if (
+          latestDraftRef.current.title !== lastSavedRef.current.title ||
+          latestDraftRef.current.content !== lastSavedRef.current.content
+        ) {
+          void runSave()
+        }
+      }
     })
+
     pendingSaveRef.current = promise
     return promise
-  }, [initialMaterial.id])
+  }, [saveChanges])
+
+  const scheduleSave = React.useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      void attemptSave()
+    }, AUTO_SAVE_DELAY_MS)
+  }, [attemptSave])
 
   const flushPendingSave = React.useCallback(() => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
       saveTimeoutRef.current = null
     }
-    // Trigger an immediate save if something changed and nothing is currently in-flight
-    if (!pendingSaveRef.current &&
-      (title !== lastSavedRef.current.title || content !== lastSavedRef.current.content)
-    ) {
-      pendingSaveRef.current = saveChanges(title, content)
-    }
-    return pendingSaveRef.current
-  }, [content, saveChanges, title])
+    return attemptSave()
+  }, [attemptSave])
 
   // Auto-save on title change
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value
     setTitle(newTitle)
-
-    // Clear existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
-
-    // Set new timeout for auto-save
-    saveTimeoutRef.current = setTimeout(() => {
-      saveChanges(newTitle, content)
-    }, AUTO_SAVE_DELAY_MS)
+    latestDraftRef.current = { ...latestDraftRef.current, title: newTitle }
+    scheduleSave()
   }
 
   // Auto-save on content change
   const handleContentChange = (newContent: string) => {
     setContent(newContent)
-
-    // Clear existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
-
-    // Set new timeout for auto-save
-    saveTimeoutRef.current = setTimeout(() => {
-      saveChanges(title, newContent)
-    }, AUTO_SAVE_DELAY_MS)
+    latestDraftRef.current = { ...latestDraftRef.current, content: newContent }
+    scheduleSave()
   }
 
   // Cleanup and save on unmount if there are unsaved changes
