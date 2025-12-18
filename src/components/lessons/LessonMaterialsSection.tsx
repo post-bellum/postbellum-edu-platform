@@ -2,19 +2,22 @@
 
 import * as React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { LessonMaterial, LessonSpecification, LessonDuration } from '@/types/lesson.types'
+import { LessonMaterial, LessonSpecification, LessonDuration, UserLessonMaterial } from '@/types/lesson.types'
 import { Button } from '@/components/ui/Button'
 import { Eye, Download, Edit } from 'lucide-react'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { AuthModal } from '@/components/auth'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
+import { copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
+import { ErrorDialog } from '@/components/ui/ErrorDialog'
 
 interface LessonMaterialsSectionProps {
   materials: LessonMaterial[]
+  lessonId: string
+  onMaterialCreated?: (material: UserLessonMaterial) => void
 }
 
 const specificationLabels: Record<LessonSpecification, string> = {
-  '1st_grade_elementary': '1. stupeň ZŠ',
   '2nd_grade_elementary': '2. stupeň ZŠ',
   'high_school': 'Střední školy',
 }
@@ -25,16 +28,19 @@ const durationLabels: Record<LessonDuration, string> = {
   90: '90 min',
 }
 
-export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProps) {
+export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated }: LessonMaterialsSectionProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { isLoggedIn } = useAuth()
   
-  const [selectedSpecification, setSelectedSpecification] = React.useState<LessonSpecification>('1st_grade_elementary')
+  const [selectedSpecification, setSelectedSpecification] = React.useState<LessonSpecification>('2nd_grade_elementary')
   const [selectedDuration, setSelectedDuration] = React.useState<LessonDuration>(30)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [selectedMaterial, setSelectedMaterial] = React.useState<LessonMaterial | null>(null)
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false)
+  const [isCopying, setIsCopying] = React.useState<string | null>(null)
+  const [errorDialogOpen, setErrorDialogOpen] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const handleAuthModalClose = (open: boolean) => {
     setIsAuthModalOpen(open)
@@ -48,6 +54,22 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
       action()
     } else {
       setIsAuthModalOpen(true)
+    }
+  }
+
+  const handleCopyMaterial = async (materialId: string) => {
+    setIsCopying(materialId)
+    const result = await copyLessonMaterialAction(materialId, lessonId)
+    
+    if (result.success && result.data) {
+      // Notify parent component about the new material
+      onMaterialCreated?.(result.data)
+      // Navigate to the edit page
+      router.push(`/lessons/${lessonId}/materials/${result.data.id}`)
+    } else if (!result.success) {
+      setErrorMessage(result.error || 'Chyba při vytváření kopie materiálu')
+      setErrorDialogOpen(true)
+      setIsCopying(null)
     }
   }
 
@@ -172,11 +194,11 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
                 <Button 
                   variant="outline" 
                   size="sm"
-                  disabled
-                  title="Připravujeme"
+                  disabled={isCopying === materials[0].id}
+                  onClick={() => requireAuth(() => handleCopyMaterial(materials[0].id))}
                 >
                   <Edit />
-                  Upravit
+                  {isCopying === materials[0].id ? 'Vytvářím...' : 'Upravit'}
                 </Button>
               </div>
             </div>
@@ -200,6 +222,12 @@ export function LessonMaterialsSection({ materials }: LessonMaterialsSectionProp
         onOpenChange={handleAuthModalClose}
         defaultStep="login"
         returnTo={pathname}
+      />
+
+      <ErrorDialog
+        open={errorDialogOpen}
+        onOpenChange={setErrorDialogOpen}
+        message={errorMessage}
       />
     </div>
   )

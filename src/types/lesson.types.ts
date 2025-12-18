@@ -4,7 +4,7 @@
  * npm run supabase:types
  */
 
-export type LessonSpecification = '1st_grade_elementary' | '2nd_grade_elementary' | 'high_school'
+export type LessonSpecification = '2nd_grade_elementary' | 'high_school'
 export type LessonDuration = 30 | 45 | 90
 
 export interface Lesson {
@@ -67,11 +67,24 @@ export type {
   UpdateLessonMaterialInput,
   CreateAdditionalActivityInput,
   UpdateAdditionalActivityInput,
+  CreateUserLessonMaterialInput,
+  UpdateUserLessonMaterialInput,
 } from '@/lib/schemas/lesson.schema'
 
 export interface UserFavorite {
   user_id: string
   lesson_id: string
   created_at: string
+}
+
+export interface UserLessonMaterial {
+  id: string
+  user_id: string
+  source_material_id: string
+  lesson_id: string
+  title: string
+  content: string | null
+  created_at: string
+  updated_at: string
 }
 

@@ -174,9 +174,6 @@ export function LessonMaterialForm({
                   <SelectValue placeholder="Vyberte skupinu" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1st_grade_elementary">
-                    1. stupeň ZŠ
-                  </SelectItem>
                   <SelectItem value="2nd_grade_elementary">
                     2. stupeň ZŠ
                   </SelectItem>
