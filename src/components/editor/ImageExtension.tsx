@@ -42,29 +42,54 @@ export const ImageExtension = Image.extend({
       align: {
         default: 'left',
         parseHTML: (element) => {
-          const align = element.style.textAlign || element.getAttribute('align') || element.parentElement?.style.textAlign
-          return align || 'left'
+          // Check multiple sources for alignment
+          const dataAlign = element.getAttribute('data-align')
+          if (dataAlign) return dataAlign
+          
+          const align = element.getAttribute('align')
+          if (align) return align
+          
+          const styleAlign = element.style.textAlign
+          if (styleAlign) return styleAlign
+          
+          const parentAlign = element.parentElement?.style.textAlign
+          if (parentAlign) return parentAlign
+          
+          // Check for center alignment in parent div (common in Google Docs)
+          const parent = element.parentElement
+          if (parent?.style.textAlign === 'center' || parent?.getAttribute('align') === 'center') {
+            return 'center'
+          }
+          
+          return 'left'
         },
         renderHTML: (attributes) => {
           if (!attributes.align || attributes.align === 'left') {
             return {}
           }
           return {
-            style: `text-align: ${attributes.align};`,
+            'data-align': attributes.align,
           }
         },
       },
       float: {
         default: null,
         parseHTML: (element) => {
-          return element.style.float || null
+          // Check data attribute first
+          const dataFloat = element.getAttribute('data-float')
+          if (dataFloat) return dataFloat
+          
+          const styleFloat = element.style.float
+          if (styleFloat && styleFloat !== 'none') return styleFloat
+          
+          return null
         },
         renderHTML: (attributes) => {
           if (!attributes.float) {
             return {}
           }
           return {
-            style: `float: ${attributes.float};`,
+            'data-float': attributes.float,
           }
         },
       },
@@ -108,14 +133,34 @@ export const ImageExtension = Image.extend({
 
       // Update wrapper styles based on current state
       const updateWrapperStyles = () => {
+        const align = state.node.attrs.align
+        const float = state.node.attrs.float
+        
+        let displayStyle = 'inline-block'
+        let marginStyle = '0.5em 0'
+        let floatStyle = ''
+        let textAlignStyle = ''
+        
+        if (float) {
+          floatStyle = `float: ${float};`
+          marginStyle = float === 'left' ? '0.5em 1em 0.5em 0' : '0.5em 0 0.5em 1em'
+        } else if (align === 'center') {
+          displayStyle = 'block'
+          marginStyle = '0.5em auto'
+          textAlignStyle = 'text-align: center;'
+        } else if (align === 'right') {
+          displayStyle = 'block'
+          marginStyle = '0.5em 0 0.5em auto'
+          textAlignStyle = 'text-align: right;'
+        }
+        
         wrapper.style.cssText = `
-          display: inline-block;
+          display: ${displayStyle};
           position: relative;
           max-width: 100%;
-          margin: 0.5em 0;
-          ${state.node.attrs.float ? `float: ${state.node.attrs.float};` : ''}
-          ${state.node.attrs.align === 'center' ? 'display: block; margin-left: auto; margin-right: auto;' : ''}
-          ${state.node.attrs.align === 'right' ? 'float: right;' : ''}
+          margin: ${marginStyle};
+          ${floatStyle}
+          ${textAlignStyle}
           ${state.isSelected ? 'outline: 2px solid #075985; outline-offset: 2px;' : ''}
         `
       }

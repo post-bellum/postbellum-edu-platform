@@ -4,23 +4,28 @@ import * as React from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import Underline from '@tiptap/extension-underline'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import Heading from '@tiptap/extension-heading'
 import { ImageExtension } from './ImageExtension'
 import { ParagraphMovement } from './ParagraphMovement'
 import { BlockControls } from './BlockControls'
 import { uploadImageToStorage } from '@/lib/supabase/storage'
 import { Button } from '@/components/ui/Button'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select'
 import { 
   Bold, 
   Italic, 
   List, 
   ListOrdered, 
-  Heading1, 
-  Heading2, 
-  Heading3,
   AlignLeft,
   AlignCenter,
   AlignRight,
   Image as ImageIcon,
+  Underline as UnderlineIcon,
+  Palette,
+  X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
@@ -40,6 +45,8 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const editorRef = React.useRef<ReturnType<typeof useEditor> | null>(null)
   const isMountedRef = React.useRef(true)
+  // State to trigger re-render when selection changes
+  const [, setUpdateCounter] = React.useState(0)
 
   // Cleanup on unmount to prevent async operations on unmounted component
   React.useEffect(() => {
@@ -57,17 +64,130 @@ export function RichTextEditor({
         codeBlock: false,
         blockquote: false,
         horizontalRule: false,
-        // Link is included in StarterKit, so we configure it here instead of adding separately
-        link: {
-          openOnClick: false,
-          HTMLAttributes: {
-            class: 'text-primary underline hover:text-primary-hover',
-          },
+        // Disable default heading - we'll add custom one below
+        heading: false,
+      }),
+      // Custom Heading extension with enhanced parsing for Google Docs/Word
+      Heading.extend({
+        addAttributes() {
+          return {
+            level: {
+              default: 1,
+              parseHTML: element => {
+                // Check for data-level attribute (from our own editor)
+                const dataLevel = element.getAttribute('data-level')
+                if (dataLevel) {
+                  return parseInt(dataLevel, 10)
+                }
+                
+                // Check for standard heading tags
+                const tagMatch = element.tagName.match(/^H([1-6])$/)
+                if (tagMatch) {
+                  return parseInt(tagMatch[1], 10)
+                }
+                
+                return 1
+              },
+              renderHTML: attributes => {
+                return {
+                  'data-level': attributes.level,
+                }
+              },
+            },
+          }
+        },
+        
+        parseHTML() {
+          // Helper to get font size from element or inner span
+          const getFontSize = (node: HTMLElement): number => {
+            // Check inner span first (Google Docs puts styles there)
+            const span = node.querySelector('span')
+            if (span) {
+              const style = span.getAttribute('style') || ''
+              const match = style.match(/font-size:\s*(\d+(?:\.\d+)?)(pt|px)/i)
+              if (match) {
+                let size = parseFloat(match[1])
+                if (match[2].toLowerCase() === 'px') size = size / 1.333
+                return size
+              }
+            }
+            // Fallback to element style
+            if (node.style && node.style.fontSize) {
+              return parseFloat(node.style.fontSize)
+            }
+            return 0
+          }
+          
+          // Parse standard heading tags
+          const standardRules = [
+            { tag: 'h1', attrs: { level: 1 } },
+            { tag: 'h2', attrs: { level: 2 } },
+            { tag: 'h3', attrs: { level: 3 } },
+            { tag: 'h4', attrs: { level: 4 } },
+            { tag: 'h5', attrs: { level: 5 } },
+            { tag: 'h6', attrs: { level: 6 } },
+          ]
+          
+          // Rules for Google Docs/Word styled paragraphs
+          const styledRules = [
+            {
+              tag: 'p',
+              getAttrs: (node: string | HTMLElement) => {
+                if (typeof node === 'string') return false
+                
+                // Check for data-level attribute (from our editor)
+                const dataLevel = node.getAttribute('data-level')
+                if (dataLevel) {
+                  return { level: parseInt(dataLevel) }
+                }
+                
+                // Check for heading classes
+                const className = (node.className || '').toLowerCase()
+                if (className.includes('title') || className.includes('heading-1') || className.includes('heading1')) {
+                  return { level: 1 }
+                }
+                if (className.includes('subtitle') || className.includes('heading-2') || className.includes('heading2')) {
+                  return { level: 2 }
+                }
+                if (className.includes('heading-3') || className.includes('heading3')) {
+                  return { level: 3 }
+                }
+                if (className.includes('heading-4') || className.includes('heading4')) {
+                  return { level: 4 }
+                }
+                
+                // Check for role=heading
+                const role = node.getAttribute('role')
+                if (role === 'heading') {
+                  const ariaLevel = node.getAttribute('aria-level')
+                  if (ariaLevel) return { level: parseInt(ariaLevel, 10) }
+                }
+                
+                // Detect by font size (Google Docs Title/Subtitle and headings)
+                const fontSize = getFontSize(node)
+                if (fontSize >= 24) return { level: 1 }  // Title or large heading
+                if (fontSize >= 18) return { level: 2 }  // Subtitle or medium heading
+                if (fontSize >= 14) return { level: 3 }  // Smaller heading
+                
+                return false
+              },
+            },
+          ]
+          
+          return [...standardRules, ...styledRules]
+        },
+      }).configure({
+        levels: [1, 2, 3, 4, 5, 6],
+        HTMLAttributes: {
+          class: 'heading',
         },
       }),
       Placeholder.configure({
         placeholder,
       }),
+      Underline,
+      TextStyle,
+      Color,
       ImageExtension.configure({
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded',
@@ -80,6 +200,12 @@ export function RichTextEditor({
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
+      // Trigger re-render to update toolbar state
+      setUpdateCounter(c => c + 1)
+    },
+    onSelectionUpdate: () => {
+      // Trigger re-render when cursor position changes
+      setUpdateCounter(c => c + 1)
     },
     onCreate: ({ editor }) => {
       editorRef.current = editor
@@ -95,7 +221,7 @@ export function RichTextEditor({
           return false
         }
 
-        // Check clipboard items for images
+        // Check clipboard items for direct image files
         if (clipboardData.items && clipboardData.items.length > 0) {
           const items = Array.from(clipboardData.items)
           
@@ -129,11 +255,11 @@ export function RichTextEditor({
           }
         }
 
-        // Also check HTML content for base64 images (Google Docs sometimes embeds images this way)
+        // Check HTML content for base64 images (Google Docs sometimes embeds images this way)
         const htmlData = clipboardData.getData('text/html')
         if (htmlData && htmlData.includes('<img') && editorRef.current) {
           // Extract base64 images from HTML
-          const imgRegex = /<img[^>]+src="(data:image\/[^;]+;base64,[^"]+)"/gi
+          const imgRegex = /<img[^>]+src="(data:image\/[^;]+;base64,[^"]+)"[^>]*>/gi
           const matches = [...htmlData.matchAll(imgRegex)]
           
           if (matches.length > 0) {
@@ -142,6 +268,20 @@ export function RichTextEditor({
             // Process all images found
             const imagePromises = matches.map((match) => {
               const base64Data = match[1]
+              const fullImgTag = match[0]
+              
+              // Extract alignment/style attributes from the img tag
+              const alignMatch = fullImgTag.match(/align="([^"]+)"/i) || 
+                                fullImgTag.match(/text-align:\s*([^;"]+)/i)
+              const floatMatch = fullImgTag.match(/float:\s*([^;"]+)/i)
+              const widthMatch = fullImgTag.match(/width:\s*(\d+)px/i) || 
+                                fullImgTag.match(/width="(\d+)"/i)
+              
+              const attributes = {
+                align: alignMatch ? alignMatch[1] : 'left',
+                float: floatMatch ? floatMatch[1] : null,
+                width: widthMatch ? parseInt(widthMatch[1]) : null,
+              }
               
               // Convert base64 to blob
               return fetch(base64Data)
@@ -157,7 +297,7 @@ export function RichTextEditor({
                 })
                 .then((url) => {
                   if (url) {
-                    return { original: base64Data, replacement: url }
+                    return { original: base64Data, replacement: url, attributes }
                   }
                   return null
                 })
@@ -169,19 +309,56 @@ export function RichTextEditor({
                 })
             })
             
-            // Wait for all images to upload, then replace in HTML
+            // Wait for all images to upload, then insert content with formatting preserved
             Promise.all(imagePromises).then((replacements) => {
               // Check if component is still mounted before updating
               if (!editorRef.current || !isMountedRef.current) return
               
               let updatedHtml = htmlData
+              
+              // Replace base64 images with Supabase URLs using simple string replace
+              // (avoiding regex due to base64 data being too large for regex patterns)
               replacements.forEach((replacement) => {
                 if (replacement) {
-                  updatedHtml = updatedHtml.replace(replacement.original, replacement.replacement)
+                  // Find the img tag with the base64 src using indexOf
+                  // We'll do a simple string search and replace
+                  const searchStr = `src="${replacement.original}"`
+                  const index = updatedHtml.indexOf(searchStr)
+                  
+                  if (index !== -1) {
+                    // Build new img tag with preserved attributes
+                    let newImgTag = `<img src="${replacement.replacement}"`
+                    if (replacement.attributes.width) {
+                      newImgTag += ` width="${replacement.attributes.width}"`
+                    }
+                    if (replacement.attributes.align) {
+                      newImgTag += ` data-align="${replacement.attributes.align}"`
+                    }
+                    if (replacement.attributes.float) {
+                      newImgTag += ` data-float="${replacement.attributes.float}"`
+                    }
+                    newImgTag += ' />'
+                    
+                    // Find the start and end of the img tag
+                    let tagStart = index
+                    while (tagStart > 0 && updatedHtml[tagStart - 1] !== '<') {
+                      tagStart--
+                    }
+                    tagStart-- // Include the '<'
+                    
+                    let tagEnd = index + searchStr.length
+                    while (tagEnd < updatedHtml.length && updatedHtml[tagEnd] !== '>') {
+                      tagEnd++
+                    }
+                    tagEnd++ // Include the '>'
+                    
+                    // Replace the old img tag with the new one
+                    updatedHtml = updatedHtml.substring(0, tagStart) + newImgTag + updatedHtml.substring(tagEnd)
+                  }
                 }
               })
               
-              // Insert the updated HTML with Supabase URLs
+              // Insert the updated HTML with Supabase URLs and preserved formatting
               editorRef.current.chain().focus().insertContent(updatedHtml).run()
             })
             
@@ -189,7 +366,8 @@ export function RichTextEditor({
           }
         }
         
-        // Let Tiptap handle other paste operations (text, Word, etc.)
+        // Let Tiptap handle other paste operations (text, Word, Google Docs text formatting, etc.)
+        // This will preserve bold, italic, headings, lists, etc.
         return false
       },
     },
@@ -199,10 +377,70 @@ export function RichTextEditor({
     return null
   }
 
+  // Get current text style for the select dropdown
+  const getCurrentTextStyle = () => {
+    if (editor.isActive('heading', { level: 1 })) return 'heading1'
+    if (editor.isActive('heading', { level: 2 })) return 'heading2'
+    if (editor.isActive('heading', { level: 3 })) return 'heading3'
+    if (editor.isActive('heading', { level: 4 })) return 'heading4'
+    if (editor.isActive('heading', { level: 5 })) return 'heading5'
+    if (editor.isActive('heading', { level: 6 })) return 'heading6'
+    return 'paragraph'
+  }
+
+  // Get label for current text style
+  const getCurrentStyleLabel = () => {
+    if (editor.isActive('heading', { level: 1 })) return 'Nadpis 1'
+    if (editor.isActive('heading', { level: 2 })) return 'Nadpis 2'
+    if (editor.isActive('heading', { level: 3 })) return 'Nadpis 3'
+    if (editor.isActive('heading', { level: 4 })) return 'Nadpis 4'
+    if (editor.isActive('heading', { level: 5 })) return 'Nadpis 5'
+    if (editor.isActive('heading', { level: 6 })) return 'Nadpis 6'
+    return 'Normální text'
+  }
+
+  // Handle text style change from select
+  const handleTextStyleChange = (value: string) => {
+    if (value === 'paragraph') {
+      editor.chain().focus().setParagraph().run()
+    } else if (value.startsWith('heading')) {
+      const level = parseInt(value.replace('heading', '')) as 1 | 2 | 3 | 4 | 5 | 6
+      editor.chain().focus().setHeading({ level }).run()
+    }
+  }
+
   return (
-    <div className={cn('border border-gray-300 rounded-md bg-gray-50', className)}>
+    <div className={cn('border border-gray-300 rounded-lg bg-white shadow-sm', className)}>
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border-b border-gray-200 flex-wrap bg-white rounded-t-md">
+      <div className="flex items-center gap-1 p-2.5 border-b border-gray-200 flex-wrap bg-gray-50/50 rounded-t-lg backdrop-blur-sm">
+        {/* Text Style Dropdown */}
+        <Select value={getCurrentTextStyle()} onValueChange={handleTextStyleChange}>
+          <SelectTrigger className="w-[140px] h-9 text-sm border-gray-300 hover:bg-gray-50 focus:ring-1 focus:ring-sky-500">
+            <SelectValue>
+              {getCurrentStyleLabel()}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent className="min-w-[200px]">
+            <SelectItem value="paragraph" className="cursor-pointer h-10">
+              <span className="text-sm">Normální text</span>
+            </SelectItem>
+            <SelectItem value="heading1" className="cursor-pointer h-10">
+              <span className="text-2xl font-bold text-gray-900">Nadpis 1</span>
+            </SelectItem>
+            <SelectItem value="heading2" className="cursor-pointer h-10">
+              <span className="text-xl font-bold text-gray-800">Nadpis 2</span>
+            </SelectItem>
+            <SelectItem value="heading3" className="cursor-pointer h-10">
+              <span className="text-lg font-semibold text-gray-700">Nadpis 3</span>
+            </SelectItem>
+            <SelectItem value="heading4" className="cursor-pointer h-10">
+              <span className="text-base font-semibold text-gray-600">Nadpis 4</span>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        <div className="w-px h-6 bg-gray-200 mx-1" />
+
         {/* Text Formatting */}
         <Button
           type="button"
@@ -226,42 +464,64 @@ export function RichTextEditor({
         >
           <Italic className="w-4 h-4" />
         </Button>
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        {/* Headings */}
         <Button
           type="button"
-          variant={editor.isActive('heading', { level: 1 }) ? 'default' : 'ghost'}
+          variant={editor.isActive('underline') ? 'default' : 'ghost'}
           size="icon"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          aria-label="Nadpis 1"
-          title="Nadpis 1"
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          disabled={!editor.can().chain().focus().toggleUnderline().run()}
+          aria-label="Podtržené"
+          title="Podtržené"
         >
-          <Heading1 className="w-4 h-4" />
-        </Button>
-        <Button
-          type="button"
-          variant={editor.isActive('heading', { level: 2 }) ? 'default' : 'ghost'}
-          size="icon"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          aria-label="Nadpis 2"
-          title="Nadpis 2"
-        >
-          <Heading2 className="w-4 h-4" />
-        </Button>
-        <Button
-          type="button"
-          variant={editor.isActive('heading', { level: 3 }) ? 'default' : 'ghost'}
-          size="icon"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          aria-label="Nadpis 3"
-          title="Nadpis 3"
-        >
-          <Heading3 className="w-4 h-4" />
+          <UnderlineIcon className="w-4 h-4" />
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+        {/* Color Picker */}
+        <div className="relative group/color">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label="Barva textu"
+            title="Barva textu"
+            className="relative"
+          >
+            <Palette className="w-4 h-4" />
+            <span 
+              className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full"
+              style={{ backgroundColor: editor.getAttributes('textStyle').color || '#000000' }}
+            />
+          </Button>
+          <div className="absolute top-full left-0 mt-1 p-2 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover/color:opacity-100 group-hover/color:visible transition-all z-50 min-w-[160px]">
+            <div className="grid grid-cols-6 gap-1 mb-2">
+              {[
+                '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc',
+                '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff',
+                '#4a86e8', '#0000ff', '#9900ff', '#ff00ff', '#e6b8af', '#f4cccc',
+                '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3',
+              ].map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  className="w-5 h-5 rounded border border-gray-300 hover:scale-110 transition-transform"
+                  style={{ backgroundColor: color }}
+                  onClick={() => editor.chain().focus().setColor(color).run()}
+                  title={color}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              className="flex items-center gap-1.5 w-full px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
+              onClick={() => editor.chain().focus().unsetColor().run()}
+            >
+              <X className="w-3 h-3" />
+              Odstranit barvu
+            </button>
+          </div>
+        </div>
+
+        <div className="w-px h-6 bg-gray-200 mx-1" />
 
         {/* Lists */}
         <Button
@@ -357,9 +617,9 @@ export function RichTextEditor({
       </div>
 
       {/* Editor Content - A4 Paper Simulation */}
-      <div className="overflow-y-auto p-4 group/editor">
-        <div className="a4-paper">
-          <div className="a4-content relative">
+      <div className="overflow-y-auto p-6 bg-gray-50 group/editor min-h-[500px]">
+        <div className="a4-paper shadow-md">
+          <div className="a4-content relative bg-white">
             <BlockControls editor={editor} />
             <EditorContent editor={editor} />
           </div>
