@@ -410,9 +410,9 @@ export function RichTextEditor({
   }
 
   return (
-    <div className={cn('border border-gray-300 rounded-lg bg-white shadow-sm', className)}>
-      {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2.5 border-b border-gray-200 flex-wrap bg-gray-50/50 rounded-t-lg backdrop-blur-sm">
+    <div className={cn('border border-gray-300 rounded-lg bg-white shadow-sm flex flex-col', className)}>
+      {/* Toolbar - Fixed at top */}
+      <div className="flex items-center gap-1 p-2.5 border-b border-gray-200 flex-wrap bg-gray-50/50 rounded-t-lg backdrop-blur-sm shrink-0">
         {/* Text Style Dropdown */}
         <Select value={getCurrentTextStyle()} onValueChange={handleTextStyleChange}>
           <SelectTrigger className="w-[140px] h-9 text-sm border-gray-300 hover:bg-gray-50 focus:ring-1 focus:ring-sky-500">
@@ -616,8 +616,8 @@ export function RichTextEditor({
         )}
       </div>
 
-      {/* Editor Content - A4 Paper Simulation */}
-      <div className="overflow-y-auto p-6 bg-gray-50 group/editor min-h-[500px]">
+      {/* Editor Content - A4 Paper Simulation - Scrollable Area */}
+      <div className="overflow-y-auto p-6 bg-gray-50 group/editor flex-1" style={{ maxHeight: 'calc(100vh - 380px)' }}>
         <div className="a4-paper shadow-md">
           <div className="a4-content relative bg-white">
             <BlockControls editor={editor} />
