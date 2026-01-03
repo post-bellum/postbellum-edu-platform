@@ -73,8 +73,29 @@ export const ImageExtension = Image.extend({
 
   addNodeView() {
     return ({ node, getPos, editor }) => {
+      // Use object to hold mutable state to avoid closure issues
+      const state = {
+        node,
+        isSelected: false,
+        isResizing: false,
+        startX: 0,
+        startWidth: 0,
+        cleanupFns: [] as (() => void)[],
+      }
+
       const wrapper = document.createElement('div')
       wrapper.className = 'image-wrapper'
+
+      const img = document.createElement('img')
+      img.src = state.node.attrs.src
+      img.alt = state.node.attrs.alt || ''
+      img.style.cssText = `
+        width: ${state.node.attrs.width ? `${state.node.attrs.width}px` : 'auto'};
+        height: ${state.node.attrs.height ? `${state.node.attrs.height}px` : 'auto'};
+        max-width: 100%;
+        display: block;
+        border-radius: 0.375rem;
+      `
       
       // Check if node is selected
       const checkSelection = () => {
@@ -82,147 +103,170 @@ export const ImageExtension = Image.extend({
         const { selection } = editor.state
         const pos = getPos()
         if (pos === null || pos === undefined) return false
-        return selection.from <= pos && selection.to >= pos + node.nodeSize
+        return selection.from <= pos && selection.to >= pos + state.node.nodeSize
       }
-      
-      let isSelected = checkSelection()
-      
-      wrapper.style.cssText = `
-        display: inline-block;
-        position: relative;
-        max-width: 100%;
-        margin: 0.5em 0;
-        ${node.attrs.float ? `float: ${node.attrs.float};` : ''}
-        ${node.attrs.align === 'center' ? 'display: block; margin-left: auto; margin-right: auto;' : ''}
-        ${node.attrs.align === 'right' ? 'float: right;' : ''}
-        ${isSelected ? 'outline: 2px solid #075985; outline-offset: 2px;' : ''}
-      `
 
-      const img = document.createElement('img')
-      img.src = node.attrs.src
-      img.alt = node.attrs.alt || ''
-      img.style.cssText = `
-        width: ${node.attrs.width ? `${node.attrs.width}px` : 'auto'};
-        height: ${node.attrs.height ? `${node.attrs.height}px` : 'auto'};
-        max-width: 100%;
-        display: block;
-        border-radius: 0.375rem;
-      `
+      // Update wrapper styles based on current state
+      const updateWrapperStyles = () => {
+        wrapper.style.cssText = `
+          display: inline-block;
+          position: relative;
+          max-width: 100%;
+          margin: 0.5em 0;
+          ${state.node.attrs.float ? `float: ${state.node.attrs.float};` : ''}
+          ${state.node.attrs.align === 'center' ? 'display: block; margin-left: auto; margin-right: auto;' : ''}
+          ${state.node.attrs.align === 'right' ? 'float: right;' : ''}
+          ${state.isSelected ? 'outline: 2px solid #075985; outline-offset: 2px;' : ''}
+        `
+      }
 
-      // Add resize handle when selected
-      if (isSelected) {
+      // Create resize handle with mouse and touch support
+      const createResizeHandle = () => {
         const resizeHandle = document.createElement('div')
         resizeHandle.className = 'resize-handle'
         resizeHandle.style.cssText = `
           position: absolute;
           right: 0;
           bottom: 0;
-          width: 12px;
-          height: 12px;
+          width: 16px;
+          height: 16px;
           background-color: #075985;
           cursor: nwse-resize;
           border: 2px solid white;
           border-radius: 2px;
           z-index: 10;
+          touch-action: none;
         `
 
-        let isResizing = false
-        let startX = 0
-        let startWidth = parseInt(node.attrs.width) || img.offsetWidth
+        const startResize = (clientX: number) => {
+          state.isResizing = true
+          state.startX = clientX
+          state.startWidth = parseInt(String(state.node.attrs.width)) || img.offsetWidth
+        }
+
+        const handleResize = (clientX: number) => {
+          if (!state.isResizing) return
+          const diff = clientX - state.startX
+          const newWidth = Math.max(50, Math.min(800, state.startWidth + diff))
+          img.style.width = `${newWidth}px`
+        }
+
+        const endResize = () => {
+          if (!state.isResizing) return
+          state.isResizing = false
+          const finalWidth = parseInt(img.style.width) || state.startWidth
+          
+          if (typeof getPos === 'function') {
+            const pos = getPos()
+            if (pos !== null && pos !== undefined) {
+              editor.view.dispatch(
+                editor.view.state.tr.setNodeMarkup(pos, undefined, {
+                  ...state.node.attrs,
+                  width: finalWidth,
+                })
+              )
+            }
+          }
+        }
+
+        // Mouse events
+        const handleMouseMove = (e: MouseEvent) => handleResize(e.clientX)
+        const handleMouseUp = () => {
+          endResize()
+          document.removeEventListener('mousemove', handleMouseMove)
+          document.removeEventListener('mouseup', handleMouseUp)
+        }
 
         resizeHandle.addEventListener('mousedown', (e) => {
           e.preventDefault()
           e.stopPropagation()
-          isResizing = true
-          startX = e.clientX
-          startWidth = parseInt(node.attrs.width) || img.offsetWidth
-
-          const handleMouseMove = (e: MouseEvent) => {
-            if (!isResizing) return
-            const diff = e.clientX - startX
-            const newWidth = Math.max(50, Math.min(800, startWidth + diff))
-            img.style.width = `${newWidth}px`
-          }
-
-          const handleMouseUp = () => {
-            if (!isResizing) return
-            isResizing = false
-            const finalWidth = parseInt(img.style.width) || startWidth
-            
-            if (typeof getPos === 'function') {
-              const pos = getPos()
-              if (pos !== null && pos !== undefined) {
-                editor.view.dispatch(
-                  editor.view.state.tr.setNodeMarkup(pos, undefined, {
-                    ...node.attrs,
-                    width: finalWidth,
-                  })
-                )
-              }
-            }
-
-            document.removeEventListener('mousemove', handleMouseMove)
-            document.removeEventListener('mouseup', handleMouseUp)
-          }
-
+          startResize(e.clientX)
           document.addEventListener('mousemove', handleMouseMove)
           document.addEventListener('mouseup', handleMouseUp)
         })
 
-        wrapper.appendChild(resizeHandle)
+        // Touch events
+        const handleTouchMove = (e: TouchEvent) => {
+          if (e.touches.length === 1) {
+            handleResize(e.touches[0].clientX)
+          }
+        }
+        const handleTouchEnd = () => {
+          endResize()
+          document.removeEventListener('touchmove', handleTouchMove)
+          document.removeEventListener('touchend', handleTouchEnd)
+        }
+
+        resizeHandle.addEventListener('touchstart', (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          if (e.touches.length === 1) {
+            startResize(e.touches[0].clientX)
+            document.addEventListener('touchmove', handleTouchMove, { passive: false })
+            document.addEventListener('touchend', handleTouchEnd)
+          }
+        }, { passive: false })
+
+        return resizeHandle
       }
 
-      wrapper.appendChild(img)
-      
+      // Add or remove resize handle based on selection
+      const updateResizeHandle = () => {
+        const existingHandle = wrapper.querySelector('.resize-handle')
+        if (state.isSelected && !existingHandle) {
+          wrapper.appendChild(createResizeHandle())
+        } else if (!state.isSelected && existingHandle) {
+          existingHandle.remove()
+        }
+      }
+
       // Update selection state on editor updates
       const updateSelection = () => {
         const newSelected = checkSelection()
-        if (newSelected !== isSelected) {
-          isSelected = newSelected
-          wrapper.style.outline = isSelected ? '2px solid #075985' : 'none'
-          wrapper.style.outlineOffset = isSelected ? '2px' : '0'
-          
-          // Add/remove resize handle
-          const existingHandle = wrapper.querySelector('.resize-handle')
-          if (isSelected && !existingHandle) {
-            // Re-add resize handle logic here if needed
-            // For now, resize handle is added on initial render
-          } else if (!isSelected && existingHandle) {
-            existingHandle.remove()
-          }
+        if (newSelected !== state.isSelected) {
+          state.isSelected = newSelected
+          updateWrapperStyles()
+          updateResizeHandle()
         }
+      }
+
+      // Initial setup
+      state.isSelected = checkSelection()
+      updateWrapperStyles()
+      wrapper.appendChild(img)
+      if (state.isSelected) {
+        wrapper.appendChild(createResizeHandle())
       }
       
       // Listen to selection changes
       editor.on('selectionUpdate', updateSelection)
       editor.on('update', updateSelection)
+      state.cleanupFns.push(() => {
+        editor.off('selectionUpdate', updateSelection)
+        editor.off('update', updateSelection)
+      })
       
       return {
         dom: wrapper,
         update: (updatedNode) => {
           if (updatedNode.type.name !== 'image') return false
+          
+          // Update state reference
+          state.node = updatedNode
+          
           // Update image src if changed
-          if (updatedNode.attrs.src !== node.attrs.src) {
-            img.src = updatedNode.attrs.src
-          }
-          // Update image alt if changed
-          if (updatedNode.attrs.alt !== node.attrs.alt) {
-            img.alt = updatedNode.attrs.alt || ''
-          }
-          // Update width if changed
-          if (updatedNode.attrs.width !== node.attrs.width) {
-            img.style.width = updatedNode.attrs.width ? `${updatedNode.attrs.width}px` : 'auto'
-          }
-          // Update height if changed
-          if (updatedNode.attrs.height !== node.attrs.height) {
-            img.style.height = updatedNode.attrs.height ? `${updatedNode.attrs.height}px` : 'auto'
-          }
-          node = updatedNode
+          img.src = updatedNode.attrs.src
+          img.alt = updatedNode.attrs.alt || ''
+          img.style.width = updatedNode.attrs.width ? `${updatedNode.attrs.width}px` : 'auto'
+          img.style.height = updatedNode.attrs.height ? `${updatedNode.attrs.height}px` : 'auto'
+          
+          // Update wrapper styles for alignment/float changes
+          updateWrapperStyles()
+          
           return true
         },
         destroy: () => {
-          editor.off('selectionUpdate', updateSelection)
-          editor.off('update', updateSelection)
+          state.cleanupFns.forEach(fn => fn())
         },
       }
     }

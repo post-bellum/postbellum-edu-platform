@@ -264,3 +264,34 @@
     min-height: auto;
   }
 }
+
+/* Block highlight styles for paragraph movement */
+.block-highlight {
+  position: relative;
+  background-color: rgba(7, 89, 133, 0.05);
+  border-radius: 4px;
+  outline: 2px solid rgba(7, 89, 133, 0.25);
+  outline-offset: 2px;
+  transition: outline-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.block-highlight:hover {
+  outline-color: rgba(7, 89, 133, 0.4);
+  background-color: rgba(7, 89, 133, 0.08);
+}
+
+/* Dragging state */
+.block-dragging {
+  outline-color: rgba(7, 89, 133, 0.6) !important;
+  background-color: rgba(7, 89, 133, 0.12) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+}
+
+/* Ensure proper spacing for highlighted blocks */
+.ProseMirror > .block-highlight {
+  margin-left: -4px;
+  margin-right: -4px;
+  padding-left: 4px;
+  padding-right: 4px;
+}

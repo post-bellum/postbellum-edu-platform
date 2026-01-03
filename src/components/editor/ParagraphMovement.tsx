@@ -1,5 +1,6 @@
 import { Extension } from '@tiptap/core'
 import { TextSelection } from '@tiptap/pm/state'
+import { Fragment } from '@tiptap/pm/model'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -11,7 +12,7 @@ declare module '@tiptap/core' {
 }
 
 /**
- * Custom Tiptap extension for moving paragraphs/sections up and down
+ * Custom Tiptap extension for moving block-level nodes (paragraphs, headings, images, lists) up and down
  * Provides commands: moveParagraphUp and moveParagraphDown
  */
 export const ParagraphMovement = Extension.create({
@@ -22,181 +23,159 @@ export const ParagraphMovement = Extension.create({
       moveParagraphUp: () => ({ state, dispatch }) => {
         const { selection } = state
         const { $from } = selection
+        const doc = state.doc
 
-        // Find the paragraph or heading node containing the selection
-        let depth = $from.depth
-        let node = null
-        let pos = -1
-
-        // Walk up the node tree to find a paragraph or heading
-        while (depth > 0) {
-          const nodeAtDepth = $from.node(depth)
-          if (nodeAtDepth.type.name === 'paragraph' || nodeAtDepth.type.name.startsWith('heading')) {
-            node = nodeAtDepth
-            pos = $from.start(depth)
-            break
-          }
-          depth--
+        // Find the top-level block node containing the selection
+        // We need to find the depth where the parent is the document (depth 0)
+        let blockDepth = $from.depth
+        while (blockDepth > 1 && $from.node(blockDepth - 1).type.name !== 'doc') {
+          blockDepth--
         }
 
-        if (!node || pos < 0) {
+        if (blockDepth < 1) {
           return false
         }
 
-        // Get the document
-        const doc = state.doc
+        // Get position before the current block (start of block in document)
+        const blockStart = $from.before(blockDepth)
+        // Get position after the current block (end of block in document)
+        const blockEnd = $from.after(blockDepth)
+        
+        // Calculate relative offset from block start
+        const relativeOffset = selection.from - blockStart
+
+        // Find the index of current block in document
         let currentIndex = -1
-
-        // Find current node index in document
-        doc.forEach((child, offset, index) => {
-          if (offset <= pos && offset + child.nodeSize > pos) {
-            currentIndex = index
+        let pos = 0
+        for (let i = 0; i < doc.childCount; i++) {
+          const child = doc.child(i)
+          if (pos === blockStart) {
+            currentIndex = i
+            break
           }
-        })
+          pos += child.nodeSize
+        }
 
+        // Can't move up if already first
         if (currentIndex <= 0) {
           return false
         }
 
-        const tr = state.tr
-        const currentNode = doc.child(currentIndex)
-        const prevNode = doc.child(currentIndex - 1)
+        if (!dispatch) {
+          return true
+        }
 
-        // Calculate positions using the document structure
-        let prevStart = 1
+        // Get the current and previous blocks
+        const currentBlock = doc.child(currentIndex)
+        const prevBlock = doc.child(currentIndex - 1)
+
+        // Calculate the start position of the previous block
+        let prevBlockStart = 0
         for (let i = 0; i < currentIndex - 1; i++) {
-          prevStart += doc.child(i).nodeSize + 1
+          prevBlockStart += doc.child(i).nodeSize
         }
-        const prevEnd = prevStart + prevNode.nodeSize
+        const prevBlockEnd = prevBlockStart + prevBlock.nodeSize
+
+        // Create a transaction that replaces both blocks with swapped order
+        const tr = state.tr
+
+        // Replace the range from prevBlockStart to blockEnd with [currentBlock, prevBlock]
+        const newContent = Fragment.from([currentBlock, prevBlock])
+        tr.replaceWith(prevBlockStart, blockEnd, newContent)
+
+        // Set selection to the moved block (now at prevBlockStart) preserving relative position
+        const newSelectionPos = Math.min(
+          prevBlockStart + relativeOffset,
+          prevBlockStart + currentBlock.nodeSize - 1
+        )
         
-        const currentStart = prevEnd + 1
-        const currentEnd = currentStart + currentNode.nodeSize
-
-        // Validate positions are within bounds
-        const docSize = doc.content.size
-        if (prevStart < 1 || prevEnd > docSize || currentStart < 1 || currentEnd > docSize) {
-          return false
-        }
-
-        try {
-          // Copy nodes
-          const currentNodeCopy = currentNode.copy()
-          const prevNodeCopy = prevNode.copy()
-
-          // Delete current node first (from end)
-          tr.delete(currentStart, currentEnd)
-          
-          // Then delete previous node
-          tr.delete(prevStart, prevEnd)
-
-          // Insert in swapped order
-          tr.insert(prevStart, currentNodeCopy)
-          tr.insert(currentStart - currentNode.nodeSize, prevNodeCopy)
-
-          // Update selection safely
-          const newPos = Math.min(prevStart + currentNodeCopy.nodeSize, tr.doc.content.size - 1)
-          if (newPos >= 1) {
-            tr.setSelection(TextSelection.near(tr.doc.resolve(newPos)))
+        if (newSelectionPos < tr.doc.content.size && newSelectionPos >= 0) {
+          try {
+            tr.setSelection(TextSelection.near(tr.doc.resolve(newSelectionPos)))
+          } catch {
+            // Fallback to start of block
+            tr.setSelection(TextSelection.near(tr.doc.resolve(prevBlockStart + 1)))
           }
-        } catch {
-          // If anything fails, don't dispatch
-          return false
         }
 
-        if (dispatch) {
-          dispatch(tr)
-        }
-
+        dispatch(tr)
         return true
       },
 
       moveParagraphDown: () => ({ state, dispatch }) => {
         const { selection } = state
         const { $from } = selection
+        const doc = state.doc
 
-        // Find the paragraph or heading node containing the selection
-        let depth = $from.depth
-        let node = null
-        let pos = -1
+        // Find the top-level block node containing the selection
+        let blockDepth = $from.depth
+        while (blockDepth > 1 && $from.node(blockDepth - 1).type.name !== 'doc') {
+          blockDepth--
+        }
 
-        // Walk up the node tree to find a paragraph or heading
-        while (depth > 0) {
-          const nodeAtDepth = $from.node(depth)
-          if (nodeAtDepth.type.name === 'paragraph' || nodeAtDepth.type.name.startsWith('heading')) {
-            node = nodeAtDepth
-            pos = $from.start(depth)
+        if (blockDepth < 1) {
+          return false
+        }
+
+        // Get position before and after the current block
+        const blockStart = $from.before(blockDepth)
+        const blockEnd = $from.after(blockDepth)
+        
+        // Calculate relative offset from block start
+        const relativeOffset = selection.from - blockStart
+
+        // Find the index of current block in document
+        let currentIndex = -1
+        let pos = 0
+        for (let i = 0; i < doc.childCount; i++) {
+          const child = doc.child(i)
+          if (pos === blockStart) {
+            currentIndex = i
             break
           }
-          depth--
+          pos += child.nodeSize
         }
 
-        if (!node || pos < 0) {
+        // Can't move down if already last
+        if (currentIndex < 0 || currentIndex >= doc.childCount - 1) {
           return false
         }
 
-        // Get the document
-        const doc = state.doc
-        let currentIndex = -1
-
-        // Find current node index in document
-        doc.forEach((child, offset, index) => {
-          if (offset <= pos && offset + child.nodeSize > pos) {
-            currentIndex = index
-          }
-        })
-
-        if (currentIndex >= doc.childCount - 1) {
-          return false
+        if (!dispatch) {
+          return true
         }
 
+        // Get the current and next blocks
+        const currentBlock = doc.child(currentIndex)
+        const nextBlock = doc.child(currentIndex + 1)
+
+        // Calculate the end position of the next block
+        const nextBlockEnd = blockEnd + nextBlock.nodeSize
+
+        // Create a transaction that replaces both blocks with swapped order
         const tr = state.tr
-        const currentNode = doc.child(currentIndex)
-        const nextNode = doc.child(currentIndex + 1)
 
-        // Calculate positions using the document structure
-        let currentStart = 1
-        for (let i = 0; i < currentIndex; i++) {
-          currentStart += doc.child(i).nodeSize + 1
-        }
-        const currentEnd = currentStart + currentNode.nodeSize
-        const nextStart = currentEnd + 1
-        const nextEnd = nextStart + nextNode.nodeSize
+        // Replace the range from blockStart to nextBlockEnd with [nextBlock, currentBlock]
+        const newContent = Fragment.from([nextBlock, currentBlock])
+        tr.replaceWith(blockStart, nextBlockEnd, newContent)
 
-        // Validate positions are within bounds
-        const docSize = doc.content.size
-        if (currentStart < 1 || currentEnd > docSize || nextStart < 1 || nextEnd > docSize) {
-          return false
-        }
-
-        try {
-          // Copy nodes
-          const currentNodeCopy = currentNode.copy()
-          const nextNodeCopy = nextNode.copy()
-
-          // Delete next node first (from end)
-          tr.delete(nextStart, nextEnd)
-          
-          // Then delete current node
-          tr.delete(currentStart, currentEnd)
-
-          // Insert in swapped order
-          tr.insert(currentStart, nextNodeCopy)
-          tr.insert(nextStart - nextNode.nodeSize, currentNodeCopy)
-
-          // Update selection safely
-          const newPos = Math.min(currentStart + nextNodeCopy.nodeSize + currentNodeCopy.nodeSize, tr.doc.content.size - 1)
-          if (newPos >= 1) {
-            tr.setSelection(TextSelection.near(tr.doc.resolve(newPos)))
+        // Set selection to the moved block (now after nextBlock) preserving relative position
+        const newBlockStart = blockStart + nextBlock.nodeSize
+        const newSelectionPos = Math.min(
+          newBlockStart + relativeOffset,
+          newBlockStart + currentBlock.nodeSize - 1
+        )
+        
+        if (newSelectionPos < tr.doc.content.size && newSelectionPos >= 0) {
+          try {
+            tr.setSelection(TextSelection.near(tr.doc.resolve(newSelectionPos)))
+          } catch {
+            // Fallback to start of block
+            tr.setSelection(TextSelection.near(tr.doc.resolve(newBlockStart + 1)))
           }
-        } catch {
-          // If anything fails, don't dispatch
-          return false
         }
 
-        if (dispatch) {
-          dispatch(tr)
-        }
-
+        dispatch(tr)
         return true
       },
     }
