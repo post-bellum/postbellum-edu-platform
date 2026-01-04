@@ -57,7 +57,7 @@ export function RichTextEditor({
       throw error
     }
   }, [])
-  
+
   return (
     <div className={cn(
       'border border-gray-200 rounded-xl bg-white overflow-hidden',
@@ -79,6 +79,8 @@ export function RichTextEditor({
         init={{
           height: 800,
           menubar: true,
+          language: 'cs',
+          language_url: '/tinymce/langs/cs.js',
           plugins: [
             'advlist',
             'autolink',
@@ -86,7 +88,6 @@ export function RichTextEditor({
             'link',
             'image',
             'charmap',
-            'preview',
             'anchor',
             'searchreplace',
             'visualblocks',
@@ -98,16 +99,17 @@ export function RichTextEditor({
             'help',
             'wordcount',
             'quickbars',
+            'pagebreak',
           ],
           toolbar:
             'undo redo | blocks fontsize | ' +
             'bold italic underline forecolor | alignleft aligncenter ' +
             'alignright alignjustify | bullist numlist outdent indent | ' +
-            'image link table | removeformat | fullscreen',
+            'image link table | pagebreak | removeformat | print | fullscreen',
           // Quickbars configuration
           quickbars_selection_toolbar: 'bold italic underline | blocks | forecolor',
           quickbars_insert_toolbar: false,
-          // Content styling - matches globals.css .lesson-material-content
+          // Content styling
           content_style: `
             body {
               font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -117,7 +119,7 @@ export function RichTextEditor({
               padding: 32px 40px;
               max-width: 100%;
               margin: 0;
-              background-color: #fafafa;
+              background-color: #fff;
             }
             p { margin: 1em 0; }
             h1 { font-size: 28px; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.75em; line-height: 1.2; }
@@ -144,6 +146,55 @@ export function RichTextEditor({
               outline-offset: 2px;
               background-color: rgba(7, 89, 133, 0.08);
               border-radius: 4px;
+            }
+            
+            /* Page break styling - visible indicator in editor */
+            .mce-pagebreak {
+              display: block;
+              width: 100%;
+              height: 4px;
+              margin: 24px 0;
+              border: none;
+              background: repeating-linear-gradient(
+                90deg,
+                #94a3b8 0px,
+                #94a3b8 8px,
+                transparent 8px,
+                transparent 16px
+              );
+              position: relative;
+              cursor: default;
+              page-break-after: always;
+            }
+            
+            .mce-pagebreak::before {
+              content: 'Konec stránky – klikni na Tisk pro náhled';
+              position: absolute;
+              left: 50%;
+              top: 50%;
+              transform: translate(-50%, -50%);
+              background: #f1f5f9;
+              padding: 4px 16px;
+              font-size: 12px;
+              font-weight: 500;
+              color: #64748b;
+              border-radius: 4px;
+              border: 1px solid #cbd5e1;
+              white-space: nowrap;
+            }
+            
+            /* Print styles - page breaks work here */
+            @media print {
+              .mce-pagebreak {
+                height: 0 !important;
+                margin: 0 !important;
+                background: none !important;
+                page-break-after: always !important;
+              }
+              
+              .mce-pagebreak::before {
+                display: none !important;
+              }
             }
           `,
           // Skin
@@ -202,8 +253,25 @@ export function RichTextEditor({
             '0c4a6e', 'Primární tmavá',
           ],
         placeholder,
+          // Pagebreak settings
+          pagebreak_separator: '<!-- pagebreak -->',
+          pagebreak_split_block: true,
           // Setup custom block movement
           setup: (editor) => {
+            // Register custom print button (print plugin removed in TinyMCE 6+)
+            editor.ui.registry.addButton('print', {
+              icon: 'print',
+              tooltip: 'Tisknout (Ctrl+P)',
+              onAction: () => {
+                editor.getWin()?.print()
+              },
+            })
+
+            // Add print keyboard shortcut
+            editor.addShortcut('ctrl+p', 'Print', () => {
+              editor.getWin()?.print()
+            })
+
             // Helper: Get the top-level block element containing the cursor
             const getTopLevelBlock = (): HTMLElement | null => {
               const node = editor.selection.getNode()
@@ -244,14 +312,28 @@ export function RichTextEditor({
               }
             }
 
-            // Update highlight on cursor movement
+            // Update highlight on cursor movement (only when focused)
             editor.on('NodeChange', () => {
-              const block = getTopLevelBlock()
-              highlightBlock(block)
+              if (editor.hasFocus()) {
+                const block = getTopLevelBlock()
+                highlightBlock(block)
+              } else {
+                clearHighlight()
+              }
             })
 
-            // Clean up on blur
-            editor.on('blur', clearHighlight)
+            // Clean up on blur - ensure highlight is removed when editor loses focus
+            editor.on('blur', () => {
+              clearHighlight()
+            })
+            
+            // Re-highlight on focus
+            editor.on('focus', () => {
+              const block = getTopLevelBlock()
+              if (block) {
+                highlightBlock(block)
+              }
+            })
 
             // Move block up
             const moveBlockUp = () => {
@@ -348,9 +430,12 @@ export function RichTextEditor({
               onAction: deleteBlock,
             })
 
-            // Register contextual toolbar for blocks (appears next to blocks)
+            // Register contextual toolbar for blocks (positioned on the right via JS)
             editor.ui.registry.addContextToolbar('blockmove', {
               predicate: (node) => {
+                // Only show when editor has focus
+                if (!editor.hasFocus()) return false
+                
                 // Show for block elements (direct children of body)
                 const body = editor.getBody()
                 if (!node || node === body) return false
@@ -371,6 +456,74 @@ export function RichTextEditor({
               position: 'node',
               scope: 'node',
             })
+            
+            // Reposition the context toolbar to the right side of the editor
+            const repositionToolbar = () => {
+              const container = editor.getContainer()
+              if (!container) return
+              
+              const containerRect = container.getBoundingClientRect()
+              const pop = document.querySelector('.tox-pop') as HTMLElement
+              
+              if (pop) {
+                // Position on the right side of the editor
+                pop.style.left = `${containerRect.right - pop.offsetWidth - 12}px`
+                // Hide the arrow
+                pop.style.setProperty('--tox-pop-arrow-display', 'none')
+                const arrows = pop.querySelectorAll('.tox-pop__dialog::before, .tox-pop__dialog::after')
+                arrows.forEach((arrow) => {
+                  (arrow as HTMLElement).style.display = 'none'
+                })
+              }
+            }
+            
+            // Watch for context toolbar appearing and reposition it
+            const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                if (mutation.addedNodes.length > 0) {
+                  mutation.addedNodes.forEach((node) => {
+                    if (node instanceof HTMLElement && node.classList.contains('tox-pop')) {
+                      // Small delay to let TinyMCE finish positioning
+                      requestAnimationFrame(repositionToolbar)
+                    }
+                  })
+                }
+              })
+            })
+            
+            // Start observing the document body for context toolbar
+            observer.observe(document.body, { childList: true, subtree: true })
+            
+            // Also reposition on node change (when moving between blocks)
+            editor.on('NodeChange', () => {
+              requestAnimationFrame(repositionToolbar)
+            })
+            
+            // Clean up observer when editor is removed
+            editor.on('remove', () => {
+              observer.disconnect()
+            })
+            
+            // Add CSS to ensure horizontal layout and hide arrows
+            const style = document.createElement('style')
+            style.textContent = `
+              .tox-pop::before,
+              .tox-pop::after {
+                display: none !important;
+              }
+              .tox-pop .tox-pop__dialog {
+                flex-direction: row !important;
+              }
+              .tox-pop .tox-toolbar {
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+              }
+              .tox-pop .tox-toolbar__group {
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+              }
+            `
+            document.head.appendChild(style)
 
             // Add keyboard shortcuts
             editor.addShortcut('alt+up', 'Move block up', moveBlockUp)
