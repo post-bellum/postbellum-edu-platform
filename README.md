@@ -30,11 +30,10 @@ src/
 ├── components/       # React components
 │   ├── ui/          # shadcn/ui components
 │   ├── lessons/     # Lesson-specific components
-│   ├── editor/      # TipTap editor components
+│   ├── editor/      # TinyMCE editor components
 │   └── layout/      # Layout components
 ├── lib/             # Utility functions
 │   ├── supabase/    # Supabase client
-│   ├── pdf/         # PDF generation
 │   └── utils/       # Helper functions
 ├── hooks/           # Custom React hooks
 └── types/           # TypeScript type definitions
@@ -60,8 +59,7 @@ Get these values from your Supabase project:
 
 - 📚 Browse historical lesson materials
 - 🎥 Watch educational videos
-- 📝 Edit and customize materials
-- 📄 Generate PDFs with custom headers/footers
+- 📝 Edit and customize materials with rich text editor
 - ⭐ Save favorite lessons
 - 🔐 Secure authentication
 - 🌐 Czech/Slovak language support

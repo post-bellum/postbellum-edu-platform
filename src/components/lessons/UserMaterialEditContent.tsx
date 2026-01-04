@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Download, Eye, Trash2, Check, Loader2 } from 'lucide-react'
+import { ArrowLeft, Eye, Trash2, Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -238,16 +238,6 @@ export function UserMaterialEditContent({
 
         <div className="flex items-center gap-2 flex-wrap">
           {getSaveStatusDisplay()}
-
-          <Button
-            variant="outline"
-            size="sm"
-            disabled
-            title="Připravujeme"
-          >
-            <Download className="w-4 h-4" />
-            Stáhnout PDF
-          </Button>
 
           <Button
             variant="outline"

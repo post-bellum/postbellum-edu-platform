@@ -45,3 +45,6 @@ next-env.d.ts
 supabase/.temp
 supabase/.branches
 supabase/.gitignore
+
+# TinyMCE self-hosted files (copied from node_modules during install)
+public/tinymce

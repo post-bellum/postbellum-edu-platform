@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { LessonMaterial, LessonSpecification, LessonDuration, UserLessonMaterial } from '@/types/lesson.types'
 import { Button } from '@/components/ui/Button'
-import { Eye, Download, Edit } from 'lucide-react'
+import { Eye, Edit } from 'lucide-react'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { AuthModal } from '@/components/auth'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
@@ -181,15 +181,6 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
                 >
                   <Eye />
                   Zobrazit
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled
-                  title="Připravujeme"
-                >
-                  <Download />
-                  Stáhnout PDF
                 </Button>
                 <Button 
                   variant="outline" 
