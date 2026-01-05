@@ -77,7 +77,7 @@ export function RichTextEditor({
           onChange(cleanContent(newContent))
         }}
         init={{
-          height: 800,
+          height: 1200,
           menubar: true,
           language: 'cs',
           language_url: '/tinymce/langs/cs.js',
@@ -105,7 +105,7 @@ export function RichTextEditor({
             'undo redo | blocks fontsize | ' +
             'bold italic underline forecolor | alignleft aligncenter ' +
             'alignright alignjustify | bullist numlist outdent indent | ' +
-            'image link table | pagebreak | removeformat | print | fullscreen',
+            'image link table | pagebreak | removeformat | fullscreen',
           // Quickbars configuration
           quickbars_selection_toolbar: 'bold italic underline | blocks | forecolor',
           quickbars_insert_toolbar: false,
@@ -182,20 +182,6 @@ export function RichTextEditor({
               border: 1px solid #cbd5e1;
               white-space: nowrap;
             }
-            
-            /* Print styles - page breaks work here */
-            @media print {
-              .mce-pagebreak {
-                height: 0 !important;
-                margin: 0 !important;
-                background: none !important;
-                page-break-after: always !important;
-              }
-              
-              .mce-pagebreak::before {
-                display: none !important;
-              }
-            }
           `,
           // Skin
           skin: 'oxide',
@@ -214,7 +200,7 @@ export function RichTextEditor({
           // Block formats for the dropdown
           block_formats: 'Odstavec=p; Nadpis 1=h1; Nadpis 2=h2; Nadpis 3=h3; Nadpis 4=h4',
           // Resize settings
-          resize: true,
+          resize: false,
           min_height: 600,
           // Branding
           branding: false,
@@ -258,20 +244,6 @@ export function RichTextEditor({
           pagebreak_split_block: true,
           // Setup custom block movement
           setup: (editor) => {
-            // Register custom print button (print plugin removed in TinyMCE 6+)
-            editor.ui.registry.addButton('print', {
-              icon: 'print',
-              tooltip: 'Tisknout (Ctrl+P)',
-              onAction: () => {
-                editor.getWin()?.print()
-              },
-            })
-
-            // Add print keyboard shortcut
-            editor.addShortcut('ctrl+p', 'Print', () => {
-              editor.getWin()?.print()
-            })
-
             // Helper: Get the top-level block element containing the cursor
             const getTopLevelBlock = (): HTMLElement | null => {
               const node = editor.selection.getNode()
