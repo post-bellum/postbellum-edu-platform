@@ -32,12 +32,14 @@ export function UserLessonMaterialEditModal({
   const [content, setContent] = React.useState(material.content || '')
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [editorResetKey, setEditorResetKey] = React.useState(0)
 
   // Reset form when material changes
   React.useEffect(() => {
     setTitle(material.title)
     setContent(material.content || '')
     setError(null)
+    setEditorResetKey(prev => prev + 1)
   }, [material])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,6 +99,7 @@ export function UserLessonMaterialEditModal({
                 onChange={setContent}
                 placeholder="Obsah materiálu..."
                 className="min-h-[400px]"
+                resetKey={editorResetKey}
               />
             </div>
           </div>

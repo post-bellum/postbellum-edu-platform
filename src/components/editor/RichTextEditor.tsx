@@ -12,25 +12,51 @@ interface RichTextEditorProps {
   onChange: (html: string) => void
   placeholder?: string
   className?: string
+  /** Increment this to force the editor to reset with new content (e.g., form reset) */
+  resetKey?: number
 }
 
-// Helper to clean content before saving (remove editor-only classes)
-function cleanContent(html: string): string {
-  // Remove mce-block-selected class from all elements
-  return html.replace(/\s*class="mce-block-selected"/g, '')
-    .replace(/\s*class="([^"]*)\s*mce-block-selected\s*([^"]*)"/g, (_, before, after) => {
-      const remaining = `${before} ${after}`.trim()
-      return remaining ? ` class="${remaining}"` : ''
-    })
-}
+// Debounce delay for autosave
+const AUTOSAVE_DEBOUNCE_MS = 1000
 
-export function RichTextEditor({
+// Memoized component that only re-renders when resetKey, placeholder, or className changes
+// NOT when content changes (since we use initialValue, content updates don't need re-renders)
+export const RichTextEditor = React.memo(function RichTextEditor({
   content,
   onChange,
   placeholder = 'Začněte psát...',
   className,
+  resetKey = 0,
 }: RichTextEditorProps) {
   const editorRef = React.useRef<TinyMCEEditor | null>(null)
+  const debounceTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastSyncedContent = React.useRef<string>(content)
+  
+  // Store onChange in a ref so we can access it in callbacks without causing re-renders
+  const onChangeRef = React.useRef(onChange)
+  onChangeRef.current = onChange
+  
+  // Sync content to parent (called on blur and debounced during editing)
+  const syncToParent = React.useCallback(() => {
+    if (!editorRef.current) return
+    const currentContent = editorRef.current.getContent()
+    // Only call onChange if content actually changed
+    if (currentContent !== lastSyncedContent.current) {
+      lastSyncedContent.current = currentContent
+      onChangeRef.current(currentContent)
+    }
+  }, [])
+  
+  // Cleanup debounce timer on unmount and sync final content
+  React.useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current)
+      }
+      // Sync on unmount
+      syncToParent()
+    }
+  }, [syncToParent])
 
   // Handle image uploads (paste, drag & drop, or file picker)
   const handleImageUpload = React.useCallback(async (
@@ -59,22 +85,31 @@ export function RichTextEditor({
   }, [])
 
   return (
-    <div className={cn(
+    <div 
+      className={cn(
       'border border-gray-200 rounded-xl bg-white overflow-hidden',
       'shadow-lg shadow-gray-200/50',
       'ring-1 ring-gray-100',
       className
-    )}>
+      )}
+    >
       <Editor
+        key={resetKey}
         tinymceScriptSrc="/tinymce/tinymce.min.js"
         licenseKey="gpl"
         onInit={(_evt, editor) => {
           editorRef.current = editor
         }}
-        value={content}
-        onEditorChange={(newContent) => {
-          // Clean the content before passing to parent
-          onChange(cleanContent(newContent))
+        initialValue={content}
+        onEditorChange={() => {
+          // Debounce content sync to avoid cursor issues
+          // The parent state update was causing TinyMCE to lose cursor position
+          if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current)
+          }
+          debounceTimer.current = setTimeout(() => {
+            syncToParent()
+          }, AUTOSAVE_DEBOUNCE_MS)
         }}
         init={{
           height: 1200,
@@ -140,14 +175,6 @@ export function RichTextEditor({
             blockquote { border-left: 4px solid #d1d5db; margin: 1em 0; padding-left: 1em; color: #6b7280; }
             code { background-color: #f3f4f6; padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em; }
             pre { background-color: #f3f4f6; padding: 1em; border-radius: 6px; overflow-x: auto; }
-            
-            /* Block highlight styles - visual only, not saved */
-            .mce-block-selected {
-              outline: 2px solid rgba(7, 89, 133, 0.5);
-              outline-offset: 2px;
-              background-color: rgba(7, 89, 133, 0.08);
-              border-radius: 4px;
-            }
             
             /* Page break styling - visible indicator in editor */
             .mce-pagebreak {
@@ -243,330 +270,34 @@ export function RichTextEditor({
           // Pagebreak settings
           pagebreak_separator: '<!-- pagebreak -->',
           pagebreak_split_block: true,
-          // Setup custom block movement
+          // Setup - sync content on blur
           setup: (editor) => {
-            // Helper: Get the top-level block element containing the cursor
-            const getTopLevelBlock = (): HTMLElement | null => {
-              const node = editor.selection.getNode()
-              if (!node) return null
-              
-              const body = editor.getBody()
-              let current: HTMLElement | null = node as HTMLElement
-              
-              // Walk up to find the direct child of body
-              while (current && current.parentElement !== body) {
-                current = current.parentElement
-              }
-              
-              return current
-            }
-
-            // Track the currently highlighted block
-            let highlightedBlock: HTMLElement | null = null
-
-            const highlightBlock = (block: HTMLElement | null) => {
-              // Remove highlight from previous block
-              if (highlightedBlock && highlightedBlock !== block) {
-                highlightedBlock.classList.remove('mce-block-selected')
-              }
-              
-              // Add highlight to new block
-              if (block) {
-                block.classList.add('mce-block-selected')
-              }
-              
-              highlightedBlock = block
-            }
-
-            const clearHighlight = () => {
-              if (highlightedBlock) {
-                highlightedBlock.classList.remove('mce-block-selected')
-                highlightedBlock = null
-              }
-            }
-
-            // Update highlight on cursor movement (only when focused)
-            editor.on('NodeChange', () => {
-              if (editor.hasFocus()) {
-                const block = getTopLevelBlock()
-                highlightBlock(block)
-              } else {
-                clearHighlight()
-              }
-            })
-
-            // Clean up on blur - ensure highlight is removed when editor loses focus
+            // Sync content when editor loses focus (important for form submission)
             editor.on('blur', () => {
-              clearHighlight()
-            })
-            
-            // Re-highlight on focus
-            editor.on('focus', () => {
-              const block = getTopLevelBlock()
-              if (block) {
-                highlightBlock(block)
+              // Clear any pending debounce
+              if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current)
+                debounceTimer.current = null
+              }
+              // Immediately sync content
+              const currentContent = editor.getContent()
+              if (currentContent !== lastSyncedContent.current) {
+                lastSyncedContent.current = currentContent
+                onChangeRef.current(currentContent)
               }
             })
-
-            // Move block up
-            const moveBlockUp = () => {
-              const block = getTopLevelBlock()
-              if (!block) return
-              
-              const prevSibling = block.previousElementSibling as HTMLElement | null
-              if (!prevSibling) return
-              
-              // Remove highlight before move
-              clearHighlight()
-              
-              // Move the block
-              block.parentElement?.insertBefore(block, prevSibling)
-              
-              // Re-focus and select
-              editor.focus()
-              editor.selection.setCursorLocation(block, 0)
-              
-              // Re-highlight after move
-              highlightBlock(block)
-              
-              // Trigger content update
-              editor.fire('change')
-            }
-
-            // Move block down
-            const moveBlockDown = () => {
-              const block = getTopLevelBlock()
-              if (!block) return
-              
-              const nextSibling = block.nextElementSibling as HTMLElement | null
-              if (!nextSibling) return
-              
-              // Remove highlight before move
-              clearHighlight()
-              
-              // Move the block (insert next sibling before current)
-              nextSibling.parentElement?.insertBefore(nextSibling, block)
-              
-              // Re-focus and select
-              editor.focus()
-              editor.selection.setCursorLocation(block, 0)
-              
-              // Re-highlight after move
-              highlightBlock(block)
-              
-              // Trigger content update
-              editor.fire('change')
-            }
-
-            // Delete block
-            const deleteBlock = () => {
-              const block = getTopLevelBlock()
-              if (!block) return
-              
-              // Clear highlight
-              clearHighlight()
-              
-              // Get next or previous sibling to move cursor to
-              const nextBlock = block.nextElementSibling || block.previousElementSibling
-              
-              // Remove the block
-              block.remove()
-              
-              // Move cursor to adjacent block if exists
-              if (nextBlock) {
-                editor.selection.setCursorLocation(nextBlock as HTMLElement, 0)
-                highlightBlock(nextBlock as HTMLElement)
-              }
-              
-              // Trigger content update
-              editor.fire('change')
-            }
-
-            // Register move up button
-            editor.ui.registry.addButton('moveup', {
-              icon: 'chevron-up',
-              tooltip: 'Přesunout nahoru (Alt+↑)',
-              onAction: moveBlockUp,
-            })
-
-            // Register move down button
-            editor.ui.registry.addButton('movedown', {
-              icon: 'chevron-down',
-              tooltip: 'Přesunout dolů (Alt+↓)',
-              onAction: moveBlockDown,
-            })
-
-            // Register delete block button
-            editor.ui.registry.addButton('deleteblock', {
-              icon: 'remove',
-              tooltip: 'Smazat blok (Alt+Delete)',
-              onAction: deleteBlock,
-            })
-
-            // Register contextual toolbar for blocks (positioned on the right via JS)
-            editor.ui.registry.addContextToolbar('blockmove', {
-              predicate: (node) => {
-                // Only show when editor has focus
-                if (!editor.hasFocus()) return false
-                
-                // Show for block elements (direct children of body)
-                const body = editor.getBody()
-                if (!node || node === body) return false
-                
-                let current: Node | null = node
-                while (current && current.parentNode !== body) {
-                  current = current.parentNode
-                }
-                
-                // Only show for block-level elements
-                if (current && current !== body && current.nodeType === 1) {
-                  const tagName = (current as HTMLElement).tagName.toLowerCase()
-                  return ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'table', 'blockquote', 'pre', 'div'].includes(tagName)
-                }
-                return false
-              },
-              items: 'moveup movedown | deleteblock',
-              position: 'node',
-              scope: 'node',
-            })
-            
-            // Reposition the context toolbar to the right side of the editor
-            const repositionToolbar = () => {
-              const container = editor.getContainer()
-              if (!container) return
-              
-              const containerRect = container.getBoundingClientRect()
-              const pop = document.querySelector('.tox-pop') as HTMLElement
-              
-              if (pop) {
-                // Position on the right side of the editor
-                pop.style.left = `${containerRect.right - pop.offsetWidth - 12}px`
-                // Ensure top position is maintained relative to viewport
-                const currentTop = pop.style.top
-                if (currentTop) {
-                  // Keep the top position but recalculate if needed
-                  pop.style.top = currentTop
-                }
-                // Hide the arrow
-                pop.style.setProperty('--tox-pop-arrow-display', 'none')
-                const arrows = pop.querySelectorAll('.tox-pop__dialog::before, .tox-pop__dialog::after')
-                arrows.forEach((arrow) => {
-                  (arrow as HTMLElement).style.display = 'none'
-                })
-              }
-            }
-            
-            // Watch for context toolbar appearing and reposition it
-            const observer = new MutationObserver((mutations) => {
-              mutations.forEach((mutation) => {
-                if (mutation.addedNodes.length > 0) {
-                  mutation.addedNodes.forEach((node) => {
-                    if (node instanceof HTMLElement && node.classList.contains('tox-pop')) {
-                      // Small delay to let TinyMCE finish positioning
-                      requestAnimationFrame(repositionToolbar)
-                    }
-                  })
-                }
-              })
-            })
-            
-            // Watch for style changes on the popup to override TinyMCE's repositioning
-            let popupObserver: MutationObserver | null = null
-            const watchPopupPosition = () => {
-              const pop = document.querySelector('.tox-pop') as HTMLElement
-              if (pop && !popupObserver) {
-                popupObserver = new MutationObserver((mutations) => {
-                  mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                      // TinyMCE changed the position, override it
-                      requestAnimationFrame(repositionToolbar)
-                    }
-                  })
-                })
-                popupObserver.observe(pop, {
-                  attributes: true,
-                  attributeFilter: ['style'],
-                })
-              } else if (!pop && popupObserver) {
-                popupObserver.disconnect()
-                popupObserver = null
-              }
-            }
-            
-            // Start observing the document body for context toolbar
-            observer.observe(document.body, { childList: true, subtree: true })
-            
-            // Watch for popup position changes
-            const popupWatcher = new MutationObserver(() => {
-              watchPopupPosition()
-            })
-            popupWatcher.observe(document.body, { childList: true, subtree: true })
-            
-            // Handle scroll events - reposition toolbar after scroll
-            const handleScroll = () => {
-              requestAnimationFrame(() => {
-                repositionToolbar()
-              })
-            }
-            
-            // Listen to scroll events on window and editor container
-            window.addEventListener('scroll', handleScroll, true)
-            const container = editor.getContainer()
-            let scrollContainer: HTMLElement | null = null
-            if (container) {
-              scrollContainer = container
-              container.addEventListener('scroll', handleScroll, true)
-            }
-            
-            // Also reposition on node change (when moving between blocks)
-            editor.on('NodeChange', () => {
-              requestAnimationFrame(() => {
-                repositionToolbar()
-                watchPopupPosition()
-              })
-            })
-            
-            // Clean up observers and listeners when editor is removed
-            editor.on('remove', () => {
-              observer.disconnect()
-              popupWatcher.disconnect()
-              if (popupObserver) {
-                popupObserver.disconnect()
-              }
-              window.removeEventListener('scroll', handleScroll, true)
-              if (scrollContainer) {
-                scrollContainer.removeEventListener('scroll', handleScroll, true)
-              }
-            })
-            
-            // Add CSS to ensure horizontal layout and hide arrows
-            const style = document.createElement('style')
-            style.textContent = `
-              .tox-pop::before,
-              .tox-pop::after {
-                display: none !important;
-              }
-              .tox-pop .tox-pop__dialog {
-                flex-direction: row !important;
-              }
-              .tox-pop .tox-toolbar {
-                flex-direction: row !important;
-                flex-wrap: nowrap !important;
-              }
-              .tox-pop .tox-toolbar__group {
-                flex-direction: row !important;
-                flex-wrap: nowrap !important;
-              }
-            `
-            document.head.appendChild(style)
-
-            // Add keyboard shortcuts
-            editor.addShortcut('alt+up', 'Move block up', moveBlockUp)
-            editor.addShortcut('alt+down', 'Move block down', moveBlockDown)
-            editor.addShortcut('alt+delete', 'Delete block', deleteBlock)
           },
         }}
       />
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison: only re-render if these props change
+  // Ignore 'content' changes since we use initialValue (only matters on mount)
+  // Ignore 'onChange' since we use a ref for it
+  return (
+    prevProps.resetKey === nextProps.resetKey &&
+    prevProps.placeholder === nextProps.placeholder &&
+    prevProps.className === nextProps.className
+  )
+})
