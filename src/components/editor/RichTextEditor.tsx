@@ -107,6 +107,7 @@ export function RichTextEditor({
             'alignright alignjustify | bullist numlist outdent indent | ' +
             'image link table | pagebreak | removeformat | fullscreen',
           // Quickbars configuration
+          toolbar_mode: 'sliding',
           quickbars_selection_toolbar: 'bold italic underline | blocks | forecolor',
           quickbars_insert_toolbar: false,
           // Content styling
@@ -440,6 +441,12 @@ export function RichTextEditor({
               if (pop) {
                 // Position on the right side of the editor
                 pop.style.left = `${containerRect.right - pop.offsetWidth - 12}px`
+                // Ensure top position is maintained relative to viewport
+                const currentTop = pop.style.top
+                if (currentTop) {
+                  // Keep the top position but recalculate if needed
+                  pop.style.top = currentTop
+                }
                 // Hide the arrow
                 pop.style.setProperty('--tox-pop-arrow-display', 'none')
                 const arrows = pop.querySelectorAll('.tox-pop__dialog::before, .tox-pop__dialog::after')
@@ -463,17 +470,73 @@ export function RichTextEditor({
               })
             })
             
+            // Watch for style changes on the popup to override TinyMCE's repositioning
+            let popupObserver: MutationObserver | null = null
+            const watchPopupPosition = () => {
+              const pop = document.querySelector('.tox-pop') as HTMLElement
+              if (pop && !popupObserver) {
+                popupObserver = new MutationObserver((mutations) => {
+                  mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                      // TinyMCE changed the position, override it
+                      requestAnimationFrame(repositionToolbar)
+                    }
+                  })
+                })
+                popupObserver.observe(pop, {
+                  attributes: true,
+                  attributeFilter: ['style'],
+                })
+              } else if (!pop && popupObserver) {
+                popupObserver.disconnect()
+                popupObserver = null
+              }
+            }
+            
             // Start observing the document body for context toolbar
             observer.observe(document.body, { childList: true, subtree: true })
             
+            // Watch for popup position changes
+            const popupWatcher = new MutationObserver(() => {
+              watchPopupPosition()
+            })
+            popupWatcher.observe(document.body, { childList: true, subtree: true })
+            
+            // Handle scroll events - reposition toolbar after scroll
+            const handleScroll = () => {
+              requestAnimationFrame(() => {
+                repositionToolbar()
+              })
+            }
+            
+            // Listen to scroll events on window and editor container
+            window.addEventListener('scroll', handleScroll, true)
+            const container = editor.getContainer()
+            let scrollContainer: HTMLElement | null = null
+            if (container) {
+              scrollContainer = container
+              container.addEventListener('scroll', handleScroll, true)
+            }
+            
             // Also reposition on node change (when moving between blocks)
             editor.on('NodeChange', () => {
-              requestAnimationFrame(repositionToolbar)
+              requestAnimationFrame(() => {
+                repositionToolbar()
+                watchPopupPosition()
+              })
             })
             
-            // Clean up observer when editor is removed
+            // Clean up observers and listeners when editor is removed
             editor.on('remove', () => {
               observer.disconnect()
+              popupWatcher.disconnect()
+              if (popupObserver) {
+                popupObserver.disconnect()
+              }
+              window.removeEventListener('scroll', handleScroll, true)
+              if (scrollContainer) {
+                scrollContainer.removeEventListener('scroll', handleScroll, true)
+              }
             })
             
             // Add CSS to ensure horizontal layout and hide arrows
