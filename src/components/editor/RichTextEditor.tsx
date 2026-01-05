@@ -140,10 +140,10 @@ export const RichTextEditor = React.memo(function RichTextEditor({
             'undo redo | blocks fontsize | ' +
             'bold italic underline forecolor | alignleft aligncenter ' +
             'alignright alignjustify | bullist numlist outdent indent | ' +
-            'image link table | pagebreak | removeformat | fullscreen',
+            'image link table | pagebreak | moveblockup moveblockdown | removeformat | fullscreen',
           // Quickbars configuration
           toolbar_mode: 'sliding',
-          quickbars_selection_toolbar: 'bold italic underline | blocks | forecolor',
+          quickbars_selection_toolbar: 'bold italic underline | blocks | forecolor | moveblockup moveblockdown',
           quickbars_insert_toolbar: false,
           // Content styling
           content_style: `
@@ -270,8 +270,87 @@ export const RichTextEditor = React.memo(function RichTextEditor({
           // Pagebreak settings
           pagebreak_separator: '<!-- pagebreak -->',
           pagebreak_split_block: true,
-          // Setup - sync content on blur
+          // Setup - sync content on blur and register custom commands
           setup: (editor) => {
+            // Helper function to get the current block element
+            const getBlockElement = (): HTMLElement | null => {
+              const node = editor.selection.getNode()
+              // Get the closest block-level element
+              const blockElements = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DIV', 'BLOCKQUOTE', 'PRE', 'UL', 'OL', 'TABLE', 'FIGURE']
+              let current: HTMLElement | null = node as HTMLElement
+              while (current && current !== editor.getBody()) {
+                if (blockElements.includes(current.nodeName)) {
+                  return current
+                }
+                current = current.parentElement
+              }
+              return null
+            }
+
+            // Register move block up command
+            editor.addCommand('moveBlockUp', () => {
+              const block = getBlockElement()
+              if (!block) return
+              
+              const parent = block.parentElement
+              const prevSibling = block.previousElementSibling as HTMLElement | null
+              
+              if (parent && prevSibling) {
+                parent.insertBefore(block, prevSibling)
+                editor.selection.select(block)
+                editor.selection.collapse(true)
+                editor.focus()
+              }
+            })
+
+            // Register move block down command
+            editor.addCommand('moveBlockDown', () => {
+              const block = getBlockElement()
+              if (!block) return
+              
+              const parent = block.parentElement
+              const nextSibling = block.nextElementSibling as HTMLElement | null
+              
+              if (parent && nextSibling) {
+                parent.insertBefore(nextSibling, block)
+                editor.selection.select(block)
+                editor.selection.collapse(true)
+                editor.focus()
+              }
+            })
+
+            // Register move block up button
+            editor.ui.registry.addButton('moveblockup', {
+              icon: 'chevron-up',
+              tooltip: 'Přesunout blok nahoru',
+              onAction: () => editor.execCommand('moveBlockUp'),
+              onSetup: (buttonApi) => {
+                const updateState = () => {
+                  const block = getBlockElement()
+                  buttonApi.setEnabled(!!block?.previousElementSibling)
+                }
+                editor.on('NodeChange', updateState)
+                updateState()
+                return () => editor.off('NodeChange', updateState)
+              }
+            })
+
+            // Register move block down button
+            editor.ui.registry.addButton('moveblockdown', {
+              icon: 'chevron-down',
+              tooltip: 'Přesunout blok dolů',
+              onAction: () => editor.execCommand('moveBlockDown'),
+              onSetup: (buttonApi) => {
+                const updateState = () => {
+                  const block = getBlockElement()
+                  buttonApi.setEnabled(!!block?.nextElementSibling)
+                }
+                editor.on('NodeChange', updateState)
+                updateState()
+                return () => editor.off('NodeChange', updateState)
+              }
+            })
+
             // Sync content when editor loses focus (important for form submission)
             editor.on('blur', () => {
               // Clear any pending debounce
