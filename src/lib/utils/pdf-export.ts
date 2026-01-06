@@ -148,7 +148,7 @@ export function createPrintView(title: string, content: string): string {
     
     body {
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-size: 11pt;
+      font-size: 10pt;
       line-height: 1.6;
       color: #18181B;
       margin: 0;
@@ -171,7 +171,7 @@ export function createPrintView(title: string, content: string): string {
     
     .print-content {
       color: #18181B;
-      font-size: 11pt;
+      font-size: 10pt;
       line-height: 1.7;
     }
     
