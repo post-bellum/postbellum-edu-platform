@@ -409,7 +409,7 @@ export const setupEditor = (
   editor: TinyMCEEditor,
   options: SetupEditorOptions
 ): void => {
-  const { onBlur, debounceTimerRef, lastSyncedContentRef, onChangeRef } = options
+  const { debounceTimerRef, lastSyncedContentRef, onChangeRef } = options
 
   // Register all commands
   registerImageCommands(editor)

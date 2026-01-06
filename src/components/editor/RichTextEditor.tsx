@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { Editor } from '@tinymce/tinymce-react'
-import type { Editor as TinyMCEEditor } from 'tinymce'
 import { cn } from '@/lib/utils'
 import { useRichTextEditor } from '@/hooks/useRichTextEditor'
 import {
