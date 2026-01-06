@@ -28,6 +28,8 @@ export const RichTextEditor = React.memo(function RichTextEditor({
   className,
   resetKey = 0,
 }: RichTextEditorProps) {
+  // Stable ID for hydration - useId generates the same ID on server and client
+  const editorId = React.useId()
   const editorRef = React.useRef<TinyMCEEditor | null>(null)
   const debounceTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastSyncedContent = React.useRef<string>(content)
@@ -94,6 +96,7 @@ export const RichTextEditor = React.memo(function RichTextEditor({
       )}
     >
       <Editor
+        id={editorId}
         key={resetKey}
         tinymceScriptSrc="/tinymce/tinymce.min.js"
         licenseKey="gpl"
