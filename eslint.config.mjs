@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // TinyMCE self-hosted files (vendor code)
+    'public/tinymce/**',
   ]),
   // Custom rules for code style consistency
   {

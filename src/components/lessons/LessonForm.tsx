@@ -67,7 +67,7 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
         router.push(`/lessons/${state.data.id}/edit`)
       })
     }
-  }, [state])
+  }, [state, router])
 
   return (
     <form action={formAction} className="space-y-6">

@@ -57,6 +57,8 @@ export function LessonMaterialForm({
   const [duration, setDuration] = React.useState<string>(
     material?.duration?.toString() || ''
   )
+  // Key to reset the rich text editor when form resets
+  const [editorResetKey, setEditorResetKey] = React.useState(0)
 
   // Reset form when modal opens/closes or material changes
   React.useEffect(() => {
@@ -66,6 +68,7 @@ export function LessonMaterialForm({
       setContent(material?.content || '')
       setSpecification(material?.specification || '')
       setDuration(material?.duration?.toString() || '')
+      setEditorResetKey(prev => prev + 1)
     }
   }, [open, material])
 
@@ -156,6 +159,7 @@ export function LessonMaterialForm({
               content={content}
               onChange={setContent}
               placeholder="Začněte psát obsah materiálu... Můžete kopírovat z Wordu nebo Google Docs."
+              resetKey={editorResetKey}
             />
             {/* Hidden input for form submission */}
             <input type="hidden" name="content" value={content} />

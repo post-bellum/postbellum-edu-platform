@@ -1,376 +1,183 @@
 'use client'
 
 import * as React from 'react'
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import { ImageExtension } from './ImageExtension'
-import { ParagraphMovement } from './ParagraphMovement'
-import { uploadImageToStorage } from '@/lib/supabase/storage'
-import { Button } from '@/components/ui/Button'
-import { 
-  Bold, 
-  Italic, 
-  List, 
-  ListOrdered, 
-  Heading1, 
-  Heading2, 
-  Heading3,
-  ArrowUp,
-  ArrowDown,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Image as ImageIcon,
-} from 'lucide-react'
+import { Editor } from '@tinymce/tinymce-react'
 import { cn } from '@/lib/utils'
-import { logger } from '@/lib/logger'
+import { useRichTextEditor } from '@/hooks/useRichTextEditor'
+import {
+  EDITOR_PLUGINS,
+  EDITOR_TOOLBAR,
+  EDITOR_MENU,
+  EDITOR_MENUBAR,
+  QUICKBARS_SELECTION_TOOLBAR,
+  QUICKBARS_IMAGE_TOOLBAR,
+  IMAGE_TOOLBAR,
+  FONT_SIZE_FORMATS,
+  BLOCK_FORMATS,
+  COLOR_MAP,
+  COLOR_COLS,
+  IMAGE_CLASS_LIST,
+  TABLE_DEFAULT_STYLES,
+  TABLE_DEFAULT_ATTRIBUTES,
+  CONTENT_STYLE,
+  setupEditor,
+} from '@/lib/editor'
 
 interface RichTextEditorProps {
   content: string
   onChange: (html: string) => void
   placeholder?: string
   className?: string
+  /** Increment this to force the editor to reset with new content (e.g., form reset) */
+  resetKey?: number
 }
 
-export function RichTextEditor({
+/**
+ * Rich text editor component using TinyMCE.
+ * 
+ * Features:
+ * - Self-hosted TinyMCE (no API key required)
+ * - Image upload with paste/drag-drop support
+ * - Custom image manipulation (rotate, flip, float)
+ * - Block movement (move paragraphs up/down)
+ * - Debounced autosave to prevent cursor jumping
+ * - Czech localization
+ * 
+ * @example
+ * ```tsx
+ * <RichTextEditor
+ *   content={html}
+ *   onChange={setHtml}
+ *   placeholder="Start typing..."
+ * />
+ * ```
+ */
+export const RichTextEditor = React.memo(function RichTextEditor({
   content,
   onChange,
   placeholder = 'Začněte psát...',
   className,
+  resetKey = 0,
 }: RichTextEditorProps) {
-  const editorRef = React.useRef<ReturnType<typeof useEditor> | null>(null)
+  // Stable ID for hydration
+  const editorId = React.useId()
   
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: [
-      StarterKit.configure({
-        // Disable some features we don't need
-        codeBlock: false,
-        blockquote: false,
-        horizontalRule: false,
-        // Link is included in StarterKit, so we configure it here instead of adding separately
-        link: {
-          openOnClick: false,
-          HTMLAttributes: {
-            class: 'text-primary underline hover:text-primary-hover',
-          },
-        },
-      }),
-      Placeholder.configure({
-        placeholder,
-      }),
-      ImageExtension.configure({
-        HTMLAttributes: {
-          class: 'max-w-full h-auto rounded',
-        },
-        inline: false,
-        allowBase64: false, // We'll use Supabase storage instead
-      }),
-      ParagraphMovement,
-    ],
-    content,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
-    },
-    onCreate: ({ editor }) => {
-      editorRef.current = editor
-    },
-    editorProps: {
-      attributes: {
-        class: 'prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-full',
-      },
-      handlePaste: (view, event) => {
-        const clipboardData = event.clipboardData
-        
-        if (!clipboardData) {
-          return false
-        }
-
-        // Check clipboard items for images
-        if (clipboardData.items && clipboardData.items.length > 0) {
-          const items = Array.from(clipboardData.items)
-          
-          // Look for image items (check all image types)
-          const imageItem = items.find((item: DataTransferItem) => {
-            return item.type.startsWith('image/')
-          })
-          
-          if (imageItem) {
-            const file = imageItem.getAsFile()
-            if (file && editorRef.current) {
-              event.preventDefault()
-              
-              // Upload image directly to Supabase Storage (client-side, bypasses Server Action limit)
-              uploadImageToStorage(file, 'lesson-materials', 'images')
-                .then((url) => {
-                  if (url && editorRef.current) {
-                    // Insert image using Tiptap editor with the Supabase URL
-                    editorRef.current.chain().focus().setImage({ src: url }).run()
-                  }
-                })
-                .catch((error) => {
-                  logger.error('Error uploading image', error)
-                })
-              
-              return true
-            }
-          }
-        }
-
-        // Also check HTML content for base64 images (Google Docs sometimes embeds images this way)
-        const htmlData = clipboardData.getData('text/html')
-        if (htmlData && htmlData.includes('<img') && editorRef.current) {
-          // Extract base64 images from HTML
-          const imgRegex = /<img[^>]+src="(data:image\/[^;]+;base64,[^"]+)"/gi
-          const matches = [...htmlData.matchAll(imgRegex)]
-          
-          if (matches.length > 0) {
-            event.preventDefault()
-            
-            // Process all images found
-            const imagePromises = matches.map((match) => {
-              const base64Data = match[1]
-              
-              // Convert base64 to blob
-              return fetch(base64Data)
-                .then(res => res.blob())
-                .then(blob => {
-                  // Determine file extension from blob type
-                  const type = blob.type || 'image/png'
-                  const ext = type.split('/')[1] || 'png'
-                  const file = new File([blob], `pasted-image.${ext}`, { type })
-                  
-                  // Upload directly to Supabase Storage (client-side)
-                  return uploadImageToStorage(file, 'lesson-materials', 'images')
-                })
-                .then((url) => {
-                  if (url) {
-                    return { original: base64Data, replacement: url }
-                  }
-                  return null
-                })
-                .catch((error) => {
-                  logger.error('Error processing image from HTML', error)
-                  return null
-                })
-            })
-            
-            // Wait for all images to upload, then replace in HTML
-            Promise.all(imagePromises).then((replacements) => {
-              if (!editorRef.current) return
-              
-              let updatedHtml = htmlData
-              replacements.forEach((replacement) => {
-                if (replacement) {
-                  updatedHtml = updatedHtml.replace(replacement.original, replacement.replacement)
-                }
-              })
-              
-              // Insert the updated HTML with Supabase URLs
-              editorRef.current.chain().focus().insertContent(updatedHtml).run()
-            })
-            
-            return true
-          }
-        }
-        
-        // Let Tiptap handle other paste operations (text, Word, etc.)
-        return false
-      },
-    },
-  })
-
-  if (!editor) {
-    return null
-  }
-
-  // Safely check if paragraph movement commands can run
-  let canMoveUp = false
-  let canMoveDown = false
-  try {
-    canMoveUp = editor.can().moveParagraphUp()
-    canMoveDown = editor.can().moveParagraphDown()
-  } catch {
-    // If check fails (e.g., complex document structure), disable buttons
-    canMoveUp = false
-    canMoveDown = false
-  }
+  // All editor logic is encapsulated in the hook
+  const {
+    editorRef,
+    debounceTimerRef,
+    lastSyncedContentRef,
+    onChangeRef,
+    handleImageUpload,
+    handleEditorChange,
+  } = useRichTextEditor({ content, onChange })
 
   return (
-    <div className={cn('border border-gray-300 rounded-md bg-gray-50', className)}>
-      {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border-b border-gray-200 flex-wrap bg-white rounded-t-md">
-        {/* Text Formatting */}
-        <Button
-          type="button"
-          variant={editor.isActive('bold') ? 'default' : 'ghost'}
-          size="icon"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          disabled={!editor.can().chain().focus().toggleBold().run()}
-        >
-          <Bold className="w-4 h-4" />
-        </Button>
-        <Button
-          type="button"
-          variant={editor.isActive('italic') ? 'default' : 'ghost'}
-          size="icon"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          disabled={!editor.can().chain().focus().toggleItalic().run()}
-        >
-          <Italic className="w-4 h-4" />
-        </Button>
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        {/* Headings */}
-        <Button
-          type="button"
-          variant={editor.isActive('heading', { level: 1 }) ? 'default' : 'ghost'}
-          size="icon"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        >
-          <Heading1 className="w-4 h-4" />
-        </Button>
-        <Button
-          type="button"
-          variant={editor.isActive('heading', { level: 2 }) ? 'default' : 'ghost'}
-          size="icon"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        >
-          <Heading2 className="w-4 h-4" />
-        </Button>
-        <Button
-          type="button"
-          variant={editor.isActive('heading', { level: 3 }) ? 'default' : 'ghost'}
-          size="icon"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        >
-          <Heading3 className="w-4 h-4" />
-        </Button>
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        {/* Lists */}
-        <Button
-          type="button"
-          variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
-          size="icon"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        >
-          <List className="w-4 h-4" />
-        </Button>
-        <Button
-          type="button"
-          variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
-          size="icon"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        >
-          <ListOrdered className="w-4 h-4" />
-        </Button>
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        {/* Image Alignment (only show when image is selected) */}
-        {editor.isActive('image') && (
-          <>
-            <Button
-              type="button"
-              variant={editor.getAttributes('image').align === 'left' ? 'default' : 'ghost'}
-              size="icon"
-              onClick={() => {
-                editor.chain().focus().updateAttributes('image', { align: 'left', float: null }).run()
-              }}
-              title="Zarovnat vlevo"
-            >
-              <AlignLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              type="button"
-              variant={editor.getAttributes('image').align === 'center' ? 'default' : 'ghost'}
-              size="icon"
-              onClick={() => {
-                editor.chain().focus().updateAttributes('image', { align: 'center', float: null }).run()
-              }}
-              title="Zarovnat na střed"
-            >
-              <AlignCenter className="w-4 h-4" />
-            </Button>
-            <Button
-              type="button"
-              variant={editor.getAttributes('image').align === 'right' ? 'default' : 'ghost'}
-              size="icon"
-              onClick={() => {
-                editor.chain().focus().updateAttributes('image', { align: 'right', float: null }).run()
-              }}
-              title="Zarovnat vpravo"
-            >
-              <AlignRight className="w-4 h-4" />
-            </Button>
-            <Button
-              type="button"
-              variant={editor.getAttributes('image').float === 'left' ? 'default' : 'ghost'}
-              size="icon"
-              onClick={() => {
-                const attrs = editor.getAttributes('image')
-                const newFloat = attrs.float === 'left' ? null : 'left'
-                editor.chain().focus().updateAttributes('image', { float: newFloat, align: null }).run()
-              }}
-              title="Plovoucí vlevo"
-            >
-              <ImageIcon className="w-4 h-4 rotate-90" />
-            </Button>
-            <Button
-              type="button"
-              variant={editor.getAttributes('image').float === 'right' ? 'default' : 'ghost'}
-              size="icon"
-              onClick={() => {
-                const attrs = editor.getAttributes('image')
-                const newFloat = attrs.float === 'right' ? null : 'right'
-                editor.chain().focus().updateAttributes('image', { float: newFloat, align: null }).run()
-              }}
-              title="Plovoucí vpravo"
-            >
-              <ImageIcon className="w-4 h-4 -rotate-90" />
-            </Button>
-          </>
-        )}
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        {/* Paragraph Movement */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().moveParagraphUp().run()}
-          disabled={!canMoveUp}
-          title="Přesunout odstavec nahoru"
-        >
-          <ArrowUp className="w-4 h-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={() => editor.chain().focus().moveParagraphDown().run()}
-          disabled={!canMoveDown}
-          title="Přesunout odstavec dolů"
-        >
-          <ArrowDown className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Editor Content - A4 Paper Simulation */}
-      <div className="overflow-y-auto p-4">
-        <div className="a4-paper">
-          <div className="a4-content">
-            <EditorContent editor={editor} />
-          </div>
-        </div>
-      </div>
+    <div 
+      className={cn(
+      'border border-gray-200 rounded-xl bg-white overflow-hidden',
+      'shadow-lg shadow-gray-200/50',
+      'ring-1 ring-gray-100',
+      className
+      )}
+    >
+      <Editor
+        id={editorId}
+        key={resetKey}
+        tinymceScriptSrc="/tinymce/tinymce.min.js"
+        licenseKey="gpl"
+        onInit={(_evt, editor) => {
+          editorRef.current = editor
+        }}
+        initialValue={content}
+        onEditorChange={handleEditorChange}
+        init={{
+          // Dimensions
+          height: 1200,
+          min_height: 600,
+          resize: false,
+          
+          // Language
+          language: 'cs',
+          language_url: '/tinymce/langs/cs.js',
+          
+          // Menu & Toolbar
+          menubar: EDITOR_MENUBAR,
+          menu: EDITOR_MENU,
+          plugins: [...EDITOR_PLUGINS],
+          toolbar: EDITOR_TOOLBAR,
+          toolbar_mode: 'sliding',
+          
+          // Quickbars
+          quickbars_selection_toolbar: QUICKBARS_SELECTION_TOOLBAR,
+          quickbars_insert_toolbar: false,
+          quickbars_image_toolbar: QUICKBARS_IMAGE_TOOLBAR,
+          image_toolbar: IMAGE_TOOLBAR,
+          
+          // Formatting
+          font_size_formats: FONT_SIZE_FORMATS,
+          block_formats: BLOCK_FORMATS,
+          color_cols: COLOR_COLS,
+          color_map: COLOR_MAP,
+          
+          // Styling
+          skin: 'oxide',
+          content_css: false,
+          content_style: CONTENT_STYLE,
+          
+          // Image handling
+          images_upload_handler: handleImageUpload,
+          automatic_uploads: true,
+          file_picker_types: 'image',
+          paste_data_images: true,
+          image_caption: true,
+          image_advtab: true,
+          image_title: true,
+          image_dimensions: true,
+          image_description: true,
+          object_resizing: 'img',
+          resize_img_proportional: true,
+          image_class_list: IMAGE_CLASS_LIST,
+          
+          // Table settings
+          table_default_styles: TABLE_DEFAULT_STYLES,
+          table_default_attributes: TABLE_DEFAULT_ATTRIBUTES,
+          
+          // Paste settings
+          paste_webkit_styles: 'all',
+          paste_merge_formats: true,
+          
+          // Pagebreak
+          pagebreak_separator: '<!-- pagebreak -->',
+          pagebreak_split_block: true,
+          
+          // Branding
+          branding: false,
+          promotion: false,
+          
+          // Placeholder
+          placeholder,
+          
+          // Setup custom commands and event handlers
+          setup: (editor) => {
+            setupEditor(editor, {
+              onBlur: () => {},
+              debounceTimerRef,
+              lastSyncedContentRef,
+              onChangeRef,
+            })
+          },
+        }}
+      />
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison: only re-render if these props change
+  // Ignore 'content' changes since we use initialValue (only matters on mount)
+  // Ignore 'onChange' since we use a ref for it
+  return (
+    prevProps.resetKey === nextProps.resetKey &&
+    prevProps.placeholder === nextProps.placeholder &&
+    prevProps.className === nextProps.className
+  )
+})

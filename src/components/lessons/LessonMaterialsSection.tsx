@@ -4,12 +4,13 @@ import * as React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { LessonMaterial, LessonSpecification, LessonDuration, UserLessonMaterial } from '@/types/lesson.types'
 import { Button } from '@/components/ui/Button'
-import { Eye, Download, Edit } from 'lucide-react'
+import { Eye, Edit, Download, Loader2 } from 'lucide-react'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { AuthModal } from '@/components/auth'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import { ErrorDialog } from '@/components/ui/ErrorDialog'
+import { exportToPDF } from '@/lib/utils/pdf-export'
 
 interface LessonMaterialsSectionProps {
   materials: LessonMaterial[]
@@ -39,6 +40,7 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
   const [selectedMaterial, setSelectedMaterial] = React.useState<LessonMaterial | null>(null)
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false)
   const [isCopying, setIsCopying] = React.useState<string | null>(null)
+  const [isExportingPDF, setIsExportingPDF] = React.useState<string | null>(null)
   const [errorDialogOpen, setErrorDialogOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
@@ -70,6 +72,23 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
       setErrorMessage(result.error || 'Chyba při vytváření kopie materiálu')
       setErrorDialogOpen(true)
       setIsCopying(null)
+    }
+  }
+
+  const handleExportPDF = async (material: LessonMaterial) => {
+    if (!material.content) return
+
+    setIsExportingPDF(material.id)
+    setErrorMessage(null)
+
+    try {
+      await exportToPDF(material.title, material.content)
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Chyba při exportu do PDF'
+      setErrorMessage(errorMsg)
+      setErrorDialogOpen(true)
+    } finally {
+      setIsExportingPDF(null)
     }
   }
 
@@ -185,11 +204,20 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
                 <Button 
                   variant="outline" 
                   size="sm"
-                  disabled
-                  title="Připravujeme"
+                  disabled={!materials[0].content || isExportingPDF === materials[0].id}
+                  onClick={() => requireAuth(() => handleExportPDF(materials[0]))}
                 >
-                  <Download />
-                  Stáhnout PDF
+                  {isExportingPDF === materials[0].id ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Exportuji...
+                    </>
+                  ) : (
+                    <>
+                      <Download />
+                      Stáhnout PDF
+                    </>
+                  )}
                 </Button>
                 <Button 
                   variant="outline" 

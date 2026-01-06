@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, Download, Copy, Pencil, Trash2, FileText, FileSpreadsheet } from 'lucide-react'
+import { Eye, Download, Copy, Pencil, Trash2, FileText, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { formatDate } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -11,6 +11,7 @@ import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { deleteUserLessonMaterialAction, copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 import { ErrorDialog } from '@/components/ui/ErrorDialog'
+import { exportToPDF } from '@/lib/utils/pdf-export'
 
 interface UserLessonMaterialsSectionProps {
   materials: UserLessonMaterial[]
@@ -30,6 +31,7 @@ export function UserLessonMaterialsSection({
   const [materialToDelete, setMaterialToDelete] = React.useState<string | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [duplicatingMaterialId, setDuplicatingMaterialId] = React.useState<string | null>(null)
+  const [isExportingPDF, setIsExportingPDF] = React.useState<string | null>(null)
   const [errorDialogOpen, setErrorDialogOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
@@ -54,6 +56,23 @@ export function UserLessonMaterialsSection({
       setErrorDialogOpen(true)
     }
     setDuplicatingMaterialId(null)
+  }
+
+  const handleExportPDF = async (material: UserLessonMaterial) => {
+    if (!material.content) return
+
+    setIsExportingPDF(material.id)
+    setErrorMessage(null)
+
+    try {
+      await exportToPDF(material.title, material.content)
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Chyba při exportu do PDF'
+      setErrorMessage(errorMsg)
+      setErrorDialogOpen(true)
+    } finally {
+      setIsExportingPDF(null)
+    }
   }
 
   const handleDeleteConfirm = async () => {
@@ -128,10 +147,15 @@ export function UserLessonMaterialsSection({
                     <Button
                       variant="ghost"
                       size="icon"
-                      disabled
-                      title="Stáhnout (připravujeme)"
+                      onClick={() => handleExportPDF(material)}
+                      disabled={!material.content || isExportingPDF === material.id}
+                      title="Stáhnout PDF"
                     >
-                      <Download className="w-4 h-4" />
+                      {isExportingPDF === material.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
                     </Button>
                     <Button
                       variant="ghost"

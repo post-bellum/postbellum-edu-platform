@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Download, Eye, Trash2, Check, Loader2 } from 'lucide-react'
+import { ArrowLeft, Eye, Trash2, Check, Loader2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -15,6 +15,8 @@ import {
   deleteUserLessonMaterialAction,
 } from '@/app/actions/user-lesson-materials'
 import type { UserLessonMaterial, LessonWithRelations } from '@/types/lesson.types'
+import { exportToPDF } from '@/lib/utils/pdf-export'
+import { logger } from '@/lib/logger'
 
 interface UserMaterialEditContentProps {
   material: UserLessonMaterial
@@ -37,6 +39,8 @@ export function UserMaterialEditContent({
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
+  const [isExportingPDF, setIsExportingPDF] = React.useState(false)
+  const [exportError, setExportError] = React.useState<string | null>(null)
 
   // Debounced auto-save
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
@@ -163,6 +167,23 @@ export function UserMaterialEditContent({
     }
   }
 
+  const handleExportPDF = React.useCallback(async () => {
+    if (!content) return
+
+    setIsExportingPDF(true)
+    setExportError(null)
+
+    try {
+      await exportToPDF(title, content)
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Chyba při exportu do PDF'
+      setExportError(errorMsg)
+      logger.error('PDF export error', err)
+    } finally {
+      setIsExportingPDF(false)
+    }
+  }, [title, content])
+
   const getSaveStatusDisplay = () => {
     switch (saveStatus) {
       case 'saving':
@@ -242,21 +263,34 @@ export function UserMaterialEditContent({
           <Button
             variant="outline"
             size="sm"
-            disabled
-            title="Připravujeme"
-          >
-            <Download className="w-4 h-4" />
-            Stáhnout PDF
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
             onClick={() => setViewModalOpen(true)}
           >
             <Eye className="w-4 h-4" />
             Zobrazit
           </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportPDF}
+            disabled={!content || isExportingPDF}
+          >
+            {isExportingPDF ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Exportuji...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                Stáhnout PDF
+              </>
+            )}
+          </Button>
+
+          {exportError && (
+            <span className="text-red-600 text-sm">{exportError}</span>
+          )}
 
           <Button
             variant="destructive"

@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
+    "postinstall": "rm -rf public/tinymce && cp -r node_modules/tinymce public/tinymce && mkdir -p public/tinymce/langs && cp scripts/tinymce-langs/* public/tinymce/langs/",
     "supabase:types": "supabase gen types typescript --linked > src/types/database.types.ts"
   },
   "dependencies": {
@@ -22,21 +23,18 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.81.1",
-    "@tiptap/extension-image": "^3.11.0",
-    "@tiptap/extension-link": "^3.11.0",
-    "@tiptap/extension-placeholder": "^3.11.0",
-    "@tiptap/pm": "^3.11.0",
-    "@tiptap/react": "^3.11.0",
-    "@tiptap/starter-kit": "^3.11.0",
+    "@tinymce/tinymce-react": "^6.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "html2pdf.js": "^0.12.1",
     "lucide-react": "^0.554.0",
     "md5": "^2.3.0",
-    "next": "16.0.7",
+    "next": "^16.1.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "sanitize-html": "^2.17.0",
     "tailwind-merge": "^3.4.0",
+    "tinymce": "^8.3.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {

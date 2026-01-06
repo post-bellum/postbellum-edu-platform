@@ -45,8 +45,7 @@ export function OTPModal({ email, password, onSuccess, onBack }: OTPModalProps) 
     setError('')
     
     try {
-      // Pass password for QA bypass functionality
-      const result = await verifyOTP(email, otp, password)
+      const result = await verifyOTP(email, otp, password || '')
       
       if (result.error) {
         setError(getErrorMessage(result.error))
