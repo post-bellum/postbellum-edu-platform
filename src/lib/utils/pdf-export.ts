@@ -148,7 +148,7 @@ export function createPrintView(title: string, content: string): string {
     
     body {
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-size: 12pt;
+      font-size: 11pt;
       line-height: 1.6;
       color: #18181B;
       margin: 0;
@@ -171,7 +171,7 @@ export function createPrintView(title: string, content: string): string {
     
     .print-content {
       color: #18181B;
-      font-size: 12pt;
+      font-size: 11pt;
       line-height: 1.7;
     }
     
@@ -233,9 +233,99 @@ export function createPrintView(title: string, content: string): string {
       max-width: 100%;
       height: auto;
       border-radius: 4px;
-      margin: 1em 0;
       page-break-inside: avoid;
       page-break-after: avoid;
+      /* Allow inline images by default - display inline-block to preserve side-by-side layout */
+      display: inline-block;
+      vertical-align: top;
+      margin: 0.5em 0.5em 0.5em 0;
+    }
+    
+    /* Images that are the only child of a paragraph - display as block */
+    .print-content p > img:only-child {
+      display: block;
+      margin: 1em auto;
+    }
+    
+    /* Image alignment classes */
+    .print-content img.img-align-left {
+      float: left;
+      margin: 0.5em 1.5em 1em 0;
+      max-width: 50%;
+    }
+    
+    .print-content img.img-align-right {
+      float: right;
+      margin: 0.5em 0 1em 1.5em;
+      max-width: 50%;
+    }
+    
+    .print-content img.img-align-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      float: none;
+    }
+    
+    .print-content img.img-full-width {
+      width: 100%;
+      max-width: 100%;
+      float: none;
+      display: block;
+    }
+    
+    /* Image style classes */
+    .print-content img.img-rounded {
+      border-radius: 16px;
+    }
+    
+    .print-content img.img-bordered {
+      border: 3px solid #e5e7eb;
+      border-radius: 8px;
+    }
+    
+    .print-content img.img-shadow {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Figure/caption styling */
+    .print-content figure.image {
+      display: table;
+      margin: 1.5em auto;
+      max-width: 100%;
+      page-break-inside: avoid;
+    }
+    
+    .print-content figure.image img {
+      display: block;
+      margin: 0 auto;
+    }
+    
+    .print-content figure.image figcaption {
+      display: table-caption;
+      caption-side: bottom;
+      text-align: center;
+      font-size: 10pt;
+      color: #6b7280;
+      padding: 8px 0;
+      font-style: italic;
+    }
+    
+    /* Clearfix - only applied to specific elements, not paragraphs (to allow text wrap around floated images) */
+    .print-content .clearfix::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    
+    /* Clear float after headings to prevent text from wrapping into next section */
+    .print-content h1,
+    .print-content h2,
+    .print-content h3,
+    .print-content h4,
+    .print-content h5,
+    .print-content h6 {
+      clear: both;
     }
     
     .print-content table {

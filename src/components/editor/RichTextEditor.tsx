@@ -113,7 +113,16 @@ export const RichTextEditor = React.memo(function RichTextEditor({
         }}
         init={{
           height: 1200,
-          menubar: true,
+          menubar: 'file edit view insert format table help',
+          menu: {
+            file: { title: 'Soubor', items: 'preview | print' },
+            edit: { title: 'Úpravy', items: 'undo redo | cut copy paste pastetext | selectall | searchreplace' },
+            view: { title: 'Zobrazit', items: 'visualblocks | fullscreen' },
+            insert: { title: 'Vložit', items: 'image link | charmap insertdatetime | pagebreak' },
+            format: { title: 'Formát', items: 'bold italic underline strikethrough superscript subscript | styles blocks fontsize align lineheight | forecolor backcolor | removeformat' },
+            table: { title: 'Tabulka', items: 'inserttable | cell row column | tableprops deletetable' },
+            help: { title: 'Nápověda', items: 'help' },
+          },
           language: 'cs',
           language_url: '/tinymce/langs/cs.js',
           plugins: [
@@ -141,10 +150,13 @@ export const RichTextEditor = React.memo(function RichTextEditor({
             'bold italic underline forecolor | alignleft aligncenter ' +
             'alignright alignjustify | bullist numlist outdent indent | ' +
             'image link table | pagebreak | moveblockup moveblockdown | removeformat | fullscreen',
+          // Contextual toolbar for images (shown when clicking on an image)
+          image_toolbar: 'floatleft floatnone floatright | rotateimage flipimageh flipimagev | image',
           // Quickbars configuration
           toolbar_mode: 'sliding',
           quickbars_selection_toolbar: 'bold italic underline | blocks | forecolor | moveblockup moveblockdown',
           quickbars_insert_toolbar: false,
+          quickbars_image_toolbar: 'floatleft floatnone floatright | rotateimage flipimageh flipimagev | image',
           // Content styling
           content_style: `
             body {
@@ -167,7 +179,46 @@ export const RichTextEditor = React.memo(function RichTextEditor({
             ul { list-style-type: disc; }
             ol { list-style-type: decimal; }
             li { margin: 0.5em 0; }
-            img { max-width: 100%; height: auto; border-radius: 6px; margin: 1em 0; }
+            img { 
+              max-width: 100%; 
+              height: auto; 
+              border-radius: 6px; 
+              transition: all 0.2s ease;
+              /* Allow inline images by default */
+              display: inline-block;
+              vertical-align: top;
+              margin: 0.5em 0.5em 0.5em 0;
+            }
+            img:hover { outline: 2px solid #075985; outline-offset: 2px; cursor: pointer; }
+            
+            /* Images that are the only child of a paragraph - display as block */
+            p > img:only-child { display: block; margin: 1em auto; }
+            
+            /* Image alignment classes */
+            img.img-align-left { float: left; margin: 0.5em 1.5em 1em 0; max-width: 50%; }
+            img.img-align-right { float: right; margin: 0.5em 0 1em 1.5em; max-width: 50%; }
+            img.img-align-center { display: block; margin-left: auto; margin-right: auto; float: none; }
+            img.img-full-width { width: 100%; max-width: 100%; float: none; display: block; }
+            
+            /* Image style classes */
+            img.img-rounded { border-radius: 16px; }
+            img.img-bordered { border: 3px solid #e5e7eb; border-radius: 8px; }
+            img.img-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
+            
+            /* Combined classes work together */
+            img.img-rounded.img-shadow { border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); }
+            img.img-bordered.img-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); }
+            
+            /* Figure/caption styling for images with captions */
+            figure.image { display: table; margin: 1.5em auto; max-width: 100%; }
+            figure.image img { display: block; margin: 0 auto; }
+            figure.image figcaption { display: table-caption; caption-side: bottom; text-align: center; font-size: 14px; color: #6b7280; padding: 8px 0; font-style: italic; }
+            
+            /* Clearfix - only applied to specific elements, not paragraphs (to allow text wrap around floated images) */
+            .clearfix::after { content: ""; display: table; clear: both; }
+            
+            /* Clear float after headings to prevent text from wrapping into next section */
+            h1, h2, h3, h4, h5, h6 { clear: both; }
             a { color: #075985; text-decoration: underline; }
             table { border-collapse: collapse; width: 100%; margin: 1em 0; }
             th, td { border: 1px solid #d1d5db; padding: 0.75em; }
@@ -221,10 +272,26 @@ export const RichTextEditor = React.memo(function RichTextEditor({
           automatic_uploads: true,
           file_picker_types: 'image',
           paste_data_images: true,
-          // Image editing
+          // Image editing and manipulation
           image_caption: true,
           image_advtab: true,
           image_title: true,
+          image_dimensions: true,
+          image_description: true,
+          // Allow users to resize images by dragging
+          object_resizing: 'img',
+          resize_img_proportional: true,
+          // Image class presets for easy styling
+          image_class_list: [
+            { title: 'Bez stylu', value: '' },
+            { title: 'Zarovnat vlevo', value: 'img-align-left' },
+            { title: 'Zarovnat vpravo', value: 'img-align-right' },
+            { title: 'Na střed', value: 'img-align-center' },
+            { title: 'Na celou šířku', value: 'img-full-width' },
+            { title: 'Zaoblené rohy', value: 'img-rounded' },
+            { title: 'S rámečkem', value: 'img-bordered' },
+            { title: 'Stín', value: 'img-shadow' },
+          ],
           // Block formats for the dropdown
           block_formats: 'Odstavec=p; Nadpis 1=h1; Nadpis 2=h2; Nadpis 3=h3; Nadpis 4=h4',
           // Resize settings
@@ -286,6 +353,267 @@ export const RichTextEditor = React.memo(function RichTextEditor({
               }
               return null
             }
+
+            // Helper function to get selected image
+            const getSelectedImage = (): HTMLImageElement | null => {
+              const node = editor.selection.getNode()
+              if (node.nodeName === 'IMG') {
+                return node as HTMLImageElement
+              }
+              // Check if we're in a figure with an image
+              const img = node.querySelector?.('img')
+              return img as HTMLImageElement | null
+            }
+
+            // Register rotate image command using canvas
+            editor.addCommand('rotateImage', () => {
+              const img = getSelectedImage()
+              if (!img) return
+
+              const canvas = document.createElement('canvas')
+              const ctx = canvas.getContext('2d')
+              if (!ctx) return
+
+              const image = new Image()
+              image.crossOrigin = 'anonymous'
+              image.onload = () => {
+                // Swap dimensions for 90-degree rotation
+                canvas.width = image.height
+                canvas.height = image.width
+                
+                ctx.translate(canvas.width / 2, canvas.height / 2)
+                ctx.rotate(Math.PI / 2)
+                ctx.drawImage(image, -image.width / 2, -image.height / 2)
+                
+                img.src = canvas.toDataURL('image/png')
+                // Swap width/height attributes
+                const oldWidth = img.width
+                img.width = img.height
+                img.height = oldWidth
+              }
+              image.src = img.src
+            })
+
+            // Register flip horizontal command
+            editor.addCommand('flipImageH', () => {
+              const img = getSelectedImage()
+              if (!img) return
+
+              const canvas = document.createElement('canvas')
+              const ctx = canvas.getContext('2d')
+              if (!ctx) return
+
+              const image = new Image()
+              image.crossOrigin = 'anonymous'
+              image.onload = () => {
+                canvas.width = image.width
+                canvas.height = image.height
+                
+                ctx.translate(canvas.width, 0)
+                ctx.scale(-1, 1)
+                ctx.drawImage(image, 0, 0)
+                
+                img.src = canvas.toDataURL('image/png')
+              }
+              image.src = img.src
+            })
+
+            // Register flip vertical command
+            editor.addCommand('flipImageV', () => {
+              const img = getSelectedImage()
+              if (!img) return
+
+              const canvas = document.createElement('canvas')
+              const ctx = canvas.getContext('2d')
+              if (!ctx) return
+
+              const image = new Image()
+              image.crossOrigin = 'anonymous'
+              image.onload = () => {
+                canvas.width = image.width
+                canvas.height = image.height
+                
+                ctx.translate(0, canvas.height)
+                ctx.scale(1, -1)
+                ctx.drawImage(image, 0, 0)
+                
+                img.src = canvas.toDataURL('image/png')
+              }
+              image.src = img.src
+            })
+
+            // Helper to remove all float-related classes from image
+            const removeFloatClasses = (img: HTMLImageElement) => {
+              img.classList.remove('img-align-left', 'img-align-right', 'img-align-center', 'img-full-width')
+              img.style.float = ''
+              img.style.margin = ''
+              img.style.maxWidth = ''
+            }
+
+            // Register float left command
+            editor.addCommand('floatImageLeft', () => {
+              const img = getSelectedImage()
+              if (!img) return
+              removeFloatClasses(img)
+              img.classList.add('img-align-left')
+            })
+
+            // Register float right command
+            editor.addCommand('floatImageRight', () => {
+              const img = getSelectedImage()
+              if (!img) return
+              removeFloatClasses(img)
+              img.classList.add('img-align-right')
+            })
+
+            // Register float none (inline) command
+            editor.addCommand('floatImageNone', () => {
+              const img = getSelectedImage()
+              if (!img) return
+              removeFloatClasses(img)
+            })
+
+            // Register float left toggle button
+            editor.ui.registry.addToggleButton('floatleft', {
+              icon: 'align-left',
+              tooltip: 'Obtékání textu zleva',
+              onAction: () => editor.execCommand('floatImageLeft'),
+              onSetup: (buttonApi) => {
+                const updateState = () => {
+                  const img = getSelectedImage()
+                  buttonApi.setEnabled(!!img)
+                  buttonApi.setActive(!!img?.classList.contains('img-align-left'))
+                }
+                editor.on('NodeChange', updateState)
+                updateState()
+                return () => editor.off('NodeChange', updateState)
+              }
+            })
+
+            // Register float right toggle button
+            editor.ui.registry.addToggleButton('floatright', {
+              icon: 'align-right',
+              tooltip: 'Obtékání textu zprava',
+              onAction: () => editor.execCommand('floatImageRight'),
+              onSetup: (buttonApi) => {
+                const updateState = () => {
+                  const img = getSelectedImage()
+                  buttonApi.setEnabled(!!img)
+                  buttonApi.setActive(!!img?.classList.contains('img-align-right'))
+                }
+                editor.on('NodeChange', updateState)
+                updateState()
+                return () => editor.off('NodeChange', updateState)
+              }
+            })
+
+            // Register float none toggle button
+            editor.ui.registry.addToggleButton('floatnone', {
+              icon: 'align-center',
+              tooltip: 'Bez obtékání',
+              onAction: () => editor.execCommand('floatImageNone'),
+              onSetup: (buttonApi) => {
+                const updateState = () => {
+                  const img = getSelectedImage()
+                  buttonApi.setEnabled(!!img)
+                  const hasNoFloat = img && !img.classList.contains('img-align-left') && !img.classList.contains('img-align-right')
+                  buttonApi.setActive(!!hasNoFloat)
+                }
+                editor.on('NodeChange', updateState)
+                updateState()
+                return () => editor.off('NodeChange', updateState)
+              }
+            })
+
+            // Register rotate button
+            editor.ui.registry.addButton('rotateimage', {
+              icon: 'rotate-right',
+              tooltip: 'Otočit obrázek o 90°',
+              onAction: () => editor.execCommand('rotateImage'),
+              onSetup: (buttonApi) => {
+                const updateState = () => {
+                  buttonApi.setEnabled(!!getSelectedImage())
+                }
+                editor.on('NodeChange', updateState)
+                updateState()
+                return () => editor.off('NodeChange', updateState)
+              }
+            })
+
+            // Register flip horizontal button
+            editor.ui.registry.addButton('flipimageh', {
+              icon: 'flip-horizontally',
+              tooltip: 'Převrátit vodorovně',
+              onAction: () => editor.execCommand('flipImageH'),
+              onSetup: (buttonApi) => {
+                const updateState = () => {
+                  buttonApi.setEnabled(!!getSelectedImage())
+                }
+                editor.on('NodeChange', updateState)
+                updateState()
+                return () => editor.off('NodeChange', updateState)
+              }
+            })
+
+            // Register flip vertical button
+            editor.ui.registry.addButton('flipimagev', {
+              icon: 'flip-vertically',
+              tooltip: 'Převrátit svisle',
+              onAction: () => editor.execCommand('flipImageV'),
+              onSetup: (buttonApi) => {
+                const updateState = () => {
+                  buttonApi.setEnabled(!!getSelectedImage())
+                }
+                editor.on('NodeChange', updateState)
+                updateState()
+                return () => editor.off('NodeChange', updateState)
+              }
+            })
+
+            // Image manipulation menu button (combines all image tools)
+            editor.ui.registry.addMenuButton('imagetools', {
+              icon: 'image',
+              tooltip: 'Nástroje obrázku',
+              fetch: (callback) => {
+                callback([
+                  {
+                    type: 'menuitem',
+                    text: 'Otočit o 90°',
+                    icon: 'rotate-right',
+                    onAction: () => editor.execCommand('rotateImage')
+                  },
+                  {
+                    type: 'menuitem',
+                    text: 'Převrátit vodorovně',
+                    icon: 'flip-horizontally',
+                    onAction: () => editor.execCommand('flipImageH')
+                  },
+                  {
+                    type: 'menuitem',
+                    text: 'Převrátit svisle',
+                    icon: 'flip-vertically',
+                    onAction: () => editor.execCommand('flipImageV')
+                  },
+                  {
+                    type: 'separator'
+                  },
+                  {
+                    type: 'menuitem',
+                    text: 'Vlastnosti obrázku...',
+                    icon: 'image',
+                    onAction: () => editor.execCommand('mceImage')
+                  }
+                ])
+              },
+              onSetup: (buttonApi) => {
+                const updateState = () => {
+                  buttonApi.setEnabled(!!getSelectedImage())
+                }
+                editor.on('NodeChange', updateState)
+                updateState()
+                return () => editor.off('NodeChange', updateState)
+              }
+            })
 
             // Register move block up command
             editor.addCommand('moveBlockUp', () => {
