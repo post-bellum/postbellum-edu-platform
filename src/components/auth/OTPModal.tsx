@@ -9,14 +9,12 @@ import { logger } from '@/lib/logger'
 
 interface OTPModalProps {
   email: string
-  password?: string // For QA bypass (currently unused)
+  password?: string // For QA bypass
   onSuccess: () => void
   onBack: () => void
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function OTPModal({ email, password: _password, onSuccess, onBack }: OTPModalProps) {
-  // password parameter kept for API compatibility but currently unused
+export function OTPModal({ email, password, onSuccess, onBack }: OTPModalProps) {
   const router = useRouter()
   const [otp, setOtp] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
@@ -47,7 +45,7 @@ export function OTPModal({ email, password: _password, onSuccess, onBack }: OTPM
     setError('')
     
     try {
-      const result = await verifyOTP(email, otp)
+      const result = await verifyOTP(email, otp, password || '')
       
       if (result.error) {
         setError(getErrorMessage(result.error))

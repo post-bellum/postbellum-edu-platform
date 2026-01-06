@@ -130,7 +130,7 @@ export async function signInWithEmail(email: string, password: string) {
  * Verify OTP code
  * For QA emails, accepts the configured QA OTP code and creates a valid session
  */
-export async function verifyOTP(email: string, token: string) {
+export async function verifyOTP(email: string, token: string, _password?: string) {
   try {
     // QA bypass: Use server action to verify and create session
     if (isQAEmail(email) && isQAOTPCode(token)) {
