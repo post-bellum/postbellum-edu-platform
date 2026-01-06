@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
+    "postinstall": "rm -rf public/tinymce && cp -r node_modules/tinymce public/tinymce && mkdir -p public/tinymce/langs && cp scripts/tinymce-langs/* public/tinymce/langs/",
     "supabase:types": "supabase gen types typescript --linked > src/types/database.types.ts"
   },
   "dependencies": {
@@ -28,7 +29,7 @@
     "html2pdf.js": "^0.12.1",
     "lucide-react": "^0.554.0",
     "md5": "^2.3.0",
-    "next": "16.0.7",
+    "next": "^16.1.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "sanitize-html": "^2.17.0",
