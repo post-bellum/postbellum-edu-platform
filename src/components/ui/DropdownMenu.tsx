@@ -1,57 +1,39 @@
 'use client'
 
 import * as React from 'react'
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { cn } from '@/lib/utils'
 
 interface DropdownMenuProps {
   trigger: React.ReactNode
   children: React.ReactNode
-  align?: 'left' | 'right'
+  align?: 'start' | 'center' | 'end'
 }
 
-export function DropdownMenu({ trigger, children, align = 'right' }: DropdownMenuProps) {
-  const [isOpen, setIsOpen] = React.useState(false)
-  const dropdownRef = React.useRef<HTMLDivElement>(null)
-
-  // Close dropdown when clicking outside
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isOpen])
-
+export function DropdownMenu({ trigger, children, align = 'end' }: DropdownMenuProps) {
   return (
-    <div className="relative" ref={dropdownRef}>
-      <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer">
-        {trigger}
-      </div>
+    <DropdownMenuPrimitive.Root>
+      <DropdownMenuPrimitive.Trigger asChild>
+        <button className="cursor-pointer bg-transparent border-none p-0" type="button">
+          {trigger}
+        </button>
+      </DropdownMenuPrimitive.Trigger>
 
-      {isOpen && (
-        <div
-          className={cn(
-            'absolute top-full mt-2 w-64 rounded-lg bg-white shadow-lg border border-gray-200 py-2 z-50',
-            align === 'right' ? 'right-0' : 'left-0'
-          )}
+      <DropdownMenuPrimitive.Portal>
+        <DropdownMenuPrimitive.Content
+          align={align}
+          sideOffset={8}
+          className="w-64 rounded-lg bg-white shadow-lg border border-gray-200 py-2 z-50 animate-in fade-in-0 zoom-in-95"
         >
           {children}
-        </div>
-      )}
-    </div>
+        </DropdownMenuPrimitive.Content>
+      </DropdownMenuPrimitive.Portal>
+    </DropdownMenuPrimitive.Root>
   )
 }
 
 interface DropdownMenuItemProps {
-  onClick?: () => void
+  onClick?: () => void | Promise<void>
   icon?: React.ReactNode
   children: React.ReactNode
   variant?: 'default' | 'danger'
@@ -63,42 +45,38 @@ export function DropdownMenuItem({
   icon, 
   children, 
   variant = 'default',
-  disabled = false 
+  disabled = false
 }: DropdownMenuItemProps) {
   return (
-    <button
+    <DropdownMenuPrimitive.Item
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-colors cursor-pointer',
-        variant === 'default' && 'text-gray-700 hover:bg-gray-50',
-        variant === 'danger' && 'text-red-600 hover:bg-red-50',
+        'w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-colors cursor-pointer outline-none',
+        'data-highlighted:bg-gray-100',
+        variant === 'default' && 'text-gray-700',
+        variant === 'danger' && 'text-red-600 data-highlighted:bg-red-50',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
     >
       {icon && <span className="text-lg">{icon}</span>}
       <span>{children}</span>
-    </button>
+    </DropdownMenuPrimitive.Item>
   )
 }
 
-interface DropdownMenuSeparatorProps {
-  className?: string
-}
-
-export function DropdownMenuSeparator({ className }: DropdownMenuSeparatorProps) {
-  return <div className={cn('my-1 h-px bg-gray-200', className)} />
-}
-
-interface DropdownMenuHeaderProps {
-  children: React.ReactNode
-}
-
-export function DropdownMenuHeader({ children }: DropdownMenuHeaderProps) {
+export function DropdownMenuSeparator({ className }: { className?: string }) {
   return (
-    <div className="px-4 py-3 text-sm font-semibold text-gray-900 border-b border-gray-200">
-      {children}
-    </div>
+    <DropdownMenuPrimitive.Separator 
+      className={cn('my-1 h-px bg-gray-200', className)} 
+    />
   )
 }
 
+export function DropdownMenuHeader({ children }: { children: React.ReactNode }) {
+  return (
+    <DropdownMenuPrimitive.Label className="px-4 py-3 text-sm font-semibold text-gray-900 border-b border-gray-200">
+      {children}
+    </DropdownMenuPrimitive.Label>
+  )
+}
