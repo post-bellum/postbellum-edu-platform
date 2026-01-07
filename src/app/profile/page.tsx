@@ -11,7 +11,12 @@ import {
   AvatarSection,
   DisplayNameSection,
   DeleteAccountSection,
+  UserEditedMaterialsSection,
 } from '@/components/profile'
+import { ProfileTabs, type TabId } from '@/components/profile/ProfileTabs'
+import { getAllUserMaterialsAction } from '@/app/actions/user-materials'
+import { deleteUserLessonMaterialAction, duplicateUserLessonMaterialAction } from '@/app/actions/user-lesson-materials'
+import type { UserLessonMaterial } from '@/types/lesson.types'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -26,6 +31,13 @@ export default function ProfilePage() {
     updateSchoolName,
   } = useProfile(isLoggedIn)
 
+  // Tab state
+  const [activeTab, setActiveTab] = React.useState<TabId>('settings')
+
+  // Materials state
+  const [materials, setMaterials] = React.useState<Array<UserLessonMaterial & { lesson_title: string }>>([])
+  const [loadingMaterials, setLoadingMaterials] = React.useState(false)
+
   // Local state for form inputs
   const [displayName, setDisplayName] = React.useState('')
   const [schoolName, setSchoolName] = React.useState('')
@@ -37,6 +49,27 @@ export default function ProfilePage() {
       setSchoolName(profile.schoolName)
     }
   }, [profile])
+
+  // Load materials when switching to materials tab
+  React.useEffect(() => {
+    async function loadMaterials() {
+      if (activeTab === 'materials' && isLoggedIn && materials.length === 0) {
+        setLoadingMaterials(true)
+        try {
+          const result = await getAllUserMaterialsAction()
+          if (result.success && result.data) {
+            setMaterials(result.data)
+          }
+        } catch {
+          // Error is already logged in the action
+          setLoadingMaterials(false)
+        } finally {
+          setLoadingMaterials(false)
+        }
+      }
+    }
+    loadMaterials()
+  }, [activeTab, isLoggedIn, materials.length])
 
   // Redirect if not logged in
   React.useEffect(() => {
@@ -53,6 +86,43 @@ export default function ProfilePage() {
     updateSchoolName(schoolName)
   }
 
+  const handleDeleteMaterial = async (materialId: string, lessonId: string) => {
+    try {
+      const result = await deleteUserLessonMaterialAction(materialId, lessonId)
+      
+      if (result.success) {
+        // Remove from local state
+        setMaterials(prev => prev.filter(m => m.id !== materialId))
+      } else {
+        alert(result.error || 'Nepodařilo se smazat materiál')
+      }
+    } catch {
+      // Error is already logged in the action
+      alert('Nepodařilo se smazat materiál')
+    }
+  }
+
+  const handleDuplicateMaterial = async (materialId: string, lessonId: string) => {
+    try {
+      const result = await duplicateUserLessonMaterialAction(materialId, lessonId)
+      
+      if (result.success && result.data) {
+        // Add the new material to local state
+        const newMaterial = {
+          ...result.data,
+          lesson_title: materials.find(m => m.lesson_id === lessonId)?.lesson_title || 'Unknown Lesson'
+        }
+        setMaterials(prev => [newMaterial, ...prev])
+        alert('Materiál byl úspěšně duplikován')
+      } else {
+        alert(result.error || 'Nepodařilo se duplikovat materiál')
+      }
+    } catch {
+      // Error is already logged in the action
+      alert('Nepodařilo se duplikovat materiál')
+    }
+  }
+
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -66,41 +136,72 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
-      <div>
+      <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Profil</h1>
       </div>
 
-      {/* Success/Error Messages */}
-      <AlertMessage success={success} error={error} />
+      {/* Two Column Layout */}
+      <div className="flex gap-8">
+        {/* Left Sidebar Navigation */}
+        <aside className="w-64 shrink-0">
+          <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        </aside>
 
-      {/* User Type Display (Read-only) */}
-      <UserTypeSection userType={profile.userType} />
+        {/* Right Content Area */}
+        <main className="flex-1 min-w-0">
+          {activeTab === 'settings' && (
+            <div className="space-y-8">
+              {/* Success/Error Messages */}
+              <AlertMessage success={success} error={error} />
 
-      {/* School Name (for teachers) */}
-      {profile.userType === 'teacher' && (
-        <SchoolNameSection
-          schoolName={schoolName}
-          onSchoolNameChange={setSchoolName}
-          onSave={handleSaveSchoolName}
-          isSaving={isSaving}
-        />
-      )}
+              {/* User Type Display (Read-only) */}
+              <UserTypeSection userType={profile.userType} />
 
-      {/* Avatar Section */}
-      <AvatarSection email={profile.email} />
+              {/* School Name (for teachers) */}
+              {profile.userType === 'teacher' && (
+                <SchoolNameSection
+                  schoolName={schoolName}
+                  onSchoolNameChange={setSchoolName}
+                  onSave={handleSaveSchoolName}
+                  isSaving={isSaving}
+                />
+              )}
 
-      {/* Display Name Section */}
-      <DisplayNameSection
-        displayName={displayName}
-        onDisplayNameChange={setDisplayName}
-        onSave={handleSaveDisplayName}
-        isSaving={isSaving}
-      />
+              {/* Avatar Section */}
+              <AvatarSection email={profile.email} />
 
-      {/* Delete Account Section */}
-      <DeleteAccountSection />
+              {/* Display Name Section */}
+              <DisplayNameSection
+                displayName={displayName}
+                onDisplayNameChange={setDisplayName}
+                onSave={handleSaveDisplayName}
+                isSaving={isSaving}
+              />
+
+              {/* Delete Account Section */}
+              <DeleteAccountSection />
+            </div>
+          )}
+
+          {activeTab === 'materials' && (
+            <div>
+              {loadingMaterials ? (
+                <div className="text-center py-12">
+                  <p>Načítání materiálů...</p>
+                </div>
+              ) : (
+            <UserEditedMaterialsSection 
+              initialMaterials={materials}
+              onDelete={handleDeleteMaterial}
+              onDuplicate={handleDuplicateMaterial}
+            />
+              )}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
 }

@@ -105,6 +105,48 @@ async function generateUniqueMaterialTitle(
 }
 
 /**
+ * Get all user lesson materials for the current user (across all lessons)
+ */
+export async function getAllUserLessonMaterials(): Promise<Array<UserLessonMaterial & { lesson_title: string }>> {
+  try {
+    const supabase = await createClient()
+    
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      // Not logged in - return empty array
+      return []
+    }
+
+    const { data, error } = await supabase
+      .from('user_lesson_materials')
+      .select(`
+        *,
+        lessons!inner(title)
+      `)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      logger.error('Error fetching all user lesson materials:', error)
+      throw error
+    }
+
+    // Transform the data to flatten lesson title
+    return (data || []).map(item => {
+      const itemWithLesson = item as UserLessonMaterial & { lessons: { title: string } }
+      return {
+        ...item,
+        lesson_title: itemWithLesson.lessons?.title || 'Unknown Lesson'
+      }
+    }) as Array<UserLessonMaterial & { lesson_title: string }>
+  } catch (error) {
+    logger.error('Error fetching all user lesson materials:', error)
+    throw error
+  }
+}
+
+/**
  * Get all user lesson materials for a specific lesson
  */
 export async function getUserLessonMaterials(lessonId: string): Promise<UserLessonMaterial[]> {
