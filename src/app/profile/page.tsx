@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { useProfile } from '@/lib/supabase/hooks/useProfile'
+import { FeedbackModal } from '@/components/ui/FeedbackModal'
 import {
   AlertMessage,
   UserTypeSection,
@@ -37,6 +38,19 @@ export default function ProfilePage() {
   // Materials state
   const [materials, setMaterials] = React.useState<Array<UserLessonMaterial & { lesson_title: string }>>([])
   const [loadingMaterials, setLoadingMaterials] = React.useState(false)
+  
+  // Feedback modal state
+  const [feedbackModal, setFeedbackModal] = React.useState<{ 
+    open: boolean
+    type: 'success' | 'error'
+    title: string
+    message?: string 
+  }>({
+    open: false,
+    type: 'success',
+    title: '',
+    message: undefined
+  })
 
   // Local state for form inputs
   const [displayName, setDisplayName] = React.useState('')
@@ -93,12 +107,28 @@ export default function ProfilePage() {
       if (result.success) {
         // Remove from local state
         setMaterials(prev => prev.filter(m => m.id !== materialId))
+        setFeedbackModal({
+          open: true,
+          type: 'success',
+          title: 'Materiál smazán',
+          message: 'Materiál byl úspěšně smazán.'
+        })
       } else {
-        alert(result.error || 'Nepodařilo se smazat materiál')
+        setFeedbackModal({
+          open: true,
+          type: 'error',
+          title: 'Chyba',
+          message: result.error || 'Nepodařilo se smazat materiál'
+        })
       }
     } catch {
       // Error is already logged in the action
-      alert('Nepodařilo se smazat materiál')
+      setFeedbackModal({
+        open: true,
+        type: 'error',
+        title: 'Chyba',
+        message: 'Nepodařilo se smazat materiál'
+      })
     }
   }
 
@@ -113,13 +143,28 @@ export default function ProfilePage() {
           lesson_title: materials.find(m => m.lesson_id === lessonId)?.lesson_title || 'Unknown Lesson'
         }
         setMaterials(prev => [newMaterial, ...prev])
-        alert('Materiál byl úspěšně duplikován')
+        setFeedbackModal({
+          open: true,
+          type: 'success',
+          title: 'Materiál duplikován',
+          message: 'Materiál byl úspěšně duplikován.'
+        })
       } else {
-        alert(result.error || 'Nepodařilo se duplikovat materiál')
+        setFeedbackModal({
+          open: true,
+          type: 'error',
+          title: 'Chyba',
+          message: result.error || 'Nepodařilo se duplikovat materiál'
+        })
       }
     } catch {
       // Error is already logged in the action
-      alert('Nepodařilo se duplikovat materiál')
+      setFeedbackModal({
+        open: true,
+        type: 'error',
+        title: 'Chyba',
+        message: 'Nepodařilo se duplikovat materiál'
+      })
     }
   }
 
@@ -136,6 +181,7 @@ export default function ProfilePage() {
   }
 
   return (
+    <>
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
@@ -203,6 +249,16 @@ export default function ProfilePage() {
         </main>
       </div>
     </div>
+
+    {/* Feedback Modal */}
+    <FeedbackModal
+      open={feedbackModal.open}
+      onOpenChange={(open) => setFeedbackModal(prev => ({ ...prev, open }))}
+      type={feedbackModal.type}
+      title={feedbackModal.title}
+      message={feedbackModal.message}
+    />
+    </>
   )
 }
 
