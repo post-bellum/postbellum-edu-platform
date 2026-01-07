@@ -1,11 +1,22 @@
 'use client'
 
+import * as React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
+import { useProfile } from '@/lib/supabase/hooks/useProfile'
 import { getGravatarUrl } from '@/lib/gravatar'
 import { cn } from '@/lib/utils'
+import { AuthModal } from '@/components/auth'
+import { 
+  DropdownMenu, 
+  DropdownMenuItem, 
+  DropdownMenuHeader,
+  DropdownMenuSeparator 
+} from '@/components/ui/DropdownMenu'
+import { logout } from '@/lib/oauth-helpers'
+import { BookmarkIcon, Cog6ToothIcon, ArrowRightStartOnRectangleIcon } from '@/components/ui/Icons'
 
 interface NavigationBarProps {
   favoriteCount?: number
@@ -14,7 +25,10 @@ interface NavigationBarProps {
 
 export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const { user, isLoggedIn } = useAuth()
+  const { profile } = useProfile(isLoggedIn)
+  const [showAuthModal, setShowAuthModal] = React.useState(false)
 
   // Use user email from hook if not provided as prop
   const email = userEmail || user?.email || ''
@@ -64,47 +78,89 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
             ))}
           </div>
 
-          {/* Right Side - Favorites and Profile */}
+          {/* Right Side - Favorites Badge and Profile/Login */}
           <div className="flex items-center gap-6">
             {isLoggedIn ? (
               <>
-                {/* Favorites Link */}
-                <Link
-                  href="/favorites"
-                  className="relative flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-900 transition-colors"
+                {/* Favorites Button */}
+                <button
+                  onClick={() => router.push('/favorites')}
+                  className="relative flex items-center gap-2 cursor-pointer hover:text-blue-900 transition-colors"
+                  title="Uložené lekce"
                 >
-                  <span>Oblíbené lekce</span>
+                  <BookmarkIcon className="h-5 w-5 text-gray-600" />
                   {favoriteCount > 0 && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-900 text-xs font-medium text-white">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-xs font-medium text-green-800">
                       {favoriteCount > 99 ? '99+' : favoriteCount}
                     </span>
                   )}
-                </Link>
+                </button>
 
-                {/* Profile Avatar */}
+                {/* Profile Dropdown */}
                 {email && (
-                  <Link href="/profile">
-                    <Image
-                      src={getGravatarUrl(email, 40)}
-                      alt="Profile"
-                      width={40}
-                      height={40}
-                      className="h-10 w-10 rounded-full cursor-pointer hover:ring-2 hover:ring-blue-900 transition-all"
-                    />
-                  </Link>
+                  <DropdownMenu
+                    trigger={
+                      <Image
+                        src={getGravatarUrl(email, 40)}
+                        alt="Profile"
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-full cursor-pointer hover:ring-2 hover:ring-green-600 transition-all"
+                      />
+                    }
+                  >
+                    <DropdownMenuHeader>
+                      {profile?.displayName || email}
+                    </DropdownMenuHeader>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push('/favorites')}
+                      icon={<BookmarkIcon className="h-5 w-5" />}
+                    >
+                      Uložené lekce
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push('/profile')}
+                      icon={<Cog6ToothIcon className="h-5 w-5" />}
+                    >
+                      Nastavení
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        await logout()
+                        router.push('/')
+                        router.refresh()
+                      }}
+                      icon={<ArrowRightStartOnRectangleIcon className="h-5 w-5" />}
+                      variant="danger"
+                    >
+                      Odhlásit se
+                    </DropdownMenuItem>
+                  </DropdownMenu>
                 )}
               </>
             ) : (
-              <Link
-                href="/"
-                className="text-sm font-medium text-gray-600 hover:text-blue-900 transition-colors"
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="text-sm font-medium text-gray-600 hover:text-blue-900 transition-colors cursor-pointer"
               >
                 Přihlásit se
-              </Link>
+              </button>
             )}
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal}
+        defaultStep="login"
+      />
     </nav>
   )
 }
