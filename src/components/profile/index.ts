@@ -5,6 +5,4 @@ export { AvatarSection } from './AvatarSection'
 export { DisplayNameSection } from './DisplayNameSection'
 export { DeleteAccountSection } from './DeleteAccountSection'
 export { UserEditedMaterialsList } from './UserEditedMaterialsList'
-export { UserEditedMaterialsSection } from './UserEditedMaterialsSection'
 export { ProfileTabs } from './ProfileTabs'
-

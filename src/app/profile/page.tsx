@@ -12,7 +12,7 @@ import {
   AvatarSection,
   DisplayNameSection,
   DeleteAccountSection,
-  UserEditedMaterialsSection,
+  UserEditedMaterialsList,
 } from '@/components/profile'
 import { ProfileTabs, type TabId } from '@/components/profile/ProfileTabs'
 import { getAllUserMaterialsAction } from '@/app/actions/user-materials'
@@ -74,9 +74,6 @@ export default function ProfilePage() {
           if (result.success && result.data) {
             setMaterials(result.data)
           }
-        } catch {
-          // Error is already logged in the action
-          setLoadingMaterials(false)
         } finally {
           setLoadingMaterials(false)
         }
@@ -182,84 +179,80 @@ export default function ProfilePage() {
 
   return (
     <>
-    <div className="max-w-7xl mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Profil</h1>
-      </div>
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Profil</h1>
+        </div>
 
-      {/* Two Column Layout */}
-      <div className="flex gap-8">
-        {/* Left Sidebar Navigation */}
-        <aside className="w-64 shrink-0">
-          <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
-        </aside>
+        {/* Two Column Layout */}
+        <div className="flex gap-8">
+          {/* Left Sidebar Navigation */}
+          <aside className="w-64 shrink-0">
+            <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+          </aside>
 
-        {/* Right Content Area */}
-        <main className="flex-1 min-w-0">
-          {activeTab === 'settings' && (
-            <div className="space-y-8">
-              {/* Success/Error Messages */}
-              <AlertMessage success={success} error={error} />
+          {/* Right Content Area */}
+          <main className="flex-1 min-w-0">
+            {activeTab === 'settings' && (
+              <div className="space-y-8">
+                {/* Success/Error Messages */}
+                <AlertMessage success={success} error={error} />
 
-              {/* User Type Display (Read-only) */}
-              <UserTypeSection userType={profile.userType} />
+                {/* User Type Display (Read-only) */}
+                <UserTypeSection userType={profile.userType} />
 
-              {/* School Name (for teachers) */}
-              {profile.userType === 'teacher' && (
-                <SchoolNameSection
-                  schoolName={schoolName}
-                  onSchoolNameChange={setSchoolName}
-                  onSave={handleSaveSchoolName}
+                {/* School Name (for teachers) */}
+                {profile.userType === 'teacher' && (
+                  <SchoolNameSection
+                    schoolName={schoolName}
+                    onSchoolNameChange={setSchoolName}
+                    onSave={handleSaveSchoolName}
+                    isSaving={isSaving}
+                  />
+                )}
+
+                {/* Avatar Section */}
+                <AvatarSection email={profile.email} />
+
+                {/* Display Name Section */}
+                <DisplayNameSection
+                  displayName={displayName}
+                  onDisplayNameChange={setDisplayName}
+                  onSave={handleSaveDisplayName}
                   isSaving={isSaving}
                 />
-              )}
 
-              {/* Avatar Section */}
-              <AvatarSection email={profile.email} />
+                {/* Delete Account Section */}
+                <DeleteAccountSection />
+              </div>
+            )}
 
-              {/* Display Name Section */}
-              <DisplayNameSection
-                displayName={displayName}
-                onDisplayNameChange={setDisplayName}
-                onSave={handleSaveDisplayName}
-                isSaving={isSaving}
-              />
-
-              {/* Delete Account Section */}
-              <DeleteAccountSection />
-            </div>
-          )}
-
-          {activeTab === 'materials' && (
-            <div>
-              {loadingMaterials ? (
+            {activeTab === 'materials' && (
+              loadingMaterials ? (
                 <div className="text-center py-12">
                   <p>Načítání materiálů...</p>
                 </div>
               ) : (
-            <UserEditedMaterialsSection 
-              initialMaterials={materials}
-              onDelete={handleDeleteMaterial}
-              onDuplicate={handleDuplicateMaterial}
-            />
-              )}
-            </div>
-          )}
-        </main>
+                <UserEditedMaterialsList
+                  materials={materials}
+                  onDelete={handleDeleteMaterial}
+                  onDuplicate={handleDuplicateMaterial}
+                />
+              )
+            )}
+          </main>
+        </div>
       </div>
-    </div>
 
-    {/* Feedback Modal */}
-    <FeedbackModal
-      open={feedbackModal.open}
-      onOpenChange={(open) => setFeedbackModal(prev => ({ ...prev, open }))}
-      type={feedbackModal.type}
-      title={feedbackModal.title}
-      message={feedbackModal.message}
-    />
+      {/* Feedback Modal */}
+      <FeedbackModal
+        open={feedbackModal.open}
+        onOpenChange={(open) => setFeedbackModal(prev => ({ ...prev, open }))}
+        type={feedbackModal.type}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+      />
     </>
   )
 }
-
-
