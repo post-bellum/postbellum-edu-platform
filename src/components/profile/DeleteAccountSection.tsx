@@ -6,10 +6,8 @@ import { Label } from '@/components/ui/Label'
 import { AUTH_CONSTANTS } from '@/lib/constants'
 import { deleteUserAccount } from '@/lib/supabase/account-deletion'
 import { logger } from '@/lib/logger'
-import { useRouter } from 'next/navigation'
 
 export function DeleteAccountSection() {
-  const router = useRouter()
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = React.useState('')
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -26,7 +24,8 @@ export function DeleteAccountSection() {
     
     try {
       await deleteUserAccount()
-      router.push('/')
+      // Force a full page reload to clear all auth state and context
+      window.location.href = '/'
     } catch (err) {
       logger.error('Error deleting account', err)
       setError('Nepodařilo se odstranit účet. Zkuste to prosím znovu nebo kontaktujte podporu.')

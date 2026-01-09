@@ -135,6 +135,81 @@ export async function updateUserLessonMaterialAction(materialId: string, formDat
 }
 
 /**
+ * Duplicate a user lesson material
+ */
+export async function duplicateUserLessonMaterialAction(materialId: string, lessonId: string) {
+  try {
+    // Validate IDs
+    if (!materialId || !isValidUUID(materialId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID materiálu',
+      }
+    }
+
+    if (!lessonId || !isValidUUID(lessonId)) {
+      return {
+        success: false,
+        error: 'Neplatné ID lekce',
+      }
+    }
+
+    // Get the source material
+    const { getUserLessonMaterialById } = await import('@/lib/supabase/user-lesson-materials')
+    const sourceMaterial = await getUserLessonMaterialById(materialId)
+    
+    if (!sourceMaterial) {
+      return {
+        success: false,
+        error: 'Zdrojový materiál nebyl nalezen',
+      }
+    }
+
+    // Ensure source material belongs to the provided lesson
+    if (sourceMaterial.lesson_id !== lessonId) {
+      return {
+        success: false,
+        error: 'Materiál nepatří k vybrané lekci',
+      }
+    }
+
+    // Create the duplicate
+    const input = {
+      source_material_id: sourceMaterial.source_material_id,
+      lesson_id: lessonId,
+      title: sourceMaterial.title,
+      content: sourceMaterial.content || undefined,
+    }
+
+    // Validate using Zod schema
+    const result = createUserLessonMaterialSchema.safeParse(input)
+    if (!result.success) {
+      const firstError = result.error.issues[0]
+      return {
+        success: false,
+        error: firstError?.message || 'Neplatná data',
+      }
+    }
+
+    const material = await createUserLessonMaterial(result.data)
+
+    revalidatePath(`/lessons/${lessonId}`)
+    revalidatePath('/profile')
+
+    return {
+      success: true,
+      data: material,
+    }
+  } catch (error) {
+    logger.error('Error duplicating user lesson material', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Chyba při duplikování materiálu',
+    }
+  }
+}
+
+/**
  * Delete a user lesson material
  */
 export async function deleteUserLessonMaterialAction(materialId: string, lessonId: string) {
@@ -157,6 +232,7 @@ export async function deleteUserLessonMaterialAction(materialId: string, lessonI
     await deleteUserLessonMaterial(materialId)
 
     revalidatePath(`/lessons/${lessonId}`)
+    revalidatePath('/profile')
 
     return {
       success: true,
