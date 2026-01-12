@@ -4,9 +4,13 @@ import * as React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { AuthModal } from '@/components/auth'
-import { Lock } from 'lucide-react'
+import { Lock, Bookmark } from 'lucide-react'
 
-export function FavoriteCTA() {
+interface FavoriteCTAProps {
+  variant?: 'default' | 'sidebar'
+}
+
+export function FavoriteCTA({ variant = 'default' }: FavoriteCTAProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false)
@@ -19,6 +23,31 @@ export function FavoriteCTA() {
     }
   }
 
+  // Sidebar variant - simple button that opens auth modal
+  if (variant === 'sidebar') {
+    return (
+      <>
+        <Button 
+          variant="secondary" 
+          size="medium" 
+          className="w-full justify-center"
+          onClick={() => setIsAuthModalOpen(true)}
+        >
+          <Bookmark className="w-5 h-5" />
+          Přidat do oblíbených
+        </Button>
+
+        <AuthModal 
+          open={isAuthModalOpen} 
+          onOpenChange={handleModalClose}
+          defaultStep="login"
+          returnTo={pathname}
+        />
+      </>
+    )
+  }
+
+  // Default variant - full CTA card
   return (
     <>
       <div className="pt-4 border-t bg-gradient-to-br from-blue-50 to-indigo-50 -mx-6 -mb-6 px-6 pb-6 mt-4 rounded-b-lg">

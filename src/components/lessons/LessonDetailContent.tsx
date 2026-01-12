@@ -5,7 +5,7 @@ import { isLessonFavorited } from '@/lib/supabase/favorites'
 import { getUserLessonMaterials } from '@/lib/supabase/user-lesson-materials'
 import { getUser } from '@/lib/supabase/auth-helpers'
 import { Button } from '@/components/ui/Button'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Lightbulb } from 'lucide-react'
 import { LessonMaterialsWrapper } from '@/components/lessons/LessonMaterialsWrapper'
 import { AdditionalActivitiesSection } from '@/components/lessons/AdditionalActivitiesSection'
 import { AdminControls } from '@/components/lessons/AdminControls'
@@ -50,7 +50,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
         </Link>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-4xl font-bold">{lesson.title}</h1>
+            <h1 className="text-4xl font-bold font-display">{lesson.title}</h1>
             {!lesson.published && (
               <span className="px-3 py-1 text-sm font-medium bg-orange-200 text-orange-800 rounded">
                 Nepublikováno
@@ -62,9 +62,9 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-10">
         {/* Main Content */}
-        <div className="flex-1 lg:w-0 space-y-6">
+        <div className="flex-1 lg:w-0 space-y-10">
           {/* Video */}
           {lesson.vimeo_video_url && (
             <LessonVideoEmbed videoUrl={lesson.vimeo_video_url} title={lesson.title} />
@@ -83,16 +83,27 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
         </div>
 
         {/* Sidebar */}
-        <div className="lg:w-80 lg:shrink-0 lg:sticky lg:top-20 lg:self-start">
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <LessonDetailInfo lesson={lesson}>
-              {/* Favorite Button or CTA */}
-              {user ? (
-                <FavoriteButton lessonId={id} initialIsFavorited={isFavorited} />
-              ) : (
-                <FavoriteCTA />
-              )}
-            </LessonDetailInfo>
+        <div className="lg:w-[340px] lg:shrink-0 space-y-6">
+          {/* Lesson Info Card */}
+          <div className="rounded-[28px] p-6">
+            <LessonDetailInfo lesson={lesson} />
+          </div>
+
+          {/* Side Action Buttons */}
+          <div className="flex flex-col gap-1.5 px-6">
+            {user ? (
+              <FavoriteButton 
+                lessonId={id} 
+                initialIsFavorited={isFavorited}
+                variant="sidebar"
+              />
+            ) : (
+              <FavoriteCTA variant="sidebar" />
+            )}
+            <Button variant="secondary" size="medium" className="w-full justify-center">
+              <Lightbulb className="w-5 h-5" />
+              Poslat návrh na zlepšení
+            </Button>
           </div>
         </div>
       </div>

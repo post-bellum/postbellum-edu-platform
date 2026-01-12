@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
-import { Circle } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -26,18 +25,28 @@ const RadioGroupItem = React.forwardRef<
     <RadioGroupPrimitive.Item
       ref={ref}
       className={cn(
-        'aspect-square h-4 w-4 rounded-full border border-gray-300 text-primary bg-white cursor-pointer hover:border-gray-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50',
+        'group aspect-square h-4 w-4 rounded-full border border-grey-400 bg-transparent cursor-pointer transition-colors',
+        'focus:outline-none focus-visible:outline-none',
+        'disabled:cursor-not-allowed',
+        'data-[state=unchecked]:disabled:border-grey-200',
+        'data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary',
+        'data-[state=checked]:disabled:bg-grey-200 data-[state=checked]:disabled:border-grey-200',
+        'relative',
         className
       )}
       {...props}
     >
       <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <Circle className="h-2.5 w-2.5 fill-current text-current" />
+        <div className="h-1.5 w-1.5 rounded-full bg-white shadow-[0px_2px_3px_0px_rgba(0,0,0,0.1)]" />
       </RadioGroupPrimitive.Indicator>
+      {/* Focus ring */}
+      <span 
+        className="absolute inset-[-2px] rounded-full border-[3px] border-mint-light opacity-0 group-focus-visible:opacity-100 pointer-events-none" 
+        style={{ filter: 'blur(1px)' }} 
+      />
     </RadioGroupPrimitive.Item>
   )
 })
 RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName
 
 export { RadioGroup, RadioGroupItem }
-

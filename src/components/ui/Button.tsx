@@ -5,30 +5,45 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-1 whitespace-nowrap font-semibold transition-colors cursor-pointer focus-visible:outline-none disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-white hover:bg-primary-hover hover:shadow-md',
+        // Post Bellum variants
+        ultra:
+          'bg-grey-950 text-white hover:bg-mint-light hover:text-grey-950 hover:border hover:border-grey-950 disabled:bg-grey-50 disabled:text-grey-300 disabled:border disabled:border-grey-100',
+        primary:
+          'bg-brand-primary text-mint-25 hover:bg-brand-primary-hover disabled:bg-grey-50 disabled:text-grey-300 disabled:border disabled:border-grey-100',
+        secondary:
+          'bg-white text-text-strong border border-grey-300 hover:bg-grey-50 disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
+        tertiary:
+          'bg-grey-100 text-grey-950 hover:bg-grey-200 disabled:bg-grey-50 disabled:text-grey-300',
+        quaternary:
+          'bg-white text-text-strong border border-grey-200 shadow-sm hover:border-grey-200 hover:bg-[rgba(0,0,0,0.02)] disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
+        // Legacy variants (mapped to Post Bellum)
+        default: 'bg-brand-primary text-mint-25 hover:bg-brand-primary-hover disabled:bg-grey-50 disabled:text-grey-300',
         destructive:
           'bg-red-600 text-white hover:bg-red-700',
         outline:
-          'border border-gray-300 bg-white hover:bg-gray-50 text-text',
-        secondary:
-          'bg-gray-100 text-text hover:bg-gray-200',
-        ghost: 'hover:bg-gray-100 text-text',
-        link: 'text-primary underline-offset-4 hover:underline hover:text-primary-hover',
+          'bg-white text-text-strong border border-grey-300 hover:bg-grey-50',
+        ghost: 'hover:bg-grey-100 text-text-strong',
+        link: 'text-brand-primary underline-offset-4 hover:underline hover:text-brand-primary-hover',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
+        // Post Bellum sizes
+        large: 'h-[52px] px-7 py-3 text-lg leading-7 rounded-full',
+        medium: 'h-12 px-5 py-2.5 text-lg leading-7 rounded-full',
+        small: 'h-10 px-4 py-1.5 text-base leading-7 rounded-full',
+        // Legacy sizes (mapped to Post Bellum)
+        default: 'h-12 px-5 py-2.5 text-lg leading-7 rounded-full',
+        sm: 'h-10 px-4 py-1.5 text-base leading-7 rounded-full',
+        lg: 'h-[52px] px-7 py-3 text-lg leading-7 rounded-full',
+        icon: 'h-10 w-10 rounded-full',
       },
     },
     defaultVariants: {
-      variant: 'default',
-      size: 'default',
+      variant: 'primary',
+      size: 'medium',
     },
   }
 )
@@ -54,4 +69,3 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button'
 
 export { Button, buttonVariants }
-

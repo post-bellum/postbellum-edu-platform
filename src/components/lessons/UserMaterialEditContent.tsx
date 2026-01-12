@@ -253,7 +253,6 @@ export function UserMaterialEditContent({
             value={title}
             onChange={handleTitleChange}
             placeholder="Název materiálu"
-            className="max-w-md"
           />
         </div>
 
@@ -317,7 +316,7 @@ export function UserMaterialEditContent({
         </div>
 
         {/* Sidebar - Right Side */}
-        <div className="flex-1 lg:flex-1 lg:max-w-sm lg:sticky lg:top-20 lg:self-start">
+        <div className="lg:w-80 xl:w-96 shrink-0 lg:sticky lg:top-20 lg:self-start">
           <MaterialEditSidebar lesson={lesson} />
         </div>
       </div>

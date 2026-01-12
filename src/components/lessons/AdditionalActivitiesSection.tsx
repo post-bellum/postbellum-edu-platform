@@ -2,7 +2,6 @@
 
 import { AdditionalActivity } from '@/types/lesson.types'
 import { Button } from '@/components/ui/Button'
-import { Eye } from 'lucide-react'
 
 interface AdditionalActivitiesSectionProps {
   activities: AdditionalActivity[]
@@ -14,33 +13,56 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Doplňkové aktivity pro žáky</h2>
+    <div className="flex flex-col gap-7">
+      {/* Section Header */}
+      <h2 className="font-display text-3xl font-semibold leading-display text-grey-950 pl-7">
+        Doplňkové aktivity pro žáky
+      </h2>
 
-      <div className="space-y-4">
+      {/* Activities Cards */}
+      <div className="flex flex-col gap-5">
         {activities.map((activity) => (
-          <div key={activity.id} className="border border-gray-200 rounded-lg p-6">
-            <div className="flex gap-6">
-              {activity.image_url && (
-                <div className="shrink-0">
-                  <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={activity.image_url}
-                      alt={activity.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+          <div 
+            key={activity.id} 
+            className="bg-grey-100 border border-black/5 rounded-[28px] px-7 py-10"
+          >
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Content */}
+              <div className="flex-1 space-y-4">
+                {/* Title with icon */}
+                <div className="flex items-start gap-4">
+                  {activity.image_url && (
+                    <div className="w-7 h-7 shrink-0 rounded overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={activity.image_url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <h3 className="text-lg font-semibold text-text-strong leading-display">
+                    {activity.title}
+                  </h3>
                 </div>
-              )}
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-2">{activity.title}</h3>
+
+                {/* Description */}
                 {activity.description && (
-                  <p className="text-gray-600 text-sm mb-4">{activity.description}</p>
+                  <p className="text-text-subtle text-lg leading-headline">
+                    {activity.description}
+                  </p>
                 )}
-                <Button variant="outline" size="sm">
-                  <Eye />
-                  Zobrazit
+              </div>
+
+              {/* Action Button */}
+              <div className="lg:w-[180px] shrink-0">
+                <Button 
+                  variant="secondary"
+                  size="medium"
+                  className="w-full"
+                  disabled
+                >
+                  Bez odkazu
                 </Button>
               </div>
             </div>

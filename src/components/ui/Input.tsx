@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
@@ -13,30 +15,47 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, leftIcon, rightIcon, onRightIconClick, ...props }, ref) => {
     const hasLeftIcon = !!leftIcon
     const hasRightIcon = !!rightIcon
+    const [isFocused, setIsFocused] = React.useState(false)
 
     return (
       <div className="relative w-full">
         {leftIcon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-grey-400">
             {leftIcon}
           </div>
         )}
         <input
           type={type}
           className={cn(
-            'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-text placeholder:text-gray-400 transition-colors hover:border-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50',
-            hasLeftIcon && 'pl-10',
-            hasRightIcon && 'pr-10',
+            'flex h-12 w-full rounded-full border border-grey-300 bg-white px-5 py-3 text-lg text-text-strong leading-[1.4] placeholder:text-grey-600 transition-colors hover:border-grey-400 focus:outline-none disabled:cursor-not-allowed disabled:bg-grey-50 disabled:border-grey-200 disabled:text-grey-400',
+            isFocused && 'border-grey-400',
+            hasLeftIcon && 'pl-12',
+            hasRightIcon && 'pr-12',
             className
           )}
           ref={ref}
+          onFocus={(e) => {
+            setIsFocused(true)
+            props.onFocus?.(e)
+          }}
+          onBlur={(e) => {
+            setIsFocused(false)
+            props.onBlur?.(e)
+          }}
           {...props}
         />
+        {/* Focus ring */}
+        {isFocused && !props.disabled && (
+          <div
+            className="absolute inset-[-2px] rounded-full pointer-events-none border-[3px] border-mint-light"
+            style={{ filter: 'blur(1px)' }}
+          />
+        )}
         {rightIcon && (
           <div 
             className={cn(
-              'absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground',
-              onRightIconClick && 'cursor-pointer hover:text-text transition-colors'
+              'absolute right-5 top-1/2 -translate-y-1/2 text-grey-400',
+              onRightIconClick && 'cursor-pointer hover:text-text-strong transition-colors'
             )}
             onClick={onRightIconClick}
           >

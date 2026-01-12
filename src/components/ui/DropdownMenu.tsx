@@ -23,7 +23,7 @@ export function DropdownMenu({ trigger, children, align = 'end' }: DropdownMenuP
         <DropdownMenuPrimitive.Content
           align={align}
           sideOffset={8}
-          className="w-64 rounded-lg bg-white shadow-lg border border-gray-200 py-2 z-50 animate-in fade-in-0 zoom-in-95"
+          className="w-64 rounded-2xl bg-white shadow-lg border border-grey-200 py-2 z-50 animate-in fade-in-0 zoom-in-95"
         >
           {children}
         </DropdownMenuPrimitive.Content>
@@ -52,9 +52,9 @@ export function DropdownMenuItem({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-colors cursor-pointer outline-none',
-        'data-highlighted:bg-gray-100',
-        variant === 'default' && 'text-gray-700',
+        'w-full flex items-center gap-3 px-4 py-3 text-left text-base transition-colors cursor-pointer outline-none',
+        'data-highlighted:bg-grey-50',
+        variant === 'default' && 'text-text-strong',
         variant === 'danger' && 'text-red-600 data-highlighted:bg-red-50',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
@@ -68,14 +68,14 @@ export function DropdownMenuItem({
 export function DropdownMenuSeparator({ className }: { className?: string }) {
   return (
     <DropdownMenuPrimitive.Separator 
-      className={cn('my-1 h-px bg-gray-200', className)} 
+      className={cn('my-1 h-px bg-grey-200', className)} 
     />
   )
 }
 
 export function DropdownMenuHeader({ children }: { children: React.ReactNode }) {
   return (
-    <DropdownMenuPrimitive.Label className="px-4 py-3 text-sm font-semibold text-gray-900 border-b border-gray-200">
+    <DropdownMenuPrimitive.Label className="px-4 py-3 text-sm font-semibold text-text-strong border-b border-grey-200">
       {children}
     </DropdownMenuPrimitive.Label>
   )

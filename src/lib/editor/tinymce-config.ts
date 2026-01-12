@@ -127,8 +127,10 @@ export const TABLE_DEFAULT_ATTRIBUTES = {
 // ============================================================================
 
 export const CONTENT_STYLE = `
+  @import url("https://use.typekit.net/anz3jmg.css");
+  
   body {
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: 'tablet-gothic-wide', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: 16px;
     line-height: 1.75;
     color: #18181B;
@@ -140,11 +142,11 @@ export const CONTENT_STYLE = `
   
   /* Typography */
   p { margin: 1em 0; }
-  h1 { font-size: 28px; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.75em; line-height: 1.2; }
-  h2 { font-size: 24px; font-weight: 600; margin-top: 1.25em; margin-bottom: 0.5em; line-height: 1.3; }
-  h3 { font-size: 20px; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; line-height: 1.4; }
-  h4 { font-size: 18px; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; }
-  h5, h6 { font-size: 16px; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; }
+  h1 { font-family: 'tablet-gothic-narrow', system-ui, sans-serif; font-size: 28px; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.75em; line-height: 1.2; }
+  h2 { font-family: 'tablet-gothic-narrow', system-ui, sans-serif; font-size: 24px; font-weight: 600; margin-top: 1.25em; margin-bottom: 0.5em; line-height: 1.3; }
+  h3 { font-family: 'tablet-gothic-narrow', system-ui, sans-serif; font-size: 20px; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; line-height: 1.4; }
+  h4 { font-family: 'tablet-gothic-narrow', system-ui, sans-serif; font-size: 18px; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; }
+  h5, h6 { font-family: 'tablet-gothic-narrow', system-ui, sans-serif; font-size: 16px; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; }
   
   /* Lists */
   ul, ol { padding-left: 1.5em; margin: 1em 0; }
