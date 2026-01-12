@@ -29,7 +29,8 @@ export async function getLessons(filters?: {
   tag_id?: string
   published_only?: boolean
   usePublicClient?: boolean // Use public client (no cookies) for static pages
-}): Promise<Lesson[]> {
+  include_tags?: boolean // Include tags for each lesson
+}): Promise<Lesson[] | LessonWithRelations[]> {
   try {
     // Use public client for static pages (no cookies needed)
     // RLS policies still work - public users only see published content
@@ -121,11 +122,46 @@ export async function getLessons(filters?: {
 
     // Convert to Lesson type with published field
     // RLS policies have already filtered the results appropriately
-    return (data || []).map((lesson: LessonRow) => ({
+    const lessons = (data || []).map((lesson: LessonRow) => ({
       ...lesson,
       published: lesson.published ?? false,
       rvp_connection: lesson.rvp_connection || [],
     })) as Lesson[]
+
+    // If include_tags is requested, fetch tags for all lessons
+    if (filters?.include_tags && lessons.length > 0) {
+      const lessonIds = lessons.map(l => l.id)
+      
+      const { data: lessonTags, error: tagsError } = await supabase
+        .from('lesson_tags')
+        .select('lesson_id, tags(*)')
+        .in('lesson_id', lessonIds)
+      
+      if (tagsError) {
+        logger.error('Error fetching lesson tags:', tagsError)
+      } else {
+        // Group tags by lesson_id
+        const tagsByLessonId = new Map<string, Tag[]>()
+        for (const lt of lessonTags || []) {
+          const tag = lt.tags
+          if (!tag) continue
+          const existingTags = tagsByLessonId.get(lt.lesson_id) || []
+          existingTags.push({
+            ...tag,
+            created_at: tag.created_at || new Date().toISOString(),
+          } as Tag)
+          tagsByLessonId.set(lt.lesson_id, existingTags)
+        }
+        
+        // Add tags to each lesson
+        return lessons.map(lesson => ({
+          ...lesson,
+          tags: tagsByLessonId.get(lesson.id) || [],
+        })) as LessonWithRelations[]
+      }
+    }
+
+    return lessons
   } catch (error) {
     logger.error('Error fetching lessons:', error)
     throw error
