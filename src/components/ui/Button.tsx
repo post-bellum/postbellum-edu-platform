@@ -13,7 +13,7 @@ const buttonVariants = cva(
         ultra:
           'bg-grey-950 text-white hover:bg-mint-light hover:text-grey-950 hover:border hover:border-grey-950 disabled:bg-grey-50 disabled:text-grey-300 disabled:border disabled:border-grey-100',
         primary:
-          'bg-brand-primary text-mint-25 hover:bg-brand-primary-hover disabled:bg-grey-50 disabled:text-grey-300 disabled:border disabled:border-grey-100',
+          'bg-brand-primary text-white hover:bg-brand-primary-hover disabled:bg-grey-50 disabled:text-grey-300 disabled:border disabled:border-grey-100',
         secondary:
           'bg-white text-text-strong border border-grey-300 hover:bg-grey-50 disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
         tertiary:
@@ -21,7 +21,7 @@ const buttonVariants = cva(
         quaternary:
           'bg-white text-text-strong border border-grey-200 shadow-sm hover:border-grey-200 hover:bg-[rgba(0,0,0,0.02)] disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
         // Legacy variants (mapped to Post Bellum)
-        default: 'bg-brand-primary text-mint-25 hover:bg-brand-primary-hover disabled:bg-grey-50 disabled:text-grey-300',
+        default: 'bg-brand-primary text-white hover:bg-brand-primary-hover disabled:bg-grey-50 disabled:text-grey-300',
         destructive:
           'bg-red-600 text-white hover:bg-red-700',
         outline:

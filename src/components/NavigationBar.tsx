@@ -6,17 +6,11 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { useProfile } from '@/lib/supabase/hooks/useProfile'
-import { getGravatarUrl } from '@/lib/gravatar'
 import { cn } from '@/lib/utils'
 import { AuthModal } from '@/components/auth'
-import { 
-  DropdownMenu, 
-  DropdownMenuItem, 
-  DropdownMenuHeader,
-  DropdownMenuSeparator 
-} from '@/components/ui/DropdownMenu'
-import { logout } from '@/lib/oauth-helpers'
-import { BookmarkIcon, Cog6ToothIcon, ArrowRightStartOnRectangleIcon } from '@/components/ui/Icons'
+import { Button } from '@/components/ui/Button'
+import { ProfileDropdown } from '@/components/ProfileDropdown'
+import { BookmarkIcon } from '@/components/ui/Icons'
 
 interface NavigationBarProps {
   favoriteCount?: number
@@ -29,6 +23,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
   const { user, isLoggedIn } = useAuth()
   const { profile } = useProfile(isLoggedIn)
   const [showAuthModal, setShowAuthModal] = React.useState(false)
+  const [authDefaultStep, setAuthDefaultStep] = React.useState<'login' | 'register'>('login')
 
   // Use user email from hook if not provided as prop
   const email = userEmail || user?.email || ''
@@ -46,31 +41,39 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
     return pathname.startsWith(href)
   }
 
-  return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-white">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex gap-1">
-              <div className="h-2 w-2 rounded-full bg-blue-900"></div>
-              <div className="h-2 w-2 rounded-full bg-blue-900"></div>
-              <div className="h-2 w-2 rounded-full bg-blue-900"></div>
-            </div>
-            <span className="text-xl font-serif text-blue-900">Post Bellum</span>
-          </Link>
+  const handleOpenAuth = (step: 'login' | 'register') => {
+    setAuthDefaultStep(step)
+    setShowAuthModal(true)
+  }
 
-          {/* Navigation Links */}
-          <div className="flex items-center gap-8">
+  return (
+    <nav className="sticky top-0 z-50 w-full bg-surface py-4">
+      <div className="container mx-auto px-10">
+        <div className="flex h-12 items-center justify-between">
+          {/* Left - Logo */}
+          <div className="flex items-center min-w-[240px]">
+            <Link href="/">
+              <Image
+                src="/logo-storyon.svg"
+                alt="StoryOn"
+                width={140}
+                height={25}
+                priority
+              />
+            </Link>
+          </div>
+
+          {/* Center - Navigation Links */}
+          <div className="flex items-center gap-7">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-blue-900',
+                  'font-body text-lg transition-colors p-1',
                   isActive(link.href)
-                    ? 'text-blue-900'
-                    : 'text-gray-600'
+                    ? 'font-semibold text-text-strong underline decoration-mint decoration-dotted underline-offset-[6px]'
+                    : 'font-normal text-text-strong hover:text-text-subtle'
                 )}
               >
                 {link.label}
@@ -78,19 +81,19 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
             ))}
           </div>
 
-          {/* Right Side - Favorites Badge and Profile/Login */}
-          <div className="flex items-center gap-6">
+          {/* Right - Actions */}
+          <div className="flex items-center justify-end gap-4 min-w-[240px]">
             {isLoggedIn ? (
               <>
                 {/* Favorites Button */}
                 <button
                   onClick={() => router.push('/favorites')}
-                  className="relative flex items-center gap-2 cursor-pointer hover:text-blue-900 transition-colors"
+                  className="flex items-center gap-0 bg-[#caffe6] rounded-full p-2 cursor-pointer hover:bg-mint transition-colors"
                   title="Uložené lekce"
                 >
-                  <BookmarkIcon className="h-5 w-5 text-gray-600" />
+                  <BookmarkIcon className="h-5 w-5 text-grey-950" />
                   {favoriteCount > 0 && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-xs font-medium text-green-800">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-mint text-xs font-semibold text-grey-950">
                       {favoriteCount > 99 ? '99+' : favoriteCount}
                     </span>
                   )}
@@ -98,58 +101,29 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
 
                 {/* Profile Dropdown */}
                 {email && (
-                  <DropdownMenu
-                    trigger={
-                      <Image
-                        src={getGravatarUrl(email, 40)}
-                        alt="Profile"
-                        width={40}
-                        height={40}
-                        className="h-10 w-10 rounded-full cursor-pointer hover:ring-2 hover:ring-green-600 transition-all"
-                      />
-                    }
-                  >
-                    <DropdownMenuHeader>
-                      {profile?.displayName || email}
-                    </DropdownMenuHeader>
-
-                    <DropdownMenuItem
-                      onClick={() => router.push('/favorites')}
-                      icon={<BookmarkIcon className="h-5 w-5" />}
-                    >
-                      Uložené lekce
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem
-                      onClick={() => router.push('/profile')}
-                      icon={<Cog6ToothIcon className="h-5 w-5" />}
-                    >
-                      Nastavení
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator />
-
-                    <DropdownMenuItem
-                      onClick={async () => {
-                        await logout()
-                        router.push('/')
-                        router.refresh()
-                      }}
-                      icon={<ArrowRightStartOnRectangleIcon className="h-5 w-5" />}
-                      variant="danger"
-                    >
-                      Odhlásit se
-                    </DropdownMenuItem>
-                  </DropdownMenu>
+                  <ProfileDropdown 
+                    email={email} 
+                    displayName={profile?.displayName} 
+                  />
                 )}
               </>
             ) : (
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className="text-sm font-medium text-gray-600 hover:text-blue-900 transition-colors cursor-pointer"
-              >
-                Přihlásit se
-              </button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="medium"
+                  onClick={() => handleOpenAuth('login')}
+                >
+                  Přihlásit
+                </Button>
+                <Button
+                  variant="primary"
+                  size="medium"
+                  onClick={() => handleOpenAuth('register')}
+                >
+                  Registrovat
+                </Button>
+              </div>
             )}
           </div>
         </div>
@@ -159,9 +133,8 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
       <AuthModal 
         open={showAuthModal} 
         onOpenChange={setShowAuthModal}
-        defaultStep="login"
+        defaultStep={authDefaultStep}
       />
     </nav>
   )
 }
-
