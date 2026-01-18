@@ -10,7 +10,7 @@ interface LessonDetailHeaderProps {
 
 export function LessonDetailHeader({ lessonId, title, published }: LessonDetailHeaderProps) {
   return (
-    <div className="mb-8">
+    <div>
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <Link 
@@ -21,7 +21,7 @@ export function LessonDetailHeader({ lessonId, title, published }: LessonDetailH
             <ArrowLeft className="w-7 h-7" />
           </Link>
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-4xl font-bold font-display leading-none">{title}</h1>
+            <h1 className="text-4xl font-semibold font-display leading-[1.2] text-grey-950">{title}</h1>
             {!published && (
               <span className="px-3 py-1 text-sm font-medium bg-orange-200 text-orange-800 rounded">
                 Nepublikováno

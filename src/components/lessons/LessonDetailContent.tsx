@@ -45,7 +45,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
   ]
 
   return (
-    <>
+    <div className="flex flex-col gap-10">
       <Breadcrumbs items={breadcrumbItems} />
       
       <LessonDetailHeader 
@@ -99,6 +99,6 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }

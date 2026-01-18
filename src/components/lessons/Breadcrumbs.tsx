@@ -12,15 +12,15 @@ interface BreadcrumbsProps {
 
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
-    <nav className="text-sm text-grey-500 mb-6" aria-label="Breadcrumb">
-      <ol className="flex items-center gap-1">
+    <nav className="text-sm text-grey-600 leading-[1.4]" aria-label="Breadcrumb">
+      <ol className="flex flex-wrap items-center gap-2.5">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
 
           return (
-            <li key={index} className="flex items-center gap-1">
+            <li key={index} className="flex items-center gap-2.5">
               {index > 0 && (
-                <ChevronRight className="w-4 h-4 text-grey-400" aria-hidden="true" />
+                <ChevronRight className="w-4 h-4 text-grey-400 shrink-0" aria-hidden="true" />
               )}
               {item.href && !isLast ? (
                 <Link 
@@ -30,7 +30,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
                   {item.label}
                 </Link>
               ) : (
-                <span className={isLast ? 'text-grey-900 font-medium' : ''}>
+                <span className={isLast ? 'text-grey-950' : ''}>
                   {item.label}
                 </span>
               )}
