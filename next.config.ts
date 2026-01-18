@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: 'www.gravatar.com',
         pathname: '/avatar/**',
       },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
   },
 };

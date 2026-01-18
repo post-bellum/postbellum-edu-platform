@@ -39,7 +39,7 @@ export default async function UserMaterialEditPage({ params }: UserMaterialEditP
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
       <UserMaterialEditContent
         material={material}
         lesson={lesson}

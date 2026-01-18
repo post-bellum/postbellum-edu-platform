@@ -48,10 +48,10 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-surface py-4">
-      <div className="container mx-auto px-10">
+      <div className="w-full px-5 xl:px-10 2xl:px-[120px]">
         <div className="flex h-12 items-center justify-between">
           {/* Left - Logo */}
-          <div className="flex items-center min-w-[240px]">
+          <div className="flex items-center md:min-w-[240px]">
             <Link href="/">
               <Image
                 src="/logo-storyon.svg"
@@ -63,8 +63,8 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
             </Link>
           </div>
 
-          {/* Center - Navigation Links */}
-          <div className="flex items-center gap-7">
+          {/* Center - Navigation Links (hidden on mobile) */}
+          <div className="hidden md:flex items-center gap-7">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -82,7 +82,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
           </div>
 
           {/* Right - Actions */}
-          <div className="flex items-center justify-end gap-4 min-w-[240px]">
+          <div className="flex items-center justify-end gap-2 md:gap-4 md:min-w-[240px]">
             {isLoggedIn ? (
               <>
                 {/* Favorites Button */}

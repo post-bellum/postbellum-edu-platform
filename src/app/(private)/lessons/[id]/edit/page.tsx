@@ -8,11 +8,11 @@ export const dynamic = 'force-dynamic'
 
 function EditLessonLoading() {
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <h1 className="text-4xl font-bold">Upravit lekci</h1>
-      <div className="text-center py-12">
-        <p className="text-gray-500">Načítání...</p>
-      </div>
+    <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
+        <h1 className="text-4xl font-bold">Upravit lekci</h1>
+        <div className="text-center py-12">
+          <p className="text-gray-500">Načítání...</p>
+        </div>
     </div>
   )
 }
@@ -30,11 +30,11 @@ export default async function EditLessonPage({ params }: EditLessonPageProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <h1 className="text-4xl font-bold">Upravit lekci</h1>
-      <React.Suspense fallback={<EditLessonLoading />}>
-        <EditLessonContent id={id} />
-      </React.Suspense>
+    <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
+        <h1 className="text-4xl font-bold">Upravit lekci</h1>
+        <React.Suspense fallback={<EditLessonLoading />}>
+          <EditLessonContent id={id} />
+        </React.Suspense>
     </div>
   )
 }

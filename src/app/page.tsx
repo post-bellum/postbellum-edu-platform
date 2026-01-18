@@ -71,7 +71,7 @@ export default function Home() {
   return (
     <>
       <main className="min-h-screen p-8">
-        <div className="max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] gap-8">
+        <div className="max-w-[896px] mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] gap-8">
           <Image
             src="/logo.svg"
             alt="Post Bellum logo"

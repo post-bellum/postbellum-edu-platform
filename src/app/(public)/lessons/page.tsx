@@ -6,7 +6,7 @@ import { LessonsList } from '@/components/lessons/LessonsList'
 
 export default function LessonsPage() {
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
       <LessonsList />
     </div>
   )
