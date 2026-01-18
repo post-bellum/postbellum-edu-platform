@@ -1,14 +1,14 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { getLessonById } from '@/lib/supabase/lessons'
 import { isLessonFavorited } from '@/lib/supabase/favorites'
 import { getUserLessonMaterials } from '@/lib/supabase/user-lesson-materials'
 import { getUser } from '@/lib/supabase/auth-helpers'
 import { Button } from '@/components/ui/Button'
-import { ArrowLeft, Lightbulb } from 'lucide-react'
+import { Lightbulb } from 'lucide-react'
+import { Breadcrumbs } from '@/components/lessons/Breadcrumbs'
+import { LessonDetailHeader } from '@/components/lessons/LessonDetailHeader'
 import { LessonMaterialsWrapper } from '@/components/lessons/LessonMaterialsWrapper'
 import { AdditionalActivitiesSection } from '@/components/lessons/AdditionalActivitiesSection'
-import { AdminControls } from '@/components/lessons/AdminControls'
 import { FavoriteButton } from '@/components/lessons/FavoriteButton'
 import { FavoriteCTA } from '@/components/lessons/FavoriteCTA'
 import { LessonVideoEmbed } from '@/components/lessons/LessonVideoEmbed'
@@ -38,29 +38,21 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
     notFound()
   }
 
+  const breadcrumbItems = [
+    { label: 'Domov', href: '/' },
+    { label: 'Katalog lekcí', href: '/lessons' },
+    { label: 'Detail lekce' },
+  ]
+
   return (
     <>
-      {/* Header */}
-      <div className="mb-6">
-        <Link href="/lessons">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ArrowLeft />
-            Zpět na seznam lekcí
-          </Button>
-        </Link>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-4xl font-bold font-display">{lesson.title}</h1>
-            {!lesson.published && (
-              <span className="px-3 py-1 text-sm font-medium bg-orange-200 text-orange-800 rounded">
-                Nepublikováno
-              </span>
-            )}
-          </div>
-          {/* AdminControls handles its own visibility via client-side admin check */}
-          <AdminControls lessonId={id} lessonTitle={lesson.title} showEditButton={true} />
-        </div>
-      </div>
+      <Breadcrumbs items={breadcrumbItems} />
+      
+      <LessonDetailHeader 
+        lessonId={id} 
+        title={lesson.title} 
+        published={lesson.published} 
+      />
 
       <div className="flex flex-col lg:flex-row gap-10">
         {/* Main Content */}
