@@ -40,14 +40,14 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-grey-200 bg-white text-text-strong p-6 shadow-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-2xl',
+        'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-16px)] max-w-[480px] translate-x-[-50%] translate-y-[-50%] gap-4 bg-white text-text-strong px-6 pt-5 pb-7 sm:px-7 sm:pt-5 sm:pb-7 shadow-[0px_32px_64px_-12px_rgba(16,24,40,0.14)] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-[40px]',
         className
       )}
       {...props}
     >
       {children}
       {!hideCloseButton && (
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1 opacity-70 text-grey-400 hover:text-text-strong transition-all hover:opacity-100 hover:bg-grey-100 focus:outline-none disabled:pointer-events-none">
+        <DialogPrimitive.Close className="absolute right-5 top-5 rounded-full p-0.5 text-grey-950 hover:text-grey-600 transition-all focus:outline-none disabled:pointer-events-none">
           <X className="h-5 w-5" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>

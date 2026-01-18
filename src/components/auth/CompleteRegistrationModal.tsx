@@ -4,7 +4,6 @@ import * as React from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/RadioGroup'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { SearchIcon } from '@/components/ui/Icons'
 import {
@@ -101,16 +100,22 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
   }
 
   return (
-    <div className="flex flex-col">
-      <h2 className="text-3xl font-bold text-center mb-2 text-text">Dokončení registrace</h2>
-      <p className="text-sm text-center text-text-secondary mb-8">
-        Pomozte nám lépe přizpůsobit platformu vaší výuce. Vyberte roli a zadejte název školy.
-      </p>
+    <div className="flex flex-col gap-7">
+      {/* Title & Description */}
+      <div className="text-center">
+        <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+          Dokončení registrace
+        </h2>
+        <p className="text-base leading-[1.5] text-text-subtle">
+          Pomozte nám lépe přizpůsobit platformu vaší výuce. Vyberte roli a zadejte název školy.
+        </p>
+      </div>
 
-      <form onSubmit={handleComplete} className="space-y-6">
+      {/* Content Stack */}
+      <form onSubmit={handleComplete} className="flex flex-col gap-5">
         {/* Display Name Field */}
-        <div className="space-y-2">
-          <Label htmlFor="display-name">
+        <div className="flex flex-col">
+          <Label htmlFor="display-name" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
             Zobrazované jméno
           </Label>
           <Input
@@ -123,32 +128,68 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
             disabled={isLoading}
             data-testid="complete-registration-display-name-input"
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-text-subtle px-2.5 py-1.5">
             Toto jméno se zobrazí v profilu. Můžete jej změnit kdykoli v nastavení. Maximum {AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH} znaků.
           </p>
         </div>
 
-        <div className="space-y-4">
-          <RadioGroup value={userType} onValueChange={handleUserTypeChange}>
-            <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-all" data-testid="teacher-radio-option">
-              <RadioGroupItem value="teacher" id="teacher" data-testid="teacher-radio" />
-              <Label htmlFor="teacher" className="flex-1 cursor-pointer font-normal select-none">
-                Jsem učitel
-              </Label>
-            </div>
-            <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 cursor-pointer hover:bg-gray-50 hover:border-gray-400 transition-all" data-testid="not-teacher-radio-option">
-              <RadioGroupItem value="not-teacher" id="not-teacher" data-testid="not-teacher-radio" />
-              <Label htmlFor="not-teacher" className="flex-1 cursor-pointer font-normal select-none">
-                Nejsem učitel
-              </Label>
-            </div>
-          </RadioGroup>
+        {/* User Type Radio */}
+        <div className="flex gap-1.5 w-full">
+          <button
+            type="button"
+            className={`flex-1 flex items-center gap-2 rounded-2xl px-5 py-3 cursor-pointer transition-all ${
+              userType === 'teacher' ? 'bg-grey-200' : 'bg-grey-100 hover:bg-grey-200'
+            }`}
+            onClick={() => handleUserTypeChange('teacher')}
+            data-testid="teacher-radio-option"
+          >
+            <span 
+              className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                userType === 'teacher' 
+                  ? 'bg-brand-primary border-brand-primary' 
+                  : 'bg-transparent border-grey-400'
+              }`}
+              data-testid="teacher-radio"
+            >
+              {userType === 'teacher' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0px_2px_3px_0px_rgba(0,0,0,0.1)]" />
+              )}
+            </span>
+            <span className="flex-1 font-normal select-none text-base leading-[1.5] text-text-subtle text-left">
+              Jsem učitel
+            </span>
+          </button>
+          <button
+            type="button"
+            className={`flex-1 flex items-center gap-2 rounded-2xl px-5 py-3 cursor-pointer transition-all ${
+              userType === 'not-teacher' ? 'bg-grey-200' : 'bg-grey-100 hover:bg-grey-200'
+            }`}
+            onClick={() => handleUserTypeChange('not-teacher')}
+            data-testid="not-teacher-radio-option"
+          >
+            <span 
+              className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                userType === 'not-teacher' 
+                  ? 'bg-brand-primary border-brand-primary' 
+                  : 'bg-transparent border-grey-400'
+              }`}
+              data-testid="not-teacher-radio"
+            >
+              {userType === 'not-teacher' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0px_2px_3px_0px_rgba(0,0,0,0.1)]" />
+              )}
+            </span>
+            <span className="flex-1 font-normal select-none text-base leading-[1.5] text-text-subtle text-left">
+              Nejsem učitel
+            </span>
+          </button>
         </div>
 
-        <div className="space-y-2">
+        {/* School Name or Category */}
+        <div className="flex flex-col">
           {userType === 'teacher' ? (
             <>
-              <Label htmlFor="school-name">
+              <Label htmlFor="school-name" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
                 Název školy <span className="text-red-500">*</span>
               </Label>
               <Autocomplete
@@ -169,7 +210,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
             </>
           ) : (
             <>
-              <Label htmlFor="organization-type">
+              <Label htmlFor="organization-type" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
                 Kategorie <span className="text-red-500">*</span>
               </Label>
               <Select
@@ -192,36 +233,35 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
           )}
         </div>
 
-        <div className="space-y-2 pt-2">
-          <div className="flex items-start space-x-2">
+        {/* Checkboxes */}
+        <div className="flex flex-col gap-[15px]">
+          <div className="flex items-center gap-2.5">
             <Checkbox
               id="terms"
               checked={termsAccepted}
               onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
               disabled={isLoading}
-              className="mt-0.5"
               data-testid="terms-checkbox"
             />
             <label
               htmlFor="terms"
-              className="text-sm leading-relaxed cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="text-sm leading-[1.4] text-text-subtle cursor-pointer select-none hover:text-grey-950 transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Souhlasím s podmínkami používání <span className="text-red-500">*</span>
             </label>
           </div>
 
-          <div className="flex items-start space-x-2">
+          <div className="flex items-center gap-2.5">
             <Checkbox
               id="email-consent"
               checked={emailConsent}
               onCheckedChange={(checked) => setEmailConsent(checked as boolean)}
               disabled={isLoading}
-              className="mt-0.5"
               data-testid="email-consent-checkbox"
             />
             <label
               htmlFor="email-consent"
-              className="text-sm leading-relaxed cursor-pointer select-none hover:text-text transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="text-sm leading-[1.4] text-text-subtle cursor-pointer select-none hover:text-grey-950 transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Souhlasím se zasíláním informačních e-mailů.
             </label>
@@ -229,18 +269,20 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
         </div>
 
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
             {error}
           </div>
         )}
 
+        {/* Submit Button */}
         <Button 
           type="submit" 
-          className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
+          size="large"
+          className="w-full"
           disabled={isLoading || !termsAccepted || (userType === 'teacher' ? !schoolName.trim() : !category)}
           data-testid="complete-registration-submit-button"
         >
-          {isLoading ? 'Dokončování...' : 'Dokončit'}
+          {isLoading ? 'Dokončování...' : 'Dokončit registraci'}
         </Button>
       </form>
     </div>

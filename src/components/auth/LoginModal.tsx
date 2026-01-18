@@ -50,89 +50,101 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
   }
 
   return (
-    <div className="flex flex-col">
-      <h2 className="text-3xl font-bold text-center mb-6 text-text">Přihlásit</h2>
+    <div className="flex flex-col gap-7">
+      {/* Title */}
+      <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-[1.2] text-center text-grey-950">
+        Přihlásit
+      </h2>
 
-      <OAuthButtons returnTo={returnTo} />
+      {/* Content Stack */}
+      <div className="flex flex-col gap-[15px]">
+        {/* OAuth Buttons */}
+        <OAuthButtons returnTo={returnTo} />
 
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-text-secondary">NEBO</span>
-        </div>
-      </div>
-
-      <form onSubmit={handleLogin} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={isLoading}
-            data-testid="login-email-input"
-          />
+        {/* Divider */}
+        <div className="flex items-center gap-5 px-5">
+          <div className="flex-1 h-[0.5px] bg-grey-300" />
+          <span className="text-xs leading-[1.5] text-text-subtle uppercase">NEBO</span>
+          <div className="flex-1 h-[0.5px] bg-grey-300" />
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Heslo</Label>
-            {onForgotPassword && (
-              <button
-                type="button"
-                onClick={onForgotPassword}
-                className="text-xs text-primary hover:text-primary-hover hover:underline cursor-pointer"
-                data-testid="forgot-password-link"
-              >
-                Zapomenuté heslo?
-              </button>
-            )}
+        {/* Email/Password Form */}
+        <form onSubmit={handleLogin} className="flex flex-col gap-1.5">
+          <div className="flex flex-col">
+            <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+              data-testid="login-email-input"
+            />
           </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Heslo"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={isLoading}
-            data-testid="login-password-input"
-          />
-        </div>
+
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between px-2.5 py-1">
+              <Label htmlFor="password" className="text-sm leading-[1.4] text-text-subtle">
+                Heslo
+              </Label>
+              {onForgotPassword && (
+                <button
+                  type="button"
+                  onClick={onForgotPassword}
+                  className="text-xs text-brand-primary hover:text-brand-primary-hover hover:underline cursor-pointer"
+                  data-testid="forgot-password-link"
+                >
+                  Zapomenuté heslo?
+                </button>
+              )}
+            </div>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Heslo"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isLoading}
+              data-testid="login-password-input"
+            />
+          </div>
+        </form>
 
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
             {error}
           </div>
         )}
 
+        {/* Submit Button */}
         <Button 
           type="submit" 
-          className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
+          size="large"
+          className="w-full"
           disabled={isLoading}
+          onClick={handleLogin}
           data-testid="login-submit-button"
         >
-          {isLoading ? 'Přihlašování...' : 'Přihlásit'}
+          {isLoading ? 'Přihlašování...' : 'Přihlásit se'}
         </Button>
-      </form>
+      </div>
 
-      <div className="mt-6 text-center">
-        <p className="text-sm text-text-secondary">
-          Jeste nemáte účet?{' '}
-          <button
-            type="button"
-            onClick={onSwitchToRegister}
-            className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer transition-colors"
-            data-testid="switch-to-register-button"
-          >
-            Zaregistrovat se
-          </button>
-        </p>
+      {/* Footer Link */}
+      <div className="flex items-center justify-center gap-2 text-sm leading-[1.5]">
+        <span className="text-grey-600">Ještě nemáte účet?</span>
+        <button
+          type="button"
+          onClick={onSwitchToRegister}
+          className="text-brand-primary underline decoration-dotted decoration-[1.7px] hover:text-brand-primary-hover cursor-pointer transition-colors"
+          data-testid="switch-to-register-button"
+        >
+          Zaregistrovat se
+        </button>
       </div>
     </div>
   )

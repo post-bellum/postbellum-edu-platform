@@ -78,111 +78,126 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
   }
 
   return (
-    <div className="flex flex-col">
-      <h2 className="text-3xl font-bold text-center mb-2 text-text">Vytvořte si účet</h2>
-      <p className="text-sm text-center text-text-secondary mb-6">
-        Začněte tím, že vyplníte své údaje. Váš účet vám umožní upravovat materiály, ukládat vlastní lekce a hodnotit obsah.
-      </p>
-
-      <OAuthButtons returnTo={returnTo} />
-
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-text-secondary">NEBO</span>
-        </div>
+    <div className="flex flex-col gap-7">
+      {/* Title & Description */}
+      <div className="text-center">
+        <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+          Vytvořte si účet
+        </h2>
+        <p className="text-base leading-[1.5] text-text-subtle">
+          Začněte tím, že vyplníte své údaje. Váš účet vám umožní upravovat materiály, ukládat vlastní lekce a hodnotit obsah.
+        </p>
       </div>
 
-      <form onSubmit={handleRegister} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={isLoading}
-            data-testid="register-email-input"
-          />
+      {/* Content Stack */}
+      <div className="flex flex-col gap-[15px]">
+        {/* OAuth Buttons */}
+        <OAuthButtons returnTo={returnTo} />
+
+        {/* Divider */}
+        <div className="flex items-center gap-5 px-5">
+          <div className="flex-1 h-[0.5px] bg-grey-300" />
+          <span className="text-xs leading-[1.5] text-text-subtle uppercase">NEBO</span>
+          <div className="flex-1 h-[0.5px] bg-grey-300" />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">Heslo</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Heslo"
-            value={password}
-            onChange={(e) => handlePasswordChange(e.target.value)}
-            onBlur={handlePasswordBlur}
-            required
-            disabled={isLoading}
-            data-testid="register-password-input"
-          />
-          {passwordTouched && passwordErrors.length > 0 && (
-            <ul className="text-xs text-red-600 space-y-1">
-              {passwordErrors.map((err, index) => (
-                <li key={index}>• {err}</li>
-              ))}
-            </ul>
-          )}
-          {!passwordTouched && (
-            <p className="text-xs text-text-secondary">
-              Minimálně 8 znaků, velké a malé písmeno, číslo
-            </p>
-          )}
-        </div>
+        {/* Registration Form */}
+        <form onSubmit={handleRegister} className="flex flex-col gap-1.5">
+          <div className="flex flex-col">
+            <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+              data-testid="register-email-input"
+            />
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Zopakujte heslo</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            placeholder="Zopakujte heslo"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            onBlur={() => setConfirmPasswordTouched(true)}
-            required
-            disabled={isLoading}
-            data-testid="register-confirm-password-input"
-          />
-          {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
-            <p className="text-xs text-red-600">Hesla se neshodují</p>
-          )}
-        </div>
+          <div className="flex flex-col">
+            <Label htmlFor="password" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+              Heslo
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Heslo"
+              value={password}
+              onChange={(e) => handlePasswordChange(e.target.value)}
+              onBlur={handlePasswordBlur}
+              required
+              disabled={isLoading}
+              data-testid="register-password-input"
+            />
+            {passwordTouched && passwordErrors.length > 0 ? (
+              <ul className="text-xs text-red-600 space-y-1 px-2.5 py-1.5">
+                {passwordErrors.map((err, index) => (
+                  <li key={index}>• {err}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-text-subtle px-2.5 py-1.5">
+                Minimálně 8 znaků, velké a malé písmeno, číslo
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col">
+            <Label htmlFor="confirmPassword" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+              Zopakujte heslo
+            </Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="Zopakujte heslo"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              onBlur={() => setConfirmPasswordTouched(true)}
+              required
+              disabled={isLoading}
+              data-testid="register-confirm-password-input"
+            />
+            {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
+              <p className="text-xs text-red-600 px-2.5 py-1.5">Hesla se neshodují</p>
+            )}
+          </div>
+        </form>
 
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
             {error}
           </div>
         )}
 
+        {/* Submit Button */}
         <Button 
           type="submit" 
-          className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
+          size="large"
+          className="w-full"
           disabled={isLoading}
+          onClick={handleRegister}
           data-testid="register-submit-button"
         >
           {isLoading ? 'Registrace...' : 'Zaregistrovat se'}
         </Button>
-      </form>
+      </div>
 
-      <div className="mt-6 text-center">
-        <p className="text-sm text-text-secondary">
-          Už máte účet?{' '}
-          <button
-            type="button"
-            onClick={onSwitchToLogin}
-            className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer transition-colors"
-            data-testid="switch-to-login-button"
-          >
-            Přihlaste se
-          </button>
-        </p>
+      {/* Footer Link */}
+      <div className="flex items-center justify-center gap-2 text-sm leading-[1.5]">
+        <span className="text-grey-600">Už máte účet?</span>
+        <button
+          type="button"
+          onClick={onSwitchToLogin}
+          className="text-brand-primary underline decoration-dotted decoration-[1.7px] hover:text-brand-primary-hover cursor-pointer transition-colors"
+          data-testid="switch-to-login-button"
+        >
+          Přihlásit se
+        </button>
       </div>
     </div>
   )

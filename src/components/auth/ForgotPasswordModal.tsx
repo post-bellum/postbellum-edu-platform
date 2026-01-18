@@ -41,71 +41,93 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
 
   if (success) {
     return (
-      <div className="flex flex-col">
-        <h2 className="text-3xl font-bold text-center mb-2 text-text">Email byl odeslán</h2>
-        <p className="text-sm text-center text-text-secondary mb-8">
-          Na adresu <span className="font-medium text-text">{email}</span> jsme odeslali odkaz pro obnovení hesla.
-          Zkontrolujte svou e-mailovou schránku a klikněte na odkaz v emailu.
-        </p>
+      <div className="flex flex-col gap-7">
+        {/* Title & Description */}
+        <div className="text-center">
+          <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+            Email byl odeslán
+          </h2>
+          <p className="text-base leading-[1.5] text-text-subtle">
+            Na adresu <span className="font-medium text-grey-950">{email}</span> jsme odeslali odkaz pro obnovení hesla.
+            Zkontrolujte svou e-mailovou schránku a klikněte na odkaz v emailu.
+          </p>
+        </div>
 
-        <Button 
-          onClick={onBack}
-          className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
-          data-testid="forgot-password-success-back-button"
-        >
-          Zpět na přihlášení
-        </Button>
+        {/* Content Stack */}
+        <div className="flex flex-col gap-4">
+          <Button 
+            onClick={onBack}
+            size="large"
+            className="w-full"
+            data-testid="forgot-password-success-back-button"
+          >
+            Zpět na přihlášení
+          </Button>
 
-        <p className="text-xs text-center text-text-secondary mt-4">
-          Neobdrželi jste email? Zkontrolujte složku spam nebo zkuste zadat email znovu.
-        </p>
+          <p className="text-xs text-center text-text-subtle">
+            Neobdrželi jste email? Zkontrolujte složku spam nebo zkuste zadat email znovu.
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col">
-      <h2 className="text-3xl font-bold text-center mb-2 text-text">Zapomenuté heslo</h2>
-      <p className="text-sm text-center text-text-secondary mb-8">
-        Zadejte svůj email a my vám pošleme odkaz pro obnovení hesla.
-      </p>
+    <div className="flex flex-col gap-7">
+      {/* Title & Description */}
+      <div className="text-center">
+        <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+          Zapomenuté heslo
+        </h2>
+        <p className="text-base leading-[1.5] text-text-subtle">
+          Zadejte svůj email a my vám pošleme odkaz pro obnovení hesla.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="vas@email.cz"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={isLoading}
-            data-testid="forgot-password-email-input"
-          />
-        </div>
+      {/* Content Stack */}
+      <div className="flex flex-col gap-[15px]">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-1.5">
+          <div className="flex flex-col">
+            <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="vas@email.cz"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+              data-testid="forgot-password-email-input"
+            />
+          </div>
+        </form>
 
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
             {error}
           </div>
         )}
 
         <Button 
           type="submit" 
-          className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
+          size="large"
+          className="w-full"
           disabled={isLoading}
+          onClick={handleSubmit}
           data-testid="forgot-password-submit-button"
         >
           {isLoading ? 'Odesílání...' : 'Odeslat odkaz'}
         </Button>
-      </form>
+      </div>
 
-      <div className="mt-6 text-center">
+      {/* Footer Link */}
+      <div className="text-center">
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-text-secondary hover:text-text cursor-pointer transition-colors"
+          className="text-sm text-grey-600 hover:text-grey-950 cursor-pointer transition-colors"
           data-testid="forgot-password-back-button"
         >
           ← Zpět na přihlášení
