@@ -56,6 +56,7 @@ export const createLessonSchema = z.object({
     .max(500, 'Název lekce může mít maximálně 500 znaků')
     .transform(sanitizeString),
   vimeo_video_url: vimeoUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  thumbnail_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
   description: z
     .string()
     .max(5000, 'Popis může mít maximálně 5000 znaků')
@@ -109,6 +110,7 @@ export const updateLessonSchema = z.object({
     .transform(sanitizeString)
     .optional(),
   vimeo_video_url: vimeoUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  thumbnail_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
   description: z
     .string()
     .max(5000, 'Popis může mít maximálně 5000 znaků')
@@ -174,6 +176,7 @@ export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
   return {
     title: getRequiredValue('title'),
     vimeo_video_url: getOptionalValue('vimeo_video_url'),
+    thumbnail_url: getOptionalValue('thumbnail_url'),
     description: getOptionalValue('description'),
     duration: getOptionalValue('duration'),
     period: getOptionalValue('period'),

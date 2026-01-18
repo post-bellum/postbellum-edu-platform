@@ -10,6 +10,7 @@ export type LessonDuration = 30 | 45 | 90
 export interface Lesson {
   id: string
   vimeo_video_url: string | null
+  thumbnail_url: string | null
   title: string
   description: string | null
   duration: string | null

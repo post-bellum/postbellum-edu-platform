@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getLessons } from '@/lib/supabase/lessons'
 import { AdminControls } from '@/components/lessons/AdminControls'
 import { isAdmin } from '@/lib/supabase/admin-helpers'
@@ -23,10 +24,20 @@ function LessonCard({ lesson }: { lesson: LessonWithRelations }) {
         href={`/lessons/${lesson.id}`}
         className="relative w-[189px] sm:w-[200px] md:w-[260px] lg:w-[316px] h-[120px] sm:h-[130px] md:h-[170px] lg:h-[200px] rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden border border-black/5 shrink-0 bg-linear-to-br from-grey-100 to-grey-200"
       >
-        {/* Placeholder pattern */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-12 md:w-16 h-12 md:h-16 rounded-full bg-grey-300/50" />
-        </div>
+        {lesson.thumbnail_url ? (
+          <Image
+            src={lesson.thumbnail_url}
+            alt={lesson.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 189px, (max-width: 768px) 200px, (max-width: 1024px) 260px, 316px"
+          />
+        ) : (
+          /* Placeholder pattern when no thumbnail */
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-12 md:w-16 h-12 md:h-16 rounded-full bg-grey-300/50" />
+          </div>
+        )}
       </Link>
 
       {/* Content */}

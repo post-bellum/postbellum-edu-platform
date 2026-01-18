@@ -2,7 +2,8 @@ import { createClient } from './client'
 import { logger } from '@/lib/logger'
 
 /**
- * Upload an image file to Supabase Storage
+ * Upload an image file to Supabase Storage (client-side)
+ * For server-side uploads, use uploadImageAction from @/app/actions/upload-image
  * @param file - File object to upload
  * @param bucket - Storage bucket name (default: 'lesson-materials')
  * @param folder - Optional folder path within the bucket
@@ -53,7 +54,7 @@ export async function uploadImageToStorage(
 }
 
 /**
- * Delete an image from Supabase Storage
+ * Delete an image from Supabase Storage (client-side)
  * @param filePath - Path to the file in storage
  * @param bucket - Storage bucket name (default: 'lesson-materials')
  */
