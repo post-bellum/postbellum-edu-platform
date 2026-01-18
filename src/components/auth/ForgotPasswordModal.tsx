@@ -85,24 +85,22 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
       </div>
 
       {/* Content Stack */}
-      <div className="flex flex-col gap-[15px]">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-1.5">
-          <div className="flex flex-col">
-            <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="vas@email.cz"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-              data-testid="forgot-password-email-input"
-            />
-          </div>
-        </form>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-[15px]">
+        <div className="flex flex-col">
+          <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+            Email
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="vas@email.cz"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={isLoading}
+            data-testid="forgot-password-email-input"
+          />
+        </div>
 
         {error && (
           <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
@@ -115,12 +113,11 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
           size="large"
           className="w-full"
           disabled={isLoading}
-          onClick={handleSubmit}
           data-testid="forgot-password-submit-button"
         >
           {isLoading ? 'Odesílání...' : 'Odeslat odkaz'}
         </Button>
-      </div>
+      </form>
 
       {/* Footer Link */}
       <div className="text-center">

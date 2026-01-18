@@ -102,89 +102,90 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
         </div>
 
         {/* Registration Form */}
-        <form onSubmit={handleRegister} className="flex flex-col gap-1.5">
-          <div className="flex flex-col">
-            <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-              data-testid="register-email-input"
-            />
+        <form onSubmit={handleRegister} className="flex flex-col gap-[15px]">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col">
+              <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+                data-testid="register-email-input"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <Label htmlFor="password" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+                Heslo
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Heslo"
+                value={password}
+                onChange={(e) => handlePasswordChange(e.target.value)}
+                onBlur={handlePasswordBlur}
+                required
+                disabled={isLoading}
+                data-testid="register-password-input"
+              />
+              {passwordTouched && passwordErrors.length > 0 ? (
+                <ul className="text-xs text-red-600 space-y-1 px-2.5 py-1.5">
+                  {passwordErrors.map((err, index) => (
+                    <li key={index}>• {err}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-text-subtle px-2.5 py-1.5">
+                  Minimálně 8 znaků, velké a malé písmeno, číslo
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-col">
+              <Label htmlFor="confirmPassword" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+                Zopakujte heslo
+              </Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Zopakujte heslo"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                onBlur={() => setConfirmPasswordTouched(true)}
+                required
+                disabled={isLoading}
+                data-testid="register-confirm-password-input"
+              />
+              {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
+                <p className="text-xs text-red-600 px-2.5 py-1.5">Hesla se neshodují</p>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-col">
-            <Label htmlFor="password" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
-              Heslo
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Heslo"
-              value={password}
-              onChange={(e) => handlePasswordChange(e.target.value)}
-              onBlur={handlePasswordBlur}
-              required
-              disabled={isLoading}
-              data-testid="register-password-input"
-            />
-            {passwordTouched && passwordErrors.length > 0 ? (
-              <ul className="text-xs text-red-600 space-y-1 px-2.5 py-1.5">
-                {passwordErrors.map((err, index) => (
-                  <li key={index}>• {err}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-text-subtle px-2.5 py-1.5">
-                Minimálně 8 znaků, velké a malé písmeno, číslo
-              </p>
-            )}
-          </div>
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
+              {error}
+            </div>
+          )}
 
-          <div className="flex flex-col">
-            <Label htmlFor="confirmPassword" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
-              Zopakujte heslo
-            </Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="Zopakujte heslo"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              onBlur={() => setConfirmPasswordTouched(true)}
-              required
-              disabled={isLoading}
-              data-testid="register-confirm-password-input"
-            />
-            {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
-              <p className="text-xs text-red-600 px-2.5 py-1.5">Hesla se neshodují</p>
-            )}
-          </div>
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            size="large"
+            className="w-full"
+            disabled={isLoading}
+            data-testid="register-submit-button"
+          >
+            {isLoading ? 'Registrace...' : 'Zaregistrovat se'}
+          </Button>
         </form>
-
-        {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
-            {error}
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <Button 
-          type="submit" 
-          size="large"
-          className="w-full"
-          disabled={isLoading}
-          onClick={handleRegister}
-          data-testid="register-submit-button"
-        >
-          {isLoading ? 'Registrace...' : 'Zaregistrovat se'}
-        </Button>
       </div>
 
       {/* Footer Link */}

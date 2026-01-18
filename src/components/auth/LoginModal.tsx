@@ -69,29 +69,42 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
         </div>
 
         {/* Email/Password Form */}
-        <form onSubmit={handleLogin} className="flex flex-col gap-1.5">
-          <div className="flex flex-col">
-            <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-              data-testid="login-email-input"
-            />
-          </div>
+        <form onSubmit={handleLogin} className="flex flex-col gap-[15px]">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col">
+              <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+                data-testid="login-email-input"
+              />
+            </div>
 
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between px-2.5 py-1">
-              <Label htmlFor="password" className="text-sm leading-[1.4] text-text-subtle">
+            <div className="flex flex-col">
+              <Label htmlFor="password" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
                 Heslo
               </Label>
-              {onForgotPassword && (
+              <Input
+                id="password"
+                type="password"
+                placeholder="Heslo"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                data-testid="login-password-input"
+              />
+            </div>
+
+            {onForgotPassword && (
+              <div className="flex justify-end px-2.5">
                 <button
                   type="button"
                   onClick={onForgotPassword}
@@ -100,38 +113,27 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
                 >
                   Zapomenuté heslo?
                 </button>
-              )}
+              </div>
+            )}
+          </div>
+
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
+              {error}
             </div>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Heslo"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-              data-testid="login-password-input"
-            />
-          </div>
+          )}
+
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            size="large"
+            className="w-full"
+            disabled={isLoading}
+            data-testid="login-submit-button"
+          >
+            {isLoading ? 'Přihlašování...' : 'Přihlásit se'}
+          </Button>
         </form>
-
-        {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
-            {error}
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <Button 
-          type="submit" 
-          size="large"
-          className="w-full"
-          disabled={isLoading}
-          onClick={handleLogin}
-          data-testid="login-submit-button"
-        >
-          {isLoading ? 'Přihlašování...' : 'Přihlásit se'}
-        </Button>
       </div>
 
       {/* Footer Link */}

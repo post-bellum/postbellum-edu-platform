@@ -44,13 +44,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           }}
           {...props}
         />
-        {/* Focus ring */}
-        {isFocused && !props.disabled && (
-          <div
-            className="absolute inset-[-2px] rounded-full pointer-events-none border-[3px] border-mint-light"
-            style={{ filter: 'blur(1px)' }}
-          />
-        )}
+        {/* Focus ring - always rendered, visibility controlled by opacity to avoid DOM mutations during tab */}
+        <div
+          className={cn(
+            'absolute inset-[-2px] rounded-full pointer-events-none border-[3px] border-mint-light transition-opacity duration-100',
+            isFocused && !props.disabled ? 'opacity-100' : 'opacity-0'
+          )}
+          style={{ filter: 'blur(1px)' }}
+          aria-hidden="true"
+        />
         {rightIcon && (
           <div 
             className={cn(
