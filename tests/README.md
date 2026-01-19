@@ -13,6 +13,14 @@ playwright install
 
 This will download the necessary browser binaries (Chromium, Firefox, and WebKit) required for running tests.
 
+Test credentials are stored in `.env.test` file (not committed to git):
+
+```bash
+TEST_EMAIL=your-test-email@example.com
+TEST_PASSWORD=your-test-password
+TEST_CONFIRMATION_CODE=111111
+```
+
 ## Test Scripts
 
 The following test scripts are available in `package.json`:
@@ -92,16 +100,6 @@ Tests are configured in `playwright.config.ts` at the project root. Key settings
 - **Timeout**: Individual tests have a 2-minute timeout
 - **Screenshots**: Automatically captured on test failures
 - **Traces**: Collected when tests are retried
-
-## Environment Variables
-
-Test credentials are stored in `.env.test` file (not committed to git):
-
-```bash
-TEST_EMAIL=your-test-email@example.com
-TEST_PASSWORD=your-test-password
-TEST_CONFIRMATION_CODE=111111
-```
 
 ## Page Object Model (POM)
 
