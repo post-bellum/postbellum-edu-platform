@@ -30,7 +30,7 @@ export async function getLessons(filters?: {
   published_only?: boolean
   usePublicClient?: boolean // Use public client (no cookies) for static pages
   include_tags?: boolean // Include tags for each lesson
-}): Promise<Lesson[] | LessonWithRelations[]> {
+}): Promise<LessonWithRelations[]> {
   try {
     // Use public client for static pages (no cookies needed)
     // RLS policies still work - public users only see published content
@@ -86,11 +86,19 @@ export async function getLessons(filters?: {
       }
       
       // Sort by publication_date and created_at
-      return filteredLessons.sort((a, b) => {
+      const sortedLessons = filteredLessons.sort((a, b) => {
         const dateA = a.publication_date || a.created_at
         const dateB = b.publication_date || b.created_at
         return new Date(dateB).getTime() - new Date(dateA).getTime()
       })
+
+      // Return with empty relations for consistent return type
+      return sortedLessons.map(lesson => ({
+        ...lesson,
+        tags: [],
+        materials: [],
+        additional_activities: [],
+      })) as LessonWithRelations[]
     }
     
     // Standard query without tag filter
@@ -128,7 +136,9 @@ export async function getLessons(filters?: {
       rvp_connection: lesson.rvp_connection || [],
     })) as Lesson[]
 
-    // If include_tags is requested, fetch tags for all lessons
+    // Fetch tags if requested
+    const tagsByLessonId = new Map<string, Tag[]>()
+    
     if (filters?.include_tags && lessons.length > 0) {
       const lessonIds = lessons.map(l => l.id)
       
@@ -141,7 +151,6 @@ export async function getLessons(filters?: {
         logger.error('Error fetching lesson tags:', tagsError)
       } else {
         // Group tags by lesson_id
-        const tagsByLessonId = new Map<string, Tag[]>()
         for (const lt of lessonTags || []) {
           const tag = lt.tags
           if (!tag) continue
@@ -152,16 +161,16 @@ export async function getLessons(filters?: {
           } as Tag)
           tagsByLessonId.set(lt.lesson_id, existingTags)
         }
-        
-        // Add tags to each lesson
-        return lessons.map(lesson => ({
-          ...lesson,
-          tags: tagsByLessonId.get(lesson.id) || [],
-        })) as LessonWithRelations[]
       }
     }
 
-    return lessons
+    // Return with relations (empty arrays if not fetched) for consistent return type
+    return lessons.map(lesson => ({
+      ...lesson,
+      tags: tagsByLessonId.get(lesson.id) || [],
+      materials: [],
+      additional_activities: [],
+    })) as LessonWithRelations[]
   } catch (error) {
     logger.error('Error fetching lessons:', error)
     throw error
@@ -402,13 +411,46 @@ export async function updateLesson(id: string, input: UpdateLessonInput): Promis
 }
 
 /**
- * Delete a lesson (admin only)
+ * Delete a lesson and its associated thumbnail from storage (admin only)
  */
 export async function deleteLesson(id: string): Promise<void> {
   await requireAdmin()
 
   try {
     const supabase = await createClient()
+    
+    // First, get the lesson to check if it has a thumbnail
+    const { data: lesson } = await supabase
+      .from('lessons')
+      .select('thumbnail_url')
+      .eq('id', id)
+      .single()
+
+    // Delete thumbnail from storage if it exists
+    if (lesson?.thumbnail_url) {
+      try {
+        // Extract file path from URL
+        // URL format: https://xxx.supabase.co/storage/v1/object/public/lesson-materials/images/filename.jpg
+        const url = new URL(lesson.thumbnail_url)
+        const pathMatch = url.pathname.match(/\/storage\/v1\/object\/public\/lesson-materials\/(.+)/)
+        
+        if (pathMatch && pathMatch[1]) {
+          const filePath = pathMatch[1]
+          const { error: storageError } = await supabase.storage
+            .from('lesson-materials')
+            .remove([filePath])
+          
+          if (storageError) {
+            // Log but don't fail the deletion - orphaned files are less critical than failing to delete lesson
+            logger.warn('Failed to delete lesson thumbnail from storage:', storageError)
+          }
+        }
+      } catch (urlError) {
+        logger.warn('Failed to parse thumbnail URL for deletion:', urlError)
+      }
+    }
+
+    // Delete the lesson
     const { error } = await supabase
       .from('lessons')
       .delete()

@@ -41,17 +41,16 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
   )
   const [published, setPublished] = React.useState(lesson?.published ?? false)
 
-  const action = isEditing
-    ? async (_prevState: unknown, formData: FormData) => {
-        formData.append('tag_ids', selectedTagIds.join(','))
-        formData.append('published', published ? 'true' : 'false')
-        return updateLessonAction(lesson.id, formData)
-      }
-    : async (_prevState: unknown, formData: FormData) => {
-        formData.append('tag_ids', selectedTagIds.join(','))
-        formData.append('published', published ? 'true' : 'false')
-        return createLessonAction(formData)
-      }
+  const action = async (_prevState: unknown, formData: FormData) => {
+    // Add controlled state fields to FormData
+    formData.append('tag_ids', selectedTagIds.join(','))
+    formData.append('published', published ? 'true' : 'false')
+    formData.append('thumbnail_url', thumbnailUrl)
+    
+    return isEditing
+      ? updateLessonAction(lesson.id, formData)
+      : createLessonAction(formData)
+  }
 
   const [state, formAction] = useActionState(action, null)
 

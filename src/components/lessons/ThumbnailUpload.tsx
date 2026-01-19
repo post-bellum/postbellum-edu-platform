@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { uploadImageAction } from '@/app/actions/upload-image'
+import { uploadImageToStorage, StorageUploadError, STORAGE_LIMITS } from '@/lib/supabase/storage'
 
 interface ThumbnailUploadProps {
   value: string
@@ -16,17 +16,46 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
   const [imageError, setImageError] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
+  const validateImageDimensions = (file: File): Promise<{ valid: boolean; error?: string }> => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        URL.revokeObjectURL(img.src)
+        const maxDimension = 4096
+        if (img.width > maxDimension || img.height > maxDimension) {
+          resolve({ 
+            valid: false, 
+            error: `Obrázek je příliš velký (${img.width}×${img.height}px). Maximum je ${maxDimension}×${maxDimension}px.`
+          })
+        } else {
+          resolve({ valid: true })
+        }
+      }
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src)
+        resolve({ valid: false, error: 'Nepodařilo se načíst obrázek pro validaci' })
+      }
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
   const handleFile = React.useCallback(async (file: File) => {
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Soubor musí být obrázek')
+    if (!STORAGE_LIMITS.ALLOWED_IMAGE_TYPES.includes(file.type as typeof STORAGE_LIMITS.ALLOWED_IMAGE_TYPES[number])) {
+      setError('Nepodporovaný formát. Povolené: JPEG, PNG, GIF, WebP, SVG.')
       return
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024
-    if (file.size > maxSize) {
-      setError('Obrázek musí být menší než 5MB')
+    // Validate file size
+    if (file.size > STORAGE_LIMITS.MAX_FILE_SIZE) {
+      setError(`Obrázek musí být menší než ${STORAGE_LIMITS.MAX_FILE_SIZE_DISPLAY}`)
+      return
+    }
+
+    // Validate image dimensions
+    const dimensionCheck = await validateImageDimensions(file)
+    if (!dimensionCheck.valid) {
+      setError(dimensionCheck.error || 'Neplatné rozměry obrázku')
       return
     }
 
@@ -35,18 +64,21 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
     setImageError(false)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
+      // Direct client-side upload to Supabase Storage
+      const url = await uploadImageToStorage(file, 'lesson-materials', 'thumbnails')
 
-      const result = await uploadImageAction(formData)
-
-      if (result.success && result.url) {
-        onChange(result.url)
+      if (url) {
+        onChange(url)
       } else {
-        setError(result.error || 'Nepodařilo se nahrát obrázek')
+        setError('Nepodařilo se nahrát obrázek')
       }
-    } catch {
-      setError('Nepodařilo se nahrát obrázek')
+    } catch (err) {
+      // Use user-friendly message from StorageUploadError
+      if (err instanceof StorageUploadError) {
+        setError(err.userMessage)
+      } else {
+        setError('Nepodařilo se nahrát obrázek. Zkuste to prosím znovu.')
+      }
     } finally {
       setIsUploading(false)
     }
@@ -160,7 +192,7 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
         >
           {isUploading ? (
             <>
-              <div className="w-10 h-10 border-3 border-grey-300 border-t-brand-primary rounded-full animate-spin" />
+              <div className="w-10 h-10 border-[3px] border-grey-300 border-t-brand-primary rounded-full animate-spin" />
               <span className="text-sm text-text-subtle">Nahrávání...</span>
             </>
           ) : (
@@ -185,7 +217,7 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
                   {isDragging ? 'Pusťte pro nahrání' : 'Přetáhněte obrázek'}
                 </p>
                 <p className="text-xs text-text-subtle mt-1">
-                  nebo klikněte pro výběr • max 5MB
+                  nebo klikněte pro výběr • max {STORAGE_LIMITS.MAX_FILE_SIZE_DISPLAY}
                 </p>
               </div>
             </>
@@ -202,9 +234,6 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
           Obrázek se nepodařilo načíst. Zkuste nahrát jiný.
         </p>
       )}
-
-      {/* Hidden URL input for form submission */}
-      <input type="hidden" name="thumbnail_url" value={value} />
     </div>
   )
 }

@@ -110,11 +110,11 @@ export async function LessonsList() {
 
   // If admin, fetch all lessons (including unpublished) using authenticated client
   // Otherwise, fetch only published lessons using public client
-  const lessons = (await getLessons({
+  const lessons = await getLessons({
     published_only: !admin,
     usePublicClient: !admin,
     include_tags: true,
-  })) as LessonWithRelations[]
+  })
 
   return (
     <div className="w-full">
