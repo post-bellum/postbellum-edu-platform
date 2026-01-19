@@ -2,7 +2,7 @@ import { test } from '@playwright/test';
 import { RegistrationModal } from '../../fixtures/registrationModal';
 
 test.describe('Teacher Registration Flow', () => {
-  test('should complete teacher registration with email confirmation', async ({ page }) => {
+  test('should complete teacher registration with email confirmation', async ({ page }, testInfo) => {
     const registrationModal = new RegistrationModal(page);
 
     // Given user is on landing page
@@ -19,8 +19,9 @@ test.describe('Teacher Registration Flow', () => {
     await registrationModal.expectCreateAccountStepIsVisible();
 
     // When user fill teacher email to email input
-    const teacherEmail = process.env.TEST_EMAIL as string;
-    await registrationModal.fillTeacherEmail(teacherEmail);
+    const teacherEmailDomain = process.env.TEST_EMAIL_DOMAIN as string;
+    const browserName = testInfo.project.name;
+    await registrationModal.fillTeacherEmail(browserName+teacherEmailDomain);
 
     // And user fill teacher password to password input
     const teacherPassword = process.env.TEST_PASSWORD as string;
@@ -31,6 +32,7 @@ test.describe('Teacher Registration Flow', () => {
 
     // And user click to button sign up
     await registrationModal.clickSignUpButton();
+    await page.waitForTimeout(10000);
 
     // Then registration modal window step 2 "Confirm email" is shown
     await registrationModal.expectConfirmEmailStepIsVisible();
@@ -57,6 +59,7 @@ test.describe('Teacher Registration Flow', () => {
 
     // And user click to button continue
     await registrationModal.clickContinueButton();
+    await page.waitForTimeout(1000);
 
     // Then registration modal window with registration success screen is shown
     await registrationModal.expectRegistrationSuccessScreenIsVisible();
