@@ -1,23 +1,33 @@
-import { z } from "zod";
+/* eslint-disable no-console */
+import { z } from 'zod';
 
 /**
  * Environment variable schema
  * This validates all environment variables at startup
+ * 
+ * Note: Uses console for startup logging before logger is available.
  */
 export const envSchema = z.object({
   // Public Supabase configuration
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url("Invalid Supabase URL"),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL'),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z
     .string()
-    .min(1, "Supabase anon key is required"),
+    .min(1, 'Supabase anon key is required'),
   
-  // Optional service role key for server-side operations
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  // Service role key for server-side admin operations (e.g., account deletion)
+  // Required in production, optional in development
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'Service role key is required for admin operations').optional(),
+  
+  // QA Testing Configuration (optional)
+  // Pattern to match QA emails (e.g., "\\+qa" matches emails like test+qa@example.com)
+  NEXT_PUBLIC_QA_EMAIL_PATTERN: z.string().optional(),
+  // OTP code that bypasses verification for QA emails
+  NEXT_PUBLIC_QA_OTP_CODE: z.string().length(6).optional(),
   
   // Node environment
   NODE_ENV: z
-    .enum(["development", "test", "production"])
-    .default("development"),
+    .enum(['development', 'test', 'production'])
+    .default('development'),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -30,9 +40,9 @@ export function validateEnv(): Env {
   const parsed = envSchema.safeParse(process.env);
   
   if (!parsed.success) {
-    console.error("❌ Invalid environment variables:");
+    console.error('❌ Invalid environment variables:');
     console.error(parsed.error.flatten().fieldErrors);
-    throw new Error("Invalid environment variables");
+    throw new Error('Invalid environment variables');
   }
   
   return parsed.data;

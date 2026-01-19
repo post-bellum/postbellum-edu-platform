@@ -1,6 +1,6 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import type { Database } from "@/types/database.types";
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import type { Database } from '@/types/database.types';
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -11,7 +11,7 @@ export async function createClient() {
 
   if (!url || !anonKey) {
     throw new Error(
-      "Missing Supabase environment variables. Please check your .env.local file."
+      'Missing Supabase environment variables. Please check your .env.local file.'
     );
   }
 
