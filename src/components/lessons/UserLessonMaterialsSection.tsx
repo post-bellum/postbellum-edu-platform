@@ -4,7 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, Download, Copy, Pencil, FileText, FilePenLine, Loader2, MoreVertical, Trash2 } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { formatRelativeTime } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { deleteUserLessonMaterialAction, copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
@@ -138,11 +138,11 @@ export function UserLessonMaterialsSection({
             ))}
           </div>
 
-          {/* Created Date Column */}
+          {/* Last Edited Column */}
           <div className="flex-1 min-w-0 overflow-hidden">
             {/* Header */}
             <div className="h-12 px-4 flex items-center border-b border-grey-200">
-              <span className="text-sm font-medium text-text-strong">Vytvořeno</span>
+              <span className="text-sm font-medium text-text-strong">Upraveno</span>
             </div>
             {/* Cells */}
             {materials.map((material) => (
@@ -151,7 +151,7 @@ export function UserLessonMaterialsSection({
                 className="h-[52px] px-4 flex items-center border-b border-grey-100"
               >
                 <span className="text-xs text-text-subtle tabular-nums">
-                  {formatDate(material.created_at)}
+                  {formatRelativeTime(material.updated_at)}
                 </span>
               </div>
             ))}
@@ -263,7 +263,7 @@ export function UserLessonMaterialsSection({
                   {material.title}
                 </h3>
                 <p className="text-xs text-text-subtle mt-1 tabular-nums">
-                  {formatDate(material.created_at)}
+                  {formatRelativeTime(material.updated_at)}
                 </p>
               </div>
               

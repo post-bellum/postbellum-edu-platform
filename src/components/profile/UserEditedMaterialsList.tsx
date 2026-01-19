@@ -4,7 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import { Download, Copy, Pencil, Trash2, FileText, FileEdit } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { formatDate } from '@/lib/utils'
+import { formatRelativeTime } from '@/lib/utils'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
 interface UserEditedMaterialsListProps {
@@ -79,7 +79,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
           <tr className="border-b border-gray-200 text-left">
             <th className="pb-3 pr-4 font-medium text-gray-600">Název</th>
             <th className="pb-3 pr-4 font-medium text-gray-600">Lekce</th>
-            <th className="pb-3 pr-4 font-medium text-gray-600">Vytvořeno</th>
+            <th className="pb-3 pr-4 font-medium text-gray-600">Upraveno</th>
             <th className="pb-3 font-medium text-gray-600 text-right">Akce</th>
           </tr>
         </thead>
@@ -113,7 +113,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                   </Link>
                 </td>
                 <td className="py-4 pr-4 text-gray-600">
-                  {formatDate(material.created_at)}
+                  {formatRelativeTime(material.updated_at)}
                 </td>
                 <td className="py-4">
                   <div className="flex items-center justify-end gap-2">
