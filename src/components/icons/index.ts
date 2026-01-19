@@ -27,6 +27,7 @@ export { ArrowLeft } from 'lucide-react'
 export { ChevronRight } from 'lucide-react'
 export { ChevronDown } from 'lucide-react'
 export { MoreVertical } from 'lucide-react'
+export { Menu } from 'lucide-react'
 
 // Action Icons
 export { Check } from 'lucide-react'
