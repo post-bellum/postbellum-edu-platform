@@ -16,9 +16,9 @@ This will download the necessary browser binaries (Chromium, Firefox, and WebKit
 Test credentials are stored in `.env.test` file (not committed to git):
 
 ```bash
-TEST_EMAIL=your-test-email@example.com
-TEST_PASSWORD=your-test-password
-TEST_CONFIRMATION_CODE=111111
+TEST_EMAIL_DOMAIN='@yourDomain.com'
+TEST_PASSWORD='password'
+TEST_CONFIRMATION_CODE='111111'
 ```
 
 ## Test Scripts
