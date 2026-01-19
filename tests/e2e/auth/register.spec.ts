@@ -63,6 +63,7 @@ test.describe('Teacher Registration Flow', () => {
 
     // And user can see profile button in menu
     await registrationModal.expectProfileButtonInMenuIsVisible();
+    await registrationModal.expectLogoutButtonIsVisible();
     //await expect(page.getByTestId('register-success-message')).toBeVisible(); TODO: add assertion for success message need to be implemented first
   });
 });

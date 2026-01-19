@@ -87,5 +87,9 @@ export class RegistrationModal {
   async expectProfileButtonInMenuIsVisible(): Promise<void> {
     await expect(this.page.locator('img[alt="Profile"]').first()).toBeVisible();
   }
+
+  async expectLogoutButtonIsVisible(): Promise<void> {
+    await expect(this.page.getByTestId('nav-logout-button')).toBeVisible();
+  }
 }
 
