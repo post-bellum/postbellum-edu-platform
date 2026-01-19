@@ -55,7 +55,6 @@ function getUploadErrorMessage(error: { message?: string; statusCode?: string })
 
 /**
  * Upload an image file to Supabase Storage (client-side)
- * For server-side uploads, use uploadImageAction from @/app/actions/upload-image
  * @param file - File object to upload
  * @param bucket - Storage bucket name (default: 'lesson-materials')
  * @param folder - Optional folder path within the bucket
