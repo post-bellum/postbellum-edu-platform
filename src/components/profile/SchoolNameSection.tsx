@@ -22,7 +22,7 @@ export function SchoolNameSection({
   isSaving,
 }: SchoolNameSectionProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4" data-testid="school-name-section">
       <h2 className="text-xl font-semibold">
         Název školy <span className="text-red-500">*</span>
       </h2>
@@ -40,12 +40,14 @@ export function SchoolNameSection({
           emptyMessage="Žádné školy nenalezeny"
           loadingMessage="Hledám školy..."
           rightIcon={<SearchIcon />}
+          data-testid="school-name-input"
         />
       </div>
       <Button 
         onClick={onSave} 
         disabled={isSaving || !schoolName.trim()}
         className="bg-primary text-white hover:bg-primary-hover"
+        data-testid="school-name-save-button"
       >
         {isSaving ? 'Ukládám...' : 'Uložit'}
       </Button>

@@ -8,17 +8,17 @@ interface UserTypeSectionProps {
 
 export function UserTypeSection({ userType }: UserTypeSectionProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4" data-testid="user-type-section">
       <h2 className="text-xl font-semibold">Typ účtu</h2>
-      <RadioGroup value={userType} disabled>
+      <RadioGroup value={userType} disabled data-testid="user-type-radio-group">
         <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 bg-gray-50">
-          <RadioGroupItem value="teacher" id="teacher-display" disabled />
+          <RadioGroupItem value="teacher" id="teacher-display" disabled data-testid="user-type-teacher" />
           <Label htmlFor="teacher-display" className="flex-1 font-normal opacity-60">
             Jsem učitel
           </Label>
         </div>
         <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 bg-gray-50">
-          <RadioGroupItem value="not-teacher" id="not-teacher-display" disabled />
+          <RadioGroupItem value="not-teacher" id="not-teacher-display" disabled data-testid="user-type-not-teacher" />
           <Label htmlFor="not-teacher-display" className="flex-1 font-normal opacity-60">
             Nejsem učitel
           </Label>

@@ -21,7 +21,7 @@ export function DisplayNameSection({
   isSaving,
 }: DisplayNameSectionProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4" data-testid="display-name-section">
       <h2 className="text-xl font-semibold">Zobrazované jméno</h2>
       <p className="text-sm text-gray-600">
         Zadejte své celé jméno nebo jméno, které byste chtěli používat.
@@ -34,6 +34,7 @@ export function DisplayNameSection({
           onChange={(e) => onDisplayNameChange(e.target.value)}
           maxLength={AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH}
           disabled={isSaving}
+          data-testid="display-name-input"
         />
         <p className="text-xs text-gray-500">
           Maximální povolená délka je {AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH} znaků.
@@ -44,6 +45,7 @@ export function DisplayNameSection({
         onClick={onSave} 
         disabled={isSaving}
         className="bg-primary text-white hover:bg-primary-hover"
+        data-testid="display-name-save-button"
       >
         {isSaving ? 'Ukládám...' : 'Uložit'}
       </Button>

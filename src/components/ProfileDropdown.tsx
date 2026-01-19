@@ -23,19 +23,21 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
 
   return (
     <DropdownMenu
+      data-testid="profile-dropdown"
       trigger={
-        <div className="relative">
+        <div className="relative" data-testid="profile-dropdown-trigger">
           <Image
             src={getGravatarUrl(email, 48)}
             alt="Profile"
             width={48}
             height={48}
             className="h-12 w-12 rounded-full cursor-pointer border-[1.25px] border-grey-950 hover:ring-[3px] hover:ring-mint transition-all"
+            data-testid="profile-avatar"
           />
         </div>
       }
     >
-      <DropdownMenuHeader>
+      <DropdownMenuHeader data-testid="profile-dropdown-header">
         {displayName || email}
       </DropdownMenuHeader>
 
@@ -44,6 +46,7 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
       <DropdownMenuItem
         onClick={() => router.push('/favorites')}
         icon={<BookmarkIcon className="h-4 w-4" />}
+        data-testid="profile-dropdown-favorites"
       >
         Uložené lekce
       </DropdownMenuItem>
@@ -51,6 +54,7 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
       <DropdownMenuItem
         onClick={() => router.push('/profile')}
         icon={<Cog6ToothIcon className="h-4 w-4" />}
+        data-testid="profile-dropdown-settings"
       >
         Nastavení
       </DropdownMenuItem>
@@ -65,6 +69,7 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
         }}
         icon={<ArrowRightStartOnRectangleIcon className="h-4 w-4 text-red-600" />}
         variant="danger"
+        data-testid="profile-dropdown-logout"
       >
         Odhlásit se
       </DropdownMenuItem>

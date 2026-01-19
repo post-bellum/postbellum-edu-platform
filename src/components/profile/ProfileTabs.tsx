@@ -22,7 +22,7 @@ interface ProfileTabsProps {
 
 export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
   return (
-    <nav className="space-y-1" aria-label="Sidebar navigation">
+    <nav className="space-y-1" aria-label="Sidebar navigation" data-testid="profile-tabs">
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id
         return (
@@ -36,6 +36,7 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
             )}
             aria-current={isActive ? 'page' : undefined}
+            data-testid={`profile-tab-${tab.id}`}
           >
             {tab.label}
           </button>

@@ -62,7 +62,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
 
   if (materials.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-gray-500" data-testid="user-materials-empty">
         <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
         <p className="text-lg font-medium mb-2">Zatím nemáte žádné upravené materiály</p>
         <p className="text-sm">
@@ -73,8 +73,8 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
+    <div className="overflow-x-auto" data-testid="user-materials-list">
+      <table className="w-full" data-testid="user-materials-table">
         <thead>
           <tr className="border-b border-gray-200 text-left">
             <th className="pb-3 pr-4 font-medium text-gray-600">Název</th>
@@ -94,11 +94,12 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
               <tr 
                 key={material.id} 
                 className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                data-testid={`user-material-row-${material.id}`}
               >
                 <td className="py-4 pr-4">
                   <div className="flex items-center gap-2">
                     <span className="text-blue-600">{materialIcon}</span>
-                    <span className="font-medium">{material.title}</span>
+                    <span className="font-medium" data-testid={`user-material-title-${material.id}`}>{material.title}</span>
                   </div>
                 </td>
                 <td className="py-4 pr-4">
@@ -106,6 +107,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                     href={`/lessons/${material.lesson_id}`}
                     className="text-gray-600 hover:text-blue-600 hover:underline line-clamp-1"
                     title={material.lesson_title}
+                    data-testid={`user-material-lesson-link-${material.id}`}
                   >
                     {material.lesson_title}
                   </Link>
@@ -122,6 +124,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                         size="icon"
                         title="Zobrazit/Upravit"
                         className="h-9 w-9"
+                        data-testid={`user-material-edit-${material.id}`}
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -135,6 +138,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                       onClick={() => handleDownload(material)}
                       disabled={!material.content}
                       className="h-9 w-9"
+                      data-testid={`user-material-download-${material.id}`}
                     >
                       <Download className="w-4 h-4" />
                     </Button>
@@ -148,6 +152,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                         onClick={() => handleDuplicate(material)}
                         disabled={duplicatingId === material.id}
                         className="h-9 w-9"
+                        data-testid={`user-material-duplicate-${material.id}`}
                       >
                         <Copy className="w-4 h-4" />
                       </Button>
@@ -162,6 +167,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                         onClick={() => handleDelete(material)}
                         disabled={isDeleting}
                         className="h-9 w-9 hover:bg-red-50 hover:text-red-600"
+                        data-testid={`user-material-delete-${material.id}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

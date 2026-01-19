@@ -43,7 +43,7 @@ export function DeleteAccountSection() {
 
   return (
     <>
-      <div className="bg-red-50 border border-red-300 rounded-lg p-6 space-y-4">
+      <div className="bg-red-50 border border-red-300 rounded-lg p-6 space-y-4" data-testid="delete-account-section">
         <h2 className="text-xl font-semibold text-red-900">Odstranit účet</h2>
         <p className="text-sm text-red-800">
           Toto odstraní váš osobní účet permanentně. Vezměte prosím na vědomí, že tato akce je nevratná, takže postupujte opatrně.
@@ -54,16 +54,17 @@ export function DeleteAccountSection() {
         <Button 
           className="bg-red-600 text-white hover:bg-red-700"
           onClick={() => setShowDeleteDialog(true)}
+          data-testid="delete-account-open-button"
         >
           Odstranit účet
         </Button>
       </div>
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px]" data-testid="delete-account-modal">
           <div className="space-y-4">
             <div>
-              <h2 className="text-2xl font-bold text-red-900 mb-2">
+              <h2 className="text-2xl font-bold text-red-900 mb-2" data-testid="delete-account-modal-title">
                 Opravdu chcete odstranit účet?
               </h2>
               <p className="text-sm text-gray-700 mb-4">
@@ -88,11 +89,15 @@ export function DeleteAccountSection() {
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
                 disabled={isDeleting}
                 className="font-mono"
+                data-testid="delete-account-confirmation-input"
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded text-sm">
+              <div 
+                className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded text-sm"
+                data-testid="delete-account-error"
+              >
                 {error}
               </div>
             )}
@@ -103,6 +108,7 @@ export function DeleteAccountSection() {
                 className="flex-1"
                 onClick={handleCancel}
                 disabled={isDeleting}
+                data-testid="delete-account-cancel-button"
               >
                 Zrušit
               </Button>
@@ -110,6 +116,7 @@ export function DeleteAccountSection() {
                 className="flex-1 bg-red-600 text-white hover:bg-red-700"
                 onClick={handleDeleteAccount}
                 disabled={isDeleting || deleteConfirmation !== AUTH_CONSTANTS.DELETE_ACCOUNT_CONFIRMATION}
+                data-testid="delete-account-confirm-button"
               >
                 {isDeleting ? 'Odstraňuji...' : 'Odstranit účet'}
               </Button>
