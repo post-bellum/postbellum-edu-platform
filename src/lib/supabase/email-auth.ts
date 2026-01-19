@@ -61,23 +61,24 @@ function isQAOTPCode(token: string): boolean {
  */
 export async function signUpWithEmail(email: string, password: string) {
   try {
-    const qaConfig = getQAConfig()
+    // Try QA signup first via server action (server has reliable env var access)
+    // The server action will return 'Not a QA email' if QA is not configured or email doesn't match
+    const qaResult = await qaSignUpAction(email, password)
     
-    // QA bypass: Use server action to create user with confirmed email
-    if (qaConfig && isQAEmail(email)) {
-      logger.info('QA email signup - using server action (no email sent)', { 
+    if (qaResult.success) {
+      // QA signup worked - user is created with confirmed email
+      const qaConfig = getQAConfig()
+      logger.info('QA email signup successful (no email sent)', { 
         email, 
-        otpCode: qaConfig.otpCode 
+        otpCode: qaConfig?.otpCode 
       })
-      
-      const result = await qaSignUpAction(email, password)
-      
-      if (!result.success) {
-        throw new Error(result.error || 'QA signup failed')
-      }
-      
-      // Return success - user is created with confirmed email
       return { data: { user: null, session: null }, error: null, isQA: true }
+    }
+    
+    // If server said "Not a QA email", proceed with regular signup
+    // Any other error from QA signup should be thrown
+    if (qaResult.error && !qaResult.error.includes('Not a QA email')) {
+      throw new Error(qaResult.error)
     }
     
     // Regular signup - sends verification email
@@ -132,18 +133,20 @@ export async function signInWithEmail(email: string, password: string) {
  */
 export async function verifyOTP(email: string, token: string, _password?: string) {
   try {
-    // QA bypass: Use server action to verify and create session
-    if (isQAEmail(email) && isQAOTPCode(token)) {
-      logger.info('QA email verification - using server action', { email })
-      
-      const result = await qaVerifyOTPAction(email, token)
-      
-      if (!result.success) {
-        throw new Error(result.error || 'QA verification failed')
-      }
-      
-      logger.info('QA user verified with valid session', { email, hasSession: result.session })
-      return { data: { user: { id: result.userId }, session: result.session }, error: null, isQABypass: true }
+    // Try QA verification first via server action (server has reliable env var access)
+    // The server action validates both email pattern and OTP code
+    const qaResult = await qaVerifyOTPAction(email, token)
+    
+    if (qaResult.success) {
+      // QA verification worked
+      logger.info('QA user verified with valid session', { email, hasSession: qaResult.session })
+      return { data: { user: { id: qaResult.userId }, session: qaResult.session }, error: null, isQABypass: true }
+    }
+    
+    // If server said "Invalid QA verification", proceed with regular OTP
+    // Any other error should be thrown
+    if (qaResult.error && !qaResult.error.includes('Invalid QA verification')) {
+      throw new Error(qaResult.error)
     }
     
     // Regular OTP verification
