@@ -1,7 +1,6 @@
 import * as React from 'react'
-import { Button } from '@/components/ui/Button'
 import { Autocomplete } from '@/components/ui/Autocomplete'
-import { SearchIcon } from '@/components/ui/Icons'
+import { SearchIcon } from '@/components/icons'
 import { searchSchools } from '@/lib/supabase/schools'
 
 interface SchoolNameSectionProps {
@@ -22,35 +21,22 @@ export function SchoolNameSection({
   isSaving,
 }: SchoolNameSectionProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4" data-testid="school-name-section">
-      <h2 className="text-xl font-semibold">
-        Název školy <span className="text-red-500">*</span>
-      </h2>
-      <div className="space-y-2">
-        <Autocomplete
-          id="school-name-edit"
-          placeholder="Začněte psát název školy..."
-          value={schoolName}
-          onChange={onSchoolNameChange}
-          onSearch={searchSchools}
-          required
-          disabled={isSaving}
-          minChars={2}
-          debounceMs={300}
-          emptyMessage="Žádné školy nenalezeny"
-          loadingMessage="Hledám školy..."
-          rightIcon={<SearchIcon />}
-          data-testid="school-name-input"
-        />
-      </div>
-      <Button 
-        onClick={onSave} 
-        disabled={isSaving || !schoolName.trim()}
-        className="bg-primary text-white hover:bg-primary-hover"
-        data-testid="school-name-save-button"
-      >
-        {isSaving ? 'Ukládám...' : 'Uložit'}
-      </Button>
+    <div className="w-full" data-testid="school-name-section">
+      <Autocomplete
+        id="school-name-edit"
+        placeholder="Začněte psát název školy..."
+        value={schoolName}
+        onChange={onSchoolNameChange}
+        onSearch={searchSchools}
+        required
+        disabled={isSaving}
+        minChars={2}
+        debounceMs={300}
+        emptyMessage="Žádné školy nenalezeny"
+        loadingMessage="Hledám školy..."
+        rightIcon={<SearchIcon />}
+        data-testid="school-name-input"
+      />
     </div>
   )
 }

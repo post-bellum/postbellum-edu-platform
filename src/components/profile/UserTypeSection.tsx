@@ -8,26 +8,22 @@ interface UserTypeSectionProps {
 
 export function UserTypeSection({ userType }: UserTypeSectionProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4" data-testid="user-type-section">
-      <h2 className="text-xl font-semibold">Typ účtu</h2>
-      <RadioGroup value={userType} disabled data-testid="user-type-radio-group">
-        <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 bg-gray-50">
+    <RadioGroup value={userType} disabled data-testid="user-type-radio-group">
+      <div className="flex gap-3 w-full">
+        <div className="flex-1 flex items-center gap-2 rounded-2xl bg-grey-100 px-5 py-3">
           <RadioGroupItem value="teacher" id="teacher-display" disabled data-testid="user-type-teacher" />
-          <Label htmlFor="teacher-display" className="flex-1 font-normal opacity-60">
+          <Label htmlFor="teacher-display" className="font-normal text-base text-text-subtle cursor-pointer">
             Jsem učitel
           </Label>
         </div>
-        <div className="flex items-center space-x-3 rounded-lg border border-gray-300 p-4 bg-gray-50">
+        <div className="flex-1 flex items-center gap-2 rounded-2xl bg-grey-100 px-5 py-3">
           <RadioGroupItem value="not-teacher" id="not-teacher-display" disabled data-testid="user-type-not-teacher" />
-          <Label htmlFor="not-teacher-display" className="flex-1 font-normal opacity-60">
+          <Label htmlFor="not-teacher-display" className="font-normal text-base text-text-subtle cursor-pointer">
             Nejsem učitel
           </Label>
         </div>
-      </RadioGroup>
-      <p className="text-sm text-gray-500">
-        Typ účtu nelze změnit. Pokud potřebujete změnit typ účtu, kontaktujte podporu.
-      </p>
-    </div>
+      </div>
+    </RadioGroup>
   )
 }
 

@@ -43,21 +43,30 @@ export function DeleteAccountSection() {
 
   return (
     <>
-      <div className="bg-red-50 border border-red-300 rounded-lg p-6 space-y-4" data-testid="delete-account-section">
-        <h2 className="text-xl font-semibold text-red-900">Odstranit účet</h2>
-        <p className="text-sm text-red-800">
-          Toto odstraní váš osobní účet permanentně. Vezměte prosím na vědomí, že tato akce je nevratná, takže postupujte opatrně.
-        </p>
-        <p className="text-sm font-medium text-red-600">
-          Tato akce je nevratná!
-        </p>
-        <Button 
-          className="bg-red-600 text-white hover:bg-red-700"
-          onClick={() => setShowDeleteDialog(true)}
-          data-testid="delete-account-open-button"
-        >
-          Odstranit účet
-        </Button>
+      <div className="bg-white border border-grey-200 rounded-[28px] shadow-sm overflow-hidden w-full" data-testid="delete-account-section">
+        <div className="px-5 py-7">
+          <div className="px-3">
+            <h2 className="text-lg font-semibold text-black leading-snug mb-1.5">Samazat účet</h2>
+            <p className="text-base text-text-subtle leading-body">
+              Dojde k trvalému smazání vašeho osobního účtu. Tato operace je nevratná, proto buďte obezřetní.
+            </p>
+          </div>
+        </div>
+        <div className="border-t border-grey-200 px-5 pt-4 pb-7">
+          <div className="flex items-center justify-between gap-10 px-2">
+            <p className="text-xs text-text-subtle leading-body flex-1">
+              Akci není možné vzít zpět.
+            </p>
+            <Button 
+              variant="destructive"
+              size="small"
+              onClick={() => setShowDeleteDialog(true)}
+              data-testid="delete-account-open-button"
+            >
+              Uložit
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
