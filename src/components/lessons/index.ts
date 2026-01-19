@@ -19,4 +19,5 @@ export { LessonMaterialsWrapper } from './LessonMaterialsWrapper'
 export { UserMaterialEditContent } from './UserMaterialEditContent'
 export { Breadcrumbs, type BreadcrumbItem } from './Breadcrumbs'
 export { LessonDetailHeader } from './LessonDetailHeader'
-
+export { LessonThumbnail } from './LessonThumbnail'
+export { ThumbnailUpload } from './ThumbnailUpload'
