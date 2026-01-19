@@ -181,21 +181,26 @@ export default function ProfilePage() {
     <>
       <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Profil</h1>
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-4xl font-bold mb-2">Profil</h1>
         </div>
 
-        {/* Two Column Layout */}
-        <div className="flex gap-8">
-          {/* Left Sidebar Navigation */}
-          <aside className="w-64 shrink-0">
-            <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Mobile Tabs - horizontal navigation */}
+        <div className="md:hidden">
+          <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} variant="horizontal" />
+        </div>
+
+        {/* Two Column Layout (Desktop) / Single Column (Mobile) */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+          {/* Left Sidebar Navigation (Desktop only) */}
+          <aside className="hidden md:block w-64 shrink-0">
+            <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} variant="vertical" />
           </aside>
 
           {/* Right Content Area */}
           <main className="flex-1 min-w-0">
             {activeTab === 'settings' && (
-              <div className="space-y-8">
+              <div className="space-y-6 md:space-y-8">
                 {/* Success/Error Messages */}
                 <AlertMessage success={success} error={error} />
 
