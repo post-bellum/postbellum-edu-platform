@@ -107,7 +107,7 @@ async function generateUniqueMaterialTitle(
 /**
  * Get all user lesson materials for the current user (across all lessons)
  */
-export async function getAllUserLessonMaterials(): Promise<Array<UserLessonMaterial & { lesson_title: string }>> {
+export async function getAllUserLessonMaterials(): Promise<Array<UserLessonMaterial & { lesson_title: string; lesson_short_id: string | null }>> {
   try {
     const supabase = await createClient()
     
@@ -122,7 +122,7 @@ export async function getAllUserLessonMaterials(): Promise<Array<UserLessonMater
       .from('user_lesson_materials')
       .select(`
         *,
-        lessons!inner(title)
+        lessons!inner(title, short_id)
       `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
@@ -132,14 +132,15 @@ export async function getAllUserLessonMaterials(): Promise<Array<UserLessonMater
       throw error
     }
 
-    // Transform the data to flatten lesson title
+    // Transform the data to flatten lesson title and short_id
     return (data || []).map(item => {
-      const itemWithLesson = item as UserLessonMaterial & { lessons: { title: string } }
+      const itemWithLesson = item as UserLessonMaterial & { lessons: { title: string; short_id: string | null } }
       return {
         ...item,
-        lesson_title: itemWithLesson.lessons?.title || 'Unknown Lesson'
+        lesson_title: itemWithLesson.lessons?.title || 'Unknown Lesson',
+        lesson_short_id: itemWithLesson.lessons?.short_id || null
       }
-    }) as Array<UserLessonMaterial & { lesson_title: string }>
+    }) as Array<UserLessonMaterial & { lesson_title: string; lesson_short_id: string | null }>
   } catch (error) {
     logger.error('Error fetching all user lesson materials:', error)
     throw error

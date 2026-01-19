@@ -4,11 +4,11 @@ import * as React from 'react'
 import Link from 'next/link'
 import { Download, Copy, Pencil, Trash2, FileText, FileEdit } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { formatRelativeTime } from '@/lib/utils'
+import { formatRelativeTime, generateLessonUrl } from '@/lib/utils'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
 interface UserEditedMaterialsListProps {
-  materials: Array<UserLessonMaterial & { lesson_title: string }>
+  materials: Array<UserLessonMaterial & { lesson_title: string; lesson_short_id?: string | null }>
   onDelete?: (materialId: string, lessonId: string) => Promise<void>
   onDuplicate?: (materialId: string, lessonId: string) => Promise<void>
 }
@@ -89,6 +89,11 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
             const materialIcon = material.title.toLowerCase().includes('pracovní') 
               ? <FileEdit className="w-4 h-4" />
               : <FileText className="w-4 h-4" />
+            
+            // Generate lesson URL using short_id if available, otherwise fallback to UUID
+            const lessonId = material.lesson_short_id || material.lesson_id
+            const lessonUrl = generateLessonUrl(lessonId, material.lesson_title)
+            const materialEditUrl = `${lessonUrl}/materials/${material.id}`
 
             return (
               <tr 
@@ -104,7 +109,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                 </td>
                 <td className="py-4 pr-4">
                   <Link 
-                    href={`/lessons/${material.lesson_id}`}
+                    href={lessonUrl}
                     className="text-gray-600 hover:text-blue-600 hover:underline line-clamp-1"
                     title={material.lesson_title}
                     data-testid={`user-material-lesson-link-${material.id}`}
@@ -118,7 +123,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                 <td className="py-4">
                   <div className="flex items-center justify-end gap-2">
                     {/* View/Edit */}
-                    <Link href={`/lessons/${material.lesson_id}/materials/${material.id}`}>
+                    <Link href={materialEditUrl}>
                       <Button
                         variant="ghost"
                         size="icon"

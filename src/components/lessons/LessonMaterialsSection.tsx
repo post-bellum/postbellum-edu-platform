@@ -11,10 +11,13 @@ import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import { ErrorDialog } from '@/components/ui/ErrorDialog'
 import { exportToPDF } from '@/lib/utils/pdf-export'
+import { generateLessonUrl } from '@/lib/utils'
 
 interface LessonMaterialsSectionProps {
   materials: LessonMaterial[]
   lessonId: string
+  lessonTitle: string
+  lessonShortId?: string | null
   onMaterialCreated?: (material: UserLessonMaterial) => void
 }
 
@@ -29,7 +32,7 @@ const durationLabels: Record<LessonDuration, string> = {
   90: '90 min',
 }
 
-export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated }: LessonMaterialsSectionProps) {
+export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lessonShortId, onMaterialCreated }: LessonMaterialsSectionProps) {
   const router = useRouter()
   const pathname = usePathname()
   const { isLoggedIn } = useAuth()
@@ -43,6 +46,10 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
   const [isExportingPDF, setIsExportingPDF] = React.useState<string | null>(null)
   const [errorDialogOpen, setErrorDialogOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+
+  // Generate base lesson URL using short_id if available
+  const idToUse = lessonShortId || lessonId
+  const baseLessonUrl = generateLessonUrl(idToUse, lessonTitle)
 
   const handleAuthModalClose = (open: boolean) => {
     setIsAuthModalOpen(open)
@@ -66,8 +73,8 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
     if (result.success && result.data) {
       // Notify parent component about the new material
       onMaterialCreated?.(result.data)
-      // Navigate to the edit page
-      router.push(`/lessons/${lessonId}/materials/${result.data.id}`)
+      // Navigate to the edit page using short_id URL
+      router.push(`${baseLessonUrl}/materials/${result.data.id}`)
     } else if (!result.success) {
       setErrorMessage(result.error || 'Chyba při vytváření kopie materiálu')
       setErrorDialogOpen(true)

@@ -4,6 +4,7 @@ import { createClient } from './server'
 import { createPublicClient } from './public'
 import { requireAdmin } from './admin-helpers'
 import { logger } from '@/lib/logger'
+import { generateShortId } from '@/lib/utils'
 import type { Database } from '@/types/database.types'
 import type { 
   Lesson, 
@@ -211,10 +212,12 @@ export async function getLessonsByIds(ids: string[]): Promise<Lesson[]> {
 }
 
 /**
- * Get a single lesson by ID with all relations
+ * Get a single lesson by ID or short_id with all relations
  * RLS policies automatically handle:
  * - Public users: can only access published lessons (will return null if unpublished)
  * - Authenticated users: can access all lessons
+ * 
+ * Automatically detects if the ID is a short_id (10 chars) or regular UUID
  */
 export async function getLessonById(
   id: string, 
@@ -227,10 +230,14 @@ export async function getLessonById(
       ? createPublicClient()
       : await createClient()
     
+    // Determine if this is a short_id (10 chars, lowercase alphanumeric) or UUID
+    const isShortId = /^[a-z0-9]{10}$/.test(id)
+    
+    // Query by appropriate column
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
       .select('*')
-      .eq('id', id)
+      .eq(isShortId ? 'short_id' : 'id', id)
       .single()
 
     if (lessonError) {
@@ -239,23 +246,26 @@ export async function getLessonById(
     }
 
     if (!lesson) return null
+    
+    // Use the lesson's actual UUID for fetching related data
+    const lessonId = lesson.id
 
-    // Fetch related data
+    // Fetch related data using the lesson's actual UUID
     // RLS policies on related tables will automatically filter based on lesson published status
     const [tagsResult, materialsResult, activitiesResult] = await Promise.all([
       supabase
         .from('lesson_tags')
         .select('tags(*)')
-        .eq('lesson_id', id),
+        .eq('lesson_id', lessonId),
       supabase
         .from('lesson_materials')
         .select('*')
-        .eq('lesson_id', id)
+        .eq('lesson_id', lessonId)
         .order('created_at', { ascending: true }),
       supabase
         .from('additional_activities')
         .select('*')
-        .eq('lesson_id', id)
+        .eq('lesson_id', lessonId)
         .order('created_at', { ascending: true })
     ])
 
@@ -303,11 +313,15 @@ export async function createLesson(input: CreateLessonInput): Promise<Lesson> {
 
     const { tag_ids, ...lessonData } = input
 
-    // Create lesson
+    // Generate short ID for SEO-friendly URLs (10 chars, like Medium)
+    const shortId = generateShortId()
+
+    // Create lesson with short_id
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
       .insert({
         ...lessonData,
+        short_id: shortId,
         created_by: user.id,
         rvp_connection: input.rvp_connection || []
       })

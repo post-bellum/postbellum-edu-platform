@@ -20,15 +20,9 @@ interface LessonDetailContentProps {
 }
 
 export async function LessonDetailContent({ id, usePublicClient = false }: LessonDetailContentProps) {
-  const [lesson, isFavorited, user, userMaterials] = await Promise.all([
-    getLessonById(id, usePublicClient),
-    // isLessonFavorited handles non-authenticated users gracefully (returns false)
-    isLessonFavorited(id).catch(() => false),
-    // Check if user is logged in - always check regardless of usePublicClient
-    getUser().catch(() => null),
-    // Fetch user's custom lesson materials
-    getUserLessonMaterials(id).catch(() => [])
-  ])
+  // First fetch the lesson (id could be short_id or UUID)
+  // This works because getLessonById is smart and detects which one it is
+  const lesson = await getLessonById(id, usePublicClient)
 
   // RLS policies ensure that:
   // - Public users can only access published lessons (getLessonById returns null for unpublished)
@@ -37,6 +31,17 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
   if (!lesson) {
     notFound()
   }
+
+  // Now fetch related data using the lesson's actual UUID
+  // (favorites and user materials tables use UUID, not short_id)
+  const [isFavorited, user, userMaterials] = await Promise.all([
+    // isLessonFavorited handles non-authenticated users gracefully (returns false)
+    isLessonFavorited(lesson.id).catch(() => false),
+    // Check if user is logged in - always check regardless of usePublicClient
+    getUser().catch(() => null),
+    // Fetch user's custom lesson materials
+    getUserLessonMaterials(lesson.id).catch(() => [])
+  ])
 
   const breadcrumbItems = [
     { label: 'Domov', href: '/' },
@@ -49,7 +54,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
       <Breadcrumbs items={breadcrumbItems} />
       
       <LessonDetailHeader 
-        lessonId={id} 
+        lessonId={lesson.id} 
         title={lesson.title} 
         published={lesson.published} 
       />
@@ -66,7 +71,9 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
           <LessonMaterialsWrapper
             materials={lesson.materials || []}
             initialUserMaterials={userMaterials}
-            lessonId={id}
+            lessonId={lesson.id}
+            lessonTitle={lesson.title}
+            lessonShortId={lesson.short_id}
             isLoggedIn={!!user}
           />
 
@@ -85,7 +92,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
           <div className="flex flex-col gap-1.5 px-6">
             {user ? (
               <FavoriteButton 
-                lessonId={id} 
+                lessonId={lesson.id} 
                 initialIsFavorited={isFavorited}
                 variant="sidebar"
               />

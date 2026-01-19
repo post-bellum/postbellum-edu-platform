@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { formatDate } from '@/lib/utils'
+import { formatDate, generateLessonUrlFromLesson } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
 import { getUserFavoriteLessonIds } from '@/lib/supabase/favorites'
 import { getLessonsByIds } from '@/lib/supabase/lessons'
@@ -46,13 +46,15 @@ export async function FavoritesList() {
 
   return (
     <div className="grid gap-4">
-      {favoriteLessons.map((lesson) => (
-        <div
-          key={lesson.id}
-          className="p-6 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all"
-        >
-          <Link href={`/lessons/${lesson.id}`} className="block">
-            <h2 className="text-xl font-semibold mb-2">{lesson.title}</h2>
+      {favoriteLessons.map((lesson) => {
+        const lessonUrl = generateLessonUrlFromLesson(lesson)
+        return (
+          <div
+            key={lesson.id}
+            className="p-6 border border-gray-200 rounded-lg hover:border-primary hover:shadow-md transition-all"
+          >
+            <Link href={lessonUrl} className="block">
+              <h2 className="text-xl font-semibold mb-2">{lesson.title}</h2>
             {lesson.description && (
               <p className="text-gray-600 mb-2 line-clamp-2">{lesson.description}</p>
             )}
@@ -66,7 +68,8 @@ export async function FavoritesList() {
             </div>
           </Link>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

@@ -4,7 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, Download, Copy, Pencil, FileText, FilePenLine, Loader2, MoreVertical, Trash2 } from 'lucide-react'
-import { formatRelativeTime } from '@/lib/utils'
+import { formatRelativeTime, generateLessonUrl } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { deleteUserLessonMaterialAction, copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
@@ -16,12 +16,16 @@ import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu'
 interface UserLessonMaterialsSectionProps {
   materials: UserLessonMaterial[]
   lessonId: string
+  lessonTitle: string
+  lessonShortId?: string | null
   onMaterialDeleted?: (materialId: string) => void
 }
 
 export function UserLessonMaterialsSection({ 
   materials, 
   lessonId,
+  lessonTitle,
+  lessonShortId,
   onMaterialDeleted,
 }: UserLessonMaterialsSectionProps) {
   const router = useRouter()
@@ -34,6 +38,10 @@ export function UserLessonMaterialsSection({
   const [isExportingPDF, setIsExportingPDF] = React.useState<string | null>(null)
   const [errorDialogOpen, setErrorDialogOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+
+  // Generate base lesson URL using short_id if available
+  const idToUse = lessonShortId || lessonId
+  const baseLessonUrl = generateLessonUrl(idToUse, lessonTitle)
 
   const handleView = (material: UserLessonMaterial) => {
     setSelectedMaterial(material)
@@ -50,7 +58,7 @@ export function UserLessonMaterialsSection({
     const result = await copyLessonMaterialAction(material.source_material_id, lessonId)
 
     if (result.success && result.data) {
-      router.push(`/lessons/${lessonId}/materials/${result.data.id}`)
+      router.push(`${baseLessonUrl}/materials/${result.data.id}`)
     } else {
       setErrorMessage(result.error || 'Chyba při duplikování materiálu')
       setErrorDialogOpen(true)
@@ -232,7 +240,7 @@ export function UserLessonMaterialsSection({
                 key={material.id} 
                 className="h-[52px] px-2 flex items-center border-b border-grey-100"
               >
-                <Link href={`/lessons/${lessonId}/materials/${material.id}`}>
+                <Link href={`${baseLessonUrl}/materials/${material.id}`}>
                   <button
                     className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors"
                     title="Upravit"
@@ -304,7 +312,7 @@ export function UserLessonMaterialsSection({
                   Duplikovat
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={() => router.push(`/lessons/${lessonId}/materials/${material.id}`)}
+                  onClick={() => router.push(`${baseLessonUrl}/materials/${material.id}`)}
                   icon={<Pencil className="w-4 h-4" />}
                 >
                   Upravit
@@ -341,7 +349,7 @@ export function UserLessonMaterialsSection({
                 <span className="text-xs font-medium">PDF</span>
               </button>
               <Link 
-                href={`/lessons/${lessonId}/materials/${material.id}`}
+                href={`${baseLessonUrl}/materials/${material.id}`}
                 className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg hover:bg-grey-50 transition-colors text-grey-600"
               >
                 <Pencil className="w-4 h-4" />
