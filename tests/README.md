@@ -4,10 +4,11 @@ This directory contains end-to-end (E2E) tests for the Post Bellum Educational P
 
 ## Prerequisites
 
-Before running tests, you need to install Playwright browsers:
+Before running tests, you need to install Playwright globally and then install the browsers:
 
 ```bash
-yarn playwright install
+npm install -g playwright
+playwright install
 ```
 
 This will download the necessary browser binaries (Chromium, Firefox, and WebKit) required for running tests.
@@ -16,39 +17,39 @@ This will download the necessary browser binaries (Chromium, Firefox, and WebKit
 
 The following test scripts are available in `package.json`:
 
-### `yarn test` or `npm test`
+### `npm test`
 Runs all Playwright tests in headless mode across all configured browsers (Chromium, Firefox, WebKit).
 
 ```bash
-yarn test
+npm test
 ```
 
-### `yarn test:ui` or `npm run test:ui`
+### `npm run test:ui`
 Opens the Playwright UI mode, which provides an interactive interface for running and debugging tests. This is recommended for development and debugging.
 
 ```bash
-yarn test:ui
+npm run test:ui
 ```
 
-### `yarn test:headed` or `npm run test:headed`
+### `npm run test:headed`
 Runs tests with visible browser windows (headed mode). Useful for watching the test execution in real-time.
 
 ```bash
-yarn test:headed
+npm run test:headed
 ```
 
-### `yarn test:debug` or `npm run test:debug`
+### `npm run test:debug`
 Runs tests in debug mode with Playwright Inspector. Allows you to step through tests, inspect elements, and debug issues.
 
 ```bash
-yarn test:debug
+npm run test:debug
 ```
 
-### `yarn test:report` or `npm run test:report`
+### `npm run test:report`
 Opens the HTML test report from the last test run. Shows detailed information about test execution, screenshots, and traces.
 
 ```bash
-yarn test:report
+npm run test:report
 ```
 
 ## Running Specific Tests
@@ -123,7 +124,7 @@ Tests use the Page Object Model pattern to improve maintainability:
 ### Using Playwright Inspector
 
 ```bash
-yarn test:debug
+npm run test:debug
 ```
 
 This opens Playwright Inspector where you can:
@@ -135,7 +136,7 @@ This opens Playwright Inspector where you can:
 ### Using UI Mode
 
 ```bash
-yarn test:ui
+npm run test:ui
 ```
 
 UI mode provides:
@@ -149,7 +150,7 @@ UI mode provides:
 After running tests, view the HTML report:
 
 ```bash
-yarn test:report
+npm run test:report
 ```
 
 The report includes:
@@ -170,7 +171,7 @@ Tests are configured to run in CI environments with:
 ### Browsers not found
 If you see an error about missing browsers, run:
 ```bash
-yarn playwright install
+playwright install
 ```
 
 ### Tests timing out
