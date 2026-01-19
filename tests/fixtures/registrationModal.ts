@@ -89,7 +89,7 @@ export class RegistrationModal {
   }
 
   async expectLogoutButtonIsVisible(): Promise<void> {
-    await expect(this.page.getByTestId('nav-logout-button')).toBeVisible();
+    await expect(this.page.getByTestId('logout-button')).toBeVisible();
   }
 }
 
