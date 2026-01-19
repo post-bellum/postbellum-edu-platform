@@ -52,16 +52,19 @@ export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] max-h-[90vh] overflow-y-auto">
-      <div className="flex justify-center mb-6">
-        <Image
-            src="/logo.svg"
-            alt="Post Bellum logo"
-            width={200}
-            height={100}
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        {/* Logo */}
+        <div className="flex justify-center">
+          <Image
+            src="/logo-storyon.svg"
+            alt="StoryOn logo"
+            width={116}
+            height={12}
             priority
+            className="h-3 w-auto"
           />
-      </div>
+        </div>
+
         {step === 'login' && (
           <LoginModal
             onSwitchToRegister={() => setStep('register')}

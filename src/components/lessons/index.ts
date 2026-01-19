@@ -17,4 +17,6 @@ export { UserLessonMaterialsSection } from './UserLessonMaterialsSection'
 export { UserLessonMaterialEditModal } from './UserLessonMaterialEditModal'
 export { LessonMaterialsWrapper } from './LessonMaterialsWrapper'
 export { UserMaterialEditContent } from './UserMaterialEditContent'
+export { Breadcrumbs, type BreadcrumbItem } from './Breadcrumbs'
+export { LessonDetailHeader } from './LessonDetailHeader'
 

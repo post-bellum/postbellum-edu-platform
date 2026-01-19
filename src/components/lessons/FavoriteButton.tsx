@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { toggleFavoriteAction } from '@/app/actions/favorites'
 import { Button } from '@/components/ui/Button'
-import { Heart } from 'lucide-react'
+import { Heart, Bookmark } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 
@@ -12,12 +12,14 @@ interface FavoriteButtonProps {
   lessonId: string
   initialIsFavorited?: boolean
   className?: string
+  variant?: 'default' | 'sidebar'
 }
 
 export function FavoriteButton({
   lessonId,
   initialIsFavorited = false,
   className,
+  variant = 'default',
 }: FavoriteButtonProps) {
   const router = useRouter()
   const [isFavorited, setIsFavorited] = React.useState(initialIsFavorited)
@@ -38,6 +40,28 @@ export function FavoriteButton({
     }
   }
 
+  // Sidebar variant - matches Figma design
+  if (variant === 'sidebar') {
+    return (
+      <Button
+        variant="secondary"
+        size="medium"
+        onClick={handleToggle}
+        disabled={isLoading}
+        className={cn('w-full justify-center', className)}
+      >
+        <Bookmark
+          className={cn(
+            'w-5 h-5',
+            isFavorited && 'fill-current'
+          )}
+        />
+        {isFavorited ? 'V oblíbených' : 'Přidat do oblíbených'}
+      </Button>
+    )
+  }
+
+  // Default variant
   return (
     <Button
       variant={isFavorited ? 'default' : 'outline'}

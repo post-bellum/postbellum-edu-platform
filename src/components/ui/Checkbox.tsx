@@ -11,7 +11,11 @@ const Checkbox = React.forwardRef<
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      'peer h-4 w-4 shrink-0 rounded-sm border border-gray-300 bg-white cursor-pointer hover:border-gray-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-white data-[state=checked]:hover:bg-primary-hover',
+      'group peer h-4 w-4 shrink-0 rounded-md border border-grey-400 bg-transparent cursor-pointer transition-colors',
+      'focus-visible:outline-none',
+      'disabled:cursor-not-allowed disabled:opacity-50',
+      'data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary data-[state=checked]:text-white',
+      'relative',
       className
     )}
     {...props}
@@ -19,11 +23,15 @@ const Checkbox = React.forwardRef<
     <CheckboxPrimitive.Indicator
       className={cn('flex items-center justify-center text-current')}
     >
-      <Check className="h-4 w-4" />
+      <Check className="h-3 w-3 stroke-[3]" />
     </CheckboxPrimitive.Indicator>
+    {/* Focus ring */}
+    <span 
+      className="absolute inset-[-2px] rounded-md border-[3px] border-mint-light opacity-0 group-focus-visible:opacity-100 pointer-events-none" 
+      style={{ filter: 'blur(1px)' }} 
+    />
   </CheckboxPrimitive.Root>
 ))
 Checkbox.displayName = CheckboxPrimitive.Root.displayName
 
 export { Checkbox }
-

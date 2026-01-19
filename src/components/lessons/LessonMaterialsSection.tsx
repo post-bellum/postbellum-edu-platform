@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { LessonMaterial, LessonSpecification, LessonDuration, UserLessonMaterial } from '@/types/lesson.types'
 import { Button } from '@/components/ui/Button'
-import { Eye, Edit, Download, Loader2 } from 'lucide-react'
+import { Eye, Edit, Download, Loader2, ClipboardList } from '@/components/icons'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { AuthModal } from '@/components/auth'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
@@ -119,20 +119,22 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
   }, [filteredMaterials])
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Materiály k lekci</h2>
+    <div className="flex flex-col gap-7">
+      {/* Section Header */}
+      <h2 className="font-display text-3xl font-semibold leading-display text-grey-950 pl-7">Materiály k lekci</h2>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap justify-between items-center">
-        <div className="flex gap-2">
+      {/* Segment Controls */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        {/* Specification Tabs */}
+        <div className="inline-flex bg-grey-100 rounded-full p-1">
           {Object.entries(specificationLabels).map(([value, label]) => (
             <button
               key={value}
               onClick={() => setSelectedSpecification(value as LessonSpecification)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-5 h-9 leading-9 rounded-full text-md transition-all ${
                 selectedSpecification === value
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-brand-primary text-white shadow-sm font-semibold'
+                  : 'text-grey-600 hover:text-grey-950'
               }`}
             >
               {label}
@@ -140,15 +142,16 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
           ))}
         </div>
 
-        <div className="flex gap-2">
+        {/* Duration Tabs */}
+        <div className="inline-flex bg-grey-100 rounded-full p-1">
           {Object.entries(durationLabels).map(([value, label]) => (
             <button
               key={value}
               onClick={() => setSelectedDuration(parseInt(value) as LessonDuration)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-5 h-9 leading-9 rounded-full text-md transition-all ${
                 selectedDuration === parseInt(value)
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-brand-primary text-white shadow-sm font-semibold'
+                  : 'text-grey-600 hover:text-grey-950'
               }`}
             >
               {label}
@@ -159,74 +162,82 @@ export function LessonMaterialsSection({ materials, lessonId, onMaterialCreated 
 
       {/* Materials List */}
       {Object.keys(groupedMaterials).length === 0 ? (
-        <p className="text-gray-500">Žádné materiály pro vybrané filtry</p>
+        <div className="bg-grey-50 border border-black/5 rounded-[28px] p-10 text-center">
+          <p className="text-text-subtle">Žádné materiály pro vybrané filtry</p>
+        </div>
       ) : (
-        <div className="space-y-6">
-          {Object.entries(groupedMaterials).map(([title, materials]) => (
-            <div key={title} className="border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{title}</span>
-                {materials[0].specification && (
-                  <span className="text-sm font-normal text-gray-500">
-                    ({specificationLabels[materials[0].specification]})
-                  </span>
-                )}
-                {materials[0].duration && (
-                  <span className="text-sm font-normal text-gray-500">
-                    • {durationLabels[materials[0].duration]}
-                  </span>
-                )}
-              </h3>
+        <div className="flex flex-col gap-5">
+          {Object.entries(groupedMaterials).map(([title, materialsList]) => (
+            <div 
+              key={title} 
+              className="bg-grey-50 border border-black/5 rounded-[28px] pl-7 pr-10 py-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-7"
+            >
+              {/* Content */}
+              <div className="flex-1 flex flex-col gap-10">
+                {/* Title with icon */}
+                <div className="flex items-center gap-4 px-3">
+                  <div className="w-7 h-7 flex items-center justify-center">
+                    <ClipboardList className="w-5 h-5 text-brand-primary" strokeWidth={2} />
+                  </div>
+                  <h3 className="text-lg font-semibold leading-[1.2] text-text-strong">
+                    {title}
+                  </h3>
+                </div>
 
-              {materials[0].description && materials[0].description.trim() && (
-                <div className="mb-4">
-                  <h4 className="font-medium mb-2">Obsahuje:</h4>
-                  <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
-                    {materials[0].description.split('\n').filter(Boolean).map((item, idx) => (
-                      <li key={idx}>{item.trim()}</li>
+                {/* Description list */}
+                {materialsList[0].description && materialsList[0].description.trim() && (
+                  <ul className="text-text-subtle text-lg leading-[1.4] list-disc ml-7 space-y-0">
+                    {materialsList[0].description.split('\n').filter(Boolean).map((item, idx) => (
+                      <li key={idx}>
+                        {item.trim()}
+                      </li>
                     ))}
                   </ul>
-                </div>
-              )}
+                )}
+              </div>
 
-              <div className="flex gap-2">
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-2 lg:w-[180px] lg:max-w-[200px] shrink-0">
                 <Button 
-                  variant="outline" 
-                  size="sm"
+                  variant="secondary" 
+                  size="medium"
+                  className="w-full justify-center [&_svg]:text-grey-500"
                   onClick={() => requireAuth(() => {
-                    setSelectedMaterial(materials[0])
+                    setSelectedMaterial(materialsList[0])
                     setViewModalOpen(true)
                   })}
                 >
-                  <Eye />
+                  <Eye className="w-5 h-5" />
                   Zobrazit
                 </Button>
                 <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={!materials[0].content || isExportingPDF === materials[0].id}
-                  onClick={() => requireAuth(() => handleExportPDF(materials[0]))}
+                  variant="secondary" 
+                  size="medium"
+                  className="w-full justify-center [&_svg]:text-grey-500"
+                  disabled={!materialsList[0].content || isExportingPDF === materialsList[0].id}
+                  onClick={() => requireAuth(() => handleExportPDF(materialsList[0]))}
                 >
-                  {isExportingPDF === materials[0].id ? (
+                  {isExportingPDF === materialsList[0].id ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                       Exportuji...
                     </>
                   ) : (
                     <>
-                      <Download />
-                      Stáhnout PDF
+                      <Download className="w-5 h-5" />
+                      Stáhnout
                     </>
                   )}
                 </Button>
                 <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={isCopying === materials[0].id}
-                  onClick={() => requireAuth(() => handleCopyMaterial(materials[0].id))}
+                  variant="secondary" 
+                  size="medium"
+                  className="w-full justify-center [&_svg]:text-grey-500"
+                  disabled={isCopying === materialsList[0].id}
+                  onClick={() => requireAuth(() => handleCopyMaterial(materialsList[0].id))}
                 >
-                  <Edit />
-                  {isCopying === materials[0].id ? 'Vytvářím...' : 'Upravit'}
+                  <Edit className="w-5 h-5" />
+                  {isCopying === materialsList[0].id ? 'Vytvářím...' : 'Upravit'}
                 </Button>
               </div>
             </div>

@@ -1,6 +1,6 @@
 'use server'
 
-import { uploadImageToStorage } from '@/lib/supabase/storage'
+import { createClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
 
 export interface UploadImageResult {
@@ -11,6 +11,7 @@ export interface UploadImageResult {
 
 /**
  * Server action to upload an image file to Supabase Storage
+ * Uses server client with authenticated user session for RLS policies
  * @param formData - FormData containing the image file
  * @returns Upload result with URL or error
  */
@@ -42,12 +43,47 @@ export async function uploadImageAction(formData: FormData): Promise<UploadImage
       }
     }
 
-    // Upload to Supabase Storage
-    const url = await uploadImageToStorage(file, 'lesson-materials', 'images')
+    // Upload to Supabase Storage using server client (authenticated)
+    const supabase = await createClient()
+    
+    // Generate unique filename
+    const timestamp = Date.now()
+    const randomString = Math.random().toString(36).substring(2, 15)
+    const fileExt = file.name.split('.').pop() || 'jpg'
+    const fileName = `${timestamp}-${randomString}.${fileExt}`
+    const filePath = `images/${fileName}`
+
+    // Upload file
+    const { error } = await supabase.storage
+      .from('lesson-materials')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+    if (error) {
+      logger.error('Error uploading image to storage', error)
+      return {
+        success: false,
+        error: `Failed to upload image: ${error.message}`,
+      }
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('lesson-materials')
+      .getPublicUrl(filePath)
+
+    if (!urlData?.publicUrl) {
+      return {
+        success: false,
+        error: 'Failed to get public URL for uploaded image',
+      }
+    }
 
     return {
       success: true,
-      url,
+      url: urlData.publicUrl,
     }
   } catch (error) {
     logger.error('Error in uploadImageAction', error)

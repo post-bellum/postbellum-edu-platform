@@ -8,96 +8,99 @@ interface LessonDetailInfoProps {
   variant?: 'default' | 'compact'
 }
 
+interface InfoBlockProps {
+  label: string
+  children: React.ReactNode
+}
+
+function InfoBlock({ label, children }: InfoBlockProps) {
+  return (
+    <div className="space-y-2">
+      <h3 className="text-md font-semibold text-text-strong">{label}</h3>
+      <div className="text-md text-text-subtle leading-body">{children}</div>
+    </div>
+  )
+}
+
 export function LessonDetailInfo({ lesson, children, variant = 'default' }: LessonDetailInfoProps) {
   const isCompact = variant === 'compact'
-  const titleClass = isCompact ? 'text-lg' : 'text-xl'
-  const headingClass = isCompact ? 'text-sm' : 'font-medium'
-  const tagClass = isCompact ? 'px-2 py-1 text-xs' : 'px-3 py-1 text-sm'
-  const titleMargin = isCompact ? 'mb-3' : 'mb-4'
-  const headingMargin = isCompact ? 'mb-1' : 'mb-2'
 
   return (
-    <>
-      <h2 className={`${titleClass} font-semibold ${titleMargin}`}>
+    <div className="flex flex-col gap-8">
+      {/* Section Title */}
+      <h2 className={`${isCompact ? 'text-lg' : 'text-xl'} font-semibold text-text-strong leading-display`}>
         Základní informace o lekci
       </h2>
-      
-      {lesson.description && (
-        <div className="mb-4">
-          <h3 className={`${headingClass} ${headingMargin}`}>Popis lekce</h3>
-          <p className="text-gray-600 text-sm">{lesson.description}</p>
-        </div>
-      )}
 
-      {lesson.duration && (
-        <div className="mb-4">
-          <h3 className={`${headingClass} ${headingMargin}`}>Délka lekce</h3>
-          <p className="text-gray-600 text-sm">{lesson.duration}</p>
-        </div>
-      )}
+      {/* Info Items */}
+      <div className="flex flex-col gap-6">
+        {lesson.period && (
+          <InfoBlock label="Období">
+            <p>{lesson.period}</p>
+          </InfoBlock>
+        )}
+        
+        {lesson.description && (
+          <InfoBlock label="Popis lekce">
+            <p>{lesson.description}</p>
+          </InfoBlock>
+        )}
 
-      {lesson.rvp_connection && lesson.rvp_connection.length > 0 && (
-        <div className="mb-4">
-          <h3 className={`${headingClass} ${headingMargin}`}>Napojení na RVP</h3>
-          <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
-            {lesson.rvp_connection.map((rvp: string, idx: number) => (
-              <li key={idx}>{rvp}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {lesson.rvp_connection && lesson.rvp_connection.length > 0 && (
+          <InfoBlock label="Napojení na RVP">
+            <ul className="list-disc list-inside space-y-1">
+              {lesson.rvp_connection.map((rvp: string, idx: number) => (
+                <li key={idx}>{rvp}</li>
+              ))}
+            </ul>
+          </InfoBlock>
+        )}
 
-      {lesson.period && (
-        <div className="mb-4">
-          <h3 className={`${headingClass} ${headingMargin}`}>Období</h3>
-          <p className="text-gray-600 text-sm">{lesson.period}</p>
-        </div>
-      )}
+        {lesson.publication_date && (
+          <InfoBlock label="Datum publikování lekce">
+            <p>{formatDateLong(lesson.publication_date)}</p>
+          </InfoBlock>
+        )}
 
-      {lesson.target_group && (
-        <div className="mb-4">
-          <h3 className={`${headingClass} ${headingMargin}`}>Cílová skupina</h3>
-          <p className="text-gray-600 text-sm">{lesson.target_group}</p>
-        </div>
-      )}
+        {lesson.duration && (
+          <InfoBlock label="Délka lekce">
+            <p>{lesson.duration}</p>
+          </InfoBlock>
+        )}
 
-      {lesson.lesson_type && (
-        <div className="mb-4">
-          <h3 className={`${headingClass} ${headingMargin}`}>Typ lekce</h3>
-          <p className="text-gray-600 text-sm">{lesson.lesson_type}</p>
-        </div>
-      )}
+        {lesson.target_group && (
+          <InfoBlock label="Cílová skupina">
+            <p>{lesson.target_group}</p>
+          </InfoBlock>
+        )}
 
-      {lesson.publication_date && (
-        <div className="mb-4">
-          <h3 className={`${headingClass} ${headingMargin}`}>Datum publikování lekce</h3>
-          <p className="text-gray-600 text-sm">
-            {formatDateLong(lesson.publication_date)}
-          </p>
-        </div>
-      )}
+        {lesson.lesson_type && (
+          <InfoBlock label="Typ lekce">
+            <p>{lesson.lesson_type}</p>
+          </InfoBlock>
+        )}
+      </div>
 
+      {/* Tags */}
       {lesson.tags && lesson.tags.length > 0 && (
-        <div className={children ? 'mb-4' : ''}>
-          <h3 className={`${headingClass} mb-2`}>Tagy</h3>
-          <div className="flex flex-wrap gap-2">
-            {lesson.tags.map((tag: { id: string; title: string }) => (
-              <span
-                key={tag.id}
-                className={`${tagClass} bg-gray-100 text-gray-700 rounded-full`}
-              >
-                {tag.title}
-              </span>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-1.5 max-w-[280px]">
+          {lesson.tags.map((tag: { id: string; title: string }) => (
+            <span
+              key={tag.id}
+              className="px-3 py-2 bg-grey-50 border border-black/5 text-text-subtle text-sm font-semibold rounded-full"
+            >
+              {tag.title}
+            </span>
+          ))}
         </div>
       )}
 
+      {/* Actions (Favorite button, etc.) */}
       {children && (
-        <div className="pt-4 border-t">
+        <div className="flex flex-col gap-1.5">
           {children}
         </div>
       )}
-    </>
+    </div>
   )
 }

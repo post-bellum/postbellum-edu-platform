@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { MaterialEditSidebar } from './MaterialEditSidebar'
+import { Breadcrumbs } from './Breadcrumbs'
 import {
   updateUserLessonMaterialAction,
   deleteUserLessonMaterialAction,
@@ -211,29 +212,19 @@ export function UserMaterialEditContent({
     }
   }
 
+  const breadcrumbItems = [
+    { label: 'Domov', href: '/' },
+    { label: 'Katalog lekcí', href: '/lessons' },
+    { label: 'Detail lekce', href: `/lessons/${lesson.id}` },
+    { label: 'Úprava materiálu' },
+  ]
+
   return (
-    <>
-      {/* Breadcrumbs */}
-      <nav className="text-sm text-gray-500 mb-4">
-        <ol className="flex items-center gap-2">
-          <li>
-            <Link href="/" className="hover:text-gray-700">Domov</Link>
-          </li>
-          <li className="text-gray-400">{'>'}</li>
-          <li>
-            <Link href="/lessons" className="hover:text-gray-700">Katalog lekcí</Link>
-          </li>
-          <li className="text-gray-400">{'>'}</li>
-          <li>
-            <Link href={`/lessons/${lesson.id}`} className="hover:text-gray-700">Detail lekce</Link>
-          </li>
-          <li className="text-gray-400">{'>'}</li>
-          <li className="text-gray-900">Úprava materiálu</li>
-        </ol>
-      </nav>
+    <div className="flex flex-col gap-6">
+      <Breadcrumbs items={breadcrumbItems} />
 
       {/* Header with back button */}
-      <div className="mb-6">
+      <div>
         <Link href={`/lessons/${lesson.id}`}>
           <Button variant="ghost" size="sm" className="mb-2 -ml-2">
             <ArrowLeft className="w-4 h-4" />
@@ -253,7 +244,6 @@ export function UserMaterialEditContent({
             value={title}
             onChange={handleTitleChange}
             placeholder="Název materiálu"
-            className="max-w-md"
           />
         </div>
 
@@ -317,7 +307,7 @@ export function UserMaterialEditContent({
         </div>
 
         {/* Sidebar - Right Side */}
-        <div className="flex-1 lg:flex-1 lg:max-w-sm lg:sticky lg:top-20 lg:self-start">
+        <div className="lg:w-80 xl:w-96 shrink-0 lg:sticky lg:top-20 lg:self-start">
           <MaterialEditSidebar lesson={lesson} />
         </div>
       </div>
@@ -342,6 +332,6 @@ export function UserMaterialEditContent({
         isLoading={isDeleting}
         onConfirm={handleDeleteConfirm}
       />
-    </>
+    </div>
   )
 }

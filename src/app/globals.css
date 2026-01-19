@@ -1,19 +1,124 @@
 @import "tailwindcss";
 
+/* ============================================
+   Adobe Typekit Fonts
+   Loaded via <link> in layout.tsx
+   https://use.typekit.net/anz3jmg.css
+   ============================================ */
+
 @theme {
-  --color-primary: #075985;
-  --color-primary-hover: #0c4a6e;
-  --color-text: #18181B;
-  --color-text-secondary: #71717A;
+  /* ============================================
+     PRIMITIVES - Typography
+     ============================================ */
+  
+  /* Font Families */
+  --font-display: 'tablet-gothic-narrow', system-ui, sans-serif;
+  --font-body: 'tablet-gothic-wide', system-ui, sans-serif;
+  
+  /* Font Sizes */
+  --text-4xl: 44px;
+  --text-3xl: 32px;
+  --text-2xl: 24px;
+  --text-xl: 20px;
+  --text-lg: 18px;
+  --text-body-lg: 18px;
+  --text-md: 16px;
+  --text-sm: 14px;
+  --text-xs: 12px;
+  
+  /* Line Heights */
+  --leading-display: 1.2;
+  --leading-headline: 1.4;
+  --leading-body: 1.5;
+  --leading-body-sm: 1.4;
+  
+  /* ============================================
+     PRIMITIVES - Colors
+     ============================================ */
+  
+  /* Grey Scale (from Figma neutral/grey-*) */
+  --color-grey-25: #fcfcfd;
+  --color-grey-50: #f9fafb;
+  --color-grey-100: #f2f4f7;
+  --color-grey-200: #e4e7ec;
+  --color-grey-300: #d0d5dd;
+  --color-grey-400: #98a2b3;
+  --color-grey-500: #667085;
+  --color-grey-600: #475467;
+  --color-grey-700: #344054;
+  --color-grey-800: #182230;
+  --color-grey-900: #101828;
+  --color-grey-950: #0c111d;
+  
+  /* Surface Colors */
+  --color-surface: #ffffff;
+  
+  /* Text Colors (semantic) */
+  --color-text-strong: #0c111d;
+  --color-text-subtle: #475467;
+  
+  /* ============================================
+     PRIMITIVES - Spacing
+     ============================================ */
+  --space-xs: 4px;
+  --space-sm: 6px;
+  --space-md: 8px;
+  --space-lg: 10px;
+  --space-xl: 12px;
+  --space-2xl: 16px;
+  --space-3xl: 20px;
+  --space-4xl: 24px;
+  --space-5xl: 28px;
+  
+  /* ============================================
+     PRIMITIVES - Border Radius
+     ============================================ */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* ============================================
+     PRIMITIVES - Focus States
+     ============================================ */
+  --color-focus: #9bffd2;
+  --focus-ring-width: 3px;
+  --focus-ring-blur: 1px;
+  
+  /* ============================================
+     SEMANTIC - Brand Colors
+     ============================================ */
+  --color-brand-primary: #277a77;
+  --color-brand-primary-hover: #204f4e;
+  --color-mint: #9bffd2;
+  --color-mint-light: #f0fff7;
+  
+  /* Turquoise Scale */
+  --color-turquoise-50: #f0fdfa;
+  --color-turquoise-100: #ccfbf1;
+  --color-turquoise-200: #99f6e4;
+  --color-turquoise-300: #5eead4;
+  --color-turquoise-400: #2dd4bf;
+  --color-turquoise-500: #14b8a6;
+  --color-turquoise-600: #0d9488;
+  --color-turquoise-700: #0f766e;
+  --color-turquoise-800: #115e59;
+  --color-turquoise-900: #134e4a;
+
 }
+
+
 
 /* Prose styles for rendered content */
 .prose {
-  color: var(--color-text);
+  color: var(--color-text-strong);
   line-height: 1.6;
 }
 
 .prose h1 {
+  font-family: var(--font-display);
   font-size: 2em;
   font-weight: 700;
   margin-top: 1.5em;
@@ -22,6 +127,7 @@
 }
 
 .prose h2 {
+  font-family: var(--font-display);
   font-size: 1.5em;
   font-weight: 600;
   margin-top: 1.25em;
@@ -30,6 +136,7 @@
 }
 
 .prose h3 {
+  font-family: var(--font-display);
   font-size: 1.25em;
   font-weight: 600;
   margin-top: 1em;
@@ -38,6 +145,7 @@
 }
 
 .prose h4 {
+  font-family: var(--font-display);
   font-size: 1.1em;
   font-weight: 600;
   margin-top: 1em;
@@ -46,6 +154,7 @@
 
 .prose h5,
 .prose h6 {
+  font-family: var(--font-display);
   font-size: 1em;
   font-weight: 600;
   margin-top: 1em;
@@ -76,12 +185,12 @@
 }
 
 .prose a {
-  color: var(--color-primary);
+  color: var(--color-brand-primary);
   text-decoration: underline;
 }
 
 .prose a:hover {
-  color: var(--color-primary-hover);
+  color: var(--color-brand-primary-hover);
 }
 
 .prose img {
@@ -123,12 +232,13 @@
 
 /* Lesson material content styles */
 .lesson-material-content {
-  color: var(--color-text);
+  color: var(--color-text-strong);
   font-size: 16px;
   line-height: 1.7;
 }
 
 .lesson-material-content h1 {
+  font-family: var(--font-display);
   font-size: 28px;
   font-weight: 700;
   margin-top: 1.5em;
@@ -137,6 +247,7 @@
 }
 
 .lesson-material-content h2 {
+  font-family: var(--font-display);
   font-size: 24px;
   font-weight: 600;
   margin-top: 1.25em;
@@ -145,6 +256,7 @@
 }
 
 .lesson-material-content h3 {
+  font-family: var(--font-display);
   font-size: 20px;
   font-weight: 600;
   margin-top: 1em;
@@ -153,6 +265,7 @@
 }
 
 .lesson-material-content h4 {
+  font-family: var(--font-display);
   font-size: 18px;
   font-weight: 600;
   margin-top: 1em;
@@ -161,6 +274,7 @@
 
 .lesson-material-content h5,
 .lesson-material-content h6 {
+  font-family: var(--font-display);
   font-size: 16px;
   font-weight: 600;
   margin-top: 1em;
@@ -191,7 +305,7 @@
 }
 
 .lesson-material-content a {
-  color: var(--color-primary);
+  color: var(--color-brand-primary);
   text-decoration: underline;
 }
 
@@ -288,6 +402,7 @@
 .lesson-material-content h4,
 .lesson-material-content h5,
 .lesson-material-content h6 {
+  font-family: var(--font-display);
   clear: both;
 }
 
@@ -321,4 +436,3 @@
 .lesson-material-content u {
   text-decoration: underline;
 }
-

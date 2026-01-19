@@ -101,50 +101,60 @@ export function OTPModal({ email, password, onSuccess, onBack }: OTPModalProps) 
   }
 
   return (
-    <div className="flex flex-col">
-      <h2 className="text-3xl font-bold text-center mb-2 text-text">Ověřte svůj email</h2>
-      <p className="text-sm text-center text-text-secondary mb-8">
-        Poslali jsme 6místný ověřovací kód na adresu{' '}
-        <span className="font-medium text-text">{email}</span>
-      </p>
+    <div className="flex flex-col gap-7">
+      {/* Title & Description */}
+      <div className="text-center">
+        <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+          Ověřte svůj email
+        </h2>
+        <p className="text-base leading-[1.5] text-text-subtle">
+          Poslali jsme 6místný ověřovací kód na adresu{' '}
+          <span className="font-medium text-grey-950">{email}</span>
+        </p>
+      </div>
 
-      <form onSubmit={handleVerify} className="space-y-6">
-        <div className="flex flex-col items-center space-y-4">
-          <InputOTP length={6} onChange={setOtp} data-testid="otp-input" />
-          
-          {error && (
-            <p className="text-sm text-red-600">{error}</p>
-          )}
-          {resendSuccess && (
-            <p className="text-sm text-green-600">Nový kód byl odeslán na váš email</p>
-          )}
-        </div>
+      {/* Content Stack */}
+      <div className="flex flex-col gap-5">
+        <form onSubmit={handleVerify} className="flex flex-col gap-5">
+          <div className="flex flex-col items-center gap-4">
+            <InputOTP length={6} onChange={setOtp} data-testid="otp-input" />
+            
+            {error && (
+              <p className="text-sm text-red-600">{error}</p>
+            )}
+            {resendSuccess && (
+              <p className="text-sm text-green-600">Nový kód byl odeslán na váš email</p>
+            )}
+          </div>
 
-        <Button 
-          type="submit" 
-          className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
-          disabled={isLoading || otp.length !== 6}
-          data-testid="otp-verify-button"
-        >
-          {isLoading ? 'Ověřování...' : 'Ověřit'}
-        </Button>
-      </form>
+          <Button 
+            type="submit" 
+            size="large"
+            className="w-full"
+            disabled={isLoading || otp.length !== 6}
+            data-testid="otp-verify-button"
+          >
+            {isLoading ? 'Ověřování...' : 'Ověřit'}
+          </Button>
+        </form>
+      </div>
 
-      <div className="mt-6 text-center space-y-2">
-        <p className="text-sm text-text-secondary">
+      {/* Footer Links */}
+      <div className="text-center space-y-2">
+        <p className="text-sm leading-[1.5] text-grey-600">
           Nedostali jste kód?{' '}
           {canResend ? (
             <button
               type="button"
               onClick={handleResend}
               disabled={isLoading}
-              className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-brand-primary underline decoration-dotted decoration-[1.7px] hover:text-brand-primary-hover cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="otp-resend-button"
             >
               Odeslat znovu
             </button>
           ) : (
-            <span className="text-text-secondary">
+            <span className="text-grey-600">
               Odeslat znovu za {countdown}s
             </span>
           )}
@@ -152,7 +162,7 @@ export function OTPModal({ email, password, onSuccess, onBack }: OTPModalProps) 
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-text-secondary hover:text-text cursor-pointer transition-colors"
+          className="text-sm text-grey-600 hover:text-grey-950 cursor-pointer transition-colors"
           data-testid="otp-back-button"
         >
           ← Zpět na registraci

@@ -164,6 +164,7 @@ export type Database = {
           published: boolean
           rvp_connection: string[] | null
           target_group: string | null
+          thumbnail_url: string | null
           title: string
           updated_at: string | null
           vimeo_video_url: string | null
@@ -180,6 +181,7 @@ export type Database = {
           published?: boolean
           rvp_connection?: string[] | null
           target_group?: string | null
+          thumbnail_url?: string | null
           title: string
           updated_at?: string | null
           vimeo_video_url?: string | null
@@ -196,6 +198,7 @@ export type Database = {
           published?: boolean
           rvp_connection?: string[] | null
           target_group?: string | null
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string | null
           vimeo_video_url?: string | null

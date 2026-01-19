@@ -9,7 +9,7 @@ import { isAdmin } from '@/lib/supabase/admin-helpers'
 
 function LessonDetailLoading() {
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
       <div className="mb-6">
         <div className="h-10 w-32 bg-gray-200 rounded mb-4 animate-pulse"></div>
         <div className="h-10 w-64 bg-gray-200 rounded animate-pulse"></div>
@@ -34,7 +34,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
   const usePublicClient = !admin
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
       <React.Suspense fallback={<LessonDetailLoading />}>
         <LessonDetailContent id={id} usePublicClient={usePublicClient} />
       </React.Suspense>

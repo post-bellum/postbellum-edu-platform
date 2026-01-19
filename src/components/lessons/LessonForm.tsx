@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/Textarea'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { TagsSelector } from './TagsSelector'
+import { ThumbnailUpload } from './ThumbnailUpload'
 
 interface LessonFormProps {
   lesson?: LessonWithRelations
@@ -23,6 +24,7 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
 
   const [title, setTitle] = React.useState(lesson?.title || '')
   const [vimeoVideoUrl, setVimeoVideoUrl] = React.useState(lesson?.vimeo_video_url || '')
+  const [thumbnailUrl, setThumbnailUrl] = React.useState(lesson?.thumbnail_url || '')
   const [description, setDescription] = React.useState(lesson?.description || '')
   const [duration, setDuration] = React.useState(lesson?.duration || '')
   const [period, setPeriod] = React.useState(lesson?.period || '')
@@ -39,17 +41,16 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
   )
   const [published, setPublished] = React.useState(lesson?.published ?? false)
 
-  const action = isEditing
-    ? async (_prevState: unknown, formData: FormData) => {
-        formData.append('tag_ids', selectedTagIds.join(','))
-        formData.append('published', published ? 'true' : 'false')
-        return updateLessonAction(lesson.id, formData)
-      }
-    : async (_prevState: unknown, formData: FormData) => {
-        formData.append('tag_ids', selectedTagIds.join(','))
-        formData.append('published', published ? 'true' : 'false')
-        return createLessonAction(formData)
-      }
+  const action = async (_prevState: unknown, formData: FormData) => {
+    // Add controlled state fields to FormData
+    formData.append('tag_ids', selectedTagIds.join(','))
+    formData.append('published', published ? 'true' : 'false')
+    formData.append('thumbnail_url', thumbnailUrl)
+    
+    return isEditing
+      ? updateLessonAction(lesson.id, formData)
+      : createLessonAction(formData)
+  }
 
   const [state, formAction] = useActionState(action, null)
 
@@ -97,6 +98,14 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
           value={vimeoVideoUrl}
           onChange={(e) => setVimeoVideoUrl(e.target.value)}
           placeholder="https://vimeo.com/..."
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Náhledový obrázek</Label>
+        <ThumbnailUpload
+          value={thumbnailUrl}
+          onChange={setThumbnailUrl}
         />
       </div>
 
