@@ -71,8 +71,8 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
               <Image
                 src="/logo-storyon.svg"
                 alt="StoryOn"
-                width={140}
-                height={25}
+                width={200}
+                height={36}
                 priority
               />
             </Link>
@@ -174,8 +174,8 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                     <Image
                       src="/logo-storyon.svg"
                       alt="StoryOn"
-                      width={140}
-                      height={25}
+                      width={200}
+                      height={36}
                       priority
                     />
                   </Link>

@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
           <div className="flex justify-center mb-6">
             <Image
-              src="/logo.svg"
+              src="/logo-postbellum.svg"
               alt="Post Bellum logo"
               width={200}
               height={100}
@@ -111,7 +111,7 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
         <div className="flex justify-center mb-6">
           <Image
-            src="/logo.svg"
+            src="/logo-postbellum.svg"
             alt="Post Bellum logo"
             width={200}
             height={100}

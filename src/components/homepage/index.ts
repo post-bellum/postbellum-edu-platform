@@ -1,0 +1,10 @@
+export { BottomIllustration } from './BottomIllustration';
+export { FeatureCard } from './FeatureCard';
+export { FeaturesSection } from './FeaturesSection';
+export { HeroSection } from './HeroSection';
+export { LessonCard } from './LessonCard';
+export { LessonsSection } from './LessonsSection';
+export { TestimonialCard } from './TestimonialCard';
+export { TestimonialsSection } from './TestimonialsSection';
+export { SectionHeadline } from './SectionHeadline';
+export { Ticker } from './Ticker';

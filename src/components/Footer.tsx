@@ -11,7 +11,6 @@ export function Footer() {
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault()
     // TODO: Implement newsletter subscription
-    console.log('Subscribe:', email)
   }
 
   return (
@@ -25,10 +24,11 @@ export function Footer() {
               <div className="flex-1 flex items-center gap-3 px-3 md:px-0 w-full md:w-auto">
                 <Link href="/">
                   <Image
-                    src="/logo-storyon.svg"
-                    alt="StoryOn"
+                    src="/logo-postbellum.svg"
+                    alt="Post Bellum"
                     width={154}
                     height={16}
+                    className="h-4 w-auto"
                   />
                 </Link>
               </div>
