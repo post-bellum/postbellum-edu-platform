@@ -5,6 +5,7 @@ import { isAdmin } from '@/lib/supabase/admin-helpers'
 import { EyeIcon } from '@/components/ui/Icons'
 import { LessonThumbnail } from './LessonThumbnail'
 import type { LessonWithRelations, Tag } from '@/types/lesson.types'
+import { generateLessonUrlFromLesson } from '@/lib/utils'
 
 function LessonTag({ tag }: { tag: Tag }) {
   return (
@@ -16,12 +17,13 @@ function LessonTag({ tag }: { tag: Tag }) {
 
 function LessonCard({ lesson }: { lesson: LessonWithRelations }) {
   const tags = lesson.tags || []
+  const lessonUrl = generateLessonUrlFromLesson(lesson)
 
   return (
     <article className="flex flex-col sm:flex-row gap-5 sm:gap-6 md:gap-8 items-start group">
       {/* Thumbnail */}
       <Link
-        href={`/lessons/${lesson.id}`}
+        href={lessonUrl}
         className="relative w-[189px] sm:w-[200px] md:w-[260px] lg:w-[316px] h-[120px] sm:h-[130px] md:h-[170px] lg:h-[200px] rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden border border-black/5 shrink-0 bg-linear-to-br from-grey-100 to-grey-200"
       >
         <LessonThumbnail
@@ -35,7 +37,7 @@ function LessonCard({ lesson }: { lesson: LessonWithRelations }) {
         <div className="flex flex-col gap-3">
           {/* Title with unpublished badge */}
           <div className="flex items-center gap-2 flex-wrap">
-            <Link href={`/lessons/${lesson.id}`}>
+            <Link href={lessonUrl}>
               <h2 className="text-xl font-semibold text-text-strong leading-display group-hover:text-brand-primary transition-colors">
                 {lesson.title}
               </h2>
@@ -72,7 +74,7 @@ function LessonCard({ lesson }: { lesson: LessonWithRelations }) {
 
       {/* Mobile View Button */}
       <Link
-        href={`/lessons/${lesson.id}`}
+        href={lessonUrl}
         className="flex sm:hidden items-center justify-center gap-1 px-4 py-1.5 bg-white border border-grey-200 rounded-full shadow-sm hover:bg-grey-50 transition-colors"
       >
         <EyeIcon className="w-5 h-5 text-grey-500" />
@@ -82,13 +84,13 @@ function LessonCard({ lesson }: { lesson: LessonWithRelations }) {
       {/* Desktop Actions */}
       <div className="hidden sm:flex flex-col items-center justify-center self-stretch shrink-0 gap-2">
         <Link
-          href={`/lessons/${lesson.id}`}
+          href={lessonUrl}
           className="flex items-center justify-center w-[52px] md:w-[60px] h-[40px] md:h-[44px] bg-white border border-grey-200 rounded-full shadow-sm hover:bg-grey-50 transition-colors"
           title="Zobrazit lekci"
         >
           <EyeIcon className="w-5 h-5 text-grey-500" />
         </Link>
-        <AdminControls lessonId={lesson.id} lessonTitle={lesson.title} />
+        <AdminControls lessonId={lesson.id} lessonShortId={lesson.short_id} lessonTitle={lesson.title} />
       </div>
     </article>
   )

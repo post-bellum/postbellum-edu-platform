@@ -1,11 +1,13 @@
 import * as React from 'react'
 import { LessonDetailContent } from '@/components/lessons/LessonDetailContent'
 import { isAdmin } from '@/lib/supabase/admin-helpers'
+import { extractLessonId } from '@/lib/utils'
 
 // Public route - can be statically generated for published lessons
 // For admins, uses authenticated client to access unpublished lessons
 // For non-admins, uses public client (no cookies), RLS handles access control
 // Admin controls are loaded client-side
+// URL format: /lessons/{slug}-{id} for SEO-friendly URLs
 
 function LessonDetailLoading() {
   return (
@@ -22,11 +24,15 @@ function LessonDetailLoading() {
 }
 
 interface LessonPageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
-  const { id } = await params
+  const { slug } = await params
+  
+  // Extract the lesson ID from the slug parameter
+  // Supports both old format (just ID) and new format (slug-id)
+  const id = extractLessonId(slug)
   
   // Check if user is admin to determine which client to use
   // Admins need authenticated client to see unpublished lessons

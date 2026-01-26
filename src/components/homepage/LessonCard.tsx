@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Eye } from 'lucide-react';
 import { LessonThumbnail } from '@/components/lessons/LessonThumbnail';
+import { generateLessonUrlFromLesson } from '@/lib/utils';
 import type { Lesson } from '@/types/lesson.types';
 
 interface LessonCardProps {
@@ -8,6 +9,8 @@ interface LessonCardProps {
 }
 
 export function LessonCard({ lesson }: LessonCardProps) {
+  const lessonUrl = generateLessonUrlFromLesson(lesson);
+  
   return (
     <div className="flex flex-col gap-3 h-full">
       {/* Thumbnail */}
@@ -34,7 +37,7 @@ export function LessonCard({ lesson }: LessonCardProps) {
       </div>
       
       <Link 
-        href={`/lessons/${lesson.id}`}
+        href={lessonUrl}
         className="inline-flex items-center justify-center w-15 h-10 rounded-full border border-grey-200 bg-white shadow-sm hover:bg-grey-50 transition-colors"
       >
         <Eye className="w-5 h-5 text-grey-500" />

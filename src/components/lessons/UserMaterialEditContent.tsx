@@ -18,6 +18,7 @@ import {
 import type { UserLessonMaterial, LessonWithRelations } from '@/types/lesson.types'
 import { exportToPDF } from '@/lib/utils/pdf-export'
 import { logger } from '@/lib/logger'
+import { generateLessonUrlFromLesson } from '@/lib/utils'
 
 interface UserMaterialEditContentProps {
   material: UserLessonMaterial
@@ -159,7 +160,7 @@ export function UserMaterialEditContent({
     const result = await deleteUserLessonMaterialAction(initialMaterial.id, lesson.id)
 
     if (result.success) {
-      router.push(`/lessons/${lesson.id}`)
+      router.push(lessonUrl)
     } else {
       // TODO: Replace alert with toast notification system for better UX
       alert(result.error || 'Chyba při mazání materiálu')
@@ -212,10 +213,12 @@ export function UserMaterialEditContent({
     }
   }
 
+  const lessonUrl = generateLessonUrlFromLesson(lesson)
+  
   const breadcrumbItems = [
     { label: 'Domov', href: '/' },
     { label: 'Katalog lekcí', href: '/lessons' },
-    { label: 'Detail lekce', href: `/lessons/${lesson.id}` },
+    { label: 'Detail lekce', href: lessonUrl },
     { label: 'Úprava materiálu' },
   ]
 
@@ -225,7 +228,7 @@ export function UserMaterialEditContent({
 
       {/* Header with back button */}
       <div>
-        <Link href={`/lessons/${lesson.id}`}>
+        <Link href={lessonUrl}>
           <Button variant="ghost" size="sm" className="mb-2 -ml-2">
             <ArrowLeft className="w-4 h-4" />
             {lesson.title}

@@ -163,6 +163,7 @@ export type Database = {
           publication_date: string | null
           published: boolean
           rvp_connection: string[] | null
+          short_id: string | null
           target_group: string | null
           thumbnail_url: string | null
           title: string
@@ -180,6 +181,7 @@ export type Database = {
           publication_date?: string | null
           published?: boolean
           rvp_connection?: string[] | null
+          short_id?: string | null
           target_group?: string | null
           thumbnail_url?: string | null
           title: string
@@ -197,6 +199,7 @@ export type Database = {
           publication_date?: string | null
           published?: boolean
           rvp_connection?: string[] | null
+          short_id?: string | null
           target_group?: string | null
           thumbnail_url?: string | null
           title?: string

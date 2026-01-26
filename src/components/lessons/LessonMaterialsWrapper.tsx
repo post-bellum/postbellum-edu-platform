@@ -9,6 +9,8 @@ interface LessonMaterialsWrapperProps {
   materials: LessonMaterial[]
   initialUserMaterials: UserLessonMaterial[]
   lessonId: string
+  lessonTitle: string
+  lessonShortId?: string | null
   isLoggedIn: boolean
 }
 
@@ -16,6 +18,8 @@ export function LessonMaterialsWrapper({
   materials,
   initialUserMaterials,
   lessonId,
+  lessonTitle,
+  lessonShortId,
   isLoggedIn,
 }: LessonMaterialsWrapperProps) {
   const [userMaterials, setUserMaterials] = React.useState<UserLessonMaterial[]>(initialUserMaterials)
@@ -34,6 +38,8 @@ export function LessonMaterialsWrapper({
       <LessonMaterialsSection
         materials={materials}
         lessonId={lessonId}
+        lessonTitle={lessonTitle}
+        lessonShortId={lessonShortId}
         onMaterialCreated={handleMaterialCreated}
       />
 
@@ -42,6 +48,8 @@ export function LessonMaterialsWrapper({
         <UserLessonMaterialsSection
           materials={userMaterials}
           lessonId={lessonId}
+          lessonTitle={lessonTitle}
+          lessonShortId={lessonShortId}
           onMaterialDeleted={handleMaterialDeleted}
         />
       )}

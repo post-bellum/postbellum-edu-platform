@@ -9,6 +9,7 @@ export type LessonDuration = 30 | 45 | 90
 
 export interface Lesson {
   id: string
+  short_id: string | null // 10-char short ID for SEO-friendly URLs (like Medium)
   vimeo_video_url: string | null
   thumbnail_url: string | null
   title: string
