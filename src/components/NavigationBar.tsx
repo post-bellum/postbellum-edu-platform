@@ -87,7 +87,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                 className={cn(
                   'font-body text-lg transition-colors p-1',
                   isActive(link.href)
-                    ? 'font-semibold text-text-strong underline decoration-mint decoration-dotted underline-offset-[6px]'
+                    ? 'font-semibold text-text-strong underline decoration-mint decoration-2 decoration-dotted underline-offset-4'
                     : 'font-normal text-text-strong hover:text-text-subtle'
                 )}
               >
