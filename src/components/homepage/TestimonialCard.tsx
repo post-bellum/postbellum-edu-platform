@@ -7,7 +7,7 @@ interface TestimonialCardProps {
 
 export function TestimonialCard({ quote, name, role, avatarUrl }: TestimonialCardProps) {
   return (
-    <div className="flex flex-col justify-between bg-grey-50 border border-grey-100 rounded-[28px] p-10 h-full">
+    <div className="flex flex-col justify-between bg-grey-50 border border-[rgba(12,17,29,0.05)] rounded-[28px] p-10 h-[260px]">
       <p className="font-body text-xl font-semibold text-text-strong leading-[1.4]">
         {quote}
       </p>
@@ -20,7 +20,7 @@ export function TestimonialCard({ quote, name, role, avatarUrl }: TestimonialCar
             <span className="text-grey-500 text-xs">Foto</span>
           )}
         </div>
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col mt-2">
           <span className="font-body text-md font-semibold text-text-strong leading-[1.4]">
             {name}
           </span>

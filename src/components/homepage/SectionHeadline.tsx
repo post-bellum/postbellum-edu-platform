@@ -14,11 +14,13 @@ export function SectionHeadline({
       <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-strong leading-[1.2]">
         {title}
       </h2>
-      {description && (
+      {(description || showArrow) && (
         <div className="flex items-start gap-10 flex-1 justify-end">
-          <p className="font-body text-md text-text-subtle leading-[1.5] max-w-[560px]">
-            {description}
-          </p>
+          {description && (
+            <p className="font-body text-md text-text-subtle leading-[1.5] max-w-[560px]">
+              {description}
+            </p>
+          )}
           {showArrow && (
             <div className="w-9 h-9 shrink-0 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">

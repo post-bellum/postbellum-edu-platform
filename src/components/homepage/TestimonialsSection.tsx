@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { TestimonialCard } from './TestimonialCard';
 import { SectionHeadline } from './SectionHeadline';
 
@@ -47,56 +47,53 @@ export function TestimonialsSection() {
   const mobileTestimonial = testimonials[testimonialIndex % testimonials.length];
 
   return (
-    <section className="px-5 md:px-10">
-      <div className="max-w-[1840px] mx-auto">
-        {/* Section Header */}
-        <div className="px-5 md:px-20 py-8">
-          <SectionHeadline
-            title="Co o platformě říkají učitelé"
-            showArrow={false}
+    <section>
+      {/* Section Header - matching LessonsSection structure */}
+      <div className="px-5 md:px-30 py-7 mb-6">
+        <SectionHeadline
+          title="Co o platformě říkají učitelé"
+        />
+      </div>
+      
+      {/* Testimonials */}
+      <div className="px-5 md:px-10 pb-10 flex flex-col gap-8">
+        {/* Desktop: Show 2 testimonials at a time */}
+        <div className="hidden md:grid md:grid-cols-2 gap-5">
+          {desktopTestimonials.map((testimonial, index) => (
+            <TestimonialCard 
+              key={`${testimonialIndex}-${index}`}
+              quote={testimonial.quote}
+              name={testimonial.name}
+              role={testimonial.role}
+            />
+          ))}
+        </div>
+        
+        {/* Mobile: Show 1 testimonial with carousel */}
+        <div className="md:hidden">
+          <TestimonialCard 
+            quote={mobileTestimonial.quote}
+            name={mobileTestimonial.name}
+            role={mobileTestimonial.role}
           />
         </div>
         
-        {/* Testimonials */}
-        <div className="px-5 md:px-10 lg:px-20 pb-10">
-          {/* Desktop: Show 2 testimonials at a time */}
-          <div className="hidden md:grid md:grid-cols-2 gap-5">
-            {desktopTestimonials.map((testimonial, index) => (
-              <TestimonialCard 
-                key={`${testimonialIndex}-${index}`}
-                quote={testimonial.quote}
-                name={testimonial.name}
-                role={testimonial.role}
-              />
-            ))}
-          </div>
-          
-          {/* Mobile: Show 1 testimonial with carousel */}
-          <div className="md:hidden">
-            <TestimonialCard 
-              quote={mobileTestimonial.quote}
-              name={mobileTestimonial.name}
-              role={mobileTestimonial.role}
-            />
-          </div>
-          
-          {/* Navigation Arrows */}
-          <div className="flex justify-end gap-2 mt-8">
-            <button
-              onClick={prevTestimonial}
-              className="w-[60px] h-10 rounded-full border border-grey-200 bg-white flex items-center justify-center hover:bg-grey-50 transition-colors shadow-sm"
-              aria-label="Předchozí recenze"
-            >
-              <ChevronLeft className="w-5 h-5 text-grey-600" />
-            </button>
-            <button
-              onClick={nextTestimonial}
-              className="w-[60px] h-10 rounded-full border border-grey-200 bg-white flex items-center justify-center hover:bg-grey-50 transition-colors shadow-sm"
-              aria-label="Další recenze"
-            >
-              <ChevronRight className="w-5 h-5 text-grey-600" />
-            </button>
-          </div>
+        {/* Navigation Arrows */}
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={prevTestimonial}
+            className="rounded-full border-[1.25px] border-grey-200 bg-white flex items-center justify-center px-5 py-2.5 hover:bg-grey-50 transition-colors shadow-sm"
+            aria-label="Předchozí recenze"
+          >
+            <ArrowLeft className="w-4 h-4 text-grey-600" />
+          </button>
+          <button
+            onClick={nextTestimonial}
+            className="rounded-full border-[1.25px] border-grey-200 bg-white flex items-center justify-center px-5 py-2.5 hover:bg-grey-50 transition-colors shadow-sm"
+            aria-label="Další recenze"
+          >
+            <ArrowRight className="w-4 h-4 text-grey-600" />
+          </button>
         </div>
       </div>
     </section>
