@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/Button'
 import { Plus, Edit } from 'lucide-react'
 import { DeleteLessonButton } from '@/components/lessons/DeleteLessonButton'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
+import { generateLessonUrl } from '@/lib/utils'
 
 interface AdminControlsProps {
   lessonId?: string
+  lessonShortId?: string | null // Prefer short_id for SEO-friendly URLs
   lessonTitle?: string
   showNewButton?: boolean
   showEditButton?: boolean // Show edit button for lesson detail page
@@ -16,6 +18,7 @@ interface AdminControlsProps {
 
 export function AdminControls({ 
   lessonId, 
+  lessonShortId,
   lessonTitle, 
   showNewButton = false,
   showEditButton = false 
@@ -47,6 +50,11 @@ export function AdminControls({
 
   if (loading || !isAdmin) return null
 
+  // Generate proper SEO-friendly edit URL using short_id if available
+  const editUrl = lessonId && lessonTitle 
+    ? `${generateLessonUrl(lessonShortId || lessonId, lessonTitle)}/edit`
+    : null
+
   return (
     <>
       {showNewButton && (
@@ -57,9 +65,9 @@ export function AdminControls({
           </Button>
         </Link>
       )}
-      {showEditButton && lessonId && lessonTitle && (
+      {showEditButton && editUrl && lessonId && lessonTitle && (
         <div className="flex gap-2">
-          <Link href={`/lessons/${lessonId}/edit`}>
+          <Link href={editUrl}>
             <Button>
               <Edit />
               Upravit lekci
@@ -68,9 +76,9 @@ export function AdminControls({
           <DeleteLessonButton lessonId={lessonId} lessonTitle={lessonTitle} />
         </div>
       )}
-      {!showEditButton && lessonId && lessonTitle && (
+      {!showEditButton && editUrl && lessonId && lessonTitle && (
         <div className="flex gap-2">
-          <Link href={`/lessons/${lessonId}/edit`}>
+          <Link href={editUrl}>
             <Button variant="outline" size="sm">
               Upravit
             </Button>

@@ -90,7 +90,7 @@ function LessonCard({ lesson }: { lesson: LessonWithRelations }) {
         >
           <EyeIcon className="w-5 h-5 text-grey-500" />
         </Link>
-        <AdminControls lessonId={lesson.id} lessonTitle={lesson.title} />
+        <AdminControls lessonId={lesson.id} lessonShortId={lesson.short_id} lessonTitle={lesson.title} />
       </div>
     </article>
   )

@@ -4,11 +4,12 @@ import { AdminControls } from './AdminControls'
 
 interface LessonDetailHeaderProps {
   lessonId: string
+  shortId?: string | null
   title: string
   published: boolean
 }
 
-export function LessonDetailHeader({ lessonId, title, published }: LessonDetailHeaderProps) {
+export function LessonDetailHeader({ lessonId, shortId, title, published }: LessonDetailHeaderProps) {
   return (
     <div>
       <div className="flex items-center justify-between gap-4">
@@ -30,7 +31,7 @@ export function LessonDetailHeader({ lessonId, title, published }: LessonDetailH
           </div>
         </div>
         {/* AdminControls handles its own visibility via client-side admin check */}
-        <AdminControls lessonId={lessonId} lessonTitle={title} showEditButton={true} />
+        <AdminControls lessonId={lessonId} lessonShortId={shortId} lessonTitle={title} showEditButton={true} />
       </div>
     </div>
   )

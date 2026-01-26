@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/Textarea'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { TagsSelector } from './TagsSelector'
 import { ThumbnailUpload } from './ThumbnailUpload'
+import { generateLessonUrl } from '@/lib/utils'
 
 interface LessonFormProps {
   lesson?: LessonWithRelations
@@ -64,8 +65,13 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
     if (state?.success && state.data) {
       // Redirect to edit page for newly created lessons (which are unpublished by default)
       // This ensures admins can view/edit their newly created lessons
+      // Use short_id for SEO-friendly URLs if available
+      const lessonUrl = generateLessonUrl(
+        state.data.short_id || state.data.id,
+        state.data.title
+      )
       React.startTransition(() => {
-        router.push(`/lessons/${state.data.id}/edit`)
+        router.push(`${lessonUrl}/edit`)
       })
     }
   }, [state, router])

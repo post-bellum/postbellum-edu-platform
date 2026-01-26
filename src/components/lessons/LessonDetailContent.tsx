@@ -55,6 +55,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
       
       <LessonDetailHeader 
         lessonId={lesson.id} 
+        shortId={lesson.short_id}
         title={lesson.title} 
         published={lesson.published} 
       />
