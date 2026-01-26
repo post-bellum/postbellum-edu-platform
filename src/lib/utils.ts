@@ -109,7 +109,7 @@ export function slugify(text: string): string {
  * @example generateLessonUrl("abc-uuid", "Title") => "/lessons/title-abc-uuid" (fallback)
  */
 export function generateLessonUrl(id: string, title: string): string {
-  const slug = slugify(title)
+  const slug = slugify(title) || 'lekce' // Fallback for titles with only special characters
   return `/lessons/${slug}-${id}`
 }
 
