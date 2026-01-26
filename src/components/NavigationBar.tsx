@@ -63,7 +63,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-surface py-4">
-      <div className="w-full px-5 xl:px-10 2xl:px-[120px]">
+      <div className="w-full max-w-[1920px] mx-auto px-5 md:px-10">
         <div className="flex h-12 items-center justify-between">
           {/* Left - Logo */}
           <div className="flex items-center md:min-w-[240px]">
@@ -71,8 +71,8 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
               <Image
                 src="/logo-storyon.svg"
                 alt="StoryOn"
-                width={140}
-                height={25}
+                width={200}
+                height={36}
                 priority
               />
             </Link>
@@ -87,7 +87,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                 className={cn(
                   'font-body text-lg transition-colors p-1',
                   isActive(link.href)
-                    ? 'font-semibold text-text-strong underline decoration-mint decoration-dotted underline-offset-[6px]'
+                    ? 'font-semibold text-text-strong underline decoration-mint decoration-2 decoration-dotted underline-offset-4'
                     : 'font-normal text-text-strong hover:text-text-subtle'
                 )}
               >
@@ -132,7 +132,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                   Přihlásit
                 </Button>
                 <Button
-                  variant="primary"
+                  variant="ultra"
                   size="medium"
                   onClick={() => handleOpenAuth('register')}
                 >
@@ -174,8 +174,8 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                     <Image
                       src="/logo-storyon.svg"
                       alt="StoryOn"
-                      width={140}
-                      height={25}
+                      width={200}
+                      height={36}
                       priority
                     />
                   </Link>
@@ -260,7 +260,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                   ) : (
                     <div className="flex flex-col gap-3 px-4">
                       <Button
-                        variant="primary"
+                        variant="ultra"
                         size="large"
                         onClick={() => handleOpenAuth('register')}
                         className="w-full"
