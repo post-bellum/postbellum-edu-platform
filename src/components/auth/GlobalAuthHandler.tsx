@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { CompleteRegistrationModal } from './CompleteRegistrationModal';
 import { OAuthErrorDisplay } from './OAuthErrorDisplay';
 import { useAuth } from '@/lib/supabase/hooks/useAuth';
-import { hasCompletedRegistration, getUserProfile } from '@/lib/supabase/user-profile';
+import { hasCompletedRegistration } from '@/lib/supabase/user-profile';
 import { logger } from '@/lib/logger';
 
 /**
@@ -70,10 +70,8 @@ export function GlobalAuthHandler() {
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <CompleteRegistrationModal 
-            onSuccess={async () => {
+            onSuccess={() => {
               setShowCompleteRegistration(false);
-              const profile = await getUserProfile();
-              logger.info('User profile updated', profile);
             }}
           />
         </DialogContent>

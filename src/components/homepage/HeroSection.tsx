@@ -24,8 +24,8 @@ export function HeroSection() {
         </div>
         
         {/* Hero Illustration */}
-        <div className="relative w-full aspect-[353/300] sm:aspect-[768/350] md:aspect-[1024/400] lg:aspect-[1440/464]">
-          <div className="absolute left-0 right-0 bottom-[-40px] sm:bottom-[-60px] md:bottom-[-82px] aspect-[4096/2000]">
+        <div className="relative w-full aspect-353/300 sm:aspect-768/350 md:aspect-1024/400 lg:aspect-1440/464">
+          <div className="absolute left-0 right-0 bottom-[-40px] sm:bottom-[-60px] md:bottom-[-82px] aspect-4096/2000">
             <ImageReveal
               strokeSrc="/illustrations/homepage/illustration-stroke.png"
               coloredSrc="/illustrations/homepage/illustration-colored.png"
@@ -38,6 +38,7 @@ export function HeroSection() {
               autoPlayDelay={200}
               fill={true}
               objectFit="cover"
+              sizes="100vw"
               className="w-full h-full"
             />
           </div>

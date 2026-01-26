@@ -10,18 +10,21 @@ import type { Lesson } from '@/types/lesson.types';
 export function LessonsSection() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function fetchLessons() {
       try {
+        setError(false);
         const data = await getLessons({ 
           published_only: true,
           usePublicClient: true 
         });
         // Take only first 4 lessons for homepage
         setLessons(data.slice(0, 4));
-      } catch (error) {
-        logger.error('Error fetching lessons for homepage', error);
+      } catch (err) {
+        logger.error('Error fetching lessons for homepage', err);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -57,6 +60,10 @@ export function LessonsSection() {
                   <div className="h-10 w-10 mx-auto bg-grey-200 rounded-full" />
                 </div>
               ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-text-subtle">Nepodařilo se načíst lekce. Zkuste to prosím později.</p>
             </div>
           ) : lessons.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8 lg:gap-20">

@@ -24,27 +24,27 @@ const testimonials = [
 ];
 
 export function TestimonialsSection() {
-  const [testimonialIndex, setTestimonialIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // For desktop: show 2 testimonials at a time
-  const getDesktopTestimonials = () => {
-    const startIndex = (testimonialIndex * 2) % testimonials.length;
-    const first = testimonials[startIndex];
-    const second = testimonials[(startIndex + 1) % testimonials.length];
-    return [first, second];
+  // Desktop shows 2 testimonials, mobile shows 1
+  const getVisibleTestimonials = (count: number) => {
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push(testimonials[(currentIndex + i) % testimonials.length]);
+    }
+    return result;
   };
 
   const nextTestimonial = () => {
-    setTestimonialIndex((prev) => (prev + 1) % Math.ceil(testimonials.length / 2));
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const prevTestimonial = () => {
-    const maxPages = Math.ceil(testimonials.length / 2);
-    setTestimonialIndex((prev) => (prev - 1 + maxPages) % maxPages);
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
-  const desktopTestimonials = getDesktopTestimonials();
-  const mobileTestimonial = testimonials[testimonialIndex % testimonials.length];
+  const desktopTestimonials = getVisibleTestimonials(2);
+  const mobileTestimonial = testimonials[currentIndex];
 
   return (
     <section>
@@ -61,7 +61,7 @@ export function TestimonialsSection() {
         <div className="hidden md:grid md:grid-cols-2 gap-5">
           {desktopTestimonials.map((testimonial, index) => (
             <TestimonialCard 
-              key={`${testimonialIndex}-${index}`}
+              key={`${currentIndex}-${index}`}
               quote={testimonial.quote}
               name={testimonial.name}
               role={testimonial.role}

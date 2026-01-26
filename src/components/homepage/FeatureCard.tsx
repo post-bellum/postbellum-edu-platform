@@ -9,7 +9,7 @@ interface FeatureCardProps {
 export function FeatureCard({ title, description, icon }: FeatureCardProps) {
   return (
     <div className="flex flex-col items-center gap-5 text-center">
-      <div className="w-20 h-20 relative">
+      <div className="w-20 h-20 relative" aria-hidden="true">
         <Image
           src={icon}
           alt=""

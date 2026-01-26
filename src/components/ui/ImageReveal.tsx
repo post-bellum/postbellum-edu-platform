@@ -43,6 +43,8 @@ interface ImageRevealProps {
   objectFit?: 'contain' | 'cover';
   /** Use fill mode for responsive sizing (container controls size) */
   fill?: boolean;
+  /** Responsive sizes attribute for Next.js Image optimization */
+  sizes?: string;
 }
 
 export function ImageReveal({
@@ -61,6 +63,7 @@ export function ImageReveal({
   triggerOnScroll = false,
   objectFit = 'contain',
   fill = false,
+  sizes,
 }: ImageRevealProps) {
   const [isRevealed, setIsRevealed] = useState(false);
   const [hasTriggered, setHasTriggered] = useState(false);
@@ -159,6 +162,7 @@ export function ImageReveal({
         width={fill ? undefined : width}
         height={fill ? undefined : height}
         fill={fill}
+        sizes={fill ? sizes : undefined}
         className={`absolute inset-0 w-full h-full ${objectFitClass}`}
         priority
       />
@@ -187,6 +191,7 @@ export function ImageReveal({
             width={fill ? undefined : width}
             height={fill ? undefined : height}
             fill={fill}
+            sizes={fill ? sizes : undefined}
             className={`w-full h-full ${objectFitClass}`}
             priority
           />
@@ -198,6 +203,7 @@ export function ImageReveal({
           width={fill ? undefined : width}
           height={fill ? undefined : height}
           fill={fill}
+          sizes={fill ? sizes : undefined}
           className={`absolute inset-0 w-full h-full ${objectFitClass}`}
           style={{
             opacity: isCrossfade ? (isRevealed ? 1 : 0) : 1,
@@ -236,14 +242,18 @@ export function ImageRevealInteractive({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isRevealing, setIsRevealing] = useState(false);
-  const [maskUrl, setMaskUrl] = useState<string>('');
+  const maskLayerRef = useRef<HTMLDivElement>(null);
+  const isRevealingRef = useRef(false);
+  const [, forceUpdate] = useState(0); // Only for button clicks
 
-  // Update mask URL from canvas
-  const updateMaskUrl = useCallback(() => {
+  // Update mask directly via DOM (no React re-render)
+  const updateMaskDirect = useCallback(() => {
     const canvas = canvasRef.current;
-    if (canvas) {
-      setMaskUrl(canvas.toDataURL());
+    const maskLayer = maskLayerRef.current;
+    if (canvas && maskLayer) {
+      const dataUrl = canvas.toDataURL();
+      maskLayer.style.maskImage = `url(${dataUrl})`;
+      maskLayer.style.webkitMaskImage = `url(${dataUrl})`;
     }
   }, []);
 
@@ -258,12 +268,12 @@ export function ImageRevealInteractive({
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, width, height);
     
-    // Update mask URL after initialization
-    updateMaskUrl();
-  }, [width, height, updateMaskUrl]);
+    // Update mask after initialization
+    updateMaskDirect();
+  }, [width, height, updateMaskDirect]);
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isRevealing) return;
+    if (!isRevealingRef.current) return;
 
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -290,13 +300,13 @@ export function ImageRevealInteractive({
     ctx.arc(x, y, brushSize, 0, Math.PI * 2);
     ctx.fill();
     
-    // Update mask URL after drawing
-    updateMaskUrl();
+    // Update mask directly (no React re-render)
+    updateMaskDirect();
   };
 
-  const handlePointerDown = () => setIsRevealing(true);
-  const handlePointerUp = () => setIsRevealing(false);
-  const handlePointerLeave = () => setIsRevealing(false);
+  const handlePointerDown = () => { isRevealingRef.current = true; };
+  const handlePointerUp = () => { isRevealingRef.current = false; };
+  const handlePointerLeave = () => { isRevealingRef.current = false; };
 
   const resetCanvas = () => {
     const canvas = canvasRef.current;
@@ -309,8 +319,8 @@ export function ImageRevealInteractive({
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, width, height);
     
-    // Update mask URL after reset
-    updateMaskUrl();
+    updateMaskDirect();
+    forceUpdate(n => n + 1); // Trigger re-render for button state if needed
   };
 
   const revealAll = () => {
@@ -322,8 +332,8 @@ export function ImageRevealInteractive({
 
     ctx.clearRect(0, 0, width, height);
     
-    // Update mask URL after reveal
-    updateMaskUrl();
+    updateMaskDirect();
+    forceUpdate(n => n + 1); // Trigger re-render for button state if needed
   };
 
   return (
@@ -349,11 +359,8 @@ export function ImageRevealInteractive({
 
         {/* Stroke version with canvas mask */}
         <div
+          ref={maskLayerRef}
           className="absolute inset-0 w-full h-full"
-          style={{
-            maskImage: maskUrl ? `url(${maskUrl})` : undefined,
-            WebkitMaskImage: maskUrl ? `url(${maskUrl})` : undefined,
-          }}
         >
           <Image
             src={strokeSrc}
