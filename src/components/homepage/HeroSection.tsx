@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ImageReveal } from '@/components/ui/ImageReveal';
+import { Button } from '@/components/ui/Button';
 import { Ticker } from './Ticker';
 
 export function HeroSection() {
@@ -14,12 +15,9 @@ export function HeroSection() {
             <h1 className="font-display text-[28px] sm:text-3xl md:text-4xl lg:text-[44px] font-semibold text-text-strong text-center leading-[1.2]">
               Zapněte příběhy do své výuky.
             </h1>
-            <Link
-              href="/lessons"
-              className="inline-flex items-center justify-center gap-1 bg-mint border-[1.25px] border-grey-950 rounded-full px-6 sm:px-7 py-2.5 sm:py-3 font-body text-base sm:text-lg font-semibold text-grey-950 hover:bg-mint/80 transition-colors"
-            >
-              Přejít na lekce
-            </Link>
+            <Button variant="mint" size="large" asChild className="z-10">
+              <Link href="/lessons">Přejít na lekce</Link>
+            </Button>
           </div>
         </div>
         

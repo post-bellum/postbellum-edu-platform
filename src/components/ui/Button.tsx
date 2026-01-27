@@ -12,6 +12,8 @@ const buttonVariants = cva(
         // Post Bellum variants
         ultra:
           'bg-grey-950 text-white hover:bg-mint-light hover:text-grey-950 border border-transparent hover:border-grey-950 disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
+        mint:
+          'bg-mint text-grey-950 border border-grey-950 hover:bg-mint-light hover:scale-[1.03] hover:shadow-lg active:scale-[0.98] transition-all duration-200 disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
         primary:
           'bg-brand-primary text-white hover:bg-brand-primary-hover disabled:bg-grey-50 disabled:text-grey-300 disabled:border disabled:border-grey-100',
         secondary:
