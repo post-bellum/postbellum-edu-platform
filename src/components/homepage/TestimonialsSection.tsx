@@ -47,16 +47,17 @@ export function TestimonialsSection() {
   const mobileTestimonial = testimonials[currentIndex];
 
   return (
-    <section>
-      {/* Section Header - matching LessonsSection structure */}
-      <div className="px-5 md:px-30 py-7 mb-6">
+    <section className="px-5 xl:px-10">
+      <div className="2xl:max-w-[1680px] mx-auto">
+        {/* Section Header - matching LessonsSection structure */}
+        <div className="px-5 xl:px-20 py-7 mb-6">
         <SectionHeadline
           title="Co o platformě říkají učitelé"
         />
       </div>
       
       {/* Testimonials */}
-      <div className="px-5 md:px-10 pb-10 flex flex-col gap-8">
+      <div className="pb-10 flex flex-col gap-8">
         {/* Desktop: Show 2 testimonials at a time */}
         <div className="hidden md:grid md:grid-cols-2 gap-5">
           {desktopTestimonials.map((testimonial, index) => (
@@ -95,6 +96,7 @@ export function TestimonialsSection() {
             <ArrowRight className="w-4 h-4 text-grey-600" />
           </button>
         </div>
+      </div>
       </div>
     </section>
   );

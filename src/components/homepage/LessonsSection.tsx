@@ -34,9 +34,10 @@ export function LessonsSection() {
   }, []);
 
   return (
-    <section className="px-5 md:px-10">
-      {/* Section Header - OUTSIDE grey background */}
-      <div className="px-5 md:px-20 py-3 mb-10">
+    <section className="px-5 xl:px-10">
+      <div className="2xl:max-w-[1680px] mx-auto">
+        {/* Section Header - OUTSIDE grey background */}
+        <div className="px-5 xl:px-20 py-3 mb-10">
         <SectionHeadline
           title="Vybrané lekce pro vás"
           description="Pravidelně přidáváme nové materiály, které reagují na aktuální výuková témata. Vše připraveno tak, aby šlo ihned použít ve třídě – bez složité přípravy."
@@ -46,7 +47,7 @@ export function LessonsSection() {
       {/* Grey background card area */}
       <div className="bg-grey-50 border border-grey-100 rounded-[28px] sm:rounded-[40px] md:rounded-[60px] pt-10 pb-12 md:pt-10 md:pb-[60px]">
         {/* Lessons Grid */}
-        <div className="px-5 md:px-10">
+        <div className="px-5 xl:px-10">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8 lg:gap-20">
               {[...Array(4)].map((_, i) => (
@@ -77,6 +78,7 @@ export function LessonsSection() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </section>
   );

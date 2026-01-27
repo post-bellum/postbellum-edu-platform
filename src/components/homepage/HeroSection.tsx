@@ -7,7 +7,7 @@ import { Ticker } from './Ticker';
 
 export function HeroSection() {
   return (
-    <section className="px-5 md:px-10">
+    <section className="px-5 xl:px-10">
       <div className="bg-[#e2f2f2] rounded-[28px] sm:rounded-[40px] md:rounded-[60px] overflow-hidden border border-grey-100">
         {/* Hero Content */}
         <div className="flex flex-col items-center px-5 py-10">
