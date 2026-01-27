@@ -17,6 +17,7 @@ interface TagsSelectorProps {
 export function TagsSelector({ tags, selectedTagIds, onSelectionChange }: TagsSelectorProps) {
   const [newTagTitle, setNewTagTitle] = React.useState('')
   const [isCreating, setIsCreating] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
   const [localTags, setLocalTags] = React.useState<Tag[]>(tags)
 
   const handleToggleTag = (tagId: string) => {
@@ -35,15 +36,28 @@ export function TagsSelector({ tags, selectedTagIds, onSelectionChange }: TagsSe
     if (!newTagTitle.trim()) return
 
     setIsCreating(true)
+    setError(null)
+    
     try {
       const result = await createTagAction(newTagTitle.trim())
       if (result.success && result.data) {
-        setLocalTags([...localTags, result.data])
-        onSelectionChange([...selectedTagIds, result.data.id])
+        // Check if tag already exists in localTags (in case of duplicate)
+        const existingTag = localTags.find(t => t.id === result.data.id)
+        if (!existingTag) {
+          setLocalTags([...localTags, result.data])
+        }
+        
+        // Select the tag if not already selected
+        if (!selectedTagIds.includes(result.data.id)) {
+          onSelectionChange([...selectedTagIds, result.data.id])
+        }
         setNewTagTitle('')
+      } else if (!result.success && result.error) {
+        setError(result.error)
       }
     } catch (error) {
       logger.error('Error creating tag:', error)
+      setError('Nepodařilo se vytvořit tag')
     } finally {
       setIsCreating(false)
     }
@@ -60,13 +74,13 @@ export function TagsSelector({ tags, selectedTagIds, onSelectionChange }: TagsSe
             return (
               <span
                 key={tagId}
-                className="inline-flex items-center gap-2 px-3 py-1 bg-primary text-white rounded-full text-sm"
+                className="inline-flex items-center gap-2 px-3 py-1 bg-brand-primary text-white rounded-full text-sm"
               >
                 {tag.title}
                 <button
                   type="button"
                   onClick={() => handleToggleTag(tagId)}
-                  className="hover:bg-primary-hover rounded-full p-0.5"
+                  className="hover:bg-brand-primary-hover rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -93,27 +107,35 @@ export function TagsSelector({ tags, selectedTagIds, onSelectionChange }: TagsSe
       </div>
 
       {/* Create New Tag */}
-      <div className="flex gap-2">
-        <Input
-          value={newTagTitle}
-          onChange={(e) => setNewTagTitle(e.target.value)}
-          placeholder="Nový tag..."
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              handleCreateTag()
-            }
-          }}
-        />
-        <Button
-          type="button"
-          onClick={handleCreateTag}
-          disabled={!newTagTitle.trim() || isCreating}
-          size="sm"
-        >
-          <Plus />
-          Přidat
-        </Button>
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <Input
+            value={newTagTitle}
+            onChange={(e) => {
+              setNewTagTitle(e.target.value)
+              if (error) setError(null)
+            }}
+            placeholder="Nový tag..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                handleCreateTag()
+              }
+            }}
+          />
+          <Button
+            type="button"
+            onClick={handleCreateTag}
+            disabled={!newTagTitle.trim() || isCreating}
+            size="sm"
+          >
+            <Plus />
+            Přidat
+          </Button>
+        </div>
+        {error && (
+          <p className="text-sm text-red-600">{error}</p>
+        )}
       </div>
     </div>
   )
