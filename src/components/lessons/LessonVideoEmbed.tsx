@@ -5,19 +5,13 @@ interface LessonVideoEmbedProps {
 
 export function LessonVideoEmbed({ videoUrl, title }: LessonVideoEmbedProps) {
   return (
-    <div className="relative rounded-lg overflow-hidden bg-gray-100" style={{ paddingTop: '56.25%' }}>
+    <div className="relative w-full max-w-[1260px] aspect-video rounded-[28px] overflow-hidden bg-black">
       <iframe
         src={videoUrl}
         frameBorder="0"
         allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
         referrerPolicy="strict-origin-when-cross-origin"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%'
-        }}
+        className="absolute inset-0 w-full h-full"
         title={title}
       />
     </div>
