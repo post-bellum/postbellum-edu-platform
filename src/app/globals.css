@@ -459,3 +459,17 @@
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+/* ============================================
+   Button Text Vertical Alignment Fix
+   Tablet Gothic font sits slightly high, this compensates
+   ============================================ */
+button,
+[role="button"],
+a[class*="rounded-full"][class*="inline-flex"],
+a[class*="rounded-full"][class*="flex"] {
+  /* Shift text content down slightly to visually center */
+  & > *:not(svg) {
+    transform: translateY(-1px);
+  }
+}

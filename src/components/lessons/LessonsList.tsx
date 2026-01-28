@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { getLessons } from '@/lib/supabase/lessons'
 import { AdminControls } from '@/components/lessons/AdminControls'
 import { isAdmin } from '@/lib/supabase/admin-helpers'
-import { EyeIcon } from '@/components/ui/Icons'
+import { ViewButton } from '@/components/ui/ViewButton'
 import { LessonThumbnail } from './LessonThumbnail'
 import type { LessonWithRelations, Tag } from '@/types/lesson.types'
 import { generateLessonUrlFromLesson } from '@/lib/utils'
@@ -73,23 +73,11 @@ function LessonCard({ lesson }: { lesson: LessonWithRelations }) {
       </div>
 
       {/* Mobile View Button */}
-      <Link
-        href={lessonUrl}
-        className="flex sm:hidden items-center justify-center gap-1 px-4 py-1.5 bg-white border border-grey-200 rounded-full shadow-sm hover:bg-grey-50 transition-colors"
-      >
-        <EyeIcon className="w-5 h-5 text-grey-500" />
-        <span className="text-sm font-semibold text-text-strong leading-7">Zobrazit</span>
-      </Link>
+      <ViewButton href={lessonUrl} className="sm:hidden" />
 
       {/* Desktop Actions */}
       <div className="hidden sm:flex flex-col items-center justify-center self-stretch shrink-0 gap-2">
-        <Link
-          href={lessonUrl}
-          className="flex items-center justify-center w-[52px] md:w-[60px] h-[40px] md:h-[44px] bg-white border border-grey-200 rounded-full shadow-sm hover:bg-grey-50 transition-colors"
-          title="Zobrazit lekci"
-        >
-          <EyeIcon className="w-5 h-5 text-grey-500" />
-        </Link>
+        <ViewButton href={lessonUrl} />
         <AdminControls lessonId={lesson.id} lessonShortId={lesson.short_id} lessonTitle={lesson.title} />
       </div>
     </article>

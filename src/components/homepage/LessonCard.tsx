@@ -1,6 +1,5 @@
-import Link from 'next/link';
-import { Eye } from 'lucide-react';
 import { LessonThumbnail } from '@/components/lessons/LessonThumbnail';
+import { ViewButton } from '@/components/ui/ViewButton';
 import { generateLessonUrlFromLesson } from '@/lib/utils';
 import type { Lesson } from '@/types/lesson.types';
 
@@ -36,12 +35,7 @@ export function LessonCard({ lesson }: LessonCardProps) {
         )}
       </div>
       
-      <Link 
-        href={lessonUrl}
-        className="inline-flex items-center justify-center w-15 h-10 rounded-full border border-grey-200 bg-white shadow-sm hover:bg-grey-50 transition-colors"
-      >
-        <Eye className="w-5 h-5 text-grey-500" />
-      </Link>
+      <ViewButton href={lessonUrl} className="self-start" />
     </div>
   );
 }
