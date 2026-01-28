@@ -12,8 +12,8 @@ interface LessonDetailHeaderProps {
 export function LessonDetailHeader({ lessonId, shortId, title, published }: LessonDetailHeaderProps) {
   return (
     <div>
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
+      <div className="flex justify-between gap-4 2xl:mb-14">
+        <div className="flex items-start gap-2">
           <Link 
             href="/lessons" 
             className="shrink-0 flex items-center justify-center w-14 h-14 rounded-full text-brand-primary hover:bg-mint transition-colors translate-y-0.5"

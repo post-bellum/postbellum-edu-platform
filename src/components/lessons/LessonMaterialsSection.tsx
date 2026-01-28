@@ -138,7 +138,7 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
             <button
               key={value}
               onClick={() => setSelectedSpecification(value as LessonSpecification)}
-              className={`px-5 h-9 leading-9 rounded-full text-md transition-all ${
+              className={`px-8 h-9 leading-9 rounded-full text-md transition-all cursor-pointer ${
                 selectedSpecification === value
                   ? 'bg-brand-primary text-white shadow-sm font-semibold'
                   : 'text-grey-600 hover:text-grey-950'
@@ -155,8 +155,8 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
             <button
               key={value}
               onClick={() => setSelectedDuration(parseInt(value) as LessonDuration)}
-              className={`px-5 h-9 leading-9 rounded-full text-md transition-all ${
-                selectedDuration === parseInt(value)
+              className={`px-4 h-9 leading-9 rounded-full text-md transition-all cursor-pointer ${
+                selectedDuration === parseInt(value) as LessonDuration
                   ? 'bg-brand-primary text-white shadow-sm font-semibold'
                   : 'text-grey-600 hover:text-grey-950'
               }`}
