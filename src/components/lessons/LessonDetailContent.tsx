@@ -13,7 +13,7 @@ import { FavoriteButton } from '@/components/lessons/FavoriteButton'
 import { FavoriteCTA } from '@/components/lessons/FavoriteCTA'
 import { LessonVideoEmbed } from '@/components/lessons/LessonVideoEmbed'
 import { LessonDetailInfo } from '@/components/lessons/LessonDetailInfo'
-import { BottomIllustration } from '../homepage/BottomIllustration'
+import { BottomIllustration } from '@/components/homepage/BottomIllustration'
 
 interface LessonDetailContentProps {
   id: string
@@ -108,7 +108,7 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
           </div>
         </div>
       </div>
-      <div className="xl:my-15">
+      <div className="xl:my-16">
         <BottomIllustration />
       </div>
     </div>
