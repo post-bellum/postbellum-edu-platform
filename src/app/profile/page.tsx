@@ -17,6 +17,7 @@ import {
 import { ProfileTabs, type TabId } from '@/components/profile/ProfileTabs'
 import { getAllUserMaterialsAction } from '@/app/actions/user-materials'
 import { deleteUserLessonMaterialAction, duplicateUserLessonMaterialAction } from '@/app/actions/user-lesson-materials'
+import { generateLessonUrl } from '@/lib/utils'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
 export default function ProfilePage() {
@@ -36,7 +37,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = React.useState<TabId>('settings')
 
   // Materials state
-  const [materials, setMaterials] = React.useState<Array<UserLessonMaterial & { lesson_title: string }>>([])
+  const [materials, setMaterials] = React.useState<Array<UserLessonMaterial & { lesson_title: string; lesson_short_id: string | null }>>([])
   const [loadingMaterials, setLoadingMaterials] = React.useState(false)
   
   // Feedback modal state
@@ -134,18 +135,15 @@ export default function ProfilePage() {
       const result = await duplicateUserLessonMaterialAction(materialId, lessonId)
       
       if (result.success && result.data) {
-        // Add the new material to local state
-        const newMaterial = {
-          ...result.data,
-          lesson_title: materials.find(m => m.lesson_id === lessonId)?.lesson_title || 'Unknown Lesson'
-        }
-        setMaterials(prev => [newMaterial, ...prev])
-        setFeedbackModal({
-          open: true,
-          type: 'success',
-          title: 'Materiál duplikován',
-          message: 'Materiál byl úspěšně duplikován.'
-        })
+        // Find the original material to get lesson info
+        const originalMaterial = materials.find(m => m.id === materialId)
+        const lessonTitle = originalMaterial?.lesson_title || 'Unknown Lesson'
+        const lessonShortId = originalMaterial?.lesson_short_id
+        
+        // Generate URL and redirect to the new material
+        const idToUse = lessonShortId || lessonId
+        const baseLessonUrl = generateLessonUrl(idToUse, lessonTitle)
+        router.push(`${baseLessonUrl}/materials/${result.data.id}`)
       } else {
         setFeedbackModal({
           open: true,
@@ -191,51 +189,51 @@ export default function ProfilePage() {
         </div>
 
         {/* Two Column Layout (Desktop) / Single Column (Mobile) */}
-        <div className="flex flex-col md:flex-row gap-11 md:gap-[60px]">
+        <div className={`flex flex-col md:flex-row ${activeTab === 'materials' ? 'gap-11 lg:gap-20' : 'gap-11 md:gap-[60px]'}`}>
           {/* Left Sidebar Navigation (Desktop only) */}
           <aside className="hidden md:block shrink-0">
             <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} variant="vertical" />
           </aside>
 
           {/* Right Content Area */}
-          <main className="flex-1 min-w-0 flex justify-center">
-            <div className="w-full max-w-[880px]">
-              {activeTab === 'settings' && (
-                <div className="space-y-8">
-                  {/* Success/Error Messages */}
-                  <AlertMessage success={success} error={error} />
+          <main className="flex-1 min-w-0">
+            {activeTab === 'settings' && (
+              <div className="w-full max-w-[880px] mx-auto space-y-8">
+                {/* Success/Error Messages */}
+                <AlertMessage success={success} error={error} />
 
-                  {/* User Type Display (Read-only) */}
-                  <UserTypeSection userType={profile.userType} />
+                {/* User Type Display (Read-only) */}
+                <UserTypeSection userType={profile.userType} />
 
-                  {/* School Name (for teachers) */}
-                  {profile.userType === 'teacher' && (
-                    <SchoolNameSection
-                      schoolName={schoolName}
-                      onSchoolNameChange={setSchoolName}
-                      onSave={handleSaveSchoolName}
-                      isSaving={isSaving}
-                    />
-                  )}
-
-                  {/* Avatar Section */}
-                  <AvatarSection email={profile.email} />
-
-                  {/* Display Name Section */}
-                  <DisplayNameSection
-                    displayName={displayName}
-                    onDisplayNameChange={setDisplayName}
-                    onSave={handleSaveDisplayName}
+                {/* School Name (for teachers) */}
+                {profile.userType === 'teacher' && (
+                  <SchoolNameSection
+                    schoolName={schoolName}
+                    onSchoolNameChange={setSchoolName}
+                    onSave={handleSaveSchoolName}
                     isSaving={isSaving}
                   />
+                )}
 
-                  {/* Delete Account Section */}
-                  <DeleteAccountSection />
-                </div>
-              )}
+                {/* Avatar Section */}
+                <AvatarSection email={profile.email} />
 
-              {activeTab === 'materials' && (
-                loadingMaterials ? (
+                {/* Display Name Section */}
+                <DisplayNameSection
+                  displayName={displayName}
+                  onDisplayNameChange={setDisplayName}
+                  onSave={handleSaveDisplayName}
+                  isSaving={isSaving}
+                />
+
+                {/* Delete Account Section */}
+                <DeleteAccountSection />
+              </div>
+            )}
+
+            {activeTab === 'materials' && (
+              <div className="w-full">
+                {loadingMaterials ? (
                   <div className="text-center py-12">
                     <p>Načítání materiálů...</p>
                   </div>
@@ -245,9 +243,9 @@ export default function ProfilePage() {
                     onDelete={handleDeleteMaterial}
                     onDuplicate={handleDuplicateMaterial}
                   />
-                )
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </main>
         </div>
       </div>

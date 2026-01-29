@@ -1,14 +1,16 @@
 'use client'
 
 import * as React from 'react'
-import Link from 'next/link'
-import { Download, Copy, Pencil, Trash2, FileText, FileEdit } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
-import { formatRelativeTime, generateLessonUrl } from '@/lib/utils'
+import { FileText } from 'lucide-react'
+import { LessonMaterialViewModal } from '@/components/lessons/LessonMaterialViewModal'
+import { UserMaterialCard } from './UserMaterialCard'
+import { UserMaterialTableRow } from './UserMaterialTableRow'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
+export type MaterialWithLesson = UserLessonMaterial & { lesson_title: string; lesson_short_id?: string | null }
+
 interface UserEditedMaterialsListProps {
-  materials: Array<UserLessonMaterial & { lesson_title: string; lesson_short_id?: string | null }>
+  materials: Array<MaterialWithLesson>
   onDelete?: (materialId: string, lessonId: string) => Promise<void>
   onDuplicate?: (materialId: string, lessonId: string) => Promise<void>
 }
@@ -16,8 +18,15 @@ interface UserEditedMaterialsListProps {
 export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: UserEditedMaterialsListProps) {
   const [deletingId, setDeletingId] = React.useState<string | null>(null)
   const [duplicatingId, setDuplicatingId] = React.useState<string | null>(null)
+  const [viewModalOpen, setViewModalOpen] = React.useState(false)
+  const [selectedMaterial, setSelectedMaterial] = React.useState<MaterialWithLesson | null>(null)
 
-  const handleDelete = async (material: UserLessonMaterial & { lesson_title: string }) => {
+  const handleView = (material: MaterialWithLesson) => {
+    setSelectedMaterial(material)
+    setViewModalOpen(true)
+  }
+
+  const handleDelete = async (material: MaterialWithLesson) => {
     if (!onDelete) return
     
     if (!confirm(`Opravdu chcete smazat "${material.title}"?`)) {
@@ -32,7 +41,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
     }
   }
 
-  const handleDuplicate = async (material: UserLessonMaterial & { lesson_title: string }) => {
+  const handleDuplicate = async (material: MaterialWithLesson) => {
     if (!onDuplicate) return
 
     setDuplicatingId(material.id)
@@ -43,7 +52,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
     }
   }
 
-  const handleDownload = (material: UserLessonMaterial & { lesson_title: string }) => {
+  const handleDownload = (material: MaterialWithLesson) => {
     if (!material.content) {
       alert('Materiál nemá žádný obsah ke stažení')
       return
@@ -73,117 +82,60 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
   }
 
   return (
-    <div className="overflow-x-auto" data-testid="user-materials-list">
-      <table className="w-full" data-testid="user-materials-table">
-        <thead>
-          <tr className="border-b border-gray-200 text-left">
-            <th className="pb-3 pr-4 font-medium text-gray-600">Název</th>
-            <th className="pb-3 pr-4 font-medium text-gray-600">Lekce</th>
-            <th className="pb-3 pr-4 font-medium text-gray-600">Upraveno</th>
-            <th className="pb-3 font-medium text-gray-600 text-right">Akce</th>
-          </tr>
-        </thead>
-        <tbody>
-          {materials.map((material) => {
-            const isDeleting = deletingId === material.id
-            const materialIcon = material.title.toLowerCase().includes('pracovní') 
-              ? <FileEdit className="w-4 h-4" />
-              : <FileText className="w-4 h-4" />
-            
-            // Generate lesson URL using short_id if available, otherwise fallback to UUID
-            const lessonId = material.lesson_short_id || material.lesson_id
-            const lessonUrl = generateLessonUrl(lessonId, material.lesson_title)
-            const materialEditUrl = `${lessonUrl}/materials/${material.id}`
+    <div data-testid="user-materials-list">
+      {/* Desktop Table View */}
+      <div className="hidden md:block">
+        <table className="w-full table-auto" data-testid="user-materials-table">
+          <thead>
+            <tr className="border-b border-gray-200 text-left">
+              <th className="pb-3 pr-4 font-medium text-gray-600 min-w-[220px]">Název</th>
+              <th className="pb-3 pr-4 font-medium text-gray-600">Lekce</th>
+              <th className="pb-3 pr-4 font-medium text-gray-600 whitespace-nowrap w-[10%]">Upraveno</th>
+              <th className="pb-3 font-medium text-gray-600 text-right whitespace-nowrap">Akce</th>
+            </tr>
+          </thead>
+          <tbody>
+            {materials.map((material) => (
+              <UserMaterialTableRow
+                key={material.id}
+                material={material}
+                onView={handleView}
+                onDownload={handleDownload}
+                onDuplicate={onDuplicate ? handleDuplicate : undefined}
+                onDelete={onDelete ? handleDelete : undefined}
+                isDuplicating={duplicatingId === material.id}
+                isDeleting={deletingId === material.id}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-            return (
-              <tr 
-                key={material.id} 
-                className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                data-testid={`user-material-row-${material.id}`}
-              >
-                <td className="py-4 pr-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-blue-600">{materialIcon}</span>
-                    <span className="font-medium" data-testid={`user-material-title-${material.id}`}>{material.title}</span>
-                  </div>
-                </td>
-                <td className="py-4 pr-4">
-                  <Link 
-                    href={lessonUrl}
-                    className="text-gray-600 hover:text-blue-600 hover:underline line-clamp-1"
-                    title={material.lesson_title}
-                    data-testid={`user-material-lesson-link-${material.id}`}
-                  >
-                    {material.lesson_title}
-                  </Link>
-                </td>
-                <td className="py-4 pr-4 text-gray-600">
-                  {formatRelativeTime(material.updated_at)}
-                </td>
-                <td className="py-4">
-                  <div className="flex items-center justify-end gap-2">
-                    {/* View/Edit */}
-                    <Link href={materialEditUrl}>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Zobrazit/Upravit"
-                        className="h-9 w-9"
-                        data-testid={`user-material-edit-${material.id}`}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                    </Link>
+      {/* Mobile Card View */}
+      <div className="md:hidden flex flex-col gap-3">
+        {materials.map((material) => (
+          <UserMaterialCard
+            key={material.id}
+            material={material}
+            onView={handleView}
+            onDownload={handleDownload}
+            onDuplicate={onDuplicate ? handleDuplicate : undefined}
+            onDelete={onDelete ? handleDelete : undefined}
+            isDuplicating={duplicatingId === material.id}
+            isDeleting={deletingId === material.id}
+          />
+        ))}
+      </div>
 
-                    {/* Download */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      title="Stáhnout"
-                      onClick={() => handleDownload(material)}
-                      disabled={!material.content}
-                      className="h-9 w-9"
-                      data-testid={`user-material-download-${material.id}`}
-                    >
-                      <Download className="w-4 h-4" />
-                    </Button>
-
-                    {/* Duplicate */}
-                    {onDuplicate && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Duplikovat materiál"
-                        onClick={() => handleDuplicate(material)}
-                        disabled={duplicatingId === material.id}
-                        className="h-9 w-9"
-                        data-testid={`user-material-duplicate-${material.id}`}
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    )}
-
-                    {/* Delete */}
-                    {onDelete && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Smazat"
-                        onClick={() => handleDelete(material)}
-                        disabled={isDeleting}
-                        className="h-9 w-9 hover:bg-red-50 hover:text-red-600"
-                        data-testid={`user-material-delete-${material.id}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+      {/* View Modal */}
+      {selectedMaterial && (
+        <LessonMaterialViewModal
+          open={viewModalOpen}
+          onOpenChange={setViewModalOpen}
+          title={selectedMaterial.title}
+          content={selectedMaterial.content}
+        />
+      )}
     </div>
   )
 }
