@@ -208,18 +208,13 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                     <div className="flex flex-col gap-2">
                       {/* Edited Materials */}
                       <button
-                        onClick={() => handleMobileNavClick('/profile')}
+                        onClick={() => handleMobileNavClick('/profile?tab=materials')}
                         className="flex items-center gap-3 w-full text-left font-body text-lg px-4 py-3 rounded-xl text-text-strong hover:bg-grey-50 transition-colors"
                       >
                         <span className="flex items-center justify-center w-8 h-8 bg-[#caffe6] rounded-full">
                           <FileText className="h-4 w-4 text-grey-950" />
                         </span>
                         <span>Moje upravené materiály</span>
-                        {favoriteCount > 0 && (
-                          <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-mint text-xs font-semibold text-grey-950">
-                            {favoriteCount > 99 ? '99+' : favoriteCount}
-                          </span>
-                        )}
                       </button>
 
                       {/* Settings */}

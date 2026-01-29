@@ -63,21 +63,20 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
       if (!validateEmail(email)) {
         setEmailTouched(true)
         setEmailError('Neplatný formát emailu')
-        setError('Neplatný formát emailu')
         return
       }
 
       // Validate password
       const validation = validatePassword(password)
       if (!validation.isValid) {
+        setPasswordTouched(true)
         setPasswordErrors(validation.errors)
-        setError(validation.errors[0])
         return
       }
 
       // Check passwords match
       if (!passwordsMatch(password, confirmPassword)) {
-        setError('Hesla se neshodují')
+        setConfirmPasswordTouched(true)
         return
       }
 
@@ -195,6 +194,11 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
             </div>
           </div>
 
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
+              {error}
+            </div>
+          )}
 
           {/* Submit Button */}
           <Button 

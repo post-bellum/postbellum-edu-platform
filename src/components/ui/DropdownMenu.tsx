@@ -52,7 +52,7 @@ export function DropdownMenuItem({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'w-full flex items-center gap-1.5 pl-2 pr-4 py-2.5 text-left font-body text-md transition-colors cursor-pointer outline-none rounded-lg line',
+        'w-full flex items-center gap-1.5 pl-2 pr-4 py-2.5 text-left font-body text-md transition-colors cursor-pointer outline-none rounded-lg',
         'data-highlighted:bg-grey-50',
         variant === 'default' && 'text-text-subtle',
         variant === 'danger' && 'text-red-600 data-highlighted:bg-red-50',

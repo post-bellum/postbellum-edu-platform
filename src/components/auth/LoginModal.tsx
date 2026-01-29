@@ -46,7 +46,6 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
       if (!validateEmail(email)) {
         setEmailTouched(true)
         setEmailError('Neplatný formát emailu')
-        setError('Neplatný formát emailu')
         return
       }
 
@@ -143,6 +142,12 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
               </div>
             )}
           </div>
+
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
+              {error}
+            </div>
+          )}
 
           {/* Submit Button */}
           <Button 

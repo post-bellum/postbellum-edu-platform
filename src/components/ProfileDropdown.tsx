@@ -44,7 +44,6 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
 
       <DropdownMenuSeparator />
 
-
       <DropdownMenuItem
         onClick={() => router.push('/profile')}
         icon={<Cog6ToothIcon className="h-4 w-4" />}
