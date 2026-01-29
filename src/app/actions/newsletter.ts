@@ -45,11 +45,15 @@ export async function subscribeToNewsletter(email: string) {
     if (error) {
       // Check if it's a duplicate email error
       if (error.code === '23505') {
-        // Email already exists - fetch existing token
+        // Email already exists - reactivate subscription
         const { data: existing } = await supabase
           .from('newsletter_subscribers')
-          .select('unsubscribe_token')
+          .update({ 
+            is_active: true,
+            unsubscribed_at: null,
+          })
           .eq('email', trimmedEmail)
+          .select('unsubscribe_token')
           .single()
         
         const baseUrl = await getBaseUrl()
