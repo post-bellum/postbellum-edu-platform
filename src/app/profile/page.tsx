@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { useProfile } from '@/lib/supabase/hooks/useProfile'
@@ -21,6 +22,18 @@ import { generateLessonUrl } from '@/lib/utils'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
 export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Načítání profilu...</p>
+      </div>
+    }>
+      <ProfilePageContent />
+    </Suspense>
+  )
+}
+
+function ProfilePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { isLoggedIn, loading: authLoading } = useAuth()
@@ -279,3 +292,4 @@ export default function ProfilePage() {
     </>
   )
 }
+
