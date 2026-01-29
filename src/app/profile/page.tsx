@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { useProfile } from '@/lib/supabase/hooks/useProfile'
 import { FeedbackModal } from '@/components/ui/FeedbackModal'
@@ -22,6 +22,7 @@ import type { UserLessonMaterial } from '@/types/lesson.types'
 
 export default function ProfilePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { isLoggedIn, loading: authLoading } = useAuth()
   const {
     profile,
@@ -33,8 +34,17 @@ export default function ProfilePage() {
     updateSchoolName,
   } = useProfile(isLoggedIn)
 
-  // Tab state
-  const [activeTab, setActiveTab] = React.useState<TabId>('settings')
+  // Tab state - initialize from URL query param
+  const tabParam = searchParams.get('tab')
+  const [activeTab, setActiveTab] = React.useState<TabId>(
+    tabParam === 'materials' ? 'materials' : 'settings'
+  )
+
+  // Sync tab state when URL param changes
+  React.useEffect(() => {
+    const newTab: TabId = tabParam === 'materials' ? 'materials' : 'settings'
+    setActiveTab(newTab)
+  }, [tabParam])
 
   // Materials state
   const [materials, setMaterials] = React.useState<Array<UserLessonMaterial & { lesson_title: string; lesson_short_id: string | null }>>([])

@@ -14,7 +14,7 @@ export function DropdownMenu({ trigger, children, align = 'end' }: DropdownMenuP
   return (
     <DropdownMenuPrimitive.Root>
       <DropdownMenuPrimitive.Trigger asChild>
-        <button className="cursor-pointer bg-transparent border-none p-0" type="button">
+        <button className="group cursor-pointer bg-transparent border-none p-0 outline-none focus:outline-none focus-visible:outline-none" type="button">
           {trigger}
         </button>
       </DropdownMenuPrimitive.Trigger>
@@ -23,7 +23,7 @@ export function DropdownMenu({ trigger, children, align = 'end' }: DropdownMenuP
         <DropdownMenuPrimitive.Content
           align={align}
           sideOffset={8}
-          className="w-[200px] rounded-[28px] bg-white shadow-[0px_20px_24px_-4px_rgba(16,24,40,0.08),0px_8px_8px_-4px_rgba(16,24,40,0.03)] border border-grey-100 px-4 py-2.5 z-50 animate-in fade-in-0 zoom-in-95"
+          className="w-[280px] rounded-[28px] bg-white shadow-[0px_20px_24px_-4px_rgba(16,24,40,0.08),0px_8px_8px_-4px_rgba(16,24,40,0.03)] border border-grey-100 px-4 py-2.5 z-50 animate-in fade-in-0 zoom-in-95"
         >
           {children}
         </DropdownMenuPrimitive.Content>
@@ -52,7 +52,7 @@ export function DropdownMenuItem({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'w-full flex items-center gap-1.5 px-2 py-2.5 text-left font-body text-md transition-colors cursor-pointer outline-none rounded-lg',
+        'w-full flex items-center gap-1.5 pl-2 pr-4 py-2.5 text-left font-body text-md transition-colors cursor-pointer outline-none rounded-lg line',
         'data-highlighted:bg-grey-50',
         variant === 'default' && 'text-text-subtle',
         variant === 'danger' && 'text-red-600 data-highlighted:bg-red-50',
