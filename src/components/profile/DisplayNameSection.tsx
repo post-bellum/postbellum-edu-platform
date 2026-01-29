@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { Label } from '@/components/ui/Label'
 import { AUTH_CONSTANTS } from '@/lib/constants'
 
 interface DisplayNameSectionProps {
@@ -24,13 +25,17 @@ export function DisplayNameSection({
     <div className="bg-white border border-grey-200 rounded-[28px] shadow-sm overflow-hidden w-full" data-testid="display-name-section">
       <div className="px-5 py-7 space-y-7">
         <div className="px-3">
-          <h2 className="text-lg font-semibold text-black leading-snug mb-1.5">Zobrazované jméno</h2>
-          <p className="text-base text-text-subtle leading-body">
+          <h2 className="text-lg font-semibold text-black leading-display mb-1.5">Zobrazované jméno</h2>
+          <p className="text-base text-text-subtle leading-[1.5]">
             Zadejte své celé jméno nebo zobrazované jméno, které chcete použít:
           </p>
         </div>
-        <div className="max-w-[480px]">
+        <div className="flex flex-col max-w-[480px]">
+          <Label htmlFor="display-name-input" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+            Zobrazované jméno <span className="text-red-500">*</span>
+          </Label>
           <Input
+            id="display-name-input"
             type="text"
             placeholder="Vaše jméno"
             value={displayName}
@@ -43,7 +48,7 @@ export function DisplayNameSection({
       </div>
       <div className="border-t border-grey-200 px-5 pt-4 pb-7">
         <div className="flex items-center justify-between gap-10 px-2">
-          <p className="text-xs text-text-subtle leading-body flex-1">
+          <p className="text-xs text-text-subtle leading-[1.5] flex-1">
             Toto jméno se zobrazí v profilu. Můžete jej změnit kdykoli v nastavení. Maximum 32 znaků.
           </p>
           <Button 

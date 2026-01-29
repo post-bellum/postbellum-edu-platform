@@ -36,8 +36,8 @@ const RadioGroupItem = React.forwardRef<
       )}
       {...props}
     >
-      <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <div className="h-1.5 w-1.5 rounded-full bg-white shadow-[0px_2px_3px_0px_rgba(0,0,0,0.1)]" />
+      <RadioGroupPrimitive.Indicator>
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full bg-white shadow-[0px_2px_3px_0px_rgba(0,0,0,0.1)]" />
       </RadioGroupPrimitive.Indicator>
       {/* Focus ring */}
       <span 

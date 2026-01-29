@@ -196,7 +196,7 @@ export default function ProfilePage() {
           </aside>
 
           {/* Right Content Area */}
-          <main className="flex-1 min-w-0">
+          <main className="flex-1 min-w-0 mb-44">
             {activeTab === 'settings' && (
               <div className="w-full max-w-[880px] mx-auto space-y-8">
                 {/* Success/Error Messages */}
