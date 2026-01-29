@@ -2,48 +2,21 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/supabase/hooks/useAuth'
+import { useIsAdmin } from '@/lib/supabase/hooks/useIsAdmin'
 import { NewsletterSubscribersSection } from '@/components/admin/NewsletterSubscribersSection'
 
 export default function AdminPage() {
   const router = useRouter()
-  const { isLoggedIn, loading: authLoading } = useAuth()
-  const [isAdmin, setIsAdmin] = React.useState(false)
-  const [checkingAdmin, setCheckingAdmin] = React.useState(true)
+  const { isAdmin, loading } = useIsAdmin()
 
+  // Redirect if not admin
   React.useEffect(() => {
-    async function checkAdmin() {
-      if (!isLoggedIn) {
-        setCheckingAdmin(false)
-        return
-      }
-
-      try {
-        const response = await fetch('/api/admin/check')
-        const data = await response.json()
-        setIsAdmin(data.isAdmin || false)
-      } catch {
-        setIsAdmin(false)
-      } finally {
-        setCheckingAdmin(false)
-      }
+    if (!loading && !isAdmin) {
+      router.push('/')
     }
+  }, [loading, isAdmin, router])
 
-    if (!authLoading) {
-      checkAdmin()
-    }
-  }, [isLoggedIn, authLoading])
-
-  // Redirect if not logged in or not admin
-  React.useEffect(() => {
-    if (!authLoading && !checkingAdmin) {
-      if (!isLoggedIn || !isAdmin) {
-        router.push('/')
-      }
-    }
-  }, [authLoading, checkingAdmin, isLoggedIn, isAdmin, router])
-
-  if (authLoading || checkingAdmin) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Načítání...</p>
@@ -51,7 +24,7 @@ export default function AdminPage() {
     )
   }
 
-  if (!isLoggedIn || !isAdmin) {
+  if (!isAdmin) {
     return null
   }
 

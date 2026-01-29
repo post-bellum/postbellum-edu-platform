@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { getGravatarUrl } from '@/lib/gravatar'
@@ -12,7 +11,8 @@ import {
 } from '@/components/ui/DropdownMenu'
 import { logout } from '@/lib/oauth-helpers'
 import { Cog6ToothIcon, ArrowRightStartOnRectangleIcon } from '@/components/ui/Icons'
-import { FileText } from 'lucide-react'
+import { FileText, Shield } from 'lucide-react'
+import { useIsAdmin } from '@/lib/supabase/hooks/useIsAdmin'
 
 interface ProfileDropdownProps {
   email: string
@@ -21,6 +21,7 @@ interface ProfileDropdownProps {
 
 export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
   const router = useRouter()
+  const { isAdmin } = useIsAdmin()
 
   return (
     <DropdownMenu
@@ -59,6 +60,19 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
       >
         Moje upravené materiály
       </DropdownMenuItem>
+
+      {isAdmin && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => router.push('/admin')}
+            icon={<Shield className="h-4 w-4" />}
+            data-testid="profile-dropdown-admin"
+          >
+            Administrace
+          </DropdownMenuItem>
+        </>
+      )}
 
       <DropdownMenuSeparator />
 
