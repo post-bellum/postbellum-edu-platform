@@ -4,6 +4,9 @@ import * as React from 'react'
 import { getUserProfile, updateProfile } from '@/lib/supabase/user-profile'
 import { logger } from '@/lib/logger'
 
+// Custom event name for profile updates
+export const PROFILE_UPDATED_EVENT = 'profile-updated'
+
 interface ProfileData {
   displayName: string
   userType: 'teacher' | 'not-teacher'
@@ -18,34 +21,54 @@ export function useProfile(isLoggedIn: boolean) {
   const [error, setError] = React.useState<string | null>(null)
   const [success, setSuccess] = React.useState<string | null>(null)
 
-  // Load profile data
-  React.useEffect(() => {
-    async function loadProfile() {
-      if (!isLoggedIn) return
-      
+  // Function to load/refetch profile data
+  // showLoading: whether to show loading state (false for background refetch)
+  const fetchProfile = React.useCallback(async (showLoading = true) => {
+    if (!isLoggedIn) return
+    
+    if (showLoading) {
       setIsLoading(true)
-      try {
-        const profileData = await getUserProfile()
-        if (profileData) {
-          setProfile({
-            displayName: profileData.displayName || '',
-            userType: profileData.userType as 'teacher' | 'not-teacher',
-            schoolName: profileData.schoolName || '',
-            email: profileData.email || '',
-          })
-        }
-      } catch (err) {
-        logger.error('Error loading profile', err)
-        setError('Nepodařilo se načíst profil')
-      } finally {
+    }
+    try {
+      const profileData = await getUserProfile()
+      if (profileData) {
+        setProfile({
+          displayName: profileData.displayName || '',
+          userType: profileData.userType as 'teacher' | 'not-teacher',
+          schoolName: profileData.schoolName || '',
+          email: profileData.email || '',
+        })
+      }
+    } catch (err) {
+      logger.error('Error loading profile', err)
+      setError('Nepodařilo se načíst profil')
+    } finally {
+      if (showLoading) {
         setIsLoading(false)
       }
     }
-    loadProfile()
   }, [isLoggedIn])
 
-  // Update display name
-  const updateDisplayName = React.useCallback(async (displayName: string) => {
+  // Load profile data on mount and when isLoggedIn changes
+  React.useEffect(() => {
+    fetchProfile(true)
+  }, [fetchProfile])
+
+  // Listen for profile update events from other components (silent refetch)
+  React.useEffect(() => {
+    const handleProfileUpdated = () => {
+      // Silent refetch - don't show loading state
+      fetchProfile(false)
+    }
+    
+    window.addEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated)
+    return () => {
+      window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated)
+    }
+  }, [fetchProfile])
+
+  // Update display name - returns true on success for modal handling
+  const updateDisplayName = React.useCallback(async (displayName: string): Promise<boolean> => {
     setIsSaving(true)
     setError(null)
     setSuccess(null)
@@ -53,11 +76,15 @@ export function useProfile(isLoggedIn: boolean) {
     try {
       await updateProfile({ displayName: displayName.trim() })
       setProfile((prev) => prev ? { ...prev, displayName: displayName.trim() } : null)
-      setSuccess('Zobrazované jméno bylo úspěšně uloženo')
-      setTimeout(() => setSuccess(null), 3000)
+      
+      // Dispatch event to notify other components (e.g., navbar) to refetch profile
+      window.dispatchEvent(new CustomEvent(PROFILE_UPDATED_EVENT))
+      
+      return true
     } catch (err) {
       logger.error('Error saving display name', err)
       setError('Nepodařilo se uložit zobrazované jméno')
+      return false
     } finally {
       setIsSaving(false)
     }
@@ -96,6 +123,7 @@ export function useProfile(isLoggedIn: boolean) {
     updateDisplayName,
     updateSchoolName,
     clearMessages,
+    refetch: fetchProfile,
   }
 }
 

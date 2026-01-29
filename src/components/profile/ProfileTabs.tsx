@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
-import { Cog6ToothIcon, Bookmark } from '@/components/icons'
+import { Cog6ToothIcon, FileText } from '@/components/icons'
 
 type TabId = 'settings' | 'materials'
 
@@ -24,7 +24,7 @@ const tabs: Tab[] = [
     id: 'materials', 
     label: 'Moje upravené materiály', 
     shortLabel: 'Materiály',
-    icon: <Bookmark className="w-6 h-6" />
+    icon: <FileText className="w-6 h-6" />
   },
 ]
 

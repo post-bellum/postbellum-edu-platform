@@ -1,8 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { FileText } from 'lucide-react'
+import { FileText, Trash2 } from 'lucide-react'
 import { LessonMaterialViewModal } from '@/components/lessons/LessonMaterialViewModal'
+import { Dialog, DialogContent } from '@/components/ui/Dialog'
+import { Button } from '@/components/ui/Button'
 import { UserMaterialCard } from './UserMaterialCard'
 import { UserMaterialTableRow } from './UserMaterialTableRow'
 import type { UserLessonMaterial } from '@/types/lesson.types'
@@ -20,25 +22,38 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
   const [duplicatingId, setDuplicatingId] = React.useState<string | null>(null)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [selectedMaterial, setSelectedMaterial] = React.useState<MaterialWithLesson | null>(null)
+  
+  // Delete confirmation modal state
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false)
+  const [materialToDelete, setMaterialToDelete] = React.useState<MaterialWithLesson | null>(null)
 
   const handleView = (material: MaterialWithLesson) => {
     setSelectedMaterial(material)
     setViewModalOpen(true)
   }
 
-  const handleDelete = async (material: MaterialWithLesson) => {
+  const handleDeleteClick = (material: MaterialWithLesson) => {
     if (!onDelete) return
-    
-    if (!confirm(`Opravdu chcete smazat "${material.title}"?`)) {
-      return
-    }
+    setMaterialToDelete(material)
+    setDeleteModalOpen(true)
+  }
 
-    setDeletingId(material.id)
+  const handleDeleteConfirm = async () => {
+    if (!onDelete || !materialToDelete) return
+
+    setDeletingId(materialToDelete.id)
     try {
-      await onDelete(material.id, material.lesson_id)
+      await onDelete(materialToDelete.id, materialToDelete.lesson_id)
+      setDeleteModalOpen(false)
     } finally {
       setDeletingId(null)
+      setMaterialToDelete(null)
     }
+  }
+
+  const handleCancelDelete = () => {
+    setDeleteModalOpen(false)
+    setMaterialToDelete(null)
   }
 
   const handleDuplicate = async (material: MaterialWithLesson) => {
@@ -102,7 +117,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                 onView={handleView}
                 onDownload={handleDownload}
                 onDuplicate={onDuplicate ? handleDuplicate : undefined}
-                onDelete={onDelete ? handleDelete : undefined}
+                onDelete={onDelete ? handleDeleteClick : undefined}
                 isDuplicating={duplicatingId === material.id}
                 isDeleting={deletingId === material.id}
               />
@@ -120,7 +135,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
             onView={handleView}
             onDownload={handleDownload}
             onDuplicate={onDuplicate ? handleDuplicate : undefined}
-            onDelete={onDelete ? handleDelete : undefined}
+            onDelete={onDelete ? handleDeleteClick : undefined}
             isDuplicating={duplicatingId === material.id}
             isDeleting={deletingId === material.id}
           />
@@ -136,6 +151,59 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
           content={selectedMaterial.content}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[440px]" data-testid="delete-material-modal">
+          <div className="space-y-5">
+            {/* Icon & Title */}
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                <Trash2 className="w-7 h-7 text-red-600" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900" data-testid="delete-material-modal-title">
+                Smazat materiál?
+              </h2>
+            </div>
+
+            {/* Material Info */}
+            {materialToDelete && (
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <p className="text-sm text-gray-600 mb-1">Chystáte se smazat:</p>
+                <p className="font-medium text-gray-900">{materialToDelete.title}</p>
+                <p className="text-xs text-gray-500 mt-1">z lekce: {materialToDelete.lesson_title}</p>
+              </div>
+            )}
+
+            {/* Warning */}
+            <p className="text-sm text-gray-600 text-center">
+              Tato akce je <span className="font-medium text-red-600">nevratná</span>. 
+              Materiál bude trvale odstraněn.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-1">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={handleCancelDelete}
+                disabled={deletingId !== null}
+                data-testid="delete-material-cancel-button"
+              >
+                Zrušit
+              </Button>
+              <Button
+                className="flex-1 bg-red-600 text-white hover:bg-red-700"
+                onClick={handleDeleteConfirm}
+                disabled={deletingId !== null}
+                data-testid="delete-material-confirm-button"
+              >
+                {deletingId !== null ? 'Mazání...' : 'Smazat materiál'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

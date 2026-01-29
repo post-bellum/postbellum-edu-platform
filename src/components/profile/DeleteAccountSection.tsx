@@ -46,7 +46,7 @@ export function DeleteAccountSection() {
       <div className="bg-white border border-grey-200 rounded-[28px] shadow-sm overflow-hidden w-full" data-testid="delete-account-section">
         <div className="px-5 py-7">
           <div className="px-3">
-            <h2 className="text-lg font-semibold text-black leading-snug mb-1.5">Samazat účet</h2>
+            <h2 className="text-lg font-semibold text-black leading-snug mb-1.5">Smazat účet</h2>
             <p className="text-base text-text-subtle leading-body">
               Dojde k trvalému smazání vašeho osobního účtu. Tato operace je nevratná, proto buďte obezřetní.
             </p>
@@ -63,7 +63,7 @@ export function DeleteAccountSection() {
               onClick={() => setShowDeleteDialog(true)}
               data-testid="delete-account-open-button"
             >
-              Uložit
+              Smazat
             </Button>
           </div>
         </div>

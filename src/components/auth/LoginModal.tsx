@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { OAuthButtons } from './OAuthButtons'
 import { signInWithEmail, getErrorMessage } from '@/lib/supabase/email-auth'
+import { validateEmail } from '@/lib/validation'
 import { logger } from '@/lib/logger'
 
 interface LoginModalProps {
@@ -20,6 +21,20 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
   const [password, setPassword] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [emailTouched, setEmailTouched] = React.useState(false)
+  const [emailError, setEmailError] = React.useState<string | null>(null)
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value)
+    if (emailTouched) {
+      setEmailError(value && !validateEmail(value) ? 'Neplatný formát emailu' : null)
+    }
+  }
+
+  const handleEmailBlur = () => {
+    setEmailTouched(true)
+    setEmailError(email && !validateEmail(email) ? 'Neplatný formát emailu' : null)
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,6 +42,13 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
     setIsLoading(true)
     
     try {
+      // Validate email
+      if (!validateEmail(email)) {
+        setEmailTouched(true)
+        setEmailError('Neplatný formát emailu')
+        return
+      }
+
       const { data, error: signInError } = await signInWithEmail(email, password)
       
       if (signInError) {
@@ -69,7 +91,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
         </div>
 
         {/* Email/Password Form */}
-        <form onSubmit={handleLogin} className="flex flex-col gap-[15px]">
+        <form onSubmit={handleLogin} noValidate className="flex flex-col gap-[15px]">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-col">
               <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
@@ -80,11 +102,15 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
                 type="email"
                 placeholder="Email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => handleEmailChange(e.target.value)}
+                onBlur={handleEmailBlur}
                 required
                 disabled={isLoading}
                 data-testid="login-email-input"
               />
+              {emailTouched && emailError && (
+                <p className="text-xs text-red-600 px-2.5 py-1.5">{emailError}</p>
+              )}
             </div>
 
             <div className="flex flex-col">

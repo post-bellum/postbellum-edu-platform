@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { useProfile } from '@/lib/supabase/hooks/useProfile'
 import { FeedbackModal } from '@/components/ui/FeedbackModal'
@@ -21,7 +22,20 @@ import { generateLessonUrl } from '@/lib/utils'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
 export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Načítání profilu...</p>
+      </div>
+    }>
+      <ProfilePageContent />
+    </Suspense>
+  )
+}
+
+function ProfilePageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { isLoggedIn, loading: authLoading } = useAuth()
   const {
     profile,
@@ -33,8 +47,17 @@ export default function ProfilePage() {
     updateSchoolName,
   } = useProfile(isLoggedIn)
 
-  // Tab state
-  const [activeTab, setActiveTab] = React.useState<TabId>('settings')
+  // Tab state - initialize from URL query param
+  const tabParam = searchParams.get('tab')
+  const [activeTab, setActiveTab] = React.useState<TabId>(
+    tabParam === 'materials' ? 'materials' : 'settings'
+  )
+
+  // Sync tab state when URL param changes
+  React.useEffect(() => {
+    const newTab: TabId = tabParam === 'materials' ? 'materials' : 'settings'
+    setActiveTab(newTab)
+  }, [tabParam])
 
   // Materials state
   const [materials, setMaterials] = React.useState<Array<UserLessonMaterial & { lesson_title: string; lesson_short_id: string | null }>>([])
@@ -90,8 +113,16 @@ export default function ProfilePage() {
     }
   }, [authLoading, isLoggedIn, router])
 
-  const handleSaveDisplayName = () => {
-    updateDisplayName(displayName)
+  const handleSaveDisplayName = async () => {
+    const success = await updateDisplayName(displayName)
+    if (success) {
+      setFeedbackModal({
+        open: true,
+        type: 'success',
+        title: 'Jméno uloženo',
+        message: 'Vaše zobrazované jméno bylo úspěšně změněno.'
+      })
+    }
   }
 
   const handleSaveSchoolName = () => {
@@ -196,7 +227,7 @@ export default function ProfilePage() {
           </aside>
 
           {/* Right Content Area */}
-          <main className="flex-1 min-w-0">
+          <main className="flex-1 min-w-0 mb-44">
             {activeTab === 'settings' && (
               <div className="w-full max-w-[880px] mx-auto space-y-8">
                 {/* Success/Error Messages */}
@@ -261,3 +292,4 @@ export default function ProfilePage() {
     </>
   )
 }
+

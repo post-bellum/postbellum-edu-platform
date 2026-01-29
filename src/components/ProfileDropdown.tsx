@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator 
 } from '@/components/ui/DropdownMenu'
 import { logout } from '@/lib/oauth-helpers'
-import { BookmarkIcon, Cog6ToothIcon, ArrowRightStartOnRectangleIcon } from '@/components/ui/Icons'
+import { Cog6ToothIcon, ArrowRightStartOnRectangleIcon } from '@/components/ui/Icons'
+import { FileText } from 'lucide-react'
 
 interface ProfileDropdownProps {
   email: string
@@ -31,7 +32,7 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
             alt="Profile"
             width={48}
             height={48}
-            className="h-12 w-12 rounded-full cursor-pointer border-[1.25px] border-grey-950 hover:ring-[3px] hover:ring-mint transition-all"
+            className="h-12 w-12 rounded-full cursor-pointer border-[1.25px] border-grey-950 hover:ring-[3px] hover:ring-mint group-data-[state=open]:ring-[3px] group-data-[state=open]:ring-mint transition-all"
             data-testid="profile-avatar"
           />
         </div>
@@ -44,19 +45,19 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
       <DropdownMenuSeparator />
 
       <DropdownMenuItem
-        onClick={() => router.push('/favorites')}
-        icon={<BookmarkIcon className="h-4 w-4" />}
-        data-testid="profile-dropdown-favorites"
-      >
-        Uložené lekce
-      </DropdownMenuItem>
-
-      <DropdownMenuItem
         onClick={() => router.push('/profile')}
         icon={<Cog6ToothIcon className="h-4 w-4" />}
         data-testid="profile-dropdown-settings"
       >
         Nastavení
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        onClick={() => router.push('/profile?tab=materials')}
+        icon={<FileText className="h-4 w-4" />}
+        data-testid="profile-dropdown-edited-materials"
+      >
+        Moje upravené materiály
       </DropdownMenuItem>
 
       <DropdownMenuSeparator />

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Autocomplete } from '@/components/ui/Autocomplete'
+import { Label } from '@/components/ui/Label'
 import { SearchIcon } from '@/components/icons'
 import { searchSchools } from '@/lib/supabase/schools'
 
@@ -21,7 +22,10 @@ export function SchoolNameSection({
   isSaving,
 }: SchoolNameSectionProps) {
   return (
-    <div className="w-full" data-testid="school-name-section">
+    <div className="flex flex-col w-full" data-testid="school-name-section">
+      <Label htmlFor="school-name-edit" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+        Název školy <span className="text-red-500">*</span>
+      </Label>
       <Autocomplete
         id="school-name-edit"
         placeholder="Začněte psát název školy..."
