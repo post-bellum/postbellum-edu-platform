@@ -151,33 +151,6 @@ export type Database = {
           },
         ]
       }
-      newsletter_subscribers: {
-        Row: {
-          id: string
-          email: string
-          unsubscribe_token: string
-          subscribed_at: string | null
-          unsubscribed_at: string | null
-          is_active: boolean | null
-        }
-        Insert: {
-          id?: string
-          email: string
-          unsubscribe_token?: string
-          subscribed_at?: string | null
-          unsubscribed_at?: string | null
-          is_active?: boolean | null
-        }
-        Update: {
-          id?: string
-          email?: string
-          unsubscribe_token?: string
-          subscribed_at?: string | null
-          unsubscribed_at?: string | null
-          is_active?: boolean | null
-        }
-        Relationships: []
-      }
       lessons: {
         Row: {
           created_at: string | null
@@ -242,6 +215,33 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          email: string
+          id: string
+          is_active: boolean | null
+          subscribed_at: string | null
+          unsubscribe_token: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          is_active?: boolean | null
+          subscribed_at?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          subscribed_at?: string | null
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
