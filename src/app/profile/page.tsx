@@ -90,8 +90,16 @@ export default function ProfilePage() {
     }
   }, [authLoading, isLoggedIn, router])
 
-  const handleSaveDisplayName = () => {
-    updateDisplayName(displayName)
+  const handleSaveDisplayName = async () => {
+    const success = await updateDisplayName(displayName)
+    if (success) {
+      setFeedbackModal({
+        open: true,
+        type: 'success',
+        title: 'Jméno uloženo',
+        message: 'Vaše zobrazované jméno bylo úspěšně změněno.'
+      })
+    }
   }
 
   const handleSaveSchoolName = () => {

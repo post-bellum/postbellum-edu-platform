@@ -40,6 +40,12 @@ export function DisplayNameSection({
             placeholder="Vaše jméno"
             value={displayName}
             onChange={(e) => onDisplayNameChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !isSaving) {
+                e.preventDefault()
+                onSave()
+              }
+            }}
             maxLength={AUTH_CONSTANTS.DISPLAY_NAME_MAX_LENGTH}
             disabled={isSaving}
             data-testid="display-name-input"

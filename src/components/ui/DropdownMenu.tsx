@@ -75,7 +75,7 @@ export function DropdownMenuSeparator({ className }: { className?: string }) {
 
 export function DropdownMenuHeader({ children }: { children: React.ReactNode }) {
   return (
-    <DropdownMenuPrimitive.Label className="px-2 py-3 font-body text-md font-semibold text-text-strong">
+    <DropdownMenuPrimitive.Label className="px-2 py-3 font-body text-md font-semibold text-text-strong text-ellipsis overflow-hidden">
       {children}
     </DropdownMenuPrimitive.Label>
   )
