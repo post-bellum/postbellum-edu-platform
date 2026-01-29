@@ -17,6 +17,7 @@ import { Autocomplete } from '@/components/ui/Autocomplete'
 import { completeRegistration } from '@/lib/supabase/user-profile'
 import { searchSchools } from '@/lib/supabase/schools'
 import { getDisplayNameFromAuth } from '@/lib/supabase/user-helpers'
+import { PROFILE_UPDATED_EVENT } from '@/lib/supabase/hooks/useProfile'
 import { AUTH_CONSTANTS } from '@/lib/constants'
 import { logger } from '@/lib/logger'
 
@@ -87,6 +88,9 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
         termsAccepted,
         emailConsent,
       })
+      
+      // Dispatch event to notify other components (e.g., navbar) to refetch profile
+      window.dispatchEvent(new CustomEvent(PROFILE_UPDATED_EVENT))
       
       // After successful completion:
       onSuccess()

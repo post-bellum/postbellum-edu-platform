@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { OAuthButtons } from './OAuthButtons'
 import { signUpWithEmail, getErrorMessage } from '@/lib/supabase/email-auth'
-import { validatePassword, passwordsMatch } from '@/lib/validation'
+import { validatePassword, passwordsMatch, validateEmail } from '@/lib/validation'
 import { logger } from '@/lib/logger'
 
 interface RegisterModalProps {
@@ -21,9 +21,23 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
   const [confirmPassword, setConfirmPassword] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [emailTouched, setEmailTouched] = React.useState(false)
+  const [emailError, setEmailError] = React.useState<string | null>(null)
   const [passwordErrors, setPasswordErrors] = React.useState<string[]>([])
   const [passwordTouched, setPasswordTouched] = React.useState(false)
   const [confirmPasswordTouched, setConfirmPasswordTouched] = React.useState(false)
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value)
+    if (emailTouched) {
+      setEmailError(value && !validateEmail(value) ? 'Neplatný formát emailu' : null)
+    }
+  }
+
+  const handleEmailBlur = () => {
+    setEmailTouched(true)
+    setEmailError(email && !validateEmail(email) ? 'Neplatný formát emailu' : null)
+  }
 
   const handlePasswordChange = (value: string) => {
     setPassword(value)
@@ -45,6 +59,14 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
     setIsLoading(true)
     
     try {
+      // Validate email
+      if (!validateEmail(email)) {
+        setEmailTouched(true)
+        setEmailError('Neplatný formát emailu')
+        setError('Neplatný formát emailu')
+        return
+      }
+
       // Validate password
       const validation = validatePassword(password)
       if (!validation.isValid) {
@@ -102,7 +124,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
         </div>
 
         {/* Registration Form */}
-        <form onSubmit={handleRegister} className="flex flex-col gap-[15px]">
+        <form onSubmit={handleRegister} noValidate className="flex flex-col gap-[15px]">
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-col">
               <Label htmlFor="email" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
@@ -113,11 +135,15 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
                 type="email"
                 placeholder="Email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => handleEmailChange(e.target.value)}
+                onBlur={handleEmailBlur}
                 required
                 disabled={isLoading}
                 data-testid="register-email-input"
               />
+              {emailTouched && emailError && (
+                <p className="text-xs text-red-600 px-2.5 py-1.5">{emailError}</p>
+              )}
             </div>
 
             <div className="flex flex-col">
@@ -169,11 +195,6 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
             </div>
           </div>
 
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
-              {error}
-            </div>
-          )}
 
           {/* Submit Button */}
           <Button 
