@@ -155,6 +155,7 @@ export type Database = {
         Row: {
           id: string
           email: string
+          unsubscribe_token: string
           subscribed_at: string | null
           unsubscribed_at: string | null
           is_active: boolean | null
@@ -162,6 +163,7 @@ export type Database = {
         Insert: {
           id?: string
           email: string
+          unsubscribe_token?: string
           subscribed_at?: string | null
           unsubscribed_at?: string | null
           is_active?: boolean | null
@@ -169,6 +171,7 @@ export type Database = {
         Update: {
           id?: string
           email?: string
+          unsubscribe_token?: string
           subscribed_at?: string | null
           unsubscribed_at?: string | null
           is_active?: boolean | null
