@@ -36,8 +36,8 @@ export function NewsletterSubscribersSection() {
     try {
       const result = await exportNewsletterSubscribersCSV()
       if (result.success && result.csv) {
-        // Create and download file
-        const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8;' })
+        // Create and download file with UTF-8 BOM for Excel compatibility
+        const blob = new Blob(['\ufeff' + result.csv], { type: 'text/csv;charset=utf-8;' })
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url

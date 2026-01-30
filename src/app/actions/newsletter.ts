@@ -39,36 +39,26 @@ export async function subscribeToNewsletter(email: string) {
     // 3. Avoids RLS warnings in Supabase for public INSERT
     const supabase = createAdminClient()
     
-    // Try to insert the email and get the unsubscribe token
+    // Use upsert for atomic operation - avoids race condition
+    // If email exists: reactivate subscription
+    // If email doesn't exist: create new subscription
     const { data, error } = await supabase
       .from('newsletter_subscribers')
-      .insert({ email: trimmedEmail })
+      .upsert(
+        { 
+          email: trimmedEmail,
+          is_active: true,
+          unsubscribed_at: null,
+        },
+        { 
+          onConflict: 'email',
+          ignoreDuplicates: false,
+        }
+      )
       .select('unsubscribe_token')
       .single()
 
     if (error) {
-      // Check if it's a duplicate email error
-      if (error.code === '23505') {
-        // Email already exists - reactivate subscription
-        const { data: existing } = await supabase
-          .from('newsletter_subscribers')
-          .update({ 
-            is_active: true,
-            unsubscribed_at: null,
-          })
-          .eq('email', trimmedEmail)
-          .select('unsubscribe_token')
-          .single()
-        
-        const baseUrl = await getBaseUrl()
-        return {
-          success: true,
-          unsubscribeUrl: existing?.unsubscribe_token 
-            ? `${baseUrl}/unsubscribe?token=${existing.unsubscribe_token}`
-            : undefined,
-        }
-      }
-      
       logger.error('Error subscribing to newsletter', error)
       return {
         success: false,

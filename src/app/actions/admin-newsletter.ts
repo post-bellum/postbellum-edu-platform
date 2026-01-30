@@ -3,15 +3,10 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/supabase/admin-helpers'
 import { logger } from '@/lib/logger'
+import type { Database } from '@/types/database.types'
 
-export interface NewsletterSubscriber {
-  id: string
-  email: string
-  unsubscribe_token: string
-  subscribed_at: string | null
-  unsubscribed_at: string | null
-  is_active: boolean | null
-}
+// Use generated database types for type safety
+export type NewsletterSubscriber = Database['public']['Tables']['newsletter_subscribers']['Row']
 
 export interface NewsletterStats {
   total: number
@@ -89,7 +84,14 @@ export async function exportNewsletterSubscribersCSV(): Promise<{
     }
 
     // Generate CSV with unsubscribe URLs
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://yourdomain.com'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (!baseUrl) {
+      logger.error('NEXT_PUBLIC_APP_URL environment variable is not set')
+      return {
+        success: false,
+        error: 'Chybí konfigurace aplikace (APP_URL)',
+      }
+    }
     const rows = (data || []).map(s => ({
       email: s.email,
       unsubscribe_url: `${baseUrl}/unsubscribe?token=${s.unsubscribe_token}`,
