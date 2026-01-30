@@ -27,7 +27,7 @@ export function UserMaterialTableRow({
 }: UserMaterialTableRowProps) {
   const lessonId = material.lesson_short_id || material.lesson_id
   const lessonUrl = generateLessonUrl(lessonId, material.lesson_title)
-  const materialEditUrl = `${lessonUrl}/materials/${material.id}`
+  const materialEditUrl = `${lessonUrl}/materials/${material.id}?from=profile`
 
   const materialIcon = material.title.toLowerCase().includes('pracovní') 
     ? <FileEdit className="w-4 h-4" />

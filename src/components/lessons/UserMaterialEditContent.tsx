@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Eye, Trash2, Check, Loader2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -35,6 +35,12 @@ export function UserMaterialEditContent({
   lesson,
 }: UserMaterialEditContentProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isFromProfile = searchParams.get('from') === 'profile'
+  
+  const lessonUrl = generateLessonUrlFromLesson(lesson)
+  const profileMaterialsUrl = '/profile?tab=materials'
+  
   const [title, setTitle] = React.useState(initialMaterial.title)
   const [content, setContent] = React.useState(initialMaterial.content || '')
   const [saveStatus, setSaveStatus] = React.useState<SaveStatus>('idle')
@@ -160,7 +166,7 @@ export function UserMaterialEditContent({
     const result = await deleteUserLessonMaterialAction(initialMaterial.id, lesson.id)
 
     if (result.success) {
-      router.push(lessonUrl)
+      router.push(isFromProfile ? profileMaterialsUrl : lessonUrl)
     } else {
       // TODO: Replace alert with toast notification system for better UX
       alert(result.error || 'Chyba při mazání materiálu')
@@ -213,14 +219,19 @@ export function UserMaterialEditContent({
     }
   }
 
-  const lessonUrl = generateLessonUrlFromLesson(lesson)
-  
-  const breadcrumbItems = [
-    { label: 'Domov', href: '/' },
-    { label: 'Katalog lekcí', href: '/lessons' },
-    { label: 'Detail lekce', href: lessonUrl },
-    { label: 'Úprava materiálu' },
-  ]
+  const breadcrumbItems = isFromProfile
+    ? [
+        { label: 'Domov', href: '/' },
+        { label: 'Profil', href: '/profile' },
+        { label: 'Moje materiály', href: profileMaterialsUrl },
+        { label: 'Úprava materiálu' },
+      ]
+    : [
+        { label: 'Domov', href: '/' },
+        { label: 'Katalog lekcí', href: '/lessons' },
+        { label: 'Detail lekce', href: lessonUrl },
+        { label: 'Úprava materiálu' },
+      ]
 
   return (
     <div className="flex flex-col gap-6">
@@ -228,10 +239,10 @@ export function UserMaterialEditContent({
 
       {/* Header with back button */}
       <div>
-        <Link href={lessonUrl}>
+        <Link href={isFromProfile ? profileMaterialsUrl : lessonUrl}>
           <Button variant="ghost" size="sm" className="mb-2 -ml-2">
             <ArrowLeft className="w-4 h-4" />
-            {lesson.title}
+            {isFromProfile ? 'Moje materiály' : lesson.title}
           </Button>
         </Link>
       </div>

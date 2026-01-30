@@ -26,7 +26,7 @@ export function UserMaterialCard({
 }: UserMaterialCardProps) {
   const lessonId = material.lesson_short_id || material.lesson_id
   const lessonUrl = generateLessonUrl(lessonId, material.lesson_title)
-  const materialEditUrl = `${lessonUrl}/materials/${material.id}`
+  const materialEditUrl = `${lessonUrl}/materials/${material.id}?from=profile`
 
   const getMaterialIcon = () => {
     return material.title.toLowerCase().includes('pracovní') 
