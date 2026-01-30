@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/logger'
 import { headers } from 'next/headers'
 
@@ -33,7 +33,11 @@ export async function subscribeToNewsletter(email: string) {
       }
     }
 
-    const supabase = await createClient()
+    // Use admin client to bypass RLS - this is safe because:
+    // 1. We validate email format above
+    // 2. This is a server action (runs on server, not client)
+    // 3. Avoids RLS warnings in Supabase for public INSERT
+    const supabase = createAdminClient()
     
     // Try to insert the email and get the unsubscribe token
     const { data, error } = await supabase
@@ -97,7 +101,11 @@ export async function unsubscribeFromNewsletter(token: string) {
       }
     }
 
-    const supabase = await createClient()
+    // Use admin client to bypass RLS - this is safe because:
+    // 1. We validate by unique token (the "authentication")
+    // 2. We only update specific fields
+    // 3. User doesn't need to be logged in to unsubscribe via email link
+    const supabase = createAdminClient()
     
     // Update subscription to inactive
     const { data, error } = await supabase
