@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -9,7 +10,7 @@ import { unsubscribeFromNewsletter } from '@/app/actions/newsletter'
 
 type UnsubscribeState = 'loading' | 'success' | 'error' | 'no-token'
 
-export default function UnsubscribePage() {
+function UnsubscribeContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
   
@@ -123,5 +124,35 @@ export default function UnsubscribePage() {
         )}
       </div>
     </div>
+  )
+}
+
+function UnsubscribeLoading() {
+  return (
+    <div className="min-h-screen bg-grey-50 flex flex-col items-center justify-center px-5 py-10">
+      <div className="w-full max-w-md bg-white rounded-[40px] shadow-lg p-8 text-center">
+        <Link href="/" className="inline-block mb-8">
+          <Image
+            src="/logo-postbellum.svg"
+            alt="Post Bellum"
+            width={154}
+            height={16}
+            className="h-4 w-auto"
+          />
+        </Link>
+        <div className="space-y-4">
+          <div className="w-12 h-12 border-4 border-mint border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-text-subtle font-body">Zpracovávám odhlášení...</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function UnsubscribePage() {
+  return (
+    <Suspense fallback={<UnsubscribeLoading />}>
+      <UnsubscribeContent />
+    </Suspense>
   )
 }
