@@ -32,7 +32,7 @@ export function DisplayNameSection({
         </div>
         <div className="flex flex-col max-w-[480px]">
           <Label htmlFor="display-name-input" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
-            Zobrazované jméno <span className="text-red-500">*</span>
+            Zobrazované jméno
           </Label>
           <Input
             id="display-name-input"
