@@ -1,11 +1,10 @@
 'use client'
 
-import * as React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Plus, Edit } from 'lucide-react'
 import { DeleteLessonButton } from '@/components/lessons/DeleteLessonButton'
-import { useAuth } from '@/lib/supabase/hooks/useAuth'
+import { useIsAdmin } from '@/lib/supabase/hooks/useIsAdmin'
 import { generateLessonUrl } from '@/lib/utils'
 
 interface AdminControlsProps {
@@ -23,30 +22,7 @@ export function AdminControls({
   showNewButton = false,
   showEditButton = false 
 }: AdminControlsProps) {
-  const { isLoggedIn } = useAuth()
-  const [isAdmin, setIsAdmin] = React.useState(false)
-  const [loading, setLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    async function checkAdmin() {
-      if (!isLoggedIn) {
-        setLoading(false)
-        return
-      }
-
-      try {
-        const response = await fetch('/api/admin/check')
-        const data = await response.json()
-        setIsAdmin(data.isAdmin || false)
-      } catch {
-        setIsAdmin(false)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkAdmin()
-  }, [isLoggedIn])
+  const { isAdmin, loading } = useIsAdmin()
 
   if (loading || !isAdmin) return null
 

@@ -16,10 +16,11 @@ import {
 import { Autocomplete } from '@/components/ui/Autocomplete'
 import { completeRegistration } from '@/lib/supabase/user-profile'
 import { searchSchools } from '@/lib/supabase/schools'
-import { getDisplayNameFromAuth } from '@/lib/supabase/user-helpers'
+import { getDisplayNameFromAuth, getUserEmail } from '@/lib/supabase/user-helpers'
 import { PROFILE_UPDATED_EVENT } from '@/lib/supabase/hooks/useProfile'
 import { AUTH_CONSTANTS } from '@/lib/constants'
 import { logger } from '@/lib/logger'
+import { subscribeToNewsletter } from '@/app/actions/newsletter'
 
 interface CompleteRegistrationModalProps {
   onSuccess: () => void
@@ -88,6 +89,21 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
         termsAccepted,
         emailConsent,
       })
+      
+      // Subscribe to newsletter if user consented
+      if (emailConsent) {
+        const email = await getUserEmail()
+        if (email) {
+          try {
+            const result = await subscribeToNewsletter(email)
+            if (!result.success) {
+              logger.error('Newsletter subscription failed during registration', result.error)
+            }
+          } catch (err) {
+            logger.error('Failed to subscribe to newsletter during registration', err)
+          }
+        }
+      }
       
       // Dispatch event to notify other components (e.g., navbar) to refetch profile
       window.dispatchEvent(new CustomEvent(PROFILE_UPDATED_EVENT))
