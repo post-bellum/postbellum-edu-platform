@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/Dialog'
+import { FeedbackModal } from '@/components/ui/FeedbackModal'
 import { logger } from '@/lib/logger'
 
 interface AdditionalActivitiesManagerProps {
@@ -32,6 +33,8 @@ export function AdditionalActivitiesManager({
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [activityToDelete, setActivityToDelete] = React.useState<AdditionalActivity | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
+  const [successModalOpen, setSuccessModalOpen] = React.useState(false)
+  const [deletedActivityTitle, setDeletedActivityTitle] = React.useState('')
 
   const loadActivities = React.useCallback(async () => {
     try {
@@ -68,9 +71,12 @@ export function AdditionalActivitiesManager({
 
     setIsDeleting(true)
     try {
+      const deletedTitle = activityToDelete.title
       await deleteAdditionalActivityAction(activityToDelete.id, lessonId)
       setDeleteDialogOpen(false)
       setActivityToDelete(null)
+      setDeletedActivityTitle(deletedTitle)
+      setSuccessModalOpen(true)
       loadActivities()
     } catch (error) {
       logger.error('Error deleting activity:', error)
@@ -184,6 +190,14 @@ export function AdditionalActivitiesManager({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <FeedbackModal
+        open={successModalOpen}
+        onOpenChange={setSuccessModalOpen}
+        type="success"
+        title="Aktivita byla smazána"
+        message={`Aktivita "${deletedActivityTitle}" byla úspěšně odstraněna.`}
+      />
     </div>
   )
 }

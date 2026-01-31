@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/Dialog'
+import { FeedbackModal } from '@/components/ui/FeedbackModal'
 import { logger } from '@/lib/logger'
 
 interface LessonMaterialsManagerProps {
@@ -44,6 +45,8 @@ export function LessonMaterialsManager({
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [materialToDelete, setMaterialToDelete] = React.useState<LessonMaterial | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
+  const [successModalOpen, setSuccessModalOpen] = React.useState(false)
+  const [deletedMaterialTitle, setDeletedMaterialTitle] = React.useState('')
 
   const loadMaterials = React.useCallback(async () => {
     try {
@@ -93,9 +96,12 @@ export function LessonMaterialsManager({
 
     setIsDeleting(true)
     try {
+      const deletedTitle = materialToDelete.title
       await deleteLessonMaterialAction(materialToDelete.id, lessonId)
       setDeleteDialogOpen(false)
       setMaterialToDelete(null)
+      setDeletedMaterialTitle(deletedTitle)
+      setSuccessModalOpen(true)
       loadMaterials()
     } catch (error) {
       logger.error('Error deleting material:', error)
@@ -206,6 +212,14 @@ export function LessonMaterialsManager({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <FeedbackModal
+        open={successModalOpen}
+        onOpenChange={setSuccessModalOpen}
+        type="success"
+        title="Materiál byl smazán"
+        message={`Materiál "${deletedMaterialTitle}" byl úspěšně odstraněn.`}
+      />
     </div>
   )
 }

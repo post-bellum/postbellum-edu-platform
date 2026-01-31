@@ -29,11 +29,15 @@ export function DeleteLessonButton({ lessonId, lessonTitle }: DeleteLessonButton
   const handleDelete = async () => {
     setIsDeleting(true)
     try {
-      await deleteLessonAction(lessonId)
-      setOpen(false)
-      React.startTransition(() => {
-        router.push('/lessons')
-      })
+      const result = await deleteLessonAction(lessonId)
+      if (result.success) {
+        setOpen(false)
+        // Redirect to lessons list with query param to show success modal there
+        router.push(`/lessons?deleted=${encodeURIComponent(lessonTitle)}`)
+      } else {
+        logger.error('Error deleting lesson:', result.error)
+        setIsDeleting(false)
+      }
     } catch (error) {
       logger.error('Error deleting lesson:', error)
       setIsDeleting(false)
