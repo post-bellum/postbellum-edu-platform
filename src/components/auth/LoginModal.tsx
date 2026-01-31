@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Label } from '@/components/ui/Label'
 import { OAuthButtons } from './OAuthButtons'
 import { signInWithEmail, getErrorMessage } from '@/lib/supabase/email-auth'
@@ -117,9 +118,8 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
               <Label htmlFor="password" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
                 Heslo
               </Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 placeholder="Heslo"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

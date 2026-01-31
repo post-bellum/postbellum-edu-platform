@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Label } from '@/components/ui/Label'
 import { OAuthButtons } from './OAuthButtons'
 import { signUpWithEmail, getErrorMessage } from '@/lib/supabase/email-auth'
@@ -149,9 +150,8 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
               <Label htmlFor="password" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
                 Heslo
               </Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 placeholder="Heslo"
                 value={password}
                 onChange={(e) => handlePasswordChange(e.target.value)}
@@ -177,9 +177,8 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
               <Label htmlFor="confirmPassword" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
                 Zopakujte heslo
               </Label>
-              <Input
+              <PasswordInput
                 id="confirmPassword"
-                type="password"
                 placeholder="Zopakujte heslo"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
