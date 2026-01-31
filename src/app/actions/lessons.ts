@@ -5,7 +5,9 @@ import {
   createLesson,
   updateLesson,
   deleteLesson,
+  getLessons,
 } from '@/lib/supabase/lessons'
+import { requireAdmin } from '@/lib/supabase/admin-helpers'
 import { logger } from '@/lib/logger'
 import { isValidUUID } from '@/lib/validation'
 import {
@@ -13,6 +15,47 @@ import {
   updateLessonSchema,
   parseFormDataForLesson,
 } from '@/lib/schemas/lesson.schema'
+import type { LessonWithRelations } from '@/types/lesson.types'
+
+export interface AdminLessonsStats {
+  total: number
+  published: number
+  unpublished: number
+}
+
+export async function getAdminLessons(): Promise<{
+  success: boolean
+  data?: LessonWithRelations[]
+  stats?: AdminLessonsStats
+  error?: string
+}> {
+  try {
+    await requireAdmin()
+    
+    const lessons = await getLessons({
+      published_only: false,
+      include_tags: true,
+    })
+
+    const stats: AdminLessonsStats = {
+      total: lessons.length,
+      published: lessons.filter(l => l.published).length,
+      unpublished: lessons.filter(l => !l.published).length,
+    }
+
+    return {
+      success: true,
+      data: lessons,
+      stats,
+    }
+  } catch (error) {
+    logger.error('Error fetching admin lessons', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Chyba při načítání lekcí',
+    }
+  }
+}
 
 export async function createLessonAction(formData: FormData) {
   try {
