@@ -20,24 +20,28 @@ export async function EditLessonContent({ id }: EditLessonContentProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">Základní informace</h2>
-        <LessonForm lesson={lesson} tags={tags} />
+    <div className="space-y-8">
+      {/* Lesson Form */}
+      <LessonForm lesson={lesson} tags={tags} />
+
+      {/* Materials Section */}
+      <div className="bg-white border border-grey-200 rounded-[28px] shadow-sm overflow-hidden">
+        <div className="px-5 py-7 sm:px-7">
+          <LessonMaterialsManager
+            lessonId={lesson.id}
+            initialMaterials={lesson.materials || []}
+          />
+        </div>
       </div>
 
-      <div className="border-t pt-6">
-        <LessonMaterialsManager
-          lessonId={lesson.id}
-          initialMaterials={lesson.materials || []}
-        />
-      </div>
-
-      <div className="border-t pt-6">
-        <AdditionalActivitiesManager
-          lessonId={lesson.id}
-          initialActivities={lesson.additional_activities || []}
-        />
+      {/* Additional Activities Section */}
+      <div className="bg-white border border-grey-200 rounded-[28px] shadow-sm overflow-hidden">
+        <div className="px-5 py-7 sm:px-7">
+          <AdditionalActivitiesManager
+            lessonId={lesson.id}
+            initialActivities={lesson.additional_activities || []}
+          />
+        </div>
       </div>
     </div>
   )
