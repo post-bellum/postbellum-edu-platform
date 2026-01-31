@@ -75,6 +75,17 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
     lessonType: 200,
   }
 
+  // Vimeo URL validation helper
+  const isValidVimeoUrl = (url: string) => {
+    if (!url.trim()) return true // Empty is allowed (optional field)
+    try {
+      new URL(url)
+      return /^https?:\/\/(www\.)?(vimeo\.com|player\.vimeo\.com)/.test(url)
+    } catch {
+      return false
+    }
+  }
+
   // Validation errors
   const errors = {
     title: !title.trim() 
@@ -84,6 +95,9 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
         : null,
     description: description.length > limits.description 
       ? `Popis může mít maximálně ${limits.description} znaků` 
+      : null,
+    vimeoVideoUrl: vimeoVideoUrl.trim() && !isValidVimeoUrl(vimeoVideoUrl)
+      ? 'Musí být platná Vimeo URL adresa (https://vimeo.com/...)'
       : null,
     duration: duration.length > limits.duration 
       ? `Délka lekce může mít maximálně ${limits.duration} znaků` 
@@ -229,8 +243,13 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
                   type="url"
                   value={vimeoVideoUrl}
                   onChange={(e) => setVimeoVideoUrl(e.target.value)}
+                  onBlur={() => setTouched(prev => ({ ...prev, vimeoVideoUrl: true }))}
                   placeholder="https://vimeo.com/..."
+                  className={showError('vimeoVideoUrl') ? 'border-red-500 focus:border-red-500' : ''}
                 />
+                {showError('vimeoVideoUrl') && (
+                  <p className="text-sm text-red-600">{errors.vimeoVideoUrl}</p>
+                )}
               </div>
 
               <div className="space-y-2">

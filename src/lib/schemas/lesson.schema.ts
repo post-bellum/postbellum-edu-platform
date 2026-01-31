@@ -102,6 +102,38 @@ export const createLessonSchema = z.object({
  * Note: This schema expects pre-processed data (arrays, booleans already converted)
  * Use parseFormDataForLesson() helper to convert FormData before validation
  */
+// Nullable string schema helper for update operations
+const nullableStringSchema = (maxLength: number, errorMessage: string) =>
+  z.union([
+    z.null(),
+    z.string().max(maxLength, errorMessage).transform(sanitizeString),
+  ]).optional()
+
+// Nullable Vimeo URL schema for updates
+const nullableVimeoUrlSchema = z.union([
+  z.null(),
+  z
+    .string()
+    .url('Neplatná URL adresa')
+    .refine(
+      (url) => /^https?:\/\/(www\.)?(vimeo\.com|player\.vimeo\.com)/.test(url),
+      { message: 'Musí být platná Vimeo URL adresa' }
+    )
+    .transform(sanitizeString),
+]).optional()
+
+// Nullable image URL schema for updates
+const nullableImageUrlSchema = z.union([
+  z.null(),
+  z.string().url('Neplatná URL adresa obrázku').transform(sanitizeString),
+]).optional()
+
+// Nullable date schema for updates
+const nullableDateSchema = z.union([
+  z.null(),
+  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Neplatný formát data (YYYY-MM-DD)'),
+]).optional()
+
 export const updateLessonSchema = z.object({
   title: z
     .string()
@@ -109,37 +141,14 @@ export const updateLessonSchema = z.object({
     .max(500, 'Název lekce může mít maximálně 500 znaků')
     .transform(sanitizeString)
     .optional(),
-  vimeo_video_url: vimeoUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
-  thumbnail_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
-  description: z
-    .string()
-    .max(5000, 'Popis může mít maximálně 5000 znaků')
-    .optional()
-    .transform((val) => val ? sanitizeString(val) : undefined),
-  duration: z
-    .string()
-    .max(50, 'Délka lekce může mít maximálně 50 znaků')
-    .optional()
-    .transform((val) => val ? sanitizeString(val) : undefined),
-  period: z
-    .string()
-    .max(200, 'Období může mít maximálně 200 znaků')
-    .optional()
-    .transform((val) => val ? sanitizeString(val) : undefined),
-  target_group: z
-    .string()
-    .max(200, 'Cílová skupina může mít maximálně 200 znaků')
-    .optional()
-    .transform((val) => val ? sanitizeString(val) : undefined),
-  lesson_type: z
-    .string()
-    .max(200, 'Typ lekce může mít maximálně 200 znaků')
-    .optional()
-    .transform((val) => val ? sanitizeString(val) : undefined),
-  publication_date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Neplatný formát data (YYYY-MM-DD)')
-    .optional(),
+  vimeo_video_url: nullableVimeoUrlSchema,
+  thumbnail_url: nullableImageUrlSchema,
+  description: nullableStringSchema(5000, 'Popis může mít maximálně 5000 znaků'),
+  duration: nullableStringSchema(50, 'Délka lekce může mít maximálně 50 znaků'),
+  period: nullableStringSchema(200, 'Období může mít maximálně 200 znaků'),
+  target_group: nullableStringSchema(200, 'Cílová skupina může mít maximálně 200 znaků'),
+  lesson_type: nullableStringSchema(200, 'Typ lekce může mít maximálně 200 znaků'),
+  publication_date: nullableDateSchema,
   published: z.boolean().optional(),
   rvp_connection: z
     .array(z.string().max(200, 'RVP připojení může mít maximálně 200 znaků').transform(sanitizeString))
@@ -152,6 +161,7 @@ export const updateLessonSchema = z.object({
 /**
  * Helper to parse FormData into object for lesson schemas
  * Converts empty strings to undefined for optional fields, empty string for required fields
+ * For updates: uses null to explicitly clear a field value in the database
  */
 export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
   const publishedValue = formData.get('published')
@@ -160,12 +170,16 @@ export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
   const rvpConnection = formData.get('rvp_connection') as string | null
   const tagIds = formData.get('tag_ids') as string | null
   
-  // Helper to convert empty strings to undefined for optional fields
-  // Zod's .optional() expects undefined, not null
-  // For required fields, return empty string so Zod can validate with .min(1)
+  // Helper to convert empty strings:
+  // - For create: undefined (field is optional)
+  // - For update: null (explicitly clear the field in database)
   const getOptionalValue = (key: string) => {
     const value = formData.get(key) as string | null
-    return value && value.trim() ? value : undefined
+    if (value && value.trim()) {
+      return value
+    }
+    // For updates, return null to clear the field; for creates, return undefined
+    return isUpdate ? null : undefined
   }
   
   const getRequiredValue = (key: string) => {
@@ -186,10 +200,10 @@ export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
     published: isUpdate && publishedValue === null ? undefined : published,
     rvp_connection: rvpConnection && rvpConnection.trim()
       ? rvpConnection.split(',').map(s => s.trim()).filter(Boolean)
-      : undefined,
+      : isUpdate ? [] : undefined,
     tag_ids: tagIds && tagIds.trim()
       ? tagIds.split(',').map(s => s.trim()).filter(Boolean)
-      : undefined,
+      : isUpdate ? [] : undefined,
   }
 }
 
