@@ -18,9 +18,10 @@ import { BottomIllustration } from '@/components/homepage/BottomIllustration'
 interface LessonDetailContentProps {
   id: string
   usePublicClient?: boolean // Use public client for static generation
+  isAdmin?: boolean // Pass admin status from parent to avoid redundant client-side checks
 }
 
-export async function LessonDetailContent({ id, usePublicClient = false }: LessonDetailContentProps) {
+export async function LessonDetailContent({ id, usePublicClient = false, isAdmin = false }: LessonDetailContentProps) {
   // First fetch the lesson (id could be short_id or UUID)
   // This works because getLessonById is smart and detects which one it is
   const lesson = await getLessonById(id, usePublicClient)
@@ -58,7 +59,8 @@ export async function LessonDetailContent({ id, usePublicClient = false }: Lesso
         lessonId={lesson.id} 
         shortId={lesson.short_id}
         title={lesson.title} 
-        published={lesson.published} 
+        published={lesson.published}
+        isAdmin={isAdmin}
       />
 
       <div className="flex flex-col lg:flex-row gap-20">

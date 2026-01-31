@@ -15,7 +15,7 @@ function LessonTag({ tag }: { tag: Tag }) {
   )
 }
 
-function LessonCard({ lesson }: { lesson: LessonWithRelations }) {
+function LessonCard({ lesson, isAdmin }: { lesson: LessonWithRelations; isAdmin: boolean }) {
   const tags = lesson.tags || []
   const lessonUrl = generateLessonUrlFromLesson(lesson)
 
@@ -78,7 +78,13 @@ function LessonCard({ lesson }: { lesson: LessonWithRelations }) {
       {/* Desktop Actions */}
       <div className="hidden sm:flex flex-col items-center justify-center self-stretch shrink-0 gap-2">
         <ViewButton href={lessonUrl} />
-        <AdminControls lessonId={lesson.id} lessonShortId={lesson.short_id} lessonTitle={lesson.title} />
+        {isAdmin && <div className="w-12 h-px bg-grey-200" />}
+        <AdminControls 
+          lessonId={lesson.id} 
+          lessonShortId={lesson.short_id} 
+          lessonTitle={lesson.title} 
+          isAdmin={isAdmin}
+        />
       </div>
     </article>
   )
@@ -109,7 +115,7 @@ export async function LessonsList() {
               Vyberte si lekci podle období nebo tématu.
             </p>
           </div>
-          <AdminControls showNewButton />
+          <AdminControls showNewButton isAdmin={admin} />
         </div>
       </div>
 
@@ -117,12 +123,12 @@ export async function LessonsList() {
       {lessons.length === 0 ? (
         <div className="text-center py-24 border border-grey-200 rounded-3xl bg-grey-50/50">
           <p className="text-text-subtle mb-6 text-lg">Zatím nejsou žádné lekce</p>
-          <AdminControls showNewButton />
+          <AdminControls showNewButton isAdmin={admin} />
         </div>
       ) : (
         <div className="flex flex-col gap-10 sm:gap-10">
           {lessons.map((lesson) => (
-            <LessonCard key={lesson.id} lesson={lesson} />
+            <LessonCard key={lesson.id} lesson={lesson} isAdmin={admin} />
           ))}
         </div>
       )}
