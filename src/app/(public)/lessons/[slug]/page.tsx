@@ -42,7 +42,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
   return (
     <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
       <React.Suspense fallback={<LessonDetailLoading />}>
-        <LessonDetailContent id={id} usePublicClient={usePublicClient} />
+        <LessonDetailContent id={id} usePublicClient={usePublicClient} isAdmin={admin} />
       </React.Suspense>
     </div>
   )

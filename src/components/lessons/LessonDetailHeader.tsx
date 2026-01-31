@@ -7,9 +7,10 @@ interface LessonDetailHeaderProps {
   shortId?: string | null
   title: string
   published: boolean
+  isAdmin?: boolean
 }
 
-export function LessonDetailHeader({ lessonId, shortId, title, published }: LessonDetailHeaderProps) {
+export function LessonDetailHeader({ lessonId, shortId, title, published, isAdmin }: LessonDetailHeaderProps) {
   return (
     <div>
       <div className="flex justify-between gap-4 2xl:mb-14">
@@ -30,8 +31,13 @@ export function LessonDetailHeader({ lessonId, shortId, title, published }: Less
             )}
           </div>
         </div>
-        {/* AdminControls handles its own visibility via client-side admin check */}
-        <AdminControls lessonId={lessonId} lessonShortId={shortId} lessonTitle={title} showEditButton={true} />
+        <AdminControls 
+          lessonId={lessonId} 
+          lessonShortId={shortId} 
+          lessonTitle={title} 
+          showEditButton={true}
+          isAdmin={isAdmin}
+        />
       </div>
     </div>
   )

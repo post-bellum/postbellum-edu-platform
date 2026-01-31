@@ -10,9 +10,27 @@ import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/Textarea'
 import { Checkbox } from '@/components/ui/Checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/Dialog'
+import { Info, Loader2, Check } from 'lucide-react'
 import { TagsSelector } from './TagsSelector'
 import { ThumbnailUpload } from './ThumbnailUpload'
 import { generateLessonUrl } from '@/lib/utils'
+
+// Character counter component (defined outside to avoid re-creation during render)
+function CharCounter({ current, max }: { current: number; max: number }) {
+  const isOver = current > max
+  return (
+    <span className={`text-xs ${isOver ? 'text-red-600 font-medium' : 'text-text-subtle'}`}>
+      {current}/{max}
+    </span>
+  )
+}
 
 interface LessonFormProps {
   lesson?: LessonWithRelations
@@ -42,6 +60,50 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
   )
   const [published, setPublished] = React.useState(lesson?.published ?? false)
 
+  // Validation state
+  const [touched, setTouched] = React.useState<Record<string, boolean>>({})
+  const [submitted, setSubmitted] = React.useState(false)
+  const [showSuccessModal, setShowSuccessModal] = React.useState(false)
+
+  // Character limits
+  const limits = {
+    title: 500,
+    description: 5000,
+    duration: 50,
+    period: 200,
+    targetGroup: 200,
+    lessonType: 200,
+  }
+
+  // Validation errors
+  const errors = {
+    title: !title.trim() 
+      ? 'Název lekce je povinný' 
+      : title.length > limits.title 
+        ? `Název lekce může mít maximálně ${limits.title} znaků` 
+        : null,
+    description: description.length > limits.description 
+      ? `Popis může mít maximálně ${limits.description} znaků` 
+      : null,
+    duration: duration.length > limits.duration 
+      ? `Délka lekce může mít maximálně ${limits.duration} znaků` 
+      : null,
+    period: period.length > limits.period 
+      ? `Období může mít maximálně ${limits.period} znaků` 
+      : null,
+    targetGroup: targetGroup.length > limits.targetGroup 
+      ? `Cílová skupina může mít maximálně ${limits.targetGroup} znaků` 
+      : null,
+    lessonType: lessonType.length > limits.lessonType 
+      ? `Typ lekce může mít maximálně ${limits.lessonType} znaků` 
+      : null,
+  }
+
+  // Show error only after field is touched or form is submitted
+  const showError = (field: keyof typeof errors) => {
+    return (touched[field] || submitted) && errors[field]
+  }
+
   const action = async (_prevState: unknown, formData: FormData) => {
     // Add controlled state fields to FormData
     formData.append('tag_ids', selectedTagIds.join(','))
@@ -53,7 +115,18 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
       : createLessonAction(formData)
   }
 
-  const [state, formAction] = useActionState(action, null)
+  // Handle form submission with client-side validation
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    setSubmitted(true)
+    
+    // Prevent submission if there are validation errors
+    const hasErrors = Object.values(errors).some(err => err !== null)
+    if (hasErrors) {
+      e.preventDefault()
+    }
+  }
+
+  const [state, formAction, isPending] = useActionState(action, null)
 
   React.useEffect(() => {
     if (lesson) {
@@ -63,168 +136,333 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
 
   React.useEffect(() => {
     if (state?.success && state.data) {
-      // Redirect to edit page for newly created lessons (which are unpublished by default)
-      // This ensures admins can view/edit their newly created lessons
-      // Use short_id for SEO-friendly URLs if available
-      const lessonUrl = generateLessonUrl(
-        state.data.short_id || state.data.id,
-        state.data.title
-      )
-      React.startTransition(() => {
-        router.push(`${lessonUrl}/edit`)
-      })
+      // Show success modal for both create and edit
+      setShowSuccessModal(true)
     }
-  }, [state, router])
+  }, [state])
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} onSubmit={handleSubmit} noValidate className="space-y-6">
       {state?.error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {state.error}
+        <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <span>{state.error}</span>
+          </div>
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="title">Název lekce *</Label>
-        <Input
-          id="title"
-          name="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="vimeo_video_url">Vimeo Video URL</Label>
-        <Input
-          id="vimeo_video_url"
-          name="vimeo_video_url"
-          type="url"
-          value={vimeoVideoUrl}
-          onChange={(e) => setVimeoVideoUrl(e.target.value)}
-          placeholder="https://vimeo.com/..."
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Náhledový obrázek</Label>
-        <ThumbnailUpload
-          value={thumbnailUrl}
-          onChange={setThumbnailUrl}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Popis lekce</Label>
-        <Textarea
-          id="description"
-          name="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={4}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="duration">Délka lekce</Label>
-          <Input
-            id="duration"
-            name="duration"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="např. 45 min"
-          />
+      {/* Info for new lesson */}
+      {!isEditing && (
+        <div className="bg-mint-light border border-mint px-5 py-4 rounded-2xl">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 mt-0.5 shrink-0 text-brand-primary" />
+            <span className="text-text-strong">
+              Po uložení lekce budete moci přidat pracovní materiály a doprovodné aktivity.
+            </span>
+          </div>
         </div>
+      )}
 
-        <div className="space-y-2">
-          <Label htmlFor="publication_date">Datum publikování</Label>
-          <Input
-            id="publication_date"
-            name="publication_date"
-            type="date"
-            value={publicationDate}
-            onChange={(e) => setPublicationDate(e.target.value)}
-          />
+      {/* Form Grid */}
+      <div className="bg-white border border-grey-200 rounded-[28px] shadow-sm overflow-hidden">
+        <div className="px-5 py-7 sm:px-7 lg:px-10 lg:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="title">Název lekce *</Label>
+                  <CharCounter current={title.length} max={limits.title} />
+                </div>
+                <Input
+                  id="title"
+                  name="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={() => setTouched(prev => ({ ...prev, title: true }))}
+                  placeholder="Zadejte název lekce"
+                  required
+                  maxLength={limits.title}
+                  aria-invalid={!!showError('title')}
+                  aria-describedby={showError('title') ? 'title-error' : undefined}
+                  className={showError('title') ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {showError('title') && (
+                  <p id="title-error" className="text-sm text-red-600 flex items-center gap-1.5">
+                    <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    {errors.title}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="description">Popis lekce</Label>
+                  <CharCounter current={description.length} max={limits.description} />
+                </div>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  onBlur={() => setTouched(prev => ({ ...prev, description: true }))}
+                  rows={5}
+                  maxLength={limits.description}
+                  placeholder="Popis lekce pro studenty a učitele..."
+                  className={showError('description') ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {showError('description') && (
+                  <p className="text-sm text-red-600">{errors.description}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="vimeo_video_url">Vimeo Video URL</Label>
+                <Input
+                  id="vimeo_video_url"
+                  name="vimeo_video_url"
+                  type="url"
+                  value={vimeoVideoUrl}
+                  onChange={(e) => setVimeoVideoUrl(e.target.value)}
+                  placeholder="https://vimeo.com/..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Náhledový obrázek</Label>
+                <ThumbnailUpload
+                  value={thumbnailUrl}
+                  onChange={setThumbnailUrl}
+                />
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="duration">Délka lekce</Label>
+                    <CharCounter current={duration.length} max={limits.duration} />
+                  </div>
+                  <Input
+                    id="duration"
+                    name="duration"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    onBlur={() => setTouched(prev => ({ ...prev, duration: true }))}
+                    maxLength={limits.duration}
+                    placeholder="např. 45 min"
+                    className={showError('duration') ? 'border-red-500 focus:border-red-500' : ''}
+                  />
+                  {showError('duration') && (
+                    <p className="text-sm text-red-600">{errors.duration}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="publication_date">Datum publikace</Label>
+                  <Input
+                    id="publication_date"
+                    name="publication_date"
+                    type="date"
+                    value={publicationDate}
+                    onChange={(e) => setPublicationDate(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="target_group">Cílová skupina</Label>
+                    <CharCounter current={targetGroup.length} max={limits.targetGroup} />
+                  </div>
+                  <Input
+                    id="target_group"
+                    name="target_group"
+                    value={targetGroup}
+                    onChange={(e) => setTargetGroup(e.target.value)}
+                    onBlur={() => setTouched(prev => ({ ...prev, targetGroup: true }))}
+                    maxLength={limits.targetGroup}
+                    placeholder="např. 9. ročník ZŠ"
+                    className={showError('targetGroup') ? 'border-red-500 focus:border-red-500' : ''}
+                  />
+                  {showError('targetGroup') && (
+                    <p className="text-sm text-red-600">{errors.targetGroup}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="lesson_type">Typ lekce</Label>
+                    <CharCounter current={lessonType.length} max={limits.lessonType} />
+                  </div>
+                  <Input
+                    id="lesson_type"
+                    name="lesson_type"
+                    value={lessonType}
+                    onChange={(e) => setLessonType(e.target.value)}
+                    onBlur={() => setTouched(prev => ({ ...prev, lessonType: true }))}
+                    maxLength={limits.lessonType}
+                    placeholder="např. Videovýpověď"
+                    className={showError('lessonType') ? 'border-red-500 focus:border-red-500' : ''}
+                  />
+                  {showError('lessonType') && (
+                    <p className="text-sm text-red-600">{errors.lessonType}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="period">Historické období</Label>
+                  <CharCounter current={period.length} max={limits.period} />
+                </div>
+                <Input
+                  id="period"
+                  name="period"
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value)}
+                  onBlur={() => setTouched(prev => ({ ...prev, period: true }))}
+                  maxLength={limits.period}
+                  placeholder="např. 40. léta – 2. světová válka"
+                  className={showError('period') ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {showError('period') && (
+                  <p className="text-sm text-red-600">{errors.period}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="rvp_connection">Napojení na RVP</Label>
+                <Textarea
+                  id="rvp_connection"
+                  name="rvp_connection"
+                  value={rvpConnection}
+                  onChange={(e) => setRvpConnection(e.target.value)}
+                  rows={3}
+                  placeholder="Dějepis - Moderní dějiny, Osobnostní a sociální výchova (oddělte čárkami)"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tagy</Label>
+                <TagsSelector
+                  tags={tags}
+                  selectedTagIds={selectedTagIds}
+                  onSelectionChange={setSelectedTagIds}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="period">Období</Label>
-        <Input
-          id="period"
-          name="period"
-          value={period}
-          onChange={(e) => setPeriod(e.target.value)}
-          placeholder="např. 40. léta – 2. světová válka"
-        />
+      {/* Publishing & Actions */}
+      <div className="bg-white border border-grey-200 rounded-[28px] shadow-sm overflow-hidden">
+        <div className="px-5 py-7 sm:px-7">
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="published"
+              checked={published}
+              onCheckedChange={(checked) => setPublished(checked === true)}
+            />
+            <div className="flex-1">
+              <Label htmlFor="published" className="cursor-pointer text-base font-medium text-black">
+                Publikovat lekci
+              </Label>
+              <p className="text-sm text-text-subtle mt-0.5">
+                Publikovaná lekce bude viditelná pro všechny uživatele.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-grey-200 px-5 py-5 sm:px-7 bg-grey-50">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-end gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={isPending}
+            >
+              Zrušit
+            </Button>
+            <Button type="submit" variant="primary" disabled={isPending}>
+              {isPending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {isEditing ? 'Ukládám...' : 'Vytvářím...'}
+                </span>
+              ) : (
+                isEditing ? 'Uložit změny' : 'Vytvořit lekci'
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="target_group">Cílová skupina</Label>
-        <Input
-          id="target_group"
-          name="target_group"
-          value={targetGroup}
-          onChange={(e) => setTargetGroup(e.target.value)}
-          placeholder="např. 9. ročník ZŠ, střední školy"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="lesson_type">Typ lekce</Label>
-        <Input
-          id="lesson_type"
-          name="lesson_type"
-          value={lessonType}
-          onChange={(e) => setLessonType(e.target.value)}
-          placeholder="např. Videovýpověď + reflexe + aktivita"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="rvp_connection">Napojení na RVP (oddělené čárkami)</Label>
-        <Textarea
-          id="rvp_connection"
-          name="rvp_connection"
-          value={rvpConnection}
-          onChange={(e) => setRvpConnection(e.target.value)}
-          rows={3}
-          placeholder="Dějepis - Moderní dějiny, Osobnostní a sociální výchova, Mediální výchova"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Tagy</Label>
-        <TagsSelector
-          tags={tags}
-          selectedTagIds={selectedTagIds}
-          onSelectionChange={setSelectedTagIds}
-        />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="published"
-          checked={published}
-          onCheckedChange={(checked) => setPublished(checked === true)}
-        />
-        <Label htmlFor="published" className="cursor-pointer">
-          Publikovat lekci (viditelná pro všechny)
-        </Label>
-      </div>
-
-      <div className="flex gap-4">
-        <Button type="submit">{isEditing ? 'Uložit změny' : 'Vytvořit lekci'}</Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-        >
-          Zrušit
-        </Button>
-      </div>
+      {/* Success Modal */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-mint">
+              <Check className="h-6 w-6 text-grey-950" strokeWidth={2} />
+            </div>
+            <DialogTitle className="text-center">
+              {isEditing ? 'Změny uloženy' : 'Lekce vytvořena'}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {isEditing 
+                ? 'Lekce byla úspěšně aktualizována.'
+                : 'Lekce byla úspěšně vytvořena. Nyní můžete přidat materiály a aktivity.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex flex-col justify-center gap-3">
+            {isEditing ? (
+              <>
+                <Button variant="outline" onClick={() => setShowSuccessModal(false)}>
+                  Pokračovat v úpravách
+                </Button>
+                {state?.data && (
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      const lessonUrl = generateLessonUrl(
+                        state.data.short_id || state.data.id,
+                        state.data.title
+                      )
+                      router.push(lessonUrl)
+                    }}
+                  >
+                    Zobrazit lekci
+                  </Button>
+                )}
+              </>
+            ) : (
+              state?.data && (
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    const lessonUrl = generateLessonUrl(
+                      state.data.short_id || state.data.id,
+                      state.data.title
+                    )
+                    router.push(`${lessonUrl}/edit`)
+                  }}
+                >
+                  Přidat materiály a aktivity
+                </Button>
+              )
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   )
 }

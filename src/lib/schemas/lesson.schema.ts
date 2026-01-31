@@ -194,7 +194,30 @@ export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
 }
 
 /**
+ * Required specification schema with Czech error message
+ */
+const requiredSpecificationSchema = z
+  .string()
+  .min(1, 'Vyberte cílovou skupinu')
+  .refine(
+    (val): val is '2nd_grade_elementary' | 'high_school' =>
+      val === '2nd_grade_elementary' || val === 'high_school',
+    { message: 'Vyberte cílovou skupinu' }
+  )
+
+/**
+ * Required duration schema with Czech error message
+ */
+const requiredDurationSchema = z
+  .number()
+  .refine(
+    (val): val is 30 | 45 | 90 => val === 30 || val === 45 || val === 90,
+    { message: 'Vyberte délku materiálu' }
+  )
+
+/**
  * Create lesson material schema
+ * Note: specification and duration are required for new materials
  */
 export const createLessonMaterialSchema = z.object({
   lesson_id: uuidSchema,
@@ -213,14 +236,13 @@ export const createLessonMaterialSchema = z.object({
     .max(50000, 'Obsah může mít maximálně 50000 znaků')
     .optional()
     .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
-  specification: lessonSpecificationSchema.optional(),
-  duration: z
-    .union([z.literal(30), z.literal(45), z.literal(90)])
-    .optional(),
+  specification: requiredSpecificationSchema,
+  duration: requiredDurationSchema,
 })
 
 /**
  * Update lesson material schema
+ * Note: specification and duration are optional for updates (only update if provided)
  */
 export const updateLessonMaterialSchema = z.object({
   title: z
@@ -240,9 +262,7 @@ export const updateLessonMaterialSchema = z.object({
     .optional()
     .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
   specification: lessonSpecificationSchema.optional(),
-  duration: z
-    .union([z.literal(30), z.literal(45), z.literal(90)])
-    .optional(),
+  duration: z.union([z.literal(30), z.literal(45), z.literal(90)]).optional(),
 })
 
 /**

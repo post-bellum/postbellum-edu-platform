@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { LessonsList } from '@/components/lessons/LessonsList'
+import { DeletedLessonFeedback } from '@/components/lessons/DeletedLessonFeedback'
 
 // Public route - can be statically generated
 // Uses public client (no cookies), RLS handles filtering to published lessons only
@@ -7,6 +9,9 @@ import { LessonsList } from '@/components/lessons/LessonsList'
 export default function LessonsPage() {
   return (
     <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
+      <Suspense fallback={null}>
+        <DeletedLessonFeedback />
+      </Suspense>
       <LessonsList />
     </div>
   )

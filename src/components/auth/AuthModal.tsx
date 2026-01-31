@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo }: AuthModalProps) {
+  const router = useRouter()
   const [step, setStep] = React.useState<AuthStep>(defaultStep)
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
@@ -35,6 +37,8 @@ export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo 
 
   const handleLoginSuccess = () => {
     onOpenChange(false)
+    // Refresh to update server components (e.g., admin controls visibility)
+    router.refresh()
   }
 
   const handleRegisterSuccess = (registrationEmail: string, registrationPassword: string) => {
@@ -48,6 +52,8 @@ export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo 
     // After OTP verification, close modal and let home page handle registration completion
     // This keeps the flow consistent with OAuth users
     onOpenChange(false)
+    // Refresh to update server components with new user state
+    router.refresh()
   }
 
   return (

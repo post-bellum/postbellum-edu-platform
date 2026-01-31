@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/Dialog'
+import { FeedbackModal } from '@/components/ui/FeedbackModal'
 import { logger } from '@/lib/logger'
 
 interface AdditionalActivitiesManagerProps {
@@ -32,6 +33,11 @@ export function AdditionalActivitiesManager({
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [activityToDelete, setActivityToDelete] = React.useState<AdditionalActivity | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
+  const [successModalOpen, setSuccessModalOpen] = React.useState(false)
+  const [successModalConfig, setSuccessModalConfig] = React.useState<{
+    title: string
+    message: string
+  }>({ title: '', message: '' })
 
   const loadActivities = React.useCallback(async () => {
     try {
@@ -68,9 +74,15 @@ export function AdditionalActivitiesManager({
 
     setIsDeleting(true)
     try {
+      const deletedTitle = activityToDelete.title
       await deleteAdditionalActivityAction(activityToDelete.id, lessonId)
       setDeleteDialogOpen(false)
       setActivityToDelete(null)
+      setSuccessModalConfig({
+        title: 'Aktivita byla smazána',
+        message: `Aktivita "${deletedTitle}" byla úspěšně odstraněna.`,
+      })
+      setSuccessModalOpen(true)
       loadActivities()
     } catch (error) {
       logger.error('Error deleting activity:', error)
@@ -79,9 +91,17 @@ export function AdditionalActivitiesManager({
     }
   }
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = React.useCallback(() => {
+    const isCreating = !editingActivity
+    setSuccessModalConfig({
+      title: isCreating ? 'Aktivita byla vytvořena' : 'Aktivita byla uložena',
+      message: isCreating 
+        ? 'Nová aktivita byla úspěšně přidána k lekci.'
+        : 'Změny v aktivitě byly úspěšně uloženy.',
+    })
+    setSuccessModalOpen(true)
     loadActivities()
-  }
+  }, [loadActivities, editingActivity])
 
   return (
     <div className="space-y-4">
@@ -184,6 +204,14 @@ export function AdditionalActivitiesManager({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <FeedbackModal
+        open={successModalOpen}
+        onOpenChange={setSuccessModalOpen}
+        type="success"
+        title={successModalConfig.title}
+        message={successModalConfig.message}
+      />
     </div>
   )
 }

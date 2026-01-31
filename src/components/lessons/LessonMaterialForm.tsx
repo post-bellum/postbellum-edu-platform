@@ -59,6 +59,11 @@ export function LessonMaterialForm({
   )
   // Key to reset the rich text editor when form resets
   const [editorResetKey, setEditorResetKey] = React.useState(0)
+  const [fieldErrors, setFieldErrors] = React.useState<{
+    title?: string
+    specification?: string
+    duration?: string
+  }>({})
 
   // Reset form when modal opens/closes or material changes
   React.useEffect(() => {
@@ -69,6 +74,7 @@ export function LessonMaterialForm({
       setSpecification(material?.specification || '')
       setDuration(material?.duration?.toString() || '')
       setEditorResetKey(prev => prev + 1)
+      setFieldErrors({})
     }
   }, [open, material])
 
@@ -91,17 +97,32 @@ export function LessonMaterialForm({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    
+    // Client-side validation for immediate feedback
+    const errors: typeof fieldErrors = {}
+    if (!title.trim()) {
+      errors.title = 'Vyplňte název materiálu'
+    }
+    if (!specification) {
+      errors.specification = 'Vyberte cílovou skupinu'
+    }
+    if (!duration) {
+      errors.duration = 'Vyberte délku materiálu'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      return
+    }
+
+    setFieldErrors({})
     const formData = new FormData(e.currentTarget)
     formData.set('lesson_id', lessonId)
     formData.set('title', title)
     formData.set('description', description)
     formData.set('content', content)
-    if (specification) {
-      formData.set('specification', specification)
-    }
-    if (duration) {
-      formData.set('duration', duration)
-    }
+    formData.set('specification', specification)
+    formData.set('duration', duration)
     // Use startTransition to wrap the async action
     React.startTransition(() => {
       formAction(formData)
@@ -135,10 +156,17 @@ export function LessonMaterialForm({
               id="title"
               name="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
+              onChange={(e) => {
+                setTitle(e.target.value)
+                if (fieldErrors.title) {
+                  setFieldErrors((prev) => ({ ...prev, title: undefined }))
+                }
+              }}
               placeholder="např. Pracovní list, Metodický list"
             />
+            {fieldErrors.title && (
+              <p className="text-sm text-red-600">{fieldErrors.title}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -167,12 +195,15 @@ export function LessonMaterialForm({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="specification">Cílová skupina</Label>
+              <Label htmlFor="specification">Cílová skupina *</Label>
               <Select
                 value={specification}
-                onValueChange={(value) =>
+                onValueChange={(value) => {
                   setSpecification(value as LessonSpecification)
-                }
+                  if (fieldErrors.specification) {
+                    setFieldErrors((prev) => ({ ...prev, specification: undefined }))
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Vyberte skupinu" />
@@ -184,11 +215,22 @@ export function LessonMaterialForm({
                   <SelectItem value="high_school">Střední školy</SelectItem>
                 </SelectContent>
               </Select>
+              {fieldErrors.specification && (
+                <p className="text-sm text-red-600">{fieldErrors.specification}</p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="duration">Délka (minuty)</Label>
-              <Select value={duration} onValueChange={setDuration}>
+              <Label htmlFor="duration">Délka (minuty) *</Label>
+              <Select
+                value={duration}
+                onValueChange={(value) => {
+                  setDuration(value)
+                  if (fieldErrors.duration) {
+                    setFieldErrors((prev) => ({ ...prev, duration: undefined }))
+                  }
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Vyberte délku" />
                 </SelectTrigger>
@@ -198,6 +240,9 @@ export function LessonMaterialForm({
                   <SelectItem value="90">90 min</SelectItem>
                 </SelectContent>
               </Select>
+              {fieldErrors.duration && (
+                <p className="text-sm text-red-600">{fieldErrors.duration}</p>
+              )}
             </div>
           </div>
 
