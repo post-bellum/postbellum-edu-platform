@@ -34,7 +34,10 @@ export function AdditionalActivitiesManager({
   const [activityToDelete, setActivityToDelete] = React.useState<AdditionalActivity | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [successModalOpen, setSuccessModalOpen] = React.useState(false)
-  const [deletedActivityTitle, setDeletedActivityTitle] = React.useState('')
+  const [successModalConfig, setSuccessModalConfig] = React.useState<{
+    title: string
+    message: string
+  }>({ title: '', message: '' })
 
   const loadActivities = React.useCallback(async () => {
     try {
@@ -75,7 +78,10 @@ export function AdditionalActivitiesManager({
       await deleteAdditionalActivityAction(activityToDelete.id, lessonId)
       setDeleteDialogOpen(false)
       setActivityToDelete(null)
-      setDeletedActivityTitle(deletedTitle)
+      setSuccessModalConfig({
+        title: 'Aktivita byla smazána',
+        message: `Aktivita "${deletedTitle}" byla úspěšně odstraněna.`,
+      })
       setSuccessModalOpen(true)
       loadActivities()
     } catch (error) {
@@ -85,9 +91,17 @@ export function AdditionalActivitiesManager({
     }
   }
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = React.useCallback(() => {
+    const isCreating = !editingActivity
+    setSuccessModalConfig({
+      title: isCreating ? 'Aktivita byla vytvořena' : 'Aktivita byla uložena',
+      message: isCreating 
+        ? 'Nová aktivita byla úspěšně přidána k lekci.'
+        : 'Změny v aktivitě byly úspěšně uloženy.',
+    })
+    setSuccessModalOpen(true)
     loadActivities()
-  }
+  }, [loadActivities, editingActivity])
 
   return (
     <div className="space-y-4">
@@ -195,8 +209,8 @@ export function AdditionalActivitiesManager({
         open={successModalOpen}
         onOpenChange={setSuccessModalOpen}
         type="success"
-        title="Aktivita byla smazána"
-        message={`Aktivita "${deletedActivityTitle}" byla úspěšně odstraněna.`}
+        title={successModalConfig.title}
+        message={successModalConfig.message}
       />
     </div>
   )

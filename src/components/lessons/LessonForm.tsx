@@ -96,21 +96,10 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
 
   React.useEffect(() => {
     if (state?.success && state.data) {
-      if (isEditing) {
-        // Show success modal for edits
-        setShowSuccessModal(true)
-      } else {
-        // Redirect to edit page for newly created lessons
-        const lessonUrl = generateLessonUrl(
-          state.data.short_id || state.data.id,
-          state.data.title
-        )
-        React.startTransition(() => {
-          router.push(`${lessonUrl}/edit`)
-        })
-      }
+      // Show success modal for both create and edit
+      setShowSuccessModal(true)
     }
-  }, [state, router, isEditing])
+  }, [state])
 
   return (
     <form action={formAction} onSubmit={handleSubmit} noValidate className="space-y-6">
@@ -336,28 +325,51 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-mint">
               <Check className="h-6 w-6 text-grey-950" strokeWidth={2} />
             </div>
-            <DialogTitle className="text-center">Změny uloženy</DialogTitle>
+            <DialogTitle className="text-center">
+              {isEditing ? 'Změny uloženy' : 'Lekce vytvořena'}
+            </DialogTitle>
             <DialogDescription className="text-center">
-              Lekce byla úspěšně aktualizována.
+              {isEditing 
+                ? 'Lekce byla úspěšně aktualizována.'
+                : 'Lekce byla úspěšně vytvořena. Nyní můžete přidat materiály a aktivity.'}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 flex flex-col justify-center gap-3">
-            <Button variant="outline" onClick={() => setShowSuccessModal(false)}>
-              Pokračovat v úpravách
-            </Button>
-            {lesson && (
-              <Button
-                variant="primary"
-                onClick={() => {
-                  const lessonUrl = generateLessonUrl(
-                    lesson.short_id || lesson.id,
-                    lesson.title
-                  )
-                  router.push(lessonUrl)
-                }}
-              >
-                Zobrazit lekci
-              </Button>
+            {isEditing ? (
+              <>
+                <Button variant="outline" onClick={() => setShowSuccessModal(false)}>
+                  Pokračovat v úpravách
+                </Button>
+                {state?.data && (
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      const lessonUrl = generateLessonUrl(
+                        state.data.short_id || state.data.id,
+                        state.data.title
+                      )
+                      router.push(lessonUrl)
+                    }}
+                  >
+                    Zobrazit lekci
+                  </Button>
+                )}
+              </>
+            ) : (
+              state?.data && (
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    const lessonUrl = generateLessonUrl(
+                      state.data.short_id || state.data.id,
+                      state.data.title
+                    )
+                    router.push(`${lessonUrl}/edit`)
+                  }}
+                >
+                  Přidat materiály a aktivity
+                </Button>
+              )
             )}
           </div>
         </DialogContent>

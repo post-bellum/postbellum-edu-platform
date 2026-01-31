@@ -46,7 +46,10 @@ export function LessonMaterialsManager({
   const [materialToDelete, setMaterialToDelete] = React.useState<LessonMaterial | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [successModalOpen, setSuccessModalOpen] = React.useState(false)
-  const [deletedMaterialTitle, setDeletedMaterialTitle] = React.useState('')
+  const [successModalConfig, setSuccessModalConfig] = React.useState<{
+    title: string
+    message: string
+  }>({ title: '', message: '' })
 
   const loadMaterials = React.useCallback(async () => {
     try {
@@ -100,7 +103,10 @@ export function LessonMaterialsManager({
       await deleteLessonMaterialAction(materialToDelete.id, lessonId)
       setDeleteDialogOpen(false)
       setMaterialToDelete(null)
-      setDeletedMaterialTitle(deletedTitle)
+      setSuccessModalConfig({
+        title: 'Materiál byl smazán',
+        message: `Materiál "${deletedTitle}" byl úspěšně odstraněn.`,
+      })
       setSuccessModalOpen(true)
       loadMaterials()
     } catch (error) {
@@ -111,8 +117,16 @@ export function LessonMaterialsManager({
   }
 
   const handleFormSuccess = React.useCallback(() => {
+    const isCreating = !editingMaterial
+    setSuccessModalConfig({
+      title: isCreating ? 'Materiál byl vytvořen' : 'Materiál byl uložen',
+      message: isCreating 
+        ? 'Nový materiál byl úspěšně přidán k lekci.'
+        : 'Změny v materiálu byly úspěšně uloženy.',
+    })
+    setSuccessModalOpen(true)
     loadMaterials()
-  }, [loadMaterials])
+  }, [loadMaterials, editingMaterial])
 
   return (
     <div className="space-y-4">
@@ -217,8 +231,8 @@ export function LessonMaterialsManager({
         open={successModalOpen}
         onOpenChange={setSuccessModalOpen}
         type="success"
-        title="Materiál byl smazán"
-        message={`Materiál "${deletedMaterialTitle}" byl úspěšně odstraněn.`}
+        title={successModalConfig.title}
+        message={successModalConfig.message}
       />
     </div>
   )

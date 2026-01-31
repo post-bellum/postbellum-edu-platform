@@ -2,22 +2,10 @@ import * as React from 'react'
 import { redirect } from 'next/navigation'
 import { isAdmin } from '@/lib/supabase/admin-helpers'
 import { NewLessonContent } from '@/components/lessons/NewLessonContent'
+import { FormSkeleton } from '@/components/ui/skeleton'
 
 // Private route - requires admin authentication
 export const dynamic = 'force-dynamic'
-
-function NewLessonLoading() {
-  return (
-    <div className="space-y-6">
-      {[1, 2, 3].map((i) => (
-        <div 
-          key={i} 
-          className="bg-white border border-grey-200 rounded-[28px] shadow-sm h-48 animate-pulse"
-        />
-      ))}
-    </div>
-  )
-}
 
 export default async function NewLessonPage() {
   const admin = await isAdmin()
@@ -39,7 +27,7 @@ export default async function NewLessonPage() {
       </div>
 
       {/* Form */}
-      <React.Suspense fallback={<NewLessonLoading />}>
+      <React.Suspense fallback={<FormSkeleton />}>
         <NewLessonContent />
       </React.Suspense>
     </div>

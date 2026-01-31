@@ -98,7 +98,7 @@ export function LessonMaterialForm({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
-    // Validate required fields
+    // Client-side validation for immediate feedback
     const errors: typeof fieldErrors = {}
     if (!title.trim()) {
       errors.title = 'Vyplňte název materiálu'
@@ -143,7 +143,7 @@ export function LessonMaterialForm({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {state?.error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {state.error}

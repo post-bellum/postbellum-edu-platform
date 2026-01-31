@@ -9,10 +9,13 @@ export function DeletedLessonFeedback() {
   const searchParams = useSearchParams()
   const [open, setOpen] = React.useState(false)
   const [lessonTitle, setLessonTitle] = React.useState('')
+  const processedRef = React.useRef(false)
 
   React.useEffect(() => {
     const deleted = searchParams.get('deleted')
-    if (deleted) {
+    // Guard against re-processing if already handled
+    if (deleted && !processedRef.current) {
+      processedRef.current = true
       setLessonTitle(deleted)
       setOpen(true)
       // Clean up URL without triggering a navigation

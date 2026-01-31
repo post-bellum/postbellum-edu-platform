@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { BookOpen, Plus, Eye, FileCheck, FileX, Pencil, Trash2 } from 'lucide-react'
 import { 
@@ -20,10 +19,10 @@ import {
   DialogTitle,
 } from '@/components/ui/Dialog'
 import { logger } from '@/lib/logger'
+import { CardSkeleton } from '@/components/ui/skeleton'
 import type { LessonWithRelations } from '@/types/lesson.types'
 
 export function AdminLessonsSection() {
-  const router = useRouter()
   const [lessons, setLessons] = React.useState<LessonWithRelations[]>([])
   const [stats, setStats] = React.useState<AdminLessonsStats | null>(null)
   const [loading, setLoading] = React.useState(true)
@@ -81,14 +80,7 @@ export function AdminLessonsSection() {
   }
 
   if (loading) {
-    return (
-      <div className="bg-white rounded-[28px] border border-grey-200 p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-grey-100 rounded w-48" />
-          <div className="h-20 bg-grey-100 rounded" />
-        </div>
-      </div>
-    )
+    return <CardSkeleton />
   }
 
   if (error) {
