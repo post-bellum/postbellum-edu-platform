@@ -50,7 +50,7 @@ export default function ResetPasswordPage() {
 
       // Check passwords match
       if (!passwordsMatch(password, confirmPassword)) {
-        setError('Hesla se neshodují')
+        setConfirmPasswordTouched(true)
         return
       }
 
@@ -78,28 +78,32 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
-        <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-          <div className="flex justify-center mb-6">
+      <main className="min-h-screen flex items-center justify-center p-8 bg-grey-50">
+        <div className="w-full max-w-[440px] bg-white rounded-3xl shadow-lg p-8 sm:p-10">
+          <div className="flex justify-center mb-8">
             <Image
-              src="/logo-postbellum.svg"
-              alt="Post Bellum logo"
-              width={200}
-              height={100}
+              src="/logo-storyon.svg"
+              alt="Story On logo"
+              width={116}
+              height={12}
               priority
             />
           </div>
           
-          <div className="text-center">
-            <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+          <div className="flex flex-col gap-7">
+            <div className="text-center">
+              <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="font-display text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+                Heslo bylo změněno
+              </h2>
+              <p className="text-base leading-[1.5] text-text-subtle">
+                Vaše heslo bylo úspěšně změněno. Za chvíli budete přesměrováni na přihlášení.
+              </p>
             </div>
-            <h2 className="text-2xl font-bold text-text mb-2">Heslo bylo změněno</h2>
-            <p className="text-sm text-text-secondary">
-              Vaše heslo bylo úspěšně změněno. Za chvíli budete přesměrováni na přihlášení.
-            </p>
           </div>
         </div>
       </main>
@@ -107,82 +111,96 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-        <div className="flex justify-center mb-6">
+    <main className="min-h-screen flex items-center justify-center p-8 bg-grey-50">
+      <div className="w-full max-w-[440px] bg-white rounded-3xl shadow-lg p-8 sm:p-10">
+        <div className="flex justify-center mb-8">
           <Image
-            src="/logo-postbellum.svg"
-            alt="Post Bellum logo"
-            width={200}
-            height={100}
+            src="/logo-storyon.svg"
+            alt="Story On logo"
+            width={116}
+            height={12}
             priority
           />
         </div>
 
-        <h2 className="text-3xl font-bold text-center mb-2 text-text">Nové heslo</h2>
-        <p className="text-sm text-center text-text-secondary mb-8">
-          Zadejte své nové heslo
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="password">Nové heslo</Label>
-            <PasswordInput
-              id="password"
-              placeholder="Nové heslo"
-              value={password}
-              onChange={(e) => handlePasswordChange(e.target.value)}
-              onBlur={handlePasswordBlur}
-              required
-              disabled={isLoading}
-              data-testid="reset-password-new-password-input"
-            />
-            {passwordTouched && passwordErrors.length > 0 && (
-              <ul className="text-xs text-red-600 space-y-1">
-                {passwordErrors.map((err, index) => (
-                  <li key={index}>• {err}</li>
-                ))}
-              </ul>
-            )}
-            {!passwordTouched && (
-              <p className="text-xs text-text-secondary">
-                Minimálně 8 znaků, velké a malé písmeno, číslo
-              </p>
-            )}
+        <div className="flex flex-col gap-7">
+          {/* Title & Description */}
+          <div className="text-center">
+            <h2 className="font-display text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+              Nové heslo
+            </h2>
+            <p className="text-base leading-[1.5] text-text-subtle">
+              Zadejte své nové heslo
+            </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Zopakujte heslo</Label>
-            <PasswordInput
-              id="confirmPassword"
-              placeholder="Zopakujte heslo"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              onBlur={() => setConfirmPasswordTouched(true)}
-              required
-              disabled={isLoading}
-              data-testid="reset-password-confirm-password-input"
-            />
-            {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
-              <p className="text-xs text-red-600">Hesla se neshodují</p>
-            )}
-          </div>
+          {/* Form */}
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-[15px]">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col">
+                <Label htmlFor="password" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+                  Nové heslo
+                </Label>
+                <PasswordInput
+                  id="password"
+                  placeholder="Nové heslo"
+                  value={password}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
+                  onBlur={handlePasswordBlur}
+                  required
+                  disabled={isLoading}
+                  data-testid="reset-password-new-password-input"
+                />
+                {passwordTouched && passwordErrors.length > 0 ? (
+                  <ul className="text-xs text-red-600 space-y-1 px-2.5 py-1.5">
+                    {passwordErrors.map((err, index) => (
+                      <li key={index}>• {err}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-text-subtle px-2.5 py-1.5">
+                    Minimálně 8 znaků, velké a malé písmeno, číslo
+                  </p>
+                )}
+              </div>
 
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-              {error}
+              <div className="flex flex-col">
+                <Label htmlFor="confirmPassword" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
+                  Zopakujte heslo
+                </Label>
+                <PasswordInput
+                  id="confirmPassword"
+                  placeholder="Zopakujte heslo"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onBlur={() => setConfirmPasswordTouched(true)}
+                  required
+                  disabled={isLoading}
+                  data-testid="reset-password-confirm-password-input"
+                />
+                {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
+                  <p className="text-xs text-red-600 px-2.5 py-1.5">Hesla se neshodují</p>
+                )}
+              </div>
             </div>
-          )}
 
-          <Button 
-            type="submit" 
-            className="w-full h-12 bg-primary text-white hover:bg-primary-hover transition-all hover:shadow-md"
-            disabled={isLoading}
-            data-testid="reset-password-submit-button"
-          >
-            {isLoading ? 'Ukládání...' : 'Změnit heslo'}
-          </Button>
-        </form>
+            {error && (
+              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">
+                {error}
+              </div>
+            )}
+
+            <Button 
+              type="submit" 
+              size="large"
+              className="w-full"
+              disabled={isLoading}
+              data-testid="reset-password-submit-button"
+            >
+              {isLoading ? 'Ukládání...' : 'Změnit heslo'}
+            </Button>
+          </form>
+        </div>
       </div>
     </main>
   )

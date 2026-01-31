@@ -276,6 +276,12 @@ export function getErrorMessage(error: unknown): string {
   if (message.includes('Token has expired')) {
     return 'Platnost odkazu vypršela. Požádejte o nový.'
   }
+  if (message.includes('New password should be different from the old password')) {
+    return 'Nové heslo se musí lišit od původního hesla'
+  }
+  if (message.includes('Auth session missing')) {
+    return 'Platnost odkazu vypršela. Požádejte o nový odkaz pro obnovení hesla.'
+  }
   
   return message || 'Neznámá chyba'
 }
