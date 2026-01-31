@@ -214,16 +214,10 @@ function ProfilePageContent() {
           <h1 className="text-4xl md:text-[44px] font-display font-semibold leading-display">Profil</h1>
         </div>
 
-        {/* Mobile Tabs - horizontal navigation */}
-        <div className="md:hidden mb-11">
-          <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} variant="horizontal" />
-        </div>
-
-        {/* Two Column Layout (Desktop) / Single Column (Mobile) */}
-        <div className={`flex flex-col md:flex-row ${activeTab === 'materials' ? 'gap-11 lg:gap-20' : 'gap-11 md:gap-[60px]'}`}>
-          {/* Left Sidebar Navigation (Desktop only) */}
-          <aside className="hidden md:block shrink-0">
-            <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} variant="vertical" />
+        {/* Two Column Layout with responsive tabs */}
+        <div className={`md:flex ${activeTab === 'materials' ? 'gap-11 lg:gap-20' : 'gap-11 md:gap-[60px]'}`}>
+          <aside className="shrink-0">
+            <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
           </aside>
 
           {/* Right Content Area */}
