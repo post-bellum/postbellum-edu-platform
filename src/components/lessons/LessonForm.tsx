@@ -22,6 +22,16 @@ import { TagsSelector } from './TagsSelector'
 import { ThumbnailUpload } from './ThumbnailUpload'
 import { generateLessonUrl } from '@/lib/utils'
 
+// Character counter component (defined outside to avoid re-creation during render)
+function CharCounter({ current, max }: { current: number; max: number }) {
+  const isOver = current > max
+  return (
+    <span className={`text-xs ${isOver ? 'text-red-600 font-medium' : 'text-text-subtle'}`}>
+      {current}/{max}
+    </span>
+  )
+}
+
 interface LessonFormProps {
   lesson?: LessonWithRelations
   tags: Tag[]
@@ -55,9 +65,38 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
   const [submitted, setSubmitted] = React.useState(false)
   const [showSuccessModal, setShowSuccessModal] = React.useState(false)
 
+  // Character limits
+  const limits = {
+    title: 500,
+    description: 5000,
+    duration: 50,
+    period: 200,
+    targetGroup: 200,
+    lessonType: 200,
+  }
+
   // Validation errors
   const errors = {
-    title: !title.trim() ? 'Název lekce je povinný' : null,
+    title: !title.trim() 
+      ? 'Název lekce je povinný' 
+      : title.length > limits.title 
+        ? `Název lekce může mít maximálně ${limits.title} znaků` 
+        : null,
+    description: description.length > limits.description 
+      ? `Popis může mít maximálně ${limits.description} znaků` 
+      : null,
+    duration: duration.length > limits.duration 
+      ? `Délka lekce může mít maximálně ${limits.duration} znaků` 
+      : null,
+    period: period.length > limits.period 
+      ? `Období může mít maximálně ${limits.period} znaků` 
+      : null,
+    targetGroup: targetGroup.length > limits.targetGroup 
+      ? `Cílová skupina může mít maximálně ${limits.targetGroup} znaků` 
+      : null,
+    lessonType: lessonType.length > limits.lessonType 
+      ? `Typ lekce může mít maximálně ${limits.lessonType} znaků` 
+      : null,
   }
 
   // Show error only after field is touched or form is submitted
@@ -81,7 +120,8 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
     setSubmitted(true)
     
     // Prevent submission if there are validation errors
-    if (errors.title) {
+    const hasErrors = Object.values(errors).some(err => err !== null)
+    if (hasErrors) {
       e.preventDefault()
     }
   }
@@ -133,7 +173,10 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
             {/* Left Column */}
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="title">Název lekce *</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="title">Název lekce *</Label>
+                  <CharCounter current={title.length} max={limits.title} />
+                </div>
                 <Input
                   id="title"
                   name="title"
@@ -142,6 +185,7 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
                   onBlur={() => setTouched(prev => ({ ...prev, title: true }))}
                   placeholder="Zadejte název lekce"
                   required
+                  maxLength={limits.title}
                   aria-invalid={!!showError('title')}
                   aria-describedby={showError('title') ? 'title-error' : undefined}
                   className={showError('title') ? 'border-red-500 focus:border-red-500' : ''}
@@ -157,15 +201,24 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Popis lekce</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="description">Popis lekce</Label>
+                  <CharCounter current={description.length} max={limits.description} />
+                </div>
                 <Textarea
                   id="description"
                   name="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  onBlur={() => setTouched(prev => ({ ...prev, description: true }))}
                   rows={5}
+                  maxLength={limits.description}
                   placeholder="Popis lekce pro studenty a učitele..."
+                  className={showError('description') ? 'border-red-500 focus:border-red-500' : ''}
                 />
+                {showError('description') && (
+                  <p className="text-sm text-red-600">{errors.description}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -193,14 +246,23 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <Label htmlFor="duration">Délka lekce</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="duration">Délka lekce</Label>
+                    <CharCounter current={duration.length} max={limits.duration} />
+                  </div>
                   <Input
                     id="duration"
                     name="duration"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
+                    onBlur={() => setTouched(prev => ({ ...prev, duration: true }))}
+                    maxLength={limits.duration}
                     placeholder="např. 45 min"
+                    className={showError('duration') ? 'border-red-500 focus:border-red-500' : ''}
                   />
+                  {showError('duration') && (
+                    <p className="text-sm text-red-600">{errors.duration}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -217,37 +279,64 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
 
               <div className="grid grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <Label htmlFor="target_group">Cílová skupina</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="target_group">Cílová skupina</Label>
+                    <CharCounter current={targetGroup.length} max={limits.targetGroup} />
+                  </div>
                   <Input
                     id="target_group"
                     name="target_group"
                     value={targetGroup}
                     onChange={(e) => setTargetGroup(e.target.value)}
+                    onBlur={() => setTouched(prev => ({ ...prev, targetGroup: true }))}
+                    maxLength={limits.targetGroup}
                     placeholder="např. 9. ročník ZŠ"
+                    className={showError('targetGroup') ? 'border-red-500 focus:border-red-500' : ''}
                   />
+                  {showError('targetGroup') && (
+                    <p className="text-sm text-red-600">{errors.targetGroup}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lesson_type">Typ lekce</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="lesson_type">Typ lekce</Label>
+                    <CharCounter current={lessonType.length} max={limits.lessonType} />
+                  </div>
                   <Input
                     id="lesson_type"
                     name="lesson_type"
                     value={lessonType}
                     onChange={(e) => setLessonType(e.target.value)}
+                    onBlur={() => setTouched(prev => ({ ...prev, lessonType: true }))}
+                    maxLength={limits.lessonType}
                     placeholder="např. Videovýpověď"
+                    className={showError('lessonType') ? 'border-red-500 focus:border-red-500' : ''}
                   />
+                  {showError('lessonType') && (
+                    <p className="text-sm text-red-600">{errors.lessonType}</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="period">Historické období</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="period">Historické období</Label>
+                  <CharCounter current={period.length} max={limits.period} />
+                </div>
                 <Input
                   id="period"
                   name="period"
                   value={period}
                   onChange={(e) => setPeriod(e.target.value)}
+                  onBlur={() => setTouched(prev => ({ ...prev, period: true }))}
+                  maxLength={limits.period}
                   placeholder="např. 40. léta – 2. světová válka"
+                  className={showError('period') ? 'border-red-500 focus:border-red-500' : ''}
                 />
+                {showError('period') && (
+                  <p className="text-sm text-red-600">{errors.period}</p>
+                )}
               </div>
 
               <div className="space-y-2">

@@ -197,7 +197,7 @@ export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
  * Required specification schema with Czech error message
  */
 const requiredSpecificationSchema = z
-  .string({ message: 'Vyberte cílovou skupinu' })
+  .string()
   .min(1, 'Vyberte cílovou skupinu')
   .refine(
     (val): val is '2nd_grade_elementary' | 'high_school' =>
@@ -209,7 +209,7 @@ const requiredSpecificationSchema = z
  * Required duration schema with Czech error message
  */
 const requiredDurationSchema = z
-  .number({ message: 'Vyberte délku materiálu' })
+  .number()
   .refine(
     (val): val is 30 | 45 | 90 => val === 30 || val === 45 || val === 90,
     { message: 'Vyberte délku materiálu' }
