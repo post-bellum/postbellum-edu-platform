@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Label } from '@/components/ui/Label'
 import { updatePassword, getErrorMessage } from '@/lib/supabase/email-auth'
 import { validatePassword, passwordsMatch } from '@/lib/validation'
@@ -127,9 +127,8 @@ export default function ResetPasswordPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="password">Nové heslo</Label>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               placeholder="Nové heslo"
               value={password}
               onChange={(e) => handlePasswordChange(e.target.value)}
@@ -154,9 +153,8 @@ export default function ResetPasswordPage() {
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Zopakujte heslo</Label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               placeholder="Zopakujte heslo"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

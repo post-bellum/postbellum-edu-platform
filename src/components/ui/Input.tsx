@@ -54,15 +54,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           aria-hidden="true"
         />
         {rightIcon && (
-          <div 
-            className={cn(
-              'absolute right-5 top-1/2 -translate-y-1/2 text-grey-400',
-              onRightIconClick && 'cursor-pointer hover:text-text-strong transition-colors'
-            )}
-            onClick={onRightIconClick}
-          >
-            {rightIcon}
-          </div>
+          onRightIconClick ? (
+            <button
+              type="button"
+              className="absolute right-5 top-1/2 -translate-y-1/2 text-grey-400 cursor-pointer hover:text-text-strong transition-colors"
+              onClick={onRightIconClick}
+              tabIndex={-1}
+              aria-label={props['aria-label'] ? undefined : 'Toggle password visibility'}
+            >
+              {rightIcon}
+            </button>
+          ) : (
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-grey-400">
+              {rightIcon}
+            </div>
+          )
         )}
       </div>
     )
