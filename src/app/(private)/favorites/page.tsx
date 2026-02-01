@@ -1,25 +1,20 @@
 import * as React from 'react'
 import { FavoritesList } from '@/components/favorites/FavoritesList'
+import { FavoritesSkeleton } from '@/components/ui/skeleton'
 
 // Private route - requires authentication
 export const dynamic = 'force-dynamic'
 
-function FavoritesLoading() {
-  return (
-    <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
-      <h1 className="text-4xl font-bold mb-8">Oblíbené lekce</h1>
-      <div className="text-center py-12">
-        <p className="text-gray-500">Načítání oblíbených lekcí...</p>
-      </div>
-    </div>
-  )
-}
-
 export default function FavoritesPage() {
   return (
-    <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
-      <h1 className="text-4xl font-bold mb-8">Oblíbené lekce</h1>
-      <React.Suspense fallback={<FavoritesLoading />}>
+    <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5 mb-16">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 pb-16 md:pb-20 lg:pb-24 pt-10">
+        <h1 className="font-display text-3xl md:text-4xl font-semibold text-text-strong leading-display">
+          Oblíbené lekce
+        </h1>
+      </div>
+      <React.Suspense fallback={<FavoritesSkeleton />}>
         <FavoritesList />
       </React.Suspense>
     </div>

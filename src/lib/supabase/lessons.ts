@@ -182,7 +182,10 @@ export async function getLessons(filters?: {
  * Get multiple lessons by their IDs
  * RLS policies automatically handle access control
  */
-export async function getLessonsByIds(ids: string[]): Promise<Lesson[]> {
+export async function getLessonsByIds(
+  ids: string[],
+  options?: { include_tags?: boolean }
+): Promise<LessonWithRelations[]> {
   try {
     if (ids.length === 0) return []
     
@@ -200,11 +203,47 @@ export async function getLessonsByIds(ids: string[]): Promise<Lesson[]> {
       throw error
     }
 
-    return (data || []).map((lesson: LessonRow) => ({
+    const lessons = (data || []).map((lesson: LessonRow) => ({
       ...lesson,
       published: lesson.published ?? false,
       rvp_connection: lesson.rvp_connection || [],
     })) as Lesson[]
+
+    // Fetch tags if requested
+    const tagsByLessonId = new Map<string, Tag[]>()
+    
+    if (options?.include_tags && lessons.length > 0) {
+      const lessonIds = lessons.map(l => l.id)
+      
+      const { data: lessonTags, error: tagsError } = await supabase
+        .from('lesson_tags')
+        .select('lesson_id, tags(*)')
+        .in('lesson_id', lessonIds)
+      
+      if (tagsError) {
+        logger.error('Error fetching lesson tags:', tagsError)
+      } else {
+        // Group tags by lesson_id
+        for (const lt of lessonTags || []) {
+          const tag = lt.tags
+          if (!tag) continue
+          const existingTags = tagsByLessonId.get(lt.lesson_id) || []
+          existingTags.push({
+            ...tag,
+            created_at: tag.created_at || new Date().toISOString(),
+          } as Tag)
+          tagsByLessonId.set(lt.lesson_id, existingTags)
+        }
+      }
+    }
+
+    // Return with relations for consistent return type
+    return lessons.map(lesson => ({
+      ...lesson,
+      tags: tagsByLessonId.get(lesson.id) || [],
+      materials: [],
+      additional_activities: [],
+    })) as LessonWithRelations[]
   } catch (error) {
     logger.error('Error fetching lessons by IDs:', error)
     throw error
