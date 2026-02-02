@@ -290,61 +290,55 @@ export type Database = {
       }
       schools: {
         Row: {
-          'Č. or.': string | null
-          'Č. p.': number | null
-          'Část obce': string | null
-          'Email 1': string | null
-          IČO: number | null
-          'Kód RÚIAN': number | null
-          Kraj: string | null
-          Místo: string | null
-          'Okres/Obvod': string | null
-          'ORP Název': string | null
-          'Plný název': string | null
-          PSČ: number | null
-          RED_IZO: number | null
-          schoolId: number
-          Ulice: string | null
-          Území: string | null
-          'Zkrácený název': string | null
+          cast_obce: string | null
+          cislo_domovni: number | null
+          cislo_orientacni: number | null
+          created_at: string | null
+          fullname: string
+          id: string
+          kod_ruian: number | null
+          obec: string | null
+          okres: string | null
+          psc: string | null
+          red_izo: string
+          typ_cisla_domovniho: string | null
+          ulice: string | null
+          updated_at: string | null
+          uzemi_dle_orp: string | null
         }
         Insert: {
-          'Č. or.'?: string | null
-          'Č. p.'?: number | null
-          'Část obce'?: string | null
-          'Email 1'?: string | null
-          IČO?: number | null
-          'Kód RÚIAN'?: number | null
-          Kraj?: string | null
-          Místo?: string | null
-          'Okres/Obvod'?: string | null
-          'ORP Název'?: string | null
-          'Plný název'?: string | null
-          PSČ?: number | null
-          RED_IZO?: number | null
-          schoolId?: number
-          Ulice?: string | null
-          Území?: string | null
-          'Zkrácený název'?: string | null
+          cast_obce?: string | null
+          cislo_domovni?: number | null
+          cislo_orientacni?: number | null
+          created_at?: string | null
+          fullname: string
+          id?: string
+          kod_ruian?: number | null
+          obec?: string | null
+          okres?: string | null
+          psc?: string | null
+          red_izo: string
+          typ_cisla_domovniho?: string | null
+          ulice?: string | null
+          updated_at?: string | null
+          uzemi_dle_orp?: string | null
         }
         Update: {
-          'Č. or.'?: string | null
-          'Č. p.'?: number | null
-          'Část obce'?: string | null
-          'Email 1'?: string | null
-          IČO?: number | null
-          'Kód RÚIAN'?: number | null
-          Kraj?: string | null
-          Místo?: string | null
-          'Okres/Obvod'?: string | null
-          'ORP Název'?: string | null
-          'Plný název'?: string | null
-          PSČ?: number | null
-          RED_IZO?: number | null
-          schoolId?: number
-          Ulice?: string | null
-          Území?: string | null
-          'Zkrácený název'?: string | null
+          cast_obce?: string | null
+          cislo_domovni?: number | null
+          cislo_orientacni?: number | null
+          created_at?: string | null
+          fullname?: string
+          id?: string
+          kod_ruian?: number | null
+          obec?: string | null
+          okres?: string | null
+          psc?: string | null
+          red_izo?: string
+          typ_cisla_domovniho?: string | null
+          ulice?: string | null
+          updated_at?: string | null
+          uzemi_dle_orp?: string | null
         }
         Relationships: []
       }

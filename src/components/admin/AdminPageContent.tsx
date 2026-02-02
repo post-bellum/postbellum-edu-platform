@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { NewsletterSubscribersSection } from '@/components/admin/NewsletterSubscribersSection'
 import { AdminLessonsSection } from '@/components/admin/AdminLessonsSection'
+import { AdminSchoolsSection } from '@/components/admin/AdminSchoolsSection'
 import { AdminTabs, type AdminTabId } from '@/components/admin/AdminTabs'
 
 export function AdminPageContent() {
@@ -29,6 +30,7 @@ export function AdminPageContent() {
         <div className="flex-1 min-w-0">
           {activeTab === 'lessons' && <AdminLessonsSection />}
           {activeTab === 'newsletter' && <NewsletterSubscribersSection />}
+          {activeTab === 'schools' && <AdminSchoolsSection />}
         </div>
       </div>
     </div>

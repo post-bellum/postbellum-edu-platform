@@ -18,6 +18,9 @@ export const envSchema = z.object({
   // Required in production, optional in development
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'Service role key is required for admin operations').optional(),
   
+  // Schools registry data URL (required for schools import)
+  SCHOOLS_REGISTRY_URL: z.string().url('Invalid schools registry URL'),
+  
   // QA Testing Configuration (optional)
   // Pattern to match QA emails (e.g., "\\+qa" matches emails like test+qa@example.com)
   NEXT_PUBLIC_QA_EMAIL_PATTERN: z.string().optional(),

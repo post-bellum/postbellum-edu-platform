@@ -33,7 +33,7 @@ export function SchoolNameSection({
         onChange={onSchoolNameChange}
         onSearch={searchSchools}
         required
-        disabled={isSaving}
+        disabled={true}
         minChars={2}
         debounceMs={300}
         emptyMessage="Žádné školy nenalezeny"
