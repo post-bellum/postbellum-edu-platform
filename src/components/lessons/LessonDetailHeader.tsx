@@ -17,7 +17,7 @@ export function LessonDetailHeader({ lessonId, shortId, title, published, isAdmi
         <div className="flex items-start gap-2">
           <Link 
             href="/lessons" 
-            className="shrink-0 flex items-center justify-center w-14 h-14 rounded-full text-brand-primary hover:bg-mint transition-colors translate-y-0.5"
+            className="shrink-0 flex items-center justify-center w-14 h-14 rounded-full text-brand-primary hover:text-black transition-colors translate-y-0.5"
             aria-label="Zpět na seznam lekcí"
           >
             <ArrowLeft className="w-7 h-7" />
