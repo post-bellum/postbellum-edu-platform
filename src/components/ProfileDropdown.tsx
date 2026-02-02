@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/DropdownMenu'
 import { logout } from '@/lib/oauth-helpers'
 import { Cog6ToothIcon, ArrowRightStartOnRectangleIcon } from '@/components/ui/Icons'
-import { FileText, Shield } from 'lucide-react'
+import { Bookmark, Pencil, Shield } from 'lucide-react'
 import { useIsAdmin } from '@/lib/supabase/hooks/useIsAdmin'
 
 interface ProfileDropdownProps {
@@ -46,19 +46,27 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
       <DropdownMenuSeparator />
 
       <DropdownMenuItem
+        onClick={() => router.push('/favorites')}
+        icon={<Bookmark className="h-4 w-4" />}
+        data-testid="profile-dropdown-favorites"
+      >
+        Uložené lekce
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        onClick={() => router.push('/profile?tab=materials')}
+        icon={<Pencil className="h-4 w-4" />}
+        data-testid="profile-dropdown-edited-materials"
+      >
+        Upravené materiály
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
         onClick={() => router.push('/profile')}
         icon={<Cog6ToothIcon className="h-4 w-4" />}
         data-testid="profile-dropdown-settings"
       >
         Nastavení
-      </DropdownMenuItem>
-
-      <DropdownMenuItem
-        onClick={() => router.push('/profile?tab=materials')}
-        icon={<FileText className="h-4 w-4" />}
-        data-testid="profile-dropdown-edited-materials"
-      >
-        Moje upravené materiály
       </DropdownMenuItem>
 
       {isAdmin && (

@@ -23,7 +23,7 @@ export function DropdownMenu({ trigger, children, align = 'end' }: DropdownMenuP
         <DropdownMenuPrimitive.Content
           align={align}
           sideOffset={8}
-          className="w-[280px] rounded-[28px] bg-white shadow-[0px_20px_24px_-4px_rgba(16,24,40,0.08),0px_8px_8px_-4px_rgba(16,24,40,0.03)] border border-grey-100 px-4 py-2.5 z-50 animate-in fade-in-0 zoom-in-95"
+          className="w-[280px] rounded-[28px] bg-white shadow-[0px_20px_24px_-4px_rgba(16,24,40,0.08),0px_8px_8px_-4px_rgba(16,24,40,0.03)] border border-grey-100 px-5 py-2.5 z-50 animate-in fade-in-0 zoom-in-95"
         >
           {children}
         </DropdownMenuPrimitive.Content>
