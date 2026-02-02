@@ -274,6 +274,14 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    // Validate UUID format
+    if (!z.string().uuid().safeParse(id).success) {
+      return NextResponse.json(
+        { error: 'Invalid school ID format' },
+        { status: 400 }
+      )
+    }
+
     const supabase = createAdminClient()
 
     const { error } = await supabase

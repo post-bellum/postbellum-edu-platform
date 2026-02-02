@@ -65,6 +65,12 @@ export async function POST() {
       throw new Error(`Failed to fetch schools data: ${response.status} ${response.statusText}`)
     }
 
+    // Verify content type is JSON or JSON-LD
+    const contentType = response.headers.get('content-type')
+    if (!contentType?.includes('application/json') && !contentType?.includes('application/ld+json')) {
+      throw new Error(`Unexpected content type: ${contentType || 'unknown'}`)
+    }
+
     const data: SchoolsResponse = await response.json()
 
     if (!data.list || !Array.isArray(data.list)) {
@@ -99,27 +105,42 @@ export async function POST() {
       )
     }
 
-    // Use upsert to handle duplicates (based on red_izo)
-    const { data: insertedData, error } = await supabase
-      .from('schools')
-      .upsert(schoolsToInsert, {
-        onConflict: 'red_izo',
-        ignoreDuplicates: false,
-      })
-      .select()
+    // Process schools in batches to avoid timeout and memory issues
+    const BATCH_SIZE = 500
+    let totalImported = 0
+    let totalProcessed = 0
 
-    if (error) {
-      logger.error('Error importing schools:', error)
-      throw error
+    for (let i = 0; i < schoolsToInsert.length; i += BATCH_SIZE) {
+      const batch = schoolsToInsert.slice(i, i + BATCH_SIZE)
+      totalProcessed += batch.length
+
+      logger.info(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} schools (${totalProcessed}/${schoolsToInsert.length})...`)
+
+      // Use upsert to handle duplicates (based on red_izo)
+      const { data: insertedData, error } = await supabase
+        .from('schools')
+        .upsert(batch, {
+          onConflict: 'red_izo',
+          ignoreDuplicates: false,
+        })
+        .select()
+
+      if (error) {
+        logger.error(`Error importing batch ${Math.floor(i / BATCH_SIZE) + 1}:`, error)
+        throw error
+      }
+
+      totalImported += insertedData?.length || 0
+      logger.info(`Batch ${Math.floor(i / BATCH_SIZE) + 1} completed: ${insertedData?.length || 0} schools imported`)
     }
 
-    logger.info(`Successfully imported ${insertedData?.length || 0} schools`)
+    logger.info(`Successfully imported ${totalImported} schools out of ${schoolsToInsert.length} total`)
 
     return NextResponse.json({
       success: true,
-      imported: insertedData?.length || 0,
+      imported: totalImported,
       total: schoolsToInsert.length,
-      message: `Successfully imported ${insertedData?.length || 0} schools`,
+      message: `Successfully imported ${totalImported} schools`,
     })
   } catch (error) {
     logger.error('Error in schools import:', error)

@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/Label'
 import { School, Upload, RefreshCw, Database, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { logger } from '@/lib/logger'
 
-interface School {
+interface SchoolData {
   id: string
   red_izo: string
   fullname: string
@@ -19,7 +19,7 @@ interface School {
 
 interface SchoolsResponse {
   success: boolean
-  data?: School[]
+  data?: SchoolData[]
   pagination?: {
     page: number
     limit: number
@@ -38,7 +38,7 @@ interface ImportResponse {
 }
 
 export function AdminSchoolsSection() {
-  const [schools, setSchools] = React.useState<School[]>([])
+  const [schools, setSchools] = React.useState<SchoolData[]>([])
   const [loading, setLoading] = React.useState(true)
   const [importing, setImporting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -79,6 +79,11 @@ export function AdminSchoolsSection() {
       }
 
       const response = await fetch(url.toString())
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
       const data: SchoolsResponse = await response.json()
 
       if (data.success && data.data) {
@@ -126,6 +131,10 @@ export function AdminSchoolsSection() {
       const response = await fetch('/api/admin/schools/import', {
         method: 'POST',
       })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
       const data: ImportResponse = await response.json()
 
