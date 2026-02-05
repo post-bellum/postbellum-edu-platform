@@ -70,12 +70,23 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
           {/* Left - Logo */}
           <div className="flex items-center md:min-w-[240px]">
             <Link href="/">
+              {/* Mobile logo */}
+              <Image
+                src="/logo-storyon-mobile.svg"
+                alt="StoryOn"
+                width={88}
+                height={36}
+                priority
+                className="md:hidden"
+              />
+              {/* Desktop logo */}
               <Image
                 src="/logo-storyon.svg"
                 alt="StoryOn"
                 width={200}
                 height={36}
                 priority
+                className="hidden md:block"
               />
             </Link>
           </div>
@@ -208,6 +219,22 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                   {/* User Actions */}
                   {isLoggedIn ? (
                     <div className="flex flex-col gap-1">
+                      {/* Profile Header */}
+                      {email && (
+                        <div className="flex items-center justify-between gap-3 pl-2 pr-4 py-2.5">
+                          <span className="font-body text-md font-semibold text-text-strong truncate">
+                            {profile?.displayName || email}
+                          </span>
+                          <Image
+                            src={getGravatarUrl(email, 40)}
+                            alt="Profile"
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 rounded-full border-[1.25px] border-grey-950"
+                          />
+                        </div>
+                      )}
+
                       {/* Favorites */}
                       <button
                         onClick={() => handleMobileNavClick('/favorites')}
