@@ -12,7 +12,7 @@ import { logout } from '@/lib/oauth-helpers'
 import { AuthModal } from '@/components/auth'
 import { Button } from '@/components/ui/Button'
 import { ProfileDropdown } from '@/components/ProfileDropdown'
-import { BookmarkIconCustom as BookmarkIcon, FileText, Menu } from '@/components/icons'
+import { BookmarkIconCustom as BookmarkIcon, FileText, MenuTwoLinesIcon } from '@/components/icons'
 import {
   Sheet,
   SheetContent,
@@ -162,7 +162,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                   className="flex items-center justify-center w-6 h-6 rounded-full bg-surface hover:bg-grey-50 transition-colors"
                   aria-label="Otevřít menu"
                 >
-                  <Menu className="h-5 w-5 text-grey-950" />
+                  <MenuTwoLinesIcon className="h-6 w-6 text-grey-950" />
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-full sm:w-[340px] p-0">

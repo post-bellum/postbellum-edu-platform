@@ -73,6 +73,7 @@ export {
   BookmarkIcon as BookmarkIconCustom,
   Cog6ToothIcon,
   ArrowRightStartOnRectangleIcon,
+  MenuTwoLinesIcon,
 } from './BrandIcons'
 
 // ============================================================================

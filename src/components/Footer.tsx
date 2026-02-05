@@ -8,7 +8,7 @@ export function Footer() {
       <div className="flex flex-col items-start md:items-center w-full rounded-[28px] gap-1 md:gap-0">
         {/* Main footer content */}
         <div className="w-full bg-[#ddffee] border border-[rgba(12,17,29,0.05)] rounded-[40px] overflow-hidden pt-10 md:pt-15 pb-[120px] md:pb-[200px] px-5 md:px-11">
-          <div className="flex flex-col md:flex-row md:justify-between gap-6 md:gap-0 w-full">
+          <div className="flex flex-col md:flex-row md:justify-between gap-12 md:gap-0 w-full">
             {/* Left - Logo */}
             <div className="flex-1 flex gap-3 px-3 md:px-0 w-full md:w-auto">
               <Link href="/">

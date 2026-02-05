@@ -11,7 +11,7 @@ export function LessonCard({ lesson }: LessonCardProps) {
   const lessonUrl = generateLessonUrlFromLesson(lesson);
   
   return (
-    <div className="flex flex-col gap-3 h-full">
+    <div className="flex flex-col gap-3 h-full mb-8 md:mb-0">
       {/* Thumbnail */}
       <div className="relative aspect-[379/240] rounded-3xl overflow-hidden border border-grey-200 bg-grey-100 shrink-0">
         <LessonThumbnail
@@ -35,7 +35,7 @@ export function LessonCard({ lesson }: LessonCardProps) {
         )}
       </div>
       
-      <ViewButton href={lessonUrl} className="self-start" />
+      {/* <ViewButton href={lessonUrl} className="self-start" /> */}
     </div>
   );
 }
