@@ -36,25 +36,21 @@ const expertCouncil = [
     name: 'Aleš Sedlmeier',
     role: 'Učitel, metodik, expert na didaktiku dějepisu',
     imageUrl: '/team/ales-sedlmeier.jpg',
-    // email: 'ales.sedlmeier@postbellum.cz',
   },
   {
     name: 'Marie Smutná',
     role: 'Lektorka, metodička, expertka na vzdělávání o holocaustu a tématech menšin',
     imageUrl: '/team/marie-smutna.jpg',
-    // email: 'marie.smutna@postbellum.cz',
   },
   {
     name: 'Andrej Novik',
     role: 'Učitel, metodik, expert na AI a nové technologie ve vzdělávání',
     imageUrl: '/team/andrej-novik.jpg',
-    // email: 'andrej.novik@postbellum.cz',
   },
   {
-    name: 'Zuzana Krocakova',
+    name: 'Zuzana Kročáková',
     role: 'Lektorka, metodička a expertka na zážitkové vzdělávání a reflexi učení',
     imageUrl: '/team/zuzana-krocakova.jpg',
-    // email: 'zuzana.krocakova@postbellum.cz',
   },
 ]
 
@@ -141,9 +137,7 @@ export default function AboutPage() {
           </p>
         </ContentSection>
 
-        <SchoolNetworkBanner
-            illustrationSrc="/illustrations/about/banner-illustration.png"
-        />
+        <SchoolNetworkBanner />
 
         {/* Project Team */}
         <ContentSection title="Projektový tým">

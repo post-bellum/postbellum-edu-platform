@@ -1,16 +1,9 @@
-import { Breadcrumbs, type BreadcrumbItem } from '@/components/lessons/Breadcrumbs'
-
 interface PageHeaderProps {
   title: string
-  breadcrumbs?: BreadcrumbItem[]
 }
 
 export function PageHeader({ 
-  title, 
-  breadcrumbs = [
-    { label: 'Domů', href: '/' },
-    { label: 'O projektu' }
-  ] 
+  title
 }: PageHeaderProps) {
   return (
     <header className="flex flex-col pt-5 md:pt-8 lg:pt-16 pb-8 sm:pb-10 md:pb-20 xl:pb-[120px]">

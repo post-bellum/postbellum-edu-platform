@@ -45,11 +45,6 @@ export function PartnerCard({
   )
 }
 
-interface PartnerCardFullProps extends PartnerCardProps {
-  // Full-width variant for main sponsor
-  fullWidth?: boolean
-}
-
 export function PartnerCardFull({
   name,
   description,
@@ -57,7 +52,7 @@ export function PartnerCardFull({
   logoAlt,
   logoWidth = 190,
   logoHeight = 88,
-}: PartnerCardFullProps) {
+}: PartnerCardProps) {
   return (
     <div className="flex flex-col items-center gap-4 px-5 py-8 bg-grey-50 border border-[rgba(12,17,29,0.05)] rounded-[28px] w-full">
       {/* Logo */}
