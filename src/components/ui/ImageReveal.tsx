@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 
-type AnimationType = 
+export type AnimationType = 
   | 'crossfade' 
   | 'wipe-left' 
   | 'wipe-right' 
