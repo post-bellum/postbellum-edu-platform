@@ -1,5 +1,4 @@
 import { LessonThumbnail } from '@/components/lessons/LessonThumbnail';
-import { ViewButton } from '@/components/ui/ViewButton';
 import { generateLessonUrlFromLesson } from '@/lib/utils';
 import type { Lesson } from '@/types/lesson.types';
 
@@ -8,7 +7,6 @@ interface LessonCardProps {
 }
 
 export function LessonCard({ lesson }: LessonCardProps) {
-  const lessonUrl = generateLessonUrlFromLesson(lesson);
   
   return (
     <div className="flex flex-col gap-3 h-full mb-8 md:mb-0">

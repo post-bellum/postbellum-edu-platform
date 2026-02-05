@@ -10,6 +10,7 @@ interface UserMaterialTableRowProps {
   material: MaterialWithLesson
   onView: (material: MaterialWithLesson) => void
   onDownload: (material: MaterialWithLesson) => void
+  onEdit?: (material: MaterialWithLesson) => void
   onDuplicate?: (material: MaterialWithLesson) => void
   onDelete?: (material: MaterialWithLesson) => void
   isDuplicating?: boolean
@@ -20,6 +21,7 @@ export function UserMaterialTableRow({
   material,
   onView,
   onDownload,
+  onEdit,
   onDuplicate,
   onDelete,
   isDuplicating,
@@ -76,17 +78,30 @@ export function UserMaterialTableRow({
             <Eye className="w-4 h-4" />
           </Button>
 
-          <Link href={materialEditUrl}>
+          {onEdit ? (
             <Button
               variant="ghost"
               size="icon"
               title="Upravit"
+              onClick={() => onEdit(material)}
               className="h-9 w-9"
               data-testid={`user-material-edit-${material.id}`}
             >
               <Pencil className="w-4 h-4" />
             </Button>
-          </Link>
+          ) : (
+            <Link href={materialEditUrl}>
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Upravit"
+                className="h-9 w-9"
+                data-testid={`user-material-edit-${material.id}`}
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+            </Link>
+          )}
 
           <Button
             variant="ghost"

@@ -44,6 +44,9 @@ export { X } from 'lucide-react'
 export { Loader2 } from 'lucide-react'
 export { Lightbulb } from 'lucide-react'
 
+// Device Icons
+export { Monitor } from 'lucide-react'
+
 // Favorites & Bookmarks Icons
 export { Heart } from 'lucide-react'
 export { Bookmark } from 'lucide-react'
