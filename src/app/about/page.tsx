@@ -1,7 +1,7 @@
 import {
   PageHeader,
   ContentSection,
-  PrincipleCard,
+  PrinciplesCarousel,
   SchoolNetworkBanner,
   TeamMemberCard,
   PartnerCard,
@@ -107,17 +107,7 @@ export default function AboutPage() {
         />
 
         {/* Pedagogical Principles */}
-        <ContentSection title="Pedagogické principy a východiska">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {principles.map((principle) => (
-              <PrincipleCard
-                key={principle.title}
-                title={principle.title}
-                description={principle.description}
-              />
-            ))}
-          </div>
-        </ContentSection>
+        <PrinciplesCarousel principles={principles} />
 
         {/* Second Illustration */}
         <Illustration

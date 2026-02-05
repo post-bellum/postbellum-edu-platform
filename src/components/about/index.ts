@@ -1,5 +1,6 @@
 export { TeamMemberCard } from './TeamMemberCard'
 export { PrincipleCard } from './PrincipleCard'
+export { PrinciplesCarousel } from './PrinciplesCarousel'
 export { SchoolNetworkBanner } from './SchoolNetworkBanner'
 export { PartnerCard, PartnerCardFull } from './PartnerCard'
 export { ContentSection } from './ContentSection'
