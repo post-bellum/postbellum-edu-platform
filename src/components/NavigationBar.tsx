@@ -185,9 +185,9 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                 <div className="flex h-12 items-center justify-between px-5 py-4 mt-4">
                   <Link href="/" onClick={() => setMobileMenuOpen(false)}>
                     <Image
-                      src="/logo-storyon.svg"
+                      src="/logo-storyon-mobile.svg"
                       alt="StoryOn"
-                      width={200}
+                      width={88}
                       height={36}
                       priority
                     />
