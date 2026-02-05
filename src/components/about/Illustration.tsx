@@ -8,6 +8,8 @@ interface IllustrationProps {
   width?: number
   height?: number
   className?: string
+  duration?: number
+  autoPlayDelay?: number
 }
 
 export function Illustration({ 
@@ -18,10 +20,11 @@ export function Illustration({
   width = 320,
   height = 320, 
   className = '',
+  duration = 1000,
+  autoPlayDelay = 100,
 }: IllustrationProps) {
   return (
-    <section className={`flex justify-center py-8 md:py-0 mx-auto ${className}`}>
-      <div className="w-full h-full">
+    <section className={`flex justify-center py-8 md:py-0 w-full h-full ${className}`}>
         <ImageReveal
           strokeSrc={strokeSrc}
           coloredSrc={coloredSrc}
@@ -29,12 +32,10 @@ export function Illustration({
           width={width}
           height={height}
           animation={animation}
-          duration={3000}
+          duration={duration}
           triggerOnScroll={true}
-          autoPlayDelay={200}
-          className="w-full h-full"
+          autoPlayDelay={autoPlayDelay}
         />
-      </div>
     </section>
   )
 }

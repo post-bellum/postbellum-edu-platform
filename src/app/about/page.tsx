@@ -83,9 +83,9 @@ export default function AboutPage() {
       <PageHeader title="O projektu" />
 
       {/* Content Container - centered with max-width for larger screens */}
-      <div className="max-w-[960px] mx-auto flex flex-col gap-16 sm:gap-20 md:gap-24 lg:gap-18 pb-16 sm:pb-20 lg:pb-36">
+      <div className="max-w-[960px] mx-auto flex flex-col gap-12 lg:gap-18 pb-16 sm:pb-20 lg:pb-36">
         {/* StoryOn Introduction */}
-        <ContentSection title="StoryOn" className="mb-8">
+        <ContentSection title="StoryOn" className="lg:mb-8">
           <p className="font-body text-sm sm:text-md md:text-xl text-text-subtle leading-[1.5] max-w-[800px]">
             StoryON je vzdělávací platforma vytvořená neziskovou organizací Post Bellum.
             Prostřednictvím videí s autentickými výpověďmi pamětníků a pamětnic a materiálů
@@ -107,6 +107,7 @@ export default function AboutPage() {
           width={280}
           height={280}
           className="mb-6"
+          animation="wipe-left"
         />
 
         {/* Pedagogical Principles */}
@@ -127,6 +128,7 @@ export default function AboutPage() {
           strokeSrc="/illustrations/about/illustration-direction-stroke.png"
           coloredSrc="/illustrations/about/illustration-direction-colored.png"
           alt="Ilustrace ukazování směru"
+          animation="wipe-right"
         />
 
         {/* School Network Section */}

@@ -144,7 +144,11 @@ export function ImageReveal({
     <div
       ref={containerRef}
       className={`relative select-none ${className}`}
-      style={fill ? undefined : { width, height }}
+      style={fill ? undefined : { 
+        width: '100%',
+        maxWidth: width,
+        aspectRatio: `${width} / ${height}`,
+      }}
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -159,10 +163,8 @@ export function ImageReveal({
       <Image
         src={strokeSrc}
         alt={alt}
-        width={fill ? undefined : width}
-        height={fill ? undefined : height}
-        fill={fill}
-        sizes={fill ? sizes : undefined}
+        fill
+        sizes={sizes ?? `(max-width: ${width}px) 100vw, ${width}px`}
         className={`absolute inset-0 w-full h-full ${objectFitClass}`}
         priority
       />
@@ -188,10 +190,8 @@ export function ImageReveal({
           <Image
             src={coloredSrc}
             alt=""
-            width={fill ? undefined : width}
-            height={fill ? undefined : height}
-            fill={fill}
-            sizes={fill ? sizes : undefined}
+            fill
+            sizes={sizes ?? `(max-width: ${width}px) 100vw, ${width}px`}
             className={`w-full h-full ${objectFitClass}`}
             priority
           />
@@ -200,10 +200,8 @@ export function ImageReveal({
         <Image
           src={coloredSrc}
           alt=""
-          width={fill ? undefined : width}
-          height={fill ? undefined : height}
-          fill={fill}
-          sizes={fill ? sizes : undefined}
+          fill
+          sizes={sizes ?? `(max-width: ${width}px) 100vw, ${width}px`}
           className={`absolute inset-0 w-full h-full ${objectFitClass}`}
           style={{
             opacity: isCrossfade ? (isRevealed ? 1 : 0) : 1,
@@ -341,7 +339,11 @@ export function ImageRevealInteractive({
       <div
         ref={containerRef}
         className="relative cursor-crosshair touch-none select-none"
-        style={{ width, height }}
+        style={{ 
+          width: '100%',
+          maxWidth: width,
+          aspectRatio: `${width} / ${height}`,
+        }}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerLeave}
