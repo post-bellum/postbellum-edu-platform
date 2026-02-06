@@ -171,8 +171,8 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
             {/* Hamburger Menu Button */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <button
-                  className="flex items-center justify-center w-6 h-6 rounded-full bg-surface hover:bg-grey-50 transition-colors"
+                    <button
+                  className="flex items-center justify-center w-6 h-6 rounded-full bg-surface hover:bg-grey-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
                   aria-label="Otevřít menu"
                 >
                   <MenuTwoLinesIcon className="h-6 w-6 text-grey-950" />
@@ -183,7 +183,11 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                 
                 {/* Sheet Header with Logo - matches navbar layout */}
                 <div className="flex h-12 items-center justify-between px-5 py-4 mt-4">
-                  <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href="/"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset focus-visible:rounded"
+                  >
                     <Image
                       src="/logo-storyon-mobile.svg"
                       alt="StoryOn"
@@ -202,7 +206,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                         key={link.href}
                         onClick={() => handleMobileNavClick(link.href)}
                         className={cn(
-                          'w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg transition-colors',
+                          'w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset',
                           isActive(link.href)
                             ? 'font-semibold text-text-strong bg-[#caffe6]'
                             : 'font-normal text-text-subtle hover:bg-grey-50'
@@ -238,7 +242,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                       {/* Favorites */}
                       <button
                         onClick={() => handleMobileNavClick('/favorites')}
-                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-text-subtle hover:bg-grey-50 transition-colors"
+                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-text-subtle hover:bg-grey-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
                       >
                         <span className="text-grey-600">
                           <Bookmark className="h-4 w-4" />
@@ -249,7 +253,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                       {/* Edited Materials */}
                       <button
                         onClick={() => handleMobileNavClick('/profile?tab=materials')}
-                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-text-subtle hover:bg-grey-50 transition-colors"
+                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-text-subtle hover:bg-grey-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
                       >
                         <span className="text-grey-600">
                           <Pencil className="h-4 w-4" />
@@ -260,7 +264,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                       {/* Settings */}
                       <button
                         onClick={() => handleMobileNavClick('/profile')}
-                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-text-subtle hover:bg-grey-50 transition-colors"
+                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-text-subtle hover:bg-grey-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
                       >
                         <span className="text-grey-600">
                           <Cog6ToothIcon className="h-4 w-4" />
@@ -279,7 +283,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                           router.push('/')
                           router.refresh()
                         }}
-                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
                       >
                         <span className="text-red-600">
                           <ArrowRightStartOnRectangleIcon className="h-4 w-4" />
