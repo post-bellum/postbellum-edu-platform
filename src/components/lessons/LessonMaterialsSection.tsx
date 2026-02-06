@@ -3,9 +3,8 @@
 import * as React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { LessonMaterial, LessonSpecification, LessonDuration, UserLessonMaterial } from '@/types/lesson.types'
-import { Button } from '@/components/ui/Button'
-import { Eye, Edit, Download, Loader2, ClipboardList } from '@/components/icons'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
+import { MaterialsList } from './MaterialsList'
 import { AuthModal } from '@/components/auth'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
@@ -168,89 +167,17 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
       </div>
 
       {/* Materials List */}
-      {Object.keys(groupedMaterials).length === 0 ? (
-        <div className="bg-grey-50 border border-black/5 rounded-[28px] p-10 text-center">
-          <p className="text-text-subtle">Žádné materiály pro vybrané filtry</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-5">
-          {Object.entries(groupedMaterials).map(([title, materialsList]) => (
-            <div 
-              key={title} 
-              className="bg-grey-50 border border-black/5 rounded-[28px] pl-7 pr-10 py-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-7"
-            >
-              {/* Content */}
-              <div className="flex-1 flex flex-col gap-10">
-                {/* Title with icon */}
-                <div className="flex items-center gap-4 px-3">
-                  <div className="w-7 h-7 flex items-center justify-center">
-                    <ClipboardList className="w-5 h-5 text-brand-primary" strokeWidth={2} />
-                  </div>
-                  <h3 className="text-lg font-semibold leading-[1.2] text-text-strong">
-                    {title}
-                  </h3>
-                </div>
-
-                {/* Description list */}
-                {materialsList[0].description && materialsList[0].description.trim() && (
-                  <ul className="text-text-subtle text-lg leading-[1.4] list-disc ml-7 space-y-0">
-                    {materialsList[0].description.split('\n').filter(Boolean).map((item, idx) => (
-                      <li key={idx}>
-                        {item.trim()}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col gap-2 lg:w-[180px] lg:max-w-[200px] shrink-0">
-                <Button 
-                  variant="secondary" 
-                  size="medium"
-                  className="w-full justify-center [&_svg]:text-grey-500"
-                  onClick={() => requireAuth(() => {
-                    setSelectedMaterial(materialsList[0])
-                    setViewModalOpen(true)
-                  })}
-                >
-                  <Eye className="w-5 h-5" />
-                  Zobrazit
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="medium"
-                  className="w-full justify-center [&_svg]:text-grey-500"
-                  disabled={!materialsList[0].content || isExportingPDF === materialsList[0].id}
-                  onClick={() => requireAuth(() => handleExportPDF(materialsList[0]))}
-                >
-                  {isExportingPDF === materialsList[0].id ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Exportuji...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-5 h-5" />
-                      Stáhnout
-                    </>
-                  )}
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="medium"
-                  className="w-full justify-center [&_svg]:text-grey-500"
-                  disabled={isCopying === materialsList[0].id}
-                  onClick={() => requireAuth(() => handleCopyMaterial(materialsList[0].id))}
-                >
-                  <Edit className="w-5 h-5" />
-                  {isCopying === materialsList[0].id ? 'Vytvářím...' : 'Upravit'}
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <MaterialsList
+        groupedMaterials={groupedMaterials}
+        isExportingPDF={isExportingPDF}
+        isCopying={isCopying}
+        onView={(material) => requireAuth(() => {
+          setSelectedMaterial(material)
+          setViewModalOpen(true)
+        })}
+        onExportPDF={(material) => requireAuth(() => handleExportPDF(material))}
+        onCopy={(materialId) => requireAuth(() => handleCopyMaterial(materialId))}
+      />
 
       {/* View Modal */}
       {selectedMaterial && (

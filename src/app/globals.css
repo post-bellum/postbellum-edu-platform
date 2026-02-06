@@ -452,7 +452,14 @@
 }
 
 .animate-marquee {
-  animation: marquee 30s linear infinite;
+  animation: marquee 10s linear infinite;
+}
+
+/* Faster animation on larger screens where there's more content visible */
+@media (min-width: 768px) {
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
 }
 
 /* Pause marquee on hover */

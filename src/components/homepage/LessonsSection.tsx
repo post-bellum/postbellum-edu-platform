@@ -45,7 +45,7 @@ export function LessonsSection() {
       </div>
       
       {/* Grey background card area */}
-      <div className="bg-grey-50 border border-grey-100 rounded-[28px] sm:rounded-[40px] md:rounded-[60px] pt-10 pb-12 md:pt-10 md:pb-[60px]">
+      <div className="bg-grey-50 border border-grey-100 rounded-[28px] sm:rounded-[40px] md:rounded-[60px] pt-10 pb-8 md:pt-10">
         {/* Lessons Grid */}
         <div className="px-5 xl:px-10">
           {loading ? (

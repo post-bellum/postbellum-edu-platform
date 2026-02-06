@@ -62,7 +62,7 @@ export function NewsletterSignup() {
           <h3 className="font-display text-2xl font-semibold leading-none text-text-strong w-full">
             Nechte mě vědět o novinkách
           </h3>
-          <p className="font-body text-sm leading-[1.4] text-text-subtle w-full">
+          <p className="font-body text-xs sm:text-sm leading-[1.4] text-text-subtle w-full">
             Buďte první, kdo se dozví o nové lekci inspirované životními příběhy.
           </p>
         </div>
@@ -80,7 +80,7 @@ export function NewsletterSignup() {
               placeholder="hello@postbellum.cz"
               disabled={isLoading}
               aria-label="E-mailová adresa pro odběr novinek"
-              className={`w-full h-12 bg-white border rounded-full px-5 py-3 font-body text-lg text-grey-600 placeholder:text-grey-600 focus:outline-none focus:ring-2 focus:ring-mint focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full h-12 bg-white border rounded-full px-5 py-3 font-body text-sm md:text-lg text-grey-600 placeholder:text-grey-600 focus:outline-none focus:ring-2 focus:ring-mint focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
                 error ? 'border-red-500' : 'border-grey-300'
               }`}
             />

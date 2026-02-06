@@ -1,17 +1,18 @@
 'use client'
 
 import * as React from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, Download, Copy, Pencil, FileText, FilePenLine, Loader2, MoreVertical, Trash2 } from 'lucide-react'
+import { Eye, Download, Copy, Pencil, FileText, FilePenLine, Loader2 } from 'lucide-react'
 import { formatRelativeTime, generateLessonUrl } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { MobileEditWarningDialog } from '@/components/ui/MobileEditWarningDialog'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
+import { UserEditedMaterialCard } from './UserEditedMaterialCard'
 import { deleteUserLessonMaterialAction, copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 import { ErrorDialog } from '@/components/ui/ErrorDialog'
 import { exportToPDF } from '@/lib/utils/pdf-export'
-import { DropdownMenu, DropdownMenuItem } from '@/components/ui/DropdownMenu'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 interface UserLessonMaterialsSectionProps {
   materials: UserLessonMaterial[]
@@ -29,6 +30,7 @@ export function UserLessonMaterialsSection({
   onMaterialDeleted,
 }: UserLessonMaterialsSectionProps) {
   const router = useRouter()
+  const isMobile = useIsMobile()
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [selectedMaterial, setSelectedMaterial] = React.useState<UserLessonMaterial | null>(null)
@@ -38,6 +40,7 @@ export function UserLessonMaterialsSection({
   const [isExportingPDF, setIsExportingPDF] = React.useState<string | null>(null)
   const [errorDialogOpen, setErrorDialogOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [mobileEditWarningOpen, setMobileEditWarningOpen] = React.useState(false)
 
   // Generate base lesson URL using short_id if available
   const idToUse = lessonShortId || lessonId
@@ -48,12 +51,25 @@ export function UserLessonMaterialsSection({
     setViewModalOpen(true)
   }
 
+  const handleEdit = (material: UserLessonMaterial) => {
+    if (isMobile) {
+      setMobileEditWarningOpen(true)
+    } else {
+      router.push(`${baseLessonUrl}/materials/${material.id}`)
+    }
+  }
+
   const handleDeleteClick = (materialId: string) => {
     setMaterialToDelete(materialId)
     setDeleteDialogOpen(true)
   }
 
   const handleDuplicate = async (material: UserLessonMaterial) => {
+    if (isMobile) {
+      setMobileEditWarningOpen(true)
+      return
+    }
+
     setDuplicatingMaterialId(material.id)
     const result = await copyLessonMaterialAction(material.source_material_id, lessonId)
 
@@ -240,14 +256,13 @@ export function UserLessonMaterialsSection({
                 key={material.id} 
                 className="h-[52px] px-2 flex items-center border-b border-grey-100"
               >
-                <Link href={`${baseLessonUrl}/materials/${material.id}`}>
-                  <button
-                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors"
-                    title="Upravit"
-                  >
-                    <Pencil className="w-4 h-4 text-grey-500" />
-                  </button>
-                </Link>
+                <button
+                  onClick={() => handleEdit(material)}
+                  className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors"
+                  title="Upravit"
+                >
+                  <Pencil className="w-4 h-4 text-grey-500" />
+                </button>
               </div>
             ))}
           </div>
@@ -257,106 +272,17 @@ export function UserLessonMaterialsSection({
       {/* Mobile Card View */}
       <div className="md:hidden flex flex-col gap-3">
         {materials.map((material) => (
-          <div
+          <UserEditedMaterialCard
             key={material.id}
-            className="bg-white border border-grey-200 rounded-xl p-4"
-          >
-            {/* Material Info */}
-            <div className="flex items-start gap-3 mb-3">
-              <div className="shrink-0 mt-0.5">
-                {getMaterialIcon(material.title)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium text-text-strong leading-body-sm">
-                  {material.title}
-                </h3>
-                <p className="text-xs text-text-subtle mt-1 tabular-nums">
-                  {formatRelativeTime(material.updated_at)}
-                </p>
-              </div>
-              
-              {/* Mobile Dropdown Menu */}
-              <DropdownMenu
-                trigger={
-                  <div className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors">
-                    <MoreVertical className="w-4 h-4 text-grey-500" />
-                  </div>
-                }
-              >
-                <DropdownMenuItem 
-                  onClick={() => handleView(material)}
-                  icon={<Eye className="w-4 h-4" />}
-                >
-                  Zobrazit
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => handleExportPDF(material)}
-                  disabled={!material.content || isExportingPDF === material.id}
-                  icon={isExportingPDF === material.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Download className="w-4 h-4" />
-                  )}
-                >
-                  Stáhnout PDF
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => handleDuplicate(material)}
-                  disabled={duplicatingMaterialId === material.id}
-                  icon={duplicatingMaterialId === material.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                >
-                  Duplikovat
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => router.push(`${baseLessonUrl}/materials/${material.id}`)}
-                  icon={<Pencil className="w-4 h-4" />}
-                >
-                  Upravit
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => handleDeleteClick(material.id)}
-                  icon={<Trash2 className="w-4 h-4" />}
-                  variant="danger"
-                >
-                  Smazat
-                </DropdownMenuItem>
-              </DropdownMenu>
-            </div>
-
-            {/* Action Buttons Row - Quick Access */}
-            <div className="flex items-center gap-1 pt-3 border-t border-grey-100">
-              <button
-                onClick={() => handleView(material)}
-                className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg hover:bg-grey-50 transition-colors text-grey-600"
-              >
-                <Eye className="w-4 h-4" />
-                <span className="text-xs font-medium">Zobrazit</span>
-              </button>
-              <button
-                onClick={() => handleExportPDF(material)}
-                disabled={!material.content || isExportingPDF === material.id}
-                className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg hover:bg-grey-50 transition-colors text-grey-600 disabled:opacity-50"
-              >
-                {isExportingPDF === material.id ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Download className="w-4 h-4" />
-                )}
-                <span className="text-xs font-medium">PDF</span>
-              </button>
-              <Link 
-                href={`${baseLessonUrl}/materials/${material.id}`}
-                className="flex-1 h-9 flex items-center justify-center gap-1.5 rounded-lg hover:bg-grey-50 transition-colors text-grey-600"
-              >
-                <Pencil className="w-4 h-4" />
-                <span className="text-xs font-medium">Upravit</span>
-              </Link>
-            </div>
-          </div>
+            material={material}
+            onView={() => handleView(material)}
+            onEdit={() => handleEdit(material)}
+            onDownload={() => handleExportPDF(material)}
+            onDuplicate={() => handleDuplicate(material)}
+            onDelete={() => handleDeleteClick(material.id)}
+            isExportingPDF={isExportingPDF === material.id}
+            isDuplicating={duplicatingMaterialId === material.id}
+          />
         ))}
       </div>
 
@@ -390,6 +316,11 @@ export function UserLessonMaterialsSection({
         open={errorDialogOpen}
         onOpenChange={setErrorDialogOpen}
         message={errorMessage}
+      />
+
+      <MobileEditWarningDialog 
+        open={mobileEditWarningOpen} 
+        onOpenChange={setMobileEditWarningOpen} 
       />
     </div>
   )

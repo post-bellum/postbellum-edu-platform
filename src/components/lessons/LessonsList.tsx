@@ -39,7 +39,7 @@ export async function LessonsList() {
           <AdminControls showNewButton isAdmin={admin} />
         </div>
       ) : (
-        <div className="flex flex-col gap-10 sm:gap-10">
+        <div className="flex flex-col gap-14 lg:gap-10">
           {lessons.map((lesson) => (
             <LessonCard key={lesson.id} lesson={lesson} isAdmin={admin} />
           ))}

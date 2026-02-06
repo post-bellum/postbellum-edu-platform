@@ -1,15 +1,20 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { FileText, Trash2 } from 'lucide-react'
 import { LessonMaterialViewModal } from '@/components/lessons/LessonMaterialViewModal'
+import { UserEditedMaterialCard, type MaterialWithLesson } from '@/components/lessons/UserEditedMaterialCard'
 import { Dialog, DialogContent } from '@/components/ui/Dialog'
 import { Button } from '@/components/ui/Button'
-import { UserMaterialCard } from './UserMaterialCard'
+import { MobileEditWarningDialog } from '@/components/ui/MobileEditWarningDialog'
 import { UserMaterialTableRow } from './UserMaterialTableRow'
+import { generateLessonUrl } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
-export type MaterialWithLesson = UserLessonMaterial & { lesson_title: string; lesson_short_id?: string | null }
+// Re-export for backward compatibility
+export type { MaterialWithLesson } from '@/components/lessons/UserEditedMaterialCard'
 
 interface UserEditedMaterialsListProps {
   materials: Array<MaterialWithLesson>
@@ -18,6 +23,8 @@ interface UserEditedMaterialsListProps {
 }
 
 export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: UserEditedMaterialsListProps) {
+  const router = useRouter()
+  const isMobile = useIsMobile()
   const [deletingId, setDeletingId] = React.useState<string | null>(null)
   const [duplicatingId, setDuplicatingId] = React.useState<string | null>(null)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
@@ -27,9 +34,23 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false)
   const [materialToDelete, setMaterialToDelete] = React.useState<MaterialWithLesson | null>(null)
 
+  // Mobile warning modal
+  const [mobileEditWarningOpen, setMobileEditWarningOpen] = React.useState(false)
+
   const handleView = (material: MaterialWithLesson) => {
     setSelectedMaterial(material)
     setViewModalOpen(true)
+  }
+
+  const handleEdit = (material: MaterialWithLesson) => {
+    if (isMobile) {
+      setMobileEditWarningOpen(true)
+    } else {
+      const lessonId = material.lesson_short_id || material.lesson_id
+      const lessonUrl = generateLessonUrl(lessonId, material.lesson_title)
+      const materialEditUrl = `${lessonUrl}/materials/${material.id}?from=profile`
+      router.push(materialEditUrl)
+    }
   }
 
   const handleDeleteClick = (material: MaterialWithLesson) => {
@@ -58,6 +79,11 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
 
   const handleDuplicate = async (material: MaterialWithLesson) => {
     if (!onDuplicate) return
+
+    if (isMobile) {
+      setMobileEditWarningOpen(true)
+      return
+    }
 
     setDuplicatingId(material.id)
     try {
@@ -116,6 +142,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
                 material={material}
                 onView={handleView}
                 onDownload={handleDownload}
+                onEdit={handleEdit}
                 onDuplicate={onDuplicate ? handleDuplicate : undefined}
                 onDelete={onDelete ? handleDeleteClick : undefined}
                 isDuplicating={duplicatingId === material.id}
@@ -129,15 +156,16 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
       {/* Mobile Card View */}
       <div className="md:hidden flex flex-col gap-3">
         {materials.map((material) => (
-          <UserMaterialCard
+          <UserEditedMaterialCard
             key={material.id}
             material={material}
-            onView={handleView}
-            onDownload={handleDownload}
-            onDuplicate={onDuplicate ? handleDuplicate : undefined}
-            onDelete={onDelete ? handleDeleteClick : undefined}
+            showLessonLink
+            onView={() => handleView(material)}
+            onEdit={() => handleEdit(material)}
+            onDownload={() => handleDownload(material)}
+            onDuplicate={onDuplicate ? () => handleDuplicate(material) : undefined}
+            onDelete={onDelete ? () => handleDeleteClick(material) : undefined}
             isDuplicating={duplicatingId === material.id}
-            isDeleting={deletingId === material.id}
           />
         ))}
       </div>
@@ -204,6 +232,11 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
           </div>
         </DialogContent>
       </Dialog>
+
+      <MobileEditWarningDialog 
+        open={mobileEditWarningOpen} 
+        onOpenChange={setMobileEditWarningOpen} 
+      />
     </div>
   )
 }

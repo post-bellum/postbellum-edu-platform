@@ -181,3 +181,21 @@ export function ArrowRightStartOnRectangleIcon({ className = 'w-5 h-5' }: IconPr
     </svg>
   )
 }
+
+export function MenuTwoLinesIcon({ className = 'w-6 h-6' }: IconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M4 8h16M4 16h16"
+      />
+    </svg>
+  )
+}

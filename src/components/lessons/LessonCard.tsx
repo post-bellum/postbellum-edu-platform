@@ -28,7 +28,7 @@ export function LessonCard({ lesson, isAdmin = false, showAdminControls = true }
       {/* Thumbnail */}
       <Link
         href={lessonUrl}
-        className="relative w-[189px] sm:w-[200px] md:w-[260px] lg:w-[316px] h-[120px] sm:h-[130px] md:h-[170px] lg:h-[200px] rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden shrink-0 bg-linear-to-br from-grey-100 to-grey-200"
+        className="relative w-full sm:w-[200px] md:w-[260px] lg:w-[316px] aspect-[16/10] sm:aspect-auto sm:h-[130px] md:h-[170px] lg:h-[200px] rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden shrink-0 bg-linear-to-br from-grey-100 to-grey-200"
       >
         <LessonThumbnail
           src={lesson.thumbnail_url}
@@ -75,9 +75,6 @@ export function LessonCard({ lesson, isAdmin = false, showAdminControls = true }
           </div>
         )}
       </div>
-
-      {/* Mobile View Button */}
-      <ViewButton href={lessonUrl} className="sm:hidden" />
 
       {/* Desktop Actions */}
       <div className="hidden sm:flex flex-col items-center justify-center self-stretch shrink-0 gap-2">

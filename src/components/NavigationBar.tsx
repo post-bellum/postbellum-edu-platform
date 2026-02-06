@@ -12,7 +12,9 @@ import { logout } from '@/lib/oauth-helpers'
 import { AuthModal } from '@/components/auth'
 import { Button } from '@/components/ui/Button'
 import { ProfileDropdown } from '@/components/ProfileDropdown'
-import { BookmarkIconCustom as BookmarkIcon, FileText, Menu } from '@/components/icons'
+import { BookmarkIconCustom as BookmarkIcon, MenuTwoLinesIcon } from '@/components/icons'
+import { Cog6ToothIcon, ArrowRightStartOnRectangleIcon } from '@/components/ui/Icons'
+import { Bookmark, Pencil } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
@@ -68,12 +70,23 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
           {/* Left - Logo */}
           <div className="flex items-center md:min-w-[240px]">
             <Link href="/">
+              {/* Mobile logo */}
+              <Image
+                src="/logo-storyon-mobile.svg"
+                alt="StoryOn"
+                width={88}
+                height={36}
+                priority
+                className="md:hidden"
+              />
+              {/* Desktop logo */}
               <Image
                 src="/logo-storyon.svg"
                 alt="StoryOn"
                 width={200}
                 height={36}
                 priority
+                className="hidden md:block"
               />
             </Link>
           </div>
@@ -158,23 +171,27 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
             {/* Hamburger Menu Button */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <button
-                  className="flex items-center justify-center w-6 h-6 rounded-full bg-surface hover:bg-grey-50 transition-colors"
+                    <button
+                  className="flex items-center justify-center w-6 h-6 rounded-full bg-surface hover:bg-grey-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
                   aria-label="Otevřít menu"
                 >
-                  <Menu className="h-5 w-5 text-grey-950" />
+                  <MenuTwoLinesIcon className="h-6 w-6 text-grey-950" />
                 </button>
               </SheetTrigger>
               <SheetContent side="right" className="w-full sm:w-[340px] p-0">
                 <SheetTitle className="sr-only">Navigace</SheetTitle>
                 
                 {/* Sheet Header with Logo - matches navbar layout */}
-                <div className="flex h-12 items-center justify-between px-5 py-4 mt-4">
-                  <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                <div className="flex h-12 items-center justify-between px-5 py-4 mt-4 -translate-x-px">
+                  <Link
+                    href="/"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset focus-visible:rounded"
+                  >
                     <Image
-                      src="/logo-storyon.svg"
+                      src="/logo-storyon-mobile.svg"
                       alt="StoryOn"
-                      width={200}
+                      width={88}
                       height={36}
                       priority
                     />
@@ -189,10 +206,10 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                         key={link.href}
                         onClick={() => handleMobileNavClick(link.href)}
                         className={cn(
-                          'w-full text-left font-body text-xl px-4 py-3 rounded-xl transition-colors',
+                          'w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset',
                           isActive(link.href)
                             ? 'font-semibold text-text-strong bg-[#caffe6]'
-                            : 'font-normal text-text-strong hover:bg-grey-50'
+                            : 'font-normal text-text-subtle hover:bg-grey-50'
                         )}
                       >
                         {link.label}
@@ -201,38 +218,62 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                   </nav>
 
                   {/* Divider */}
-                  <div className="h-px bg-grey-200" />
+                  <div className="h-px bg-grey-100" />
 
                   {/* User Actions */}
                   {isLoggedIn ? (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1">
+                      {/* Profile Header */}
+                      {email && (
+                        <div className="flex items-center justify-between gap-3 pl-2 pr-4 py-2.5">
+                          <span className="font-body text-md font-semibold text-text-strong truncate">
+                            {profile?.displayName || email}
+                          </span>
+                          <Image
+                            src={getGravatarUrl(email, 40)}
+                            alt="Profile"
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 rounded-full border-[1.25px] border-grey-950"
+                          />
+                        </div>
+                      )}
+
+                      {/* Favorites */}
+                      <button
+                        onClick={() => handleMobileNavClick('/favorites')}
+                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-text-subtle hover:bg-grey-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
+                      >
+                        <span className="text-grey-600">
+                          <Bookmark className="h-4 w-4" />
+                        </span>
+                        <span className="leading-normal">Uložené lekce</span>
+                      </button>
+
                       {/* Edited Materials */}
                       <button
                         onClick={() => handleMobileNavClick('/profile?tab=materials')}
-                        className="flex items-center gap-3 w-full text-left font-body text-lg px-4 py-3 rounded-xl text-text-strong hover:bg-grey-50 transition-colors"
+                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-text-subtle hover:bg-grey-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
                       >
-                        <span className="flex items-center justify-center w-8 h-8 bg-[#caffe6] rounded-full">
-                          <FileText className="h-4 w-4 text-grey-950" />
+                        <span className="text-grey-600">
+                          <Pencil className="h-4 w-4" />
                         </span>
-                        <span>Moje upravené materiály</span>
+                        <span className="leading-normal">Upravené materiály</span>
                       </button>
 
                       {/* Settings */}
                       <button
                         onClick={() => handleMobileNavClick('/profile')}
-                        className="flex items-center gap-3 w-full text-left font-body text-lg px-4 py-3 rounded-xl text-text-strong hover:bg-grey-50 transition-colors"
+                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-text-subtle hover:bg-grey-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
                       >
-                        <span className="flex items-center justify-center w-8 h-8 bg-grey-100 rounded-full">
-                          <svg className="h-4 w-4 text-grey-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
+                        <span className="text-grey-600">
+                          <Cog6ToothIcon className="h-4 w-4" />
                         </span>
-                        <span>Nastavení</span>
+                        <span className="leading-normal">Nastavení</span>
                       </button>
 
                       {/* Divider before logout */}
-                      <div className="h-px bg-grey-200 my-2" />
+                      <div className="h-px bg-grey-100 my-1" />
 
                       {/* Logout */}
                       <button
@@ -242,14 +283,12 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                           router.push('/')
                           router.refresh()
                         }}
-                        className="flex items-center gap-3 w-full text-left font-body text-lg px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                        className="flex items-center gap-1.5 w-full text-left font-body text-md pl-2 pr-4 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mint focus-visible:ring-inset"
                       >
-                        <span className="flex items-center justify-center w-8 h-8 bg-red-50 rounded-full">
-                          <svg className="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                          </svg>
+                        <span className="text-red-600">
+                          <ArrowRightStartOnRectangleIcon className="h-4 w-4" />
                         </span>
-                        <span>Odhlásit se</span>
+                        <span className="leading-normal">Odhlásit se</span>
                       </button>
                     </div>
                   ) : (
