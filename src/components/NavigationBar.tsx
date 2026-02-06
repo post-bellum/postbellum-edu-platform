@@ -182,7 +182,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                 <SheetTitle className="sr-only">Navigace</SheetTitle>
                 
                 {/* Sheet Header with Logo - matches navbar layout */}
-                <div className="flex h-12 items-center justify-between px-5 py-4 mt-4">
+                <div className="flex h-12 items-center justify-between px-5 py-4 mt-4 -translate-x-px">
                   <Link
                     href="/"
                     onClick={() => setMobileMenuOpen(false)}
