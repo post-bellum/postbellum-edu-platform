@@ -80,7 +80,7 @@ export function NewsletterSignup() {
               placeholder="hello@postbellum.cz"
               disabled={isLoading}
               aria-label="E-mailová adresa pro odběr novinek"
-              className={`w-full h-12 bg-white border rounded-full px-5 py-3 font-body text-sm md:text-lg text-grey-600 placeholder:text-grey-600 focus:outline-none focus:ring-2 focus:ring-mint focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`w-full h-12 bg-white border rounded-full pl-5 pr-28 py-3 font-body text-sm md:text-lg text-grey-600 placeholder:text-grey-600 focus:outline-none focus:ring-2 focus:ring-mint focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
                 error ? 'border-red-500' : 'border-grey-300'
               }`}
             />
