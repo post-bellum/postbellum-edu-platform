@@ -1,17 +1,17 @@
 'use client'
 
 import * as React from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FileText, Trash2 } from 'lucide-react'
 import { LessonMaterialViewModal } from '@/components/lessons/LessonMaterialViewModal'
 import { UserEditedMaterialCard, type MaterialWithLesson } from '@/components/lessons/UserEditedMaterialCard'
+import { UserMaterialsTable } from '@/components/lessons/UserMaterialsTable'
 import { Dialog, DialogContent } from '@/components/ui/Dialog'
 import { Button } from '@/components/ui/Button'
 import { MobileEditWarningDialog } from '@/components/ui/MobileEditWarningDialog'
-import { UserMaterialTableRow } from './UserMaterialTableRow'
 import { generateLessonUrl } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import type { UserLessonMaterial } from '@/types/lesson.types'
 
 // Re-export for backward compatibility
 export type { MaterialWithLesson } from '@/components/lessons/UserEditedMaterialCard'
@@ -125,33 +125,33 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
   return (
     <div data-testid="user-materials-list">
       {/* Desktop Table View */}
-      <div className="hidden md:block">
-        <table className="w-full table-auto" data-testid="user-materials-table">
-          <thead>
-            <tr className="border-b border-gray-200 text-left">
-              <th className="pb-3 pr-4 font-medium text-gray-600 min-w-[220px]">Název</th>
-              <th className="pb-3 pr-4 font-medium text-gray-600">Lekce</th>
-              <th className="pb-3 pr-4 font-medium text-gray-600 whitespace-nowrap w-[10%]">Upraveno</th>
-              <th className="pb-3 font-medium text-gray-600 text-right whitespace-nowrap">Akce</th>
-            </tr>
-          </thead>
-          <tbody>
-            {materials.map((material) => (
-              <UserMaterialTableRow
-                key={material.id}
-                material={material}
-                onView={handleView}
-                onDownload={handleDownload}
-                onEdit={handleEdit}
-                onDuplicate={onDuplicate ? handleDuplicate : undefined}
-                onDelete={onDelete ? handleDeleteClick : undefined}
-                isDuplicating={duplicatingId === material.id}
-                isDeleting={deletingId === material.id}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <UserMaterialsTable<MaterialWithLesson>
+        materials={materials}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDownload={handleDownload}
+        onDuplicate={onDuplicate ? handleDuplicate : undefined}
+        onDelete={onDelete ? handleDeleteClick : undefined}
+        isDuplicating={duplicatingId}
+        renderLessonCell={(material) => {
+          const lessonUrl = generateLessonUrl(
+            material.lesson_short_id || material.lesson_id,
+            material.lesson_title
+          )
+          return (
+            <Link
+              href={lessonUrl}
+              className="text-sm text-text-subtle leading-body-sm truncate block hover:text-brand-primary hover:underline"
+              title={material.lesson_title}
+              data-testid={`user-material-lesson-link-${material.id}`}
+            >
+              {material.lesson_title}
+            </Link>
+          )
+        }}
+        dataTestId="user-materials-table"
+        rowDataTestId="user-material-row"
+      />
 
       {/* Mobile Card View */}
       <div className="md:hidden flex flex-col gap-3">

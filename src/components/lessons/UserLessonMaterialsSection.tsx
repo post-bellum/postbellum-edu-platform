@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { Eye, Download, Copy, Pencil, FileText, FilePenLine, Loader2 } from 'lucide-react'
-import { formatRelativeTime, generateLessonUrl } from '@/lib/utils'
+import { generateLessonUrl } from '@/lib/utils'
+import { UserMaterialsTable } from './UserMaterialsTable'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { MobileEditWarningDialog } from '@/components/ui/MobileEditWarningDialog'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
@@ -117,15 +117,6 @@ export function UserLessonMaterialsSection({
     setMaterialToDelete(null)
   }
 
-  // Determine icon based on title - metodický = FileText, pracovní = FilePenLine
-  const getMaterialIcon = (title: string) => {
-    const lowerTitle = title.toLowerCase()
-    if (lowerTitle.includes('pracovní')) {
-      return <FilePenLine className="w-5 h-5 text-brand-primary" />
-    }
-    return <FileText className="w-5 h-5 text-brand-primary" />
-  }
-
   if (materials.length === 0) {
     return null
   }
@@ -140,134 +131,16 @@ export function UserLessonMaterialsSection({
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block min-w-[356px]">
-        <div className="flex">
-          {/* Name Column */}
-          <div className="flex-1 min-w-0 overflow-hidden">
-            {/* Header */}
-            <div className="h-12 px-4 flex items-center border-b border-grey-200">
-              <span className="text-sm font-medium text-text-strong">Název</span>
-            </div>
-            {/* Cells */}
-            {materials.map((material) => (
-              <div 
-                key={material.id} 
-                className="h-[52px] px-4 flex items-center gap-2 border-b border-grey-100"
-              >
-                {getMaterialIcon(material.title)}
-                <span className="text-sm text-text-strong leading-body-sm truncate">
-                  {material.title}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Last Edited Column */}
-          <div className="flex-1 min-w-0 overflow-hidden">
-            {/* Header */}
-            <div className="h-12 px-4 flex items-center border-b border-grey-200">
-              <span className="text-sm font-medium text-text-strong">Upraveno</span>
-            </div>
-            {/* Cells */}
-            {materials.map((material) => (
-              <div 
-                key={material.id} 
-                className="h-[52px] px-4 flex items-center border-b border-grey-100"
-              >
-                <span className="text-xs text-text-subtle tabular-nums">
-                  {formatRelativeTime(material.updated_at)}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* View Action Column */}
-          <div className="shrink-0">
-            <div className="h-12 px-4 border-b border-grey-200" />
-            {materials.map((material) => (
-              <div 
-                key={material.id} 
-                className="h-[52px] px-2 flex items-center border-b border-grey-100"
-              >
-                <button
-                  onClick={() => handleView(material)}
-                  className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors"
-                  title="Zobrazit"
-                >
-                  <Eye className="w-4 h-4 text-grey-500" />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Download Action Column */}
-          <div className="shrink-0">
-            <div className="h-12 px-4 border-b border-grey-200" />
-            {materials.map((material) => (
-              <div 
-                key={material.id} 
-                className="h-[52px] px-2 flex items-center border-b border-grey-100"
-              >
-                <button
-                  onClick={() => handleExportPDF(material)}
-                  disabled={!material.content || isExportingPDF === material.id}
-                  className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Stáhnout PDF"
-                >
-                  {isExportingPDF === material.id ? (
-                    <Loader2 className="w-4 h-4 text-grey-500 animate-spin" />
-                  ) : (
-                    <Download className="w-4 h-4 text-grey-500" />
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Copy Action Column */}
-          <div className="shrink-0">
-            <div className="h-12 px-4 border-b border-grey-200" />
-            {materials.map((material) => (
-              <div 
-                key={material.id} 
-                className="h-[52px] px-2 flex items-center border-b border-grey-100"
-              >
-                <button
-                  onClick={() => handleDuplicate(material)}
-                  disabled={duplicatingMaterialId === material.id}
-                  className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Duplikovat"
-                >
-                  {duplicatingMaterialId === material.id ? (
-                    <Loader2 className="w-4 h-4 text-grey-500 animate-spin" />
-                  ) : (
-                    <Copy className="w-4 h-4 text-grey-500" />
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Edit Action Column */}
-          <div className="shrink-0">
-            <div className="h-12 px-4 border-b border-grey-200" />
-            {materials.map((material) => (
-              <div 
-                key={material.id} 
-                className="h-[52px] px-2 flex items-center border-b border-grey-100"
-              >
-                <button
-                  onClick={() => handleEdit(material)}
-                  className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors"
-                  title="Upravit"
-                >
-                  <Pencil className="w-4 h-4 text-grey-500" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <UserMaterialsTable<UserLessonMaterial>
+        materials={materials}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDownload={handleExportPDF}
+        onDuplicate={handleDuplicate}
+        onDelete={(material) => handleDeleteClick(material.id)}
+        isDownloading={isExportingPDF}
+        isDuplicating={duplicatingMaterialId}
+      />
 
       {/* Mobile Card View */}
       <div className="md:hidden flex flex-col gap-3">
