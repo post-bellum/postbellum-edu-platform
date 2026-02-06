@@ -48,6 +48,7 @@ export function AdditionalActivityForm({
   const [isUploading, setIsUploading] = React.useState(false)
   const [uploadError, setUploadError] = React.useState<string | null>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const fileInputId = React.useId()
 
   // Reset form when modal opens/closes or activity changes
   React.useEffect(() => {
@@ -186,13 +187,15 @@ export function AdditionalActivityForm({
           </div>
 
           <div className="space-y-2">
-            <Label>Příloha (obrázek, QR kód nebo PDF)</Label>
+            <Label htmlFor={fileInputId}>Příloha (obrázek, QR kód nebo PDF)</Label>
             <input
+              id={fileInputId}
               ref={fileInputRef}
               type="file"
               accept="image/*,application/pdf"
               onChange={handleFileSelect}
-              className="hidden"
+              className="sr-only"
+              aria-label="Vybrat soubor (obrázek nebo PDF)"
             />
             {imageUrl ? (
               <div className="border border-gray-200 rounded-lg p-4 space-y-3">
@@ -244,10 +247,10 @@ export function AdditionalActivityForm({
                 )}
               </div>
             ) : (
-              <div
+              <label
+                htmlFor={fileInputId}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
                 className={`
                   border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
                   transition-colors flex flex-col items-center justify-center gap-2 min-h-[140px]
@@ -273,7 +276,7 @@ export function AdditionalActivityForm({
                     </p>
                   </>
                 )}
-              </div>
+              </label>
             )}
             {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
           </div>

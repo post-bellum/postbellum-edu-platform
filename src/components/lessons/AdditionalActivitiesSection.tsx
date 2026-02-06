@@ -118,17 +118,20 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
       </div>
 
       <Dialog open={previewOpen} onOpenChange={(open) => !open && closePreview()}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] w-auto overflow-hidden" hideCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>{previewTitle}</DialogTitle>
+        <DialogContent
+          className="w-[calc(100vw-2rem)] max-w-[480px] max-h-[90vh] flex flex-col overflow-hidden rounded-[40px]"
+          hideCloseButton={false}
+        >
+          <DialogHeader className="shrink-0 pr-8">
+            <DialogTitle className="truncate">{previewTitle}</DialogTitle>
           </DialogHeader>
           {previewUrl && (
-            <div className="flex items-center justify-center bg-grey-100 rounded-lg overflow-auto max-h-[70vh] p-4">
+            <div className="min-h-0 min-w-0 flex flex-1 items-center justify-center overflow-auto rounded-lg bg-grey-100 p-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
                 alt={previewTitle}
-                className="max-w-full max-h-full object-contain"
+                className="max-h-[70vh] max-w-full object-contain"
               />
             </div>
           )}
