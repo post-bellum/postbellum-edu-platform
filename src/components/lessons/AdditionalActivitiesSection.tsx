@@ -118,10 +118,7 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
       </div>
 
       <Dialog open={previewOpen} onOpenChange={(open) => !open && closePreview()}>
-        <DialogContent
-          className="w-[calc(100vw-2rem)] max-w-[480px] max-h-[90vh] flex flex-col overflow-hidden rounded-[40px]"
-          hideCloseButton={false}
-        >
+        <DialogContent className="max-h-[90vh] flex flex-col overflow-hidden">
           <DialogHeader className="shrink-0 pr-8">
             <DialogTitle className="truncate">{previewTitle}</DialogTitle>
           </DialogHeader>
@@ -131,7 +128,7 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
               <img
                 src={previewUrl}
                 alt={previewTitle}
-                className="max-h-[70vh] max-w-full object-contain"
+                className="max-h-full max-w-full object-contain"
               />
             </div>
           )}
