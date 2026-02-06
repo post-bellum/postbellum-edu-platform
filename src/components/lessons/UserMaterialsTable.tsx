@@ -110,7 +110,7 @@ export function UserMaterialsTable<T extends UserMaterialTableItem>({
           <div className="h-[52px] px-2 shrink-0 flex items-center w-10">
             <button
               onClick={() => onView(material)}
-              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors cursor-pointer"
               title="Zobrazit"
               {...(rowDataTestId ? { 'data-testid': `user-material-view-${material.id}` } : {})}
             >
@@ -120,7 +120,7 @@ export function UserMaterialsTable<T extends UserMaterialTableItem>({
           <div className="h-[52px] px-2 shrink-0 flex items-center w-10">
             <button
               onClick={() => onEdit(material)}
-              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-grey-100 transition-colors cursor-pointer"
               title="Upravit"
               {...(rowDataTestId ? { 'data-testid': `user-material-edit-${material.id}` } : {})}
             >
