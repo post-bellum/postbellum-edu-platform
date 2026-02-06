@@ -280,6 +280,11 @@ export const updateLessonMaterialSchema = z.object({
 })
 
 /**
+ * Attachment type for additional activities (image or pdf)
+ */
+export const attachmentTypeSchema = z.enum(['image', 'pdf'])
+
+/**
  * Create additional activity schema
  */
 export const createAdditionalActivitySchema = z.object({
@@ -295,6 +300,7 @@ export const createAdditionalActivitySchema = z.object({
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   image_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  attachment_type: attachmentTypeSchema.optional(),
 })
 
 /**
@@ -313,6 +319,7 @@ export const updateAdditionalActivitySchema = z.object({
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   image_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  attachment_type: attachmentTypeSchema.optional(),
 })
 
 /**
@@ -366,6 +373,7 @@ export function parseFormDataForAdditionalActivity(formData: FormData) {
     title: getRequiredValue('title'),
     description: getOptionalValue('description'),
     image_url: getOptionalValue('image_url'),
+    attachment_type: getOptionalValue('attachment_type') as 'image' | 'pdf' | undefined,
   }
 }
 

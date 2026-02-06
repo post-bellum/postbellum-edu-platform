@@ -5,7 +5,7 @@ import { getAdditionalActivities } from '@/lib/supabase/additional-activities-cl
 import { deleteAdditionalActivityAction } from '@/app/actions/additional-activities'
 import type { AdditionalActivity } from '@/types/lesson.types'
 import { Button } from '@/components/ui/Button'
-import { Plus, Edit, Trash2 } from 'lucide-react'
+import { Plus, Edit, Trash2, FileText } from 'lucide-react'
 import { AdditionalActivityForm } from './AdditionalActivityForm'
 import {
   Dialog,
@@ -128,15 +128,24 @@ export function AdditionalActivitiesManager({
               className="border border-gray-200 rounded-lg p-4 flex items-start gap-4"
             >
               {activity.image_url && (
-                <div className="shrink-0">
+                <div className="shrink-0 relative">
                   <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={activity.image_url}
-                      alt={activity.title}
-                      className="w-full h-full object-cover"
-                    />
+                    {activity.attachment_type === 'pdf' ? (
+                      <FileText className="w-10 h-10 text-gray-400" />
+                    ) : (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={activity.image_url}
+                        alt={activity.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
+                  {activity.attachment_type === 'pdf' && (
+                    <span className="absolute bottom-1 right-1 bg-red-100 text-red-700 text-[10px] font-medium px-1.5 py-0.5 rounded">
+                      PDF
+                    </span>
+                  )}
                 </div>
               )}
               <div className="flex-1">

@@ -44,12 +44,15 @@ export interface LessonMaterial {
   updated_at: string
 }
 
+export type AdditionalActivityAttachmentType = 'image' | 'pdf'
+
 export interface AdditionalActivity {
   id: string
   lesson_id: string
   title: string
   description: string | null
   image_url: string | null
+  attachment_type: AdditionalActivityAttachmentType | null
   created_at: string
   updated_at: string
 }
