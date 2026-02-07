@@ -1,135 +1,65 @@
 /**
- * PDF Export and Print Utilities
- * Handles PDF generation and printing for TinyMCE content with proper
- * page break handling and image preloading.
+ * PDF Export Utilities
+ *
+ * Uses html2pdf.js to generate PDF documents from HTML content.
+ * Handles page breaks, A4 formatting, and print-optimized styling.
  */
 
 import { logger } from '@/lib/logger'
 
-// Type for html2pdf.js library
-type Html2Pdf = {
-  (): {
-    set: (options: unknown) => {
-      from: (element: HTMLElement) => {
-        save: () => Promise<void>
-      }
-    }
+// html2pdf.js type definitions
+interface Html2PdfOptions {
+  margin?: number | [number, number, number, number]
+  filename?: string
+  image?: { type: 'jpeg' | 'png' | 'webp'; quality: number }
+  html2canvas?: {
+    scale: number
+    useCORS: boolean
+    letterRendering: boolean
+    allowTaint: boolean
   }
-}
-
-// Dynamically import html2pdf.js to avoid SSR issues
-let html2pdf: Html2Pdf | null = null
-
-async function getHtml2Pdf(): Promise<Html2Pdf | null> {
-  if (typeof window === 'undefined') {
-    return null
+  jsPDF?: {
+    unit: string
+    format: string | [number, number]
+    orientation: 'portrait' | 'landscape'
   }
-  
-  if (!html2pdf) {
-    try {
-      const html2pdfModule = await import('html2pdf.js')
-      html2pdf = (html2pdfModule.default || html2pdfModule) as Html2Pdf
-    } catch (error) {
-      logger.warn('Failed to load html2pdf.js', error)
-      return null
-    }
+  pagebreak?: {
+    mode: string | string[]
+    before?: string | string[]
+    after?: string | string[]
+    avoid?: string | string[]
   }
-  
-  return html2pdf
 }
 
 /**
- * Converts TinyMCE page break comments to CSS page breaks for PDF/print
- * @param html - HTML content with <!-- pagebreak --> comments
- * @returns HTML with page breaks converted to CSS
+ * Dynamically imports html2pdf.js to avoid SSR issues
  */
-export function convertPageBreaks(html: string): string {
-  // Replace <!-- pagebreak --> comments with div elements that have page-break-after
-  // Add both CSS and class for html2pdf.js compatibility
-  return html.replace(
-    /<!--\s*pagebreak\s*-->/gi,
-    '<div class="page-break-after" style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>'
-  )
+async function getHtml2Pdf() {
+  try {
+    // Dynamic import to avoid SSR issues
+    const html2pdf = await import('html2pdf.js')
+    return html2pdf.default || html2pdf
+  } catch (error) {
+    logger.error('Failed to load html2pdf.js', error)
+    throw new Error('PDF export library not available')
+  }
 }
 
 /**
- * Preloads all images in HTML content and converts to data URLs if needed
- * @param html - HTML content containing img tags
- * @returns Promise that resolves with HTML where images are preloaded
+ * Converts page break comments to CSS page breaks for PDF/print
  */
-export async function preloadImages(html: string): Promise<string> {
-  // Create a temporary DOM element to parse HTML
-  const tempDiv = document.createElement('div')
-  tempDiv.innerHTML = html
-
-  const images = tempDiv.querySelectorAll('img')
-  const imagePromises: Promise<void>[] = []
-
-  images.forEach((img) => {
-    const promise = new Promise<void>((resolve) => {
-      // Skip if image has no src
-      if (!img.src) {
-        resolve()
-        return
-      }
-
-      // If image is already loaded, resolve immediately
-      if (img.complete && img.naturalWidth > 0) {
-        resolve()
-        return
-      }
-
-      // Handle CORS issues by converting to data URL if possible
-      const handleImageLoad = () => {
-        // Try to convert to data URL if CORS allows (optional optimization)
-        // Most modern browsers handle CORS for Supabase public URLs, so this is just a fallback
-        try {
-          const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d')
-          
-          if (ctx && img.naturalWidth > 0 && img.naturalHeight > 0) {
-            canvas.width = img.naturalWidth
-            canvas.height = img.naturalHeight
-            ctx.drawImage(img, 0, 0)
-            
-            // Convert to data URL
-            const dataUrl = canvas.toDataURL('image/png')
-            img.src = dataUrl
-          }
-        } catch (error) {
-          // If conversion fails, keep original src
-          // This is fine - browsers can print external images if CORS allows
-          logger.debug('Could not convert image to data URL (keeping original)', error)
-        }
-        resolve()
-      }
-
-      img.onload = handleImageLoad
-      img.onerror = () => {
-        // If image fails to load, keep original src and continue
-        logger.debug('Image failed to load', { src: img.src })
-        resolve()
-      }
-    })
-
-    imagePromises.push(promise)
-  })
-
-  // Wait for all images to load
-  await Promise.all(imagePromises)
-
-  return tempDiv.innerHTML
+function processPageBreaks(content: string): string {
+  return content
+    .replace(/<!--\s*pagebreak\s*-->/gi, '<div class="page-break-after"></div>')
+    .replace(/<div[^>]*class="page-break-after"[^>]*><\/div>/gi, '<div class="page-break-after"></div>')
 }
 
 /**
  * Creates a print-optimized HTML document from content
- * @param title - Document title
- * @param content - HTML content
- * @returns Complete HTML document string
  */
-export function createPrintView(title: string, content: string): string {
-  const htmlWithPageBreaks = convertPageBreaks(content)
-  
+function createPrintView(title: string, content: string): string {
+  const processedContent = processPageBreaks(content)
+
   return `<!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -141,284 +71,465 @@ export function createPrintView(title: string, content: string): string {
       size: A4;
       margin: 2cm;
     }
-    
+
     * {
       box-sizing: border-box;
     }
-    
+
     body {
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-size: 10pt;
+      font-family: 'tablet-gothic-wide', ui-sans-serif, system-ui,
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+      font-size: 11pt;
       line-height: 1.6;
       color: #18181B;
       margin: 0;
       padding: 0;
       background: white;
     }
-    
-    .print-header {
-      margin-bottom: 2em;
-      padding-bottom: 1em;
-      border-bottom: 2px solid #d1d5db;
+
+    /* Typography */
+    h1, h2, h3, h4 {
+      page-break-after: avoid;
+      break-after: avoid;
+      clear: both;
     }
-    
-    .print-title {
-      font-size: 24pt;
+
+    h1 {
+      font-size: 22pt;
       font-weight: 700;
-      margin: 0 0 0.5em 0;
-      color: #18181B;
-    }
-    
-    .print-content {
-      color: #18181B;
-      font-size: 10pt;
-      line-height: 1.7;
-    }
-    
-    .print-content h1 {
-      font-size: 20pt;
-      font-weight: 700;
-      margin-top: 1.5em;
-      margin-bottom: 0.75em;
+      margin: 1.5em 0 0.75em;
       line-height: 1.2;
-      page-break-after: avoid;
     }
-    
-    .print-content h2 {
-      font-size: 16pt;
+
+    h2 {
+      font-size: 18pt;
       font-weight: 600;
-      margin-top: 1.25em;
-      margin-bottom: 0.5em;
+      margin: 1.25em 0 0.5em;
       line-height: 1.3;
-      page-break-after: avoid;
     }
-    
-    .print-content h3 {
-      font-size: 14pt;
+
+    h3 {
+      font-size: 15pt;
       font-weight: 600;
-      margin-top: 1em;
-      margin-bottom: 0.5em;
+      margin: 1em 0 0.5em;
       line-height: 1.4;
-      page-break-after: avoid;
     }
-    
-    .print-content h4 {
-      font-size: 12pt;
+
+    h4 {
+      font-size: 13pt;
       font-weight: 600;
-      margin-top: 1em;
-      margin-bottom: 0.5em;
-      page-break-after: avoid;
+      margin: 1em 0 0.5em;
     }
-    
-    .print-content p {
-      margin: 1em 0;
-      line-height: 1.7;
+
+    p {
+      margin: 0.75em 0;
       orphans: 3;
       widows: 3;
     }
-    
-    .print-content ul,
-    .print-content ol {
-      margin: 1em 0;
+
+    /* Lists */
+    ul, ol {
+      margin: 0.75em 0;
       padding-left: 1.5em;
+    }
+
+    ul { list-style-type: disc; }
+    ol { list-style-type: decimal; }
+
+    li {
+      margin: 0.25em 0;
       page-break-inside: avoid;
     }
-    
-    .print-content li {
-      margin: 0.5em 0;
-      page-break-inside: avoid;
-    }
-    
-    .print-content img {
+
+    /* Images */
+    img {
       max-width: 100%;
       height: auto;
       border-radius: 4px;
       page-break-inside: avoid;
-      page-break-after: avoid;
-      /* Allow inline images by default - display inline-block to preserve side-by-side layout */
-      display: inline-block;
-      vertical-align: top;
-      margin: 0.5em 0.5em 0.5em 0;
-    }
-    
-    /* Images that are the only child of a paragraph - display as block */
-    .print-content p > img:only-child {
       display: block;
-      margin: 1em auto;
+      margin: 0.5em auto;
     }
-    
-    /* Image alignment classes */
-    .print-content img.img-align-left {
+
+    img.img-align-left {
       float: left;
-      margin: 0.5em 1.5em 1em 0;
-      max-width: 50%;
+      margin: 0.5em 1em 1em 0;
+      max-width: 45%;
     }
-    
-    .print-content img.img-align-right {
+
+    img.img-align-right {
       float: right;
-      margin: 0.5em 0 1em 1.5em;
-      max-width: 50%;
+      margin: 0.5em 0 1em 1em;
+      max-width: 45%;
     }
-    
-    .print-content img.img-align-center {
+
+    img.img-align-center {
       display: block;
       margin-left: auto;
       margin-right: auto;
-      float: none;
     }
-    
-    .print-content img.img-full-width {
-      width: 100%;
-      max-width: 100%;
-      float: none;
-      display: block;
-    }
-    
-    /* Image style classes */
-    .print-content img.img-rounded {
-      border-radius: 16px;
-    }
-    
-    .print-content img.img-bordered {
-      border: 3px solid #e5e7eb;
-      border-radius: 8px;
-    }
-    
-    .print-content img.img-shadow {
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Figure/caption styling */
-    .print-content figure.image {
-      display: table;
-      margin: 1.5em auto;
-      max-width: 100%;
-      page-break-inside: avoid;
-    }
-    
-    .print-content figure.image img {
-      display: block;
-      margin: 0 auto;
-    }
-    
-    .print-content figure.image figcaption {
-      display: table-caption;
-      caption-side: bottom;
-      text-align: center;
-      font-size: 10pt;
-      color: #6b7280;
-      padding: 8px 0;
-      font-style: italic;
-    }
-    
-    /* Clearfix - only applied to specific elements, not paragraphs (to allow text wrap around floated images) */
-    .print-content .clearfix::after {
-      content: "";
-      display: table;
-      clear: both;
-    }
-    
-    /* Clear float after headings to prevent text from wrapping into next section */
-    .print-content h1,
-    .print-content h2,
-    .print-content h3,
-    .print-content h4,
-    .print-content h5,
-    .print-content h6 {
-      clear: both;
-    }
-    
-    .print-content table {
+
+    /* Tables */
+    table {
       border-collapse: collapse;
       width: 100%;
       margin: 1em 0;
       page-break-inside: avoid;
     }
-    
-    .print-content th,
-    .print-content td {
+
+    th, td {
       border: 1px solid #d1d5db;
-      padding: 0.5em;
+      padding: 0.5em 0.75em;
       page-break-inside: avoid;
     }
-    
-    .print-content th {
+
+    th {
       background-color: #f3f4f6;
       font-weight: 600;
     }
-    
-    .print-content blockquote {
+
+    /* Other elements */
+    blockquote {
       border-left: 4px solid #d1d5db;
       margin: 1em 0;
       padding-left: 1em;
       color: #6b7280;
       page-break-inside: avoid;
     }
-    
-    .print-content code {
+
+    a {
+      color: #075985;
+      text-decoration: underline;
+    }
+
+    code {
       background-color: #f3f4f6;
-      padding: 0.2em 0.4em;
+      padding: 0.15em 0.35em;
       border-radius: 3px;
       font-size: 0.9em;
     }
-    
-    .print-content pre {
-      background-color: #f3f4f6;
-      padding: 1em;
-      border-radius: 6px;
-      overflow-x: auto;
-      page-break-inside: avoid;
+
+    hr {
+      border: none;
+      border-top: 2px solid #e5e7eb;
+      margin: 1.5em 0;
+      page-break-after: avoid;
     }
-    
-    /* Page break handling */
-    div[style*="page-break-after"],
+
+    strong, b { font-weight: 600; }
+    em, i { font-style: italic; }
+    u { text-decoration: underline; }
+
+    /* Page breaks */
     .page-break-after {
-      page-break-after: always !important;
-      break-after: page !important;
-      height: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
+      page-break-after: always;
+      break-after: page;
+      height: 0;
+      margin: 0;
+      padding: 0;
     }
-    
-    .page-break-before {
-      page-break-before: always !important;
-      break-before: page !important;
-    }
-    
-    .no-break {
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-    }
-    
+
     @media print {
       body {
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
       }
-      
-      .print-header {
-        page-break-after: avoid;
-      }
     }
   </style>
 </head>
 <body>
-  <div class="print-content">
-    ${htmlWithPageBreaks}
-  </div>
+  ${processedContent}
 </body>
 </html>`
 }
 
 /**
- * Escapes HTML to prevent XSS
+ * Exports content as a PDF using html2pdf.js
  */
+export async function exportToPDF(title: string, content: string): Promise<void> {
+  try {
+    const html2pdf = await getHtml2Pdf()
+    
+    if (!content || content.trim().length === 0) {
+      throw new Error('Obsah materiálu je prázdný')
+    }
+    
+    const processedContent = processPageBreaks(content)
+    const filename = sanitizeFilename(title) || 'document'
+    
+    // Create complete HTML document with styles matching the editor
+    const htmlDocument = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          @page {
+            size: A4;
+            margin: 2cm;
+          }
+
+          body {
+            font-family: Arial, sans-serif !important;
+            font-size: 16px !important;
+            line-height: 1.75 !important;
+            color: #18181b !important;
+            margin: 0;
+            padding: 0;
+            background: white;
+          }
+
+          /* Headings - using web-safe fonts for PDF compatibility */
+          h1 {
+            font-family: Arial, sans-serif !important;
+            font-size: 28px !important;
+            font-weight: 700 !important;
+            margin: 1.5em 0 0.75em !important;
+            line-height: 1.2 !important;
+            page-break-after: avoid;
+            clear: both;
+          }
+
+          h2 {
+            font-family: Arial, sans-serif !important;
+            font-size: 24px !important;
+            font-weight: 600 !important;
+            margin: 1.25em 0 0.5em !important;
+            line-height: 1.3 !important;
+            page-break-after: avoid;
+            clear: both;
+          }
+
+          h3 {
+            font-family: Arial, sans-serif !important;
+            font-size: 20px !important;
+            font-weight: 600 !important;
+            margin: 1em 0 0.5em !important;
+            line-height: 1.4 !important;
+            page-break-after: avoid;
+            clear: both;
+          }
+
+          h4 {
+            font-family: Arial, sans-serif !important;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            margin: 1em 0 0.5em !important;
+            page-break-after: avoid;
+            clear: both;
+          }
+
+          /* Paragraphs */
+          p {
+            margin: 1em 0 !important;
+            line-height: 1.75 !important;
+            orphans: 3;
+            widows: 3;
+            font-size: 16px !important;
+          }
+
+          /* Lists */
+          ul, ol {
+            padding-left: 1.5em;
+            margin: 1em 0;
+          }
+
+          ul {
+            list-style-type: disc;
+          }
+
+          ol {
+            list-style-type: decimal;
+          }
+
+          li {
+            margin: 0.5em 0;
+            page-break-inside: avoid;
+          }
+
+          /* Links */
+          a {
+            color: #075985;
+            text-decoration: underline;
+          }
+
+          /* Images */
+          img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 0.5em 0;
+            page-break-inside: avoid;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          img.img-align-left {
+            float: left;
+            margin: 0.5em 1.5em 1em 0;
+            max-width: 50%;
+          }
+
+          img.img-align-right {
+            float: right;
+            margin: 0.5em 0 1em 1.5em;
+            max-width: 50%;
+          }
+
+          img.img-align-center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          /* Tables */
+          table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+            page-break-inside: avoid;
+          }
+
+          th, td {
+            border: 1px solid #d1d5db;
+            padding: 0.75em;
+            page-break-inside: avoid;
+          }
+
+          th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+          }
+
+          /* Blockquotes */
+          blockquote {
+            border-left: 4px solid #d1d5db;
+            margin: 1em 0;
+            padding-left: 1em;
+            color: #6b7280;
+            page-break-inside: avoid;
+          }
+
+          /* Text formatting */
+          strong, b {
+            font-weight: 600;
+          }
+
+          em, i {
+            font-style: italic;
+          }
+
+          u {
+            text-decoration: underline;
+          }
+
+          code {
+            background-color: #f3f4f6;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+          }
+
+          hr {
+            border: none;
+            border-top: 2px solid #e5e7eb;
+            margin: 1.5em 0;
+            page-break-after: avoid;
+          }
+
+          /* Page breaks */
+          .page-break-after {
+            page-break-after: always;
+            break-after: page;
+            height: 0;
+            margin: 0;
+            padding: 0;
+          }
+
+          @media print {
+            body {
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        ${processedContent}
+      </body>
+      </html>
+    `
+
+    const options: Html2PdfOptions = {
+      margin: [15, 15, 15, 15],
+      filename: `${filename}.pdf`,
+      image: { type: 'jpeg', quality: 0.85 },
+      html2canvas: {
+        scale: 1,
+        useCORS: true,
+        letterRendering: true,
+        allowTaint: true
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
+      }
+    }
+
+    try {
+      // Use html2pdf with HTML string instead of DOM element
+      await html2pdf().set(options).from(htmlDocument).save()
+      logger.info('PDF export completed successfully')
+    } catch (pdfError) {
+      logger.error('html2pdf.js failed:', pdfError)
+      // Fallback: open print dialog
+      const printWindow = window.open('', '_blank')
+      if (printWindow) {
+        printWindow.document.write(htmlDocument)
+        printWindow.document.close()
+        printWindow.print()
+      } else {
+        throw new Error('Popup blocked and PDF generation failed')
+      }
+    }
+  } catch (error) {
+    logger.error('Error in PDF export', error)
+    throw error
+  }
+}
+
+/**
+ * Opens the print dialog for the content
+ */
+export async function printContent(title: string, content: string): Promise<void> {
+  try {
+    const printHtml = createPrintView(title, content)
+    const printWindow = window.open('', '_blank')
+    
+    if (!printWindow) {
+      throw new Error('Popup blocked')
+    }
+
+    printWindow.document.write(printHtml)
+    printWindow.document.close()
+    printWindow.print()
+  } catch (error) {
+    logger.error('Error opening print dialog', error)
+    throw error
+  }
+}
+
+// Helper functions
 function escapeHtml(text: string): string {
   const div = document.createElement('div')
   div.textContent = text
   return div.innerHTML
 }
 
+<<<<<<< HEAD
 /**
  * Exports content to PDF directly (downloads PDF file)
  * Uses html2pdf.js for direct PDF generation without print dialog
@@ -573,58 +684,11 @@ export async function exportToPDF(title: string, content: string): Promise<void>
 /**
  * Sanitizes filename for PDF download
  */
+=======
+>>>>>>> 2bfc3d4 (feat: Replace TinyMCE with Plate.js)
 function sanitizeFilename(filename: string): string {
   return filename
     .replace(/[^a-z0-9áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ\s-]/gi, '')
     .replace(/\s+/g, '-')
     .substring(0, 100)
 }
-
-/**
- * Opens print dialog for content
- * @param title - Document title
- * @param content - HTML content
- */
-export async function printContent(title: string, content: string): Promise<void> {
-  try {
-    // Preload images first
-    const contentWithImages = await preloadImages(content)
-    
-    // Create print-optimized HTML
-    const printHtml = createPrintView(title, contentWithImages)
-    
-    // Open in new window
-    const printWindow = window.open('', '_blank')
-    if (!printWindow) {
-      throw new Error('Pop-up blocked. Please allow pop-ups for this site.')
-    }
-    
-    // Write HTML to window
-    printWindow.document.write(printHtml)
-    printWindow.document.close()
-    
-    // Wait for content to load
-    await new Promise<void>((resolve) => {
-      printWindow.onload = () => {
-        setTimeout(() => {
-          resolve()
-        }, 500)
-      }
-      
-      if (printWindow.document.readyState === 'complete') {
-        setTimeout(() => {
-          resolve()
-        }, 500)
-      }
-    })
-    
-    // Trigger print dialog
-    printWindow.print()
-    
-    // Don't auto-close for print (user may want to adjust settings)
-  } catch (error) {
-    logger.error('Error printing content', error)
-    throw error
-  }
-}
-

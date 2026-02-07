@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { FeedbackModal } from '@/components/ui/FeedbackModal'
-import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { PlateEditor } from '@/components/editor/PlateEditor'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { MaterialEditSidebar } from './MaterialEditSidebar'
 import { Breadcrumbs } from './Breadcrumbs'
@@ -371,7 +371,7 @@ export function UserMaterialEditContent({
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Main Editor - Left Side */}
         <div className="flex-1 lg:flex-2 lg:w-0">
-          <RichTextEditor
+          <PlateEditor
             content={content}
             onChange={handleContentChange}
             placeholder="Obsah materiálu..."

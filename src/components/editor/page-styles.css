@@ -1,0 +1,278 @@
+/*
+ * Shared A4 Page Styles
+ *
+ * Used by: Editor, Preview, PDF/Print export
+ * Ensures consistent rendering across all output modes.
+ *
+ * A4 dimensions: 210mm x 297mm
+ * At 96 DPI: 794px x 1123px
+ * With 2cm (76px) margins: content area ~642px x 971px
+ */
+
+/* ============================================================================
+   Editor Container - scrollable area around the editor
+   ============================================================================ */
+
+.page-editor-container {
+  background-color: #e5e7eb; /* gray-200 */
+  padding: 24px 16px;
+  min-height: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* ============================================================================
+   Editor Surface - the white "page" area
+   ============================================================================ */
+
+.page-editor-surface {
+  max-width: 794px; /* A4 width at 96dpi */
+  margin: 0 auto;
+  background: white;
+  border-radius: 4px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  min-height: 1123px; /* A4 height at 96dpi */
+  position: relative;
+}
+
+/* ============================================================================
+   Editor Content - the editable area inside the page
+   ============================================================================ */
+
+.page-editor-content {
+  padding: 60px 60px 80px;
+  min-height: 1000px;
+  font-family: 'tablet-gothic-wide', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #18181b;
+}
+
+/* ============================================================================
+   Page Rulers - visual A4 page boundary indicators
+   ============================================================================ */
+
+.page-rulers-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.page-ruler {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+}
+
+.page-ruler-line {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  height: 0;
+  border-top: 1.5px dashed #93c5fd; /* blue-300 */
+}
+
+.page-ruler-label {
+  position: absolute;
+  right: 20px;
+  top: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #93c5fd;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+/* ============================================================================
+   Preview Container - used for paginated preview mode
+   ============================================================================ */
+
+.page-preview-container {
+  background-color: #e5e7eb;
+  padding: 24px 16px;
+}
+
+.page-preview-page {
+  max-width: 794px;
+  min-height: 1123px;
+  margin: 0 auto 24px;
+  background: white;
+  border-radius: 4px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+  font-family: 'tablet-gothic-wide', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #18181b;
+}
+
+/* Page number badge */
+.page-preview-page::after {
+  content: attr(data-page-number);
+  position: absolute;
+  bottom: 20px;
+  right: 30px;
+  font-size: 12px;
+  color: #9ca3af;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ============================================================================
+   Preview Content Typography (matches editor)
+   ============================================================================ */
+
+.page-preview-page h1 {
+  font-family: 'tablet-gothic-narrow', system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  line-height: 1.2;
+}
+
+.page-preview-page h2 {
+  font-family: 'tablet-gothic-narrow', system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+.page-preview-page h3 {
+  font-family: 'tablet-gothic-narrow', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.4;
+}
+
+.page-preview-page h4 {
+  font-family: 'tablet-gothic-narrow', system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.page-preview-page p {
+  margin: 1em 0;
+  line-height: 1.75;
+}
+
+.page-preview-page ul,
+.page-preview-page ol {
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+
+.page-preview-page ul {
+  list-style-type: disc;
+}
+
+.page-preview-page ol {
+  list-style-type: decimal;
+}
+
+.page-preview-page li {
+  margin: 0.5em 0;
+}
+
+.page-preview-page a {
+  color: #075985;
+  text-decoration: underline;
+}
+
+.page-preview-page img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 0.5em 0;
+}
+
+.page-preview-page img.img-align-left {
+  float: left;
+  margin: 0.5em 1.5em 1em 0;
+  max-width: 50%;
+}
+
+.page-preview-page img.img-align-right {
+  float: right;
+  margin: 0.5em 0 1em 1.5em;
+  max-width: 50%;
+}
+
+.page-preview-page img.img-align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-preview-page table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.page-preview-page th,
+.page-preview-page td {
+  border: 1px solid #d1d5db;
+  padding: 0.75em;
+}
+
+.page-preview-page th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
+.page-preview-page blockquote {
+  border-left: 4px solid #d1d5db;
+  margin: 1em 0;
+  padding-left: 1em;
+  color: #6b7280;
+}
+
+.page-preview-page strong,
+.page-preview-page b {
+  font-weight: 600;
+}
+
+.page-preview-page em,
+.page-preview-page i {
+  font-style: italic;
+}
+
+.page-preview-page u {
+  text-decoration: underline;
+}
+
+.page-preview-page code {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* Clear float after headings */
+.page-preview-page h1,
+.page-preview-page h2,
+.page-preview-page h3,
+.page-preview-page h4 {
+  clear: both;
+}
