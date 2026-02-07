@@ -18,8 +18,6 @@ interface SchoolNameSectionProps {
 export function SchoolNameSection({
   schoolName,
   onSchoolNameChange,
-  onSave,
-  isSaving,
 }: SchoolNameSectionProps) {
   return (
     <div className="flex flex-col w-full" data-testid="school-name-section">

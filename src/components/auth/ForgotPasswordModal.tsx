@@ -44,7 +44,7 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
       <div className="flex flex-col gap-7">
         {/* Title & Description */}
         <div className="text-center">
-          <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+          <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-display text-grey-950 mb-2.5">
             Email byl odeslán
           </h2>
           <p className="text-base leading-[1.5] text-text-subtle">
@@ -76,7 +76,7 @@ export function ForgotPasswordModal({ onBack }: ForgotPasswordModalProps) {
     <div className="flex flex-col gap-7">
       {/* Title & Description */}
       <div className="text-center">
-        <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+        <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-display text-grey-950 mb-2.5">
           Zapomenuté heslo
         </h2>
         <p className="text-base leading-[1.5] text-text-subtle">

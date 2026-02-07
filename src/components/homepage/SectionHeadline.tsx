@@ -11,7 +11,7 @@ export function SectionHeadline({
 }: SectionHeadlineProps) {
   return (
     <div className="flex flex-col lg:flex-row lg:justify-between gap-6 lg:gap-10 w-full">
-      <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-strong leading-[1.2]">
+      <h2 className="font-display text-2xl md:text-3xl font-semibold text-text-strong leading-display">
         {title}
       </h2>
       {(description || showArrow) && (

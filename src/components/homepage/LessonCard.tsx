@@ -25,7 +25,7 @@ export function LessonCard({ lesson }: LessonCardProps) {
         {lesson.period && (
           <span className="text-sm text-text-subtle leading-none">{lesson.period}</span>
         )}
-        <h4 className="font-body text-xl font-semibold text-text-strong leading-[1.2] line-clamp-2">
+        <h4 className="font-body text-xl font-semibold text-text-strong leading-display line-clamp-2">
           {lesson.title}
         </h4>
         {lesson.description && (

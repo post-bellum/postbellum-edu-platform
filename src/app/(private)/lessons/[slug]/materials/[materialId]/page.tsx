@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { getUser } from '@/lib/supabase/auth-helpers'
 import { getUserLessonMaterialById } from '@/lib/supabase/user-lesson-materials'
 import { getLessonById } from '@/lib/supabase/lessons'
-import { generateLessonUrlFromLesson, extractLessonId } from '@/lib/utils'
+import { extractLessonId } from '@/lib/utils'
 import { UserMaterialEditContent } from '@/components/lessons/UserMaterialEditContent'
 
 interface UserMaterialEditPageProps {

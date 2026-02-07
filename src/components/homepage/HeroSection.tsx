@@ -13,7 +13,7 @@ export function HeroSection() {
         {/* Hero Content */}
         <div className="flex flex-col items-center px-5 pt-8 sm:py-10">
           <div className="flex flex-col items-center gap-4 sm:gap-5 max-w-[680px] w-full py-5">
-            <h1 className="font-display text-[36px] sm:text-3xl md:text-4xl lg:text-[44px] font-semibold text-text-strong text-center leading-[1.2]">
+            <h1 className="font-display text-[36px] sm:text-3xl md:text-4xl lg:text-[44px] font-semibold text-text-strong text-center leading-display">
               Zapněte příběhy{' '}
               <br className="sm:hidden" />
               do své výuky.

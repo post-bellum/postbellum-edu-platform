@@ -97,7 +97,7 @@ export default function ResetPasswordPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="font-display text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+              <h2 className="font-display text-[32px] font-semibold leading-display text-grey-950 mb-2.5">
                 Heslo bylo změněno
               </h2>
               <p className="text-base leading-[1.5] text-text-subtle">
@@ -126,7 +126,7 @@ export default function ResetPasswordPage() {
         <div className="flex flex-col gap-7">
           {/* Title & Description */}
           <div className="text-center">
-            <h2 className="font-display text-[32px] font-semibold leading-[1.2] text-grey-950 mb-2.5">
+            <h2 className="font-display text-[32px] font-semibold leading-display text-grey-950 mb-2.5">
               Nové heslo
             </h2>
             <p className="text-base leading-[1.5] text-text-subtle">

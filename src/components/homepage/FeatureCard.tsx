@@ -19,7 +19,7 @@ export function FeatureCard({ title, description, icon }: FeatureCardProps) {
         />
       </div>
       <div className="flex flex-col gap-2">
-        <h3 className="font-body text-xl font-semibold text-text-strong leading-[1.2]">
+        <h3 className="font-body text-xl font-semibold text-text-strong leading-display">
           {title}
         </h3>
         <p className="font-body text-md text-text-subtle leading-[1.5]">

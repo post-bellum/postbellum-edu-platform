@@ -43,15 +43,6 @@ export function isQAEmail(email: string): boolean {
 }
 
 /**
- * Check if OTP code is the QA bypass code
- */
-function isQAOTPCode(token: string): boolean {
-  const config = getQAConfig()
-  if (!config) return false
-  return token === config.otpCode
-}
-
-/**
  * Sign up with email and password
  * Sends verification email automatically
  * 

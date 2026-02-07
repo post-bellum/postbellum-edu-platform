@@ -75,7 +75,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
   return (
     <div className="flex flex-col gap-7">
       {/* Title */}
-      <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-[1.2] text-center text-grey-950">
+      <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-display text-center text-grey-950">
         Přihlásit
       </h2>
 
