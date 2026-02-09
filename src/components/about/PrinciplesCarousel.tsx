@@ -82,7 +82,7 @@ export function PrinciplesCarousel({ principles }: PrinciplesCarouselProps) {
           <button
             onClick={goToPrevious}
             disabled={isAnimating}
-            className="flex items-center justify-center w-7 h-7 text-teal-700 hover:text-teal-800 transition-colors disabled:opacity-50 cursor-pointer"
+            className="flex items-center justify-center w-7 h-7 text-teal-700 hover:text-teal-800 transition-colors cursor-pointer"
             aria-label="Předchozí princip"
           >
             <ChevronLeft className="w-7 h-7" strokeWidth={1.5} />
@@ -90,7 +90,7 @@ export function PrinciplesCarousel({ principles }: PrinciplesCarouselProps) {
           <button
             onClick={goToNext}
             disabled={isAnimating}
-            className="flex items-center justify-center w-7 h-7 text-teal-700 hover:text-teal-800 transition-colors disabled:opacity-50 cursor-pointer"
+            className="flex items-center justify-center w-7 h-7 text-teal-700 hover:text-teal-800 transition-colors cursor-pointer"
             aria-label="Další princip"
           >
             <ChevronRight className="w-7 h-7" strokeWidth={1.5} />
