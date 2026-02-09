@@ -174,7 +174,7 @@ function ProfilePageContent() {
         // Generate URL and redirect to the new material
         const idToUse = lessonShortId || lessonId
         const baseLessonUrl = generateLessonUrl(idToUse, lessonTitle)
-        router.push(`${baseLessonUrl}/materials/${result.data.id}`)
+        router.push(`${baseLessonUrl}/materials/${result.data.id}?from=profile`)
       } else {
         setFeedbackModal({
           open: true,
