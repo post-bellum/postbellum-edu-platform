@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button'
 import { MobileEditWarningDialog } from '@/components/ui/MobileEditWarningDialog'
 import { generateLessonUrl } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { exportToPDF } from '@/lib/utils/pdf-export'
 
 // Re-export for backward compatibility
 export type { MaterialWithLesson } from '@/components/lessons/UserEditedMaterialCard'
@@ -27,6 +28,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
   const isMobile = useIsMobile()
   const [deletingId, setDeletingId] = React.useState<string | null>(null)
   const [duplicatingId, setDuplicatingId] = React.useState<string | null>(null)
+  const [downloadingId, setDownloadingId] = React.useState<string | null>(null)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [selectedMaterial, setSelectedMaterial] = React.useState<MaterialWithLesson | null>(null)
   
@@ -93,21 +95,21 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
     }
   }
 
-  const handleDownload = (material: MaterialWithLesson) => {
+  const handleDownload = async (material: MaterialWithLesson) => {
     if (!material.content) {
       alert('Materiál nemá žádný obsah ke stažení')
       return
     }
 
-    const blob = new Blob([material.content], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${material.title}.html`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    setDownloadingId(material.id)
+    try {
+      await exportToPDF(material.title, material.content)
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Chyba při exportu do PDF'
+      alert(errorMsg)
+    } finally {
+      setDownloadingId(null)
+    }
   }
 
   if (materials.length === 0) {
@@ -132,6 +134,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
         onDownload={handleDownload}
         onDuplicate={onDuplicate ? handleDuplicate : undefined}
         onDelete={onDelete ? handleDeleteClick : undefined}
+        isDownloading={downloadingId}
         isDuplicating={duplicatingId}
         renderLessonCell={(material) => {
           const lessonUrl = generateLessonUrl(
@@ -165,6 +168,7 @@ export function UserEditedMaterialsList({ materials, onDelete, onDuplicate }: Us
             onDownload={() => handleDownload(material)}
             onDuplicate={onDuplicate ? () => handleDuplicate(material) : undefined}
             onDelete={onDelete ? () => handleDeleteClick(material) : undefined}
+            isExportingPDF={downloadingId === material.id}
             isDuplicating={duplicatingId === material.id}
           />
         ))}
