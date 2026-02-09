@@ -64,11 +64,11 @@ export function UserMaterialsTable<T extends UserMaterialTableItem>({
     >
       {/* Header row */}
       <div className="flex border-b border-grey-200">
-        <div className="h-12 px-4 flex-1 min-w-0 flex items-center">
+        <div className={`h-12 px-4 min-w-0 flex items-center ${showLessonColumn ? 'flex-[0.6]' : 'flex-1'}`}>
           <span className="text-sm font-medium text-text-strong">Název</span>
         </div>
         {showLessonColumn && (
-          <div className="h-12 px-4 flex-1 min-w-0 flex items-center">
+          <div className="h-12 px-4 flex-[1.4] min-w-0 flex items-center">
             <span className="text-sm font-medium text-text-strong">Lekce</span>
           </div>
         )}
@@ -86,7 +86,7 @@ export function UserMaterialsTable<T extends UserMaterialTableItem>({
           className="flex border-b border-grey-100"
           {...(rowDataTestId ? { 'data-testid': `${rowDataTestId}-${material.id}` } : {})}
         >
-          <div className="h-[52px] px-4 flex-1 min-w-0 flex items-center gap-2 overflow-hidden">
+          <div className={`h-[52px] px-4 min-w-0 flex items-center gap-2 overflow-hidden ${showLessonColumn ? 'flex-[0.6]' : 'flex-1'}`}>
             {getMaterialIcon(material.title)}
             <button
               type="button"
@@ -98,7 +98,7 @@ export function UserMaterialsTable<T extends UserMaterialTableItem>({
             </button>
           </div>
           {showLessonColumn && (
-            <div className="h-[52px] px-4 flex-1 min-w-0 flex items-center overflow-hidden">
+            <div className="h-[52px] px-4 flex-[1.4] min-w-0 flex items-center overflow-hidden">
               {renderLessonCell!(material)}
             </div>
           )}
