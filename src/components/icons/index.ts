@@ -20,6 +20,7 @@
 export { FileText } from 'lucide-react'
 export { FilePenLine } from 'lucide-react'
 export { FileEdit } from 'lucide-react'
+export { Clipboard } from 'lucide-react'
 export { ClipboardList } from 'lucide-react'
 
 // Navigation Icons

@@ -4,7 +4,7 @@ import * as React from 'react'
 import { LessonMaterial } from '@/types/lesson.types'
 import { Button } from '@/components/ui/Button'
 import { MobileEditWarningDialog } from '@/components/ui/MobileEditWarningDialog'
-import { Eye, Edit, Download, Loader2, ClipboardList } from '@/components/icons'
+import { Eye, Edit, Download, Loader2, Clipboard } from '@/components/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 interface MaterialsListProps {
@@ -53,10 +53,8 @@ export function MaterialsList({
           {/* Content */}
           <div className="flex-1 flex flex-col gap-10">
             {/* Title with icon */}
-            <div className="flex items-center gap-4 px-3">
-              <div className="w-7 h-7 flex items-center justify-center">
-                <ClipboardList className="w-5 h-5 text-brand-primary" strokeWidth={2} />
-              </div>
+            <div className="flex items-center gap-6 ml-4">
+              <Clipboard className="w-7 h-7 text-brand-primary" strokeWidth={2} />
               <h3 className="text-lg font-semibold leading-display text-text-strong">
                 {title}
               </h3>
