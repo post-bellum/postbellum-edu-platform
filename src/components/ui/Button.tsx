@@ -33,13 +33,14 @@ const buttonVariants = cva(
       },
       size: {
         // Post Bellum sizes
-        large: 'h-[52px] px-7 py-3 text-lg leading-7 rounded-full',
-        medium: 'h-12 px-5 py-2.5 text-lg leading-7 rounded-full',
-        small: 'h-10 px-4 py-1.5 text-base leading-7 rounded-full',
+        // Asymmetric vertical padding compensates for Tablet Gothic font sitting slightly high
+        large: 'h-[52px] px-7 pt-[10px] pb-[11px] text-lg leading-7 rounded-full',
+        medium: 'h-12 px-5 pt-[7px] pb-[9px] text-lg leading-7 rounded-full',
+        small: 'h-10 px-4 pt-[4px] pb-[5px] text-base leading-7 rounded-full',
         // Legacy sizes (mapped to Post Bellum)
-        default: 'h-12 px-5 py-2.5 text-lg leading-7 rounded-full',
-        sm: 'h-10 px-4 py-1.5 text-base leading-7 rounded-full',
-        lg: 'h-[52px] px-7 py-3 text-lg leading-7 rounded-full',
+        default: 'h-12 px-5 pt-[11px] pb-[9px] text-lg leading-7 rounded-full',
+        sm: 'h-10 px-4 pt-[5px] pb-[5px] text-base leading-7 rounded-full',
+        lg: 'h-[52px] px-7 pt-[13px] pb-[11px] text-lg leading-7 rounded-full',
         icon: 'h-10 w-10 rounded-full',
       },
     },

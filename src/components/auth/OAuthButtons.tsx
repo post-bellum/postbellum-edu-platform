@@ -42,7 +42,7 @@ export function OAuthButtons({ returnTo }: OAuthButtonsProps) {
         <button
           key={provider.id}
           type="button"
-          className="w-full h-[52px] bg-grey-100 border-[1.5px] border-grey-200 rounded-full flex items-center justify-center gap-2.5 px-10 py-3 hover:bg-grey-200 hover:border-grey-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full h-[52px] bg-grey-100 border-[1.5px] border-grey-200 rounded-full flex items-center justify-center gap-2.5 px-10 pt-[10px] pb-[11px] hover:bg-grey-200 hover:border-grey-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => onOAuthClick(provider.id)}
           disabled={isLoading}
           data-testid={`oauth-${provider.id}-button`}

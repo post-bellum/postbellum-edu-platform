@@ -469,14 +469,17 @@
 
 /* ============================================
    Button Text Vertical Alignment Fix
-   Tablet Gothic font sits slightly high, this compensates
+   Tablet Gothic font sits slightly high in its line box.
+   The Button component handles this via asymmetric padding.
+   This rule catches raw <button> / [role="button"] elements
+   that have text wrapped in child elements (e.g. <span>).
    ============================================ */
 button,
 [role="button"],
 a[class*="rounded-full"][class*="inline-flex"],
 a[class*="rounded-full"][class*="flex"] {
-  /* Shift text content down slightly to visually center */
-  & > *:not(svg) {
-    transform: translateY(-1px);
+  /* Shift non-SVG children down slightly to visually center text */
+  & > svg {
+    transform: translateY(1px);
   }
 }
