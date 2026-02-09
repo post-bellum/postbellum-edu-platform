@@ -50,7 +50,7 @@ export function TestimonialsSection() {
     <section className="px-5 xl:px-10">
       <div className="2xl:max-w-[1680px] mx-auto">
         {/* Section Header - matching LessonsSection structure */}
-        <div className="px-5 xl:px-20 py-7 mb-6">
+        <div className="px-5 xl:px-12 2xl:px-20 py-7 mb-6">
         <SectionHeadline
           title="Co o platformě říkají učitelé"
         />

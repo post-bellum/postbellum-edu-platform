@@ -41,7 +41,7 @@ export function FeaturesSection() {
     <section className="px-5 xl:px-10">
       <div className="2xl:max-w-[1680px] mx-auto">
         {/* Section Header */}
-        <div className="px-5 xl:px-20 py-8">
+        <div className="px-5 xl:px-12 2xl:px-20 py-8">
           <SectionHeadline
             title="Platforma nabízí"
             description="Všechny materiály jsou připravené tak, abyste je mohli rovnou využít ve výuce – bez zbytečné administrativy nebo technických překážek."
@@ -49,7 +49,7 @@ export function FeaturesSection() {
         </div>
         
         {/* Features Grid */}
-        <div className="px-5 xl:px-20 py-16 xl:py-30">
+        <div className="px-5 xl:px-12 2xl:px-20 py-16 xl:py-30">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20 max-w-[1280px] mx-auto">
             {features.map((feature, index) => (
               <FeatureCard 

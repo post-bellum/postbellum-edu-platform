@@ -37,7 +37,7 @@ export function LessonsSection() {
     <section className="px-5 xl:px-10">
       <div className="2xl:max-w-[1680px] mx-auto">
         {/* Section Header - OUTSIDE grey background */}
-        <div className="px-5 xl:px-20 py-3 mb-10">
+        <div className="px-5 xl:px-12 2xl:px-20 py-3 mb-10">
         <SectionHeadline
           title="Vybrané lekce pro vás"
           description="Pravidelně přidáváme nové materiály, které reagují na aktuální výuková témata. Vše připraveno tak, aby šlo ihned použít ve třídě – bez složité přípravy."
