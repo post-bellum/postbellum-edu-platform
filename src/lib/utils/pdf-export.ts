@@ -435,10 +435,60 @@ export async function exportToPDF(title: string, content: string): Promise<void>
     const html2pdfLib = await getHtml2Pdf()
     
     if (html2pdfLib) {
-      // Create a temporary container element
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = createPrintView(title, contentWithImages)
-      document.body.appendChild(tempDiv)
+      // Use an iframe to completely isolate the print content from the main page
+      // This prevents font-family changes from affecting the main page
+      const iframe = document.createElement('iframe')
+      iframe.style.position = 'absolute'
+      iframe.style.left = '-9999px'
+      iframe.style.top = '-9999px'
+      iframe.style.width = '210mm' // A4 width
+      iframe.style.height = '297mm' // A4 height
+      iframe.style.border = 'none'
+      iframe.style.visibility = 'hidden'
+      iframe.style.pointerEvents = 'none'
+      iframe.style.zIndex = '-1'
+      document.body.appendChild(iframe)
+      
+      // Wait for iframe to be ready
+      await new Promise<void>((resolve) => {
+        iframe.onload = () => resolve()
+        iframe.src = 'about:blank'
+        // Check if already loaded (some browsers load immediately)
+        setTimeout(() => {
+          if (iframe.contentDocument?.readyState === 'complete') {
+            resolve()
+          }
+        }, 0)
+      })
+      
+      // Write content to iframe
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+      if (!iframeDoc) {
+        document.body.removeChild(iframe)
+        throw new Error('Failed to access iframe document')
+      }
+      
+      iframeDoc.open()
+      iframeDoc.write(createPrintView(title, contentWithImages))
+      iframeDoc.close()
+      
+      // Wait for iframe content to load
+      await new Promise<void>((resolve) => {
+        if (iframeDoc.readyState === 'complete') {
+          resolve()
+        } else {
+          iframeDoc.addEventListener('DOMContentLoaded', () => resolve(), { once: true })
+          // Fallback timeout
+          setTimeout(() => resolve(), 1000)
+        }
+      })
+      
+      // Get the body element from iframe for html2pdf
+      const iframeBody = iframeDoc.body
+      if (!iframeBody) {
+        document.body.removeChild(iframe)
+        throw new Error('Failed to access iframe body')
+      }
       
       try {
         // Configure html2pdf.js options
@@ -451,6 +501,8 @@ export async function exportToPDF(title: string, content: string): Promise<void>
             useCORS: true,
             logging: false,
             letterRendering: true,
+            windowWidth: iframeDoc.documentElement.scrollWidth,
+            windowHeight: iframeDoc.documentElement.scrollHeight,
           },
           jsPDF: { 
             unit: 'mm', 
@@ -465,18 +517,18 @@ export async function exportToPDF(title: string, content: string): Promise<void>
           }
         }
         
-        // Generate and download PDF
+        // Generate and download PDF from iframe content
         // html2pdf.js returns a promise-like object
-        const pdfPromise = html2pdfLib().set(opt).from(tempDiv).save()
+        const pdfPromise = html2pdfLib().set(opt).from(iframeBody).save()
         await Promise.resolve(pdfPromise)
         
         // Clean up
-        document.body.removeChild(tempDiv)
+        document.body.removeChild(iframe)
         return
       } catch (pdfError) {
         // Clean up on error
-        if (tempDiv.parentNode) {
-          document.body.removeChild(tempDiv)
+        if (iframe.parentNode) {
+          document.body.removeChild(iframe)
         }
         logger.debug('html2pdf.js failed, falling back to print dialog', pdfError)
         // Fall through to print dialog fallback
