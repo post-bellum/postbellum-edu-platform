@@ -7,6 +7,7 @@ import { ArrowLeft, Eye, Trash2, Check, Loader2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { FeedbackModal } from '@/components/ui/FeedbackModal'
 import { RichTextEditor } from '@/components/editor/RichTextEditor'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { MaterialEditSidebar } from './MaterialEditSidebar'
@@ -49,6 +50,16 @@ export function UserMaterialEditContent({
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [isExportingPDF, setIsExportingPDF] = React.useState(false)
   const [exportError, setExportError] = React.useState<string | null>(null)
+  const [feedbackModal, setFeedbackModal] = React.useState<{
+    open: boolean
+    type: 'success' | 'error'
+    title: string
+    message?: string
+  }>({
+    open: false,
+    type: 'error',
+    title: '',
+  })
 
   // Debounced auto-save
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
@@ -56,8 +67,14 @@ export function UserMaterialEditContent({
   const queuedSaveRef = React.useRef(false)
   const lastSavedRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
   const latestDraftRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
+  const isDeletedRef = React.useRef(false) // Flag to prevent auto-save after deletion
 
   const saveChanges = React.useCallback(async (newTitle: string, newContent: string) => {
+    // Skip if material was deleted
+    if (isDeletedRef.current) {
+      return
+    }
+
     // Skip if nothing changed
     if (newTitle === lastSavedRef.current.title && newContent === lastSavedRef.current.content) {
       return
@@ -70,6 +87,11 @@ export function UserMaterialEditContent({
     formData.set('content', newContent)
 
     const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
+
+    // Check again if material was deleted during the request
+    if (isDeletedRef.current) {
+      return
+    }
 
     if (result.success) {
       setSaveStatus('saved')
@@ -156,6 +178,14 @@ export function UserMaterialEditContent({
   // Cleanup and save on unmount if there are unsaved changes
   React.useEffect(() => {
     return () => {
+      // Cancel any pending saves if material was deleted
+      if (isDeletedRef.current) {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current)
+          saveTimeoutRef.current = null
+        }
+        return
+      }
       // Flush any debounced save before unmount; fire-and-forget the promise
       void flushPendingSave()
     }
@@ -163,13 +193,39 @@ export function UserMaterialEditContent({
 
   const handleDeleteConfirm = async () => {
     setIsDeleting(true)
-    const result = await deleteUserLessonMaterialAction(initialMaterial.id, lesson.id)
+    
+    // Mark as deleted to prevent any pending auto-save requests
+    isDeletedRef.current = true
+    
+    // Cancel any pending auto-save requests
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+      saveTimeoutRef.current = null
+    }
+    
+    // Navigate immediately to prevent page re-render from trying to fetch deleted material
+    const targetUrl = isFromProfile ? profileMaterialsUrl : lessonUrl
+    router.replace(targetUrl)
+    
+    try {
+      const result = await deleteUserLessonMaterialAction(initialMaterial.id, lesson.id)
 
-    if (result.success) {
-      router.push(isFromProfile ? profileMaterialsUrl : lessonUrl)
-    } else {
-      // TODO: Replace alert with toast notification system for better UX
-      alert(result.error || 'Chyba při mazání materiálu')
+      if (!result.success) {
+        setFeedbackModal({
+          open: true,
+          type: 'error',
+          title: 'Chyba',
+          message: result.error || 'Nepodařilo se smazat materiál',
+        })
+      }
+    } catch (error) {
+      setFeedbackModal({
+        open: true,
+        type: 'error',
+        title: 'Chyba',
+        message: 'Nepodařilo se smazat materiál',
+      })
+    } finally {
       setIsDeleting(false)
       setDeleteDialogOpen(false)
     }
@@ -345,6 +401,15 @@ export function UserMaterialEditContent({
         variant="destructive"
         isLoading={isDeleting}
         onConfirm={handleDeleteConfirm}
+      />
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        open={feedbackModal.open}
+        onOpenChange={(open) => setFeedbackModal(prev => ({ ...prev, open }))}
+        type={feedbackModal.type}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
       />
     </div>
   )
