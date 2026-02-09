@@ -23,16 +23,53 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
   const [previewOpen, setPreviewOpen] = React.useState(false)
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null)
   const [previewTitle, setPreviewTitle] = React.useState<string>('')
+  const [isQrCode, setIsQrCode] = React.useState(false)
 
-  const openPreview = (url: string, title: string) => {
-    setPreviewUrl(url)
-    setPreviewTitle(title)
-    setPreviewOpen(true)
+  const openPreview = async (url: string, title: string, activity: AdditionalActivity) => {
+    // Preload image to detect QR code before opening modal
+    const img = new Image()
+    img.src = url
+    
+    const detectQrCode = () => {
+      // Detect QR code: square images (aspect ratio close to 1:1) and relatively small
+      if (img.naturalWidth && img.naturalHeight) {
+        const aspectRatio = img.naturalWidth / img.naturalHeight
+        const isSquare = aspectRatio >= 0.9 && aspectRatio <= 1.1
+        const isSmall = img.naturalWidth <= 1000 && img.naturalHeight <= 1000
+        return isSquare && isSmall
+      }
+      return false
+    }
+    
+    // If image is already loaded (cached), check immediately
+    if (img.complete && img.naturalWidth > 0) {
+      setIsQrCode(detectQrCode())
+      setPreviewUrl(url)
+      setPreviewTitle(title)
+      setPreviewOpen(true)
+    } else {
+      // Otherwise wait for image to load
+      await new Promise<void>((resolve) => {
+        img.onload = () => {
+          setIsQrCode(detectQrCode())
+          resolve()
+        }
+        img.onerror = () => {
+          setIsQrCode(false)
+          resolve()
+        }
+      })
+      
+      setPreviewUrl(url)
+      setPreviewTitle(title)
+      setPreviewOpen(true)
+    }
   }
   const closePreview = () => {
     setPreviewOpen(false)
     setPreviewUrl(null)
     setPreviewTitle('')
+    setIsQrCode(false)
   }
 
   if (activities.length === 0) {
@@ -53,16 +90,9 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
           >
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 space-y-4">
-                <div className="flex items-start gap-4">
-                  {activity.image_url && isPdfAttachment(activity) && (
-                    <div className="w-7 h-7 shrink-0 rounded bg-red-100 flex items-center justify-center">
-                      <Download className="w-4 h-4 text-red-600" />
-                    </div>
-                  )}
-                  <h3 className="text-lg font-semibold text-text-strong leading-display">
-                    {activity.title}
-                  </h3>
-                </div>
+                <h3 className="text-lg font-semibold text-text-strong leading-display">
+                  {activity.title}
+                </h3>
 
                 {activity.description && (
                   <p className="text-text-subtle text-lg leading-headline">
@@ -92,14 +122,14 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
                         <img
                           src={activity.image_url}
                           alt=""
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-contain p-2"
                         />
                       </div>
                       <Button
                         variant="secondary"
                         size="medium"
                         className="w-full"
-                        onClick={() => openPreview(activity.image_url!, activity.title)}
+                        onClick={() => openPreview(activity.image_url!, activity.title, activity)}
                       >
                         <ImageIcon className="w-5 h-5 mr-2" />
                         Zvětšit
@@ -118,17 +148,17 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
       </div>
 
       <Dialog open={previewOpen} onOpenChange={(open) => !open && closePreview()}>
-        <DialogContent className="max-h-[90vh] flex flex-col overflow-hidden">
-          <DialogHeader className="shrink-0 pr-8">
-            <DialogTitle className="truncate">{previewTitle}</DialogTitle>
+        <DialogContent className={`max-h-[90vh] flex flex-col overflow-hidden ${isQrCode ? 'max-w-md' : 'max-w-[95vw]'}`}>
+          <DialogHeader className="pr-8 mb-2">
+            <DialogTitle>{previewTitle}</DialogTitle>
           </DialogHeader>
           {previewUrl && (
-            <div className="min-h-0 min-w-0 flex flex-1 items-center justify-center overflow-auto rounded-lg bg-grey-100 p-4">
+            <div className="min-h-0 min-w-0 flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-grey-100 p-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
                 alt={previewTitle}
-                className="max-h-full max-w-full object-contain"
+                className="max-w-full max-h-full w-auto h-auto object-contain"
               />
             </div>
           )}
