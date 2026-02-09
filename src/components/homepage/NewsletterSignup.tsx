@@ -102,7 +102,7 @@ export function NewsletterSignup() {
 
       {/* Success Modal */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-display text-2xl">
               Děkujeme za přihlášení!
