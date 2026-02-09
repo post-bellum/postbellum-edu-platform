@@ -135,23 +135,6 @@ export function PlateEditor({
     input.click()
   }, [editor])
 
-  // Track editor surface height for page rulers
-  const surfaceRef = React.useRef<HTMLDivElement>(null)
-  const [surfaceHeight, setSurfaceHeight] = React.useState(0)
-
-  React.useEffect(() => {
-    const el = surfaceRef.current
-    if (!el) return
-
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setSurfaceHeight(entry.contentRect.height)
-      }
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
   return (
     <DndProvider backend={HTML5Backend}>
       <div
@@ -172,71 +155,16 @@ export function PlateEditor({
             onInsertImage={handleInsertImage}
           />
 
-          {/* Editor content area styled as A4 pages */}
-          <EditorContainer className="page-editor-container">
-            <div ref={surfaceRef} className="page-editor-surface">
-              <Editor
-                placeholder={placeholder}
-                className="page-editor-content"
-              />
-              {/* Visual page boundary rulers */}
-              <PageRulers surfaceHeight={surfaceHeight} />
-            </div>
+          {/* Continuous editor - pagination only in preview/PDF */}
+          <EditorContainer className="continuous-editor-container">
+            <Editor
+              placeholder={placeholder}
+              className="continuous-editor-content"
+            />
           </EditorContainer>
         </Plate>
       </div>
     </DndProvider>
-  )
-}
-
-// ============================================================================
-// Page Rulers — visual A4 page boundary indicators
-// ============================================================================
-
-/**
- * A4 page content height used for visual pagination.
- *
- * Calculation: A4 height at 96 DPI = 1123px.
- * Typical print margins ≈ 20mm top + 20mm bottom = ~151px.
- * Content per page ≈ 972px.  We round to 960px for a conservative estimate
- * that keeps content safely within the printable area.
- */
-const PAGE_CONTENT_HEIGHT = 960
-
-/**
- * Top padding of the editor surface (must match page-styles.css).
- * The first page break appears at SURFACE_TOP_PADDING + PAGE_CONTENT_HEIGHT.
- */
-const SURFACE_TOP_PADDING = 60
-
-function PageRulers({ surfaceHeight }: { surfaceHeight: number }) {
-  const rulers: number[] = []
-  let y = SURFACE_TOP_PADDING + PAGE_CONTENT_HEIGHT
-  while (y < surfaceHeight) {
-    rulers.push(y)
-    y += PAGE_CONTENT_HEIGHT
-  }
-
-  if (rulers.length === 0) return null
-
-  return (
-    <div
-      className="page-rulers-overlay"
-      aria-hidden="true"
-    >
-      {rulers.map((top, i) => (
-        <div
-          key={top}
-          className="page-ruler"
-          style={{ top }}
-        >
-          <div className="page-ruler-line" />
-          <span className="page-ruler-label">
-            Strana {i + 1} / {i + 2}
-          </span>
-        </div>
-      ))}
-    </div>
   )
 }
 
@@ -599,17 +527,20 @@ function serializeNode(node: Record<string, unknown>): string {
   const align = node.align as string | undefined
   const style = align ? ` style="text-align: ${align}"` : ''
 
+  // Preserve empty paragraphs and headings with <br> tag
+  const isEmpty = !children || children.trim() === ''
+
   switch (type) {
     case 'p':
-      return `<p${style}>${children}</p>`
+      return `<p${style}>${isEmpty ? '<br>' : children}</p>`
     case 'h1':
-      return `<h1${style}>${children}</h1>`
+      return `<h1${style}>${isEmpty ? '<br>' : children}</h1>`
     case 'h2':
-      return `<h2${style}>${children}</h2>`
+      return `<h2${style}>${isEmpty ? '<br>' : children}</h2>`
     case 'h3':
-      return `<h3${style}>${children}</h3>`
+      return `<h3${style}>${isEmpty ? '<br>' : children}</h3>`
     case 'h4':
-      return `<h4${style}>${children}</h4>`
+      return `<h4${style}>${isEmpty ? '<br>' : children}</h4>`
     case 'blockquote':
       return `<blockquote>${children}</blockquote>`
     case 'ul':
