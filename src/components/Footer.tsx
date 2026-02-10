@@ -42,7 +42,7 @@ export function Footer() {
                 href="https://www.instagram.com/jakubmikulastik" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[#2ceeaa] hover:underline"
+                className="text-brand-primary hover:text-text-strong hover:underline"
               >
                 Jakub Mikuláštík
               </a>
