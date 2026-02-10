@@ -36,14 +36,17 @@ export function AdminContentSection() {
     setErrorMessage(null)
 
     const result = await getPageContentForAdmin(slug)
-    if (result.success && result.data?.content) {
-      setContent((prev) => ({
-        ...prev,
-        [slug]: result.data!.content as PageContent,
-      }))
+    if (result.success) {
+      if (result.data?.content) {
+        setContent((prev) => ({
+          ...prev,
+          [slug]: result.data!.content as PageContent,
+        }))
+      }
+      setLoadedTabs((prev) => (prev.includes(slug) ? prev : [...prev, slug]))
+    } else {
+      setErrorMessage(result.error || 'Chyba při načítání obsahu')
     }
-
-    setLoadedTabs((prev) => prev.includes(slug) ? prev : [...prev, slug])
     setLoading(false)
   }
 
@@ -53,13 +56,17 @@ export function AdminContentSection() {
 
     getPageContentForAdmin('homepage').then((result) => {
       if (cancelled) return
-      if (result.success && result.data?.content) {
-        setContent((prev) => ({
-          ...prev,
-          homepage: result.data!.content as PageContent,
-        }))
+      if (result.success) {
+        if (result.data?.content) {
+          setContent((prev) => ({
+            ...prev,
+            homepage: result.data!.content as PageContent,
+          }))
+        }
+        setLoadedTabs(['homepage'])
+      } else {
+        setErrorMessage(result.error || 'Chyba při načítání obsahu')
       }
-      setLoadedTabs(['homepage'])
       setLoading(false)
     })
 

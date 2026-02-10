@@ -113,15 +113,13 @@ export function ImageUploadField({
         onChange={handleUpload}
         className="hidden"
       />
-      {value && (
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="nebo zadejte URL"
-          className="mt-1 px-3 py-1.5 text-xs border border-grey-200 rounded-lg font-mono text-grey-600"
-        />
-      )}
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="nebo zadejte URL"
+        className="mt-1 px-3 py-1.5 text-xs border border-grey-200 rounded-lg font-mono text-grey-600"
+      />
     </div>
   )
 }

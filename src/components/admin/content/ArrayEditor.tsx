@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
@@ -22,14 +23,21 @@ export function ArrayEditor<T>({
   minItems = 1,
   addLabel = 'Přidat',
 }: ArrayEditorProps<T>) {
+  const [nextKeyId, setNextKeyId] = useState(items.length)
+  const [itemKeys, setItemKeys] = useState<string[]>(() => items.map((_, i) => `item-${i}`))
+
   const handleAdd = () => {
     if (items.length < maxItems) {
+      const newKey = `item-${nextKeyId}`
+      setNextKeyId((prev) => prev + 1)
+      setItemKeys((prev) => [...prev, newKey])
       onChange([...items, createEmpty()])
     }
   }
 
   const handleRemove = (index: number) => {
     if (items.length > minItems) {
+      setItemKeys((prev) => prev.filter((_, i) => i !== index))
       onChange(items.filter((_, i) => i !== index))
     }
   }
@@ -42,6 +50,11 @@ export function ArrayEditor<T>({
 
   const handleMoveUp = (index: number) => {
     if (index === 0) return
+    setItemKeys((prev) => {
+      const updatedKeys = [...prev]
+      ;[updatedKeys[index - 1], updatedKeys[index]] = [updatedKeys[index], updatedKeys[index - 1]]
+      return updatedKeys
+    })
     const updated = [...items]
     ;[updated[index - 1], updated[index]] = [updated[index], updated[index - 1]]
     onChange(updated)
@@ -49,6 +62,11 @@ export function ArrayEditor<T>({
 
   const handleMoveDown = (index: number) => {
     if (index === items.length - 1) return
+    setItemKeys((prev) => {
+      const updatedKeys = [...prev]
+      ;[updatedKeys[index], updatedKeys[index + 1]] = [updatedKeys[index + 1], updatedKeys[index]]
+      return updatedKeys
+    })
     const updated = [...items]
     ;[updated[index], updated[index + 1]] = [updated[index + 1], updated[index]]
     onChange(updated)
@@ -57,7 +75,10 @@ export function ArrayEditor<T>({
   return (
     <div className="flex flex-col gap-4">
       {items.map((item, index) => (
-        <div key={index} className="border border-grey-200 rounded-xl p-4 bg-white">
+        <div
+          key={itemKeys[index] ?? `fallback-${index}`}
+          className="border border-grey-200 rounded-xl p-4 bg-white"
+        >
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-grey-500">#{index + 1}</span>
             <div className="flex items-center gap-1">
