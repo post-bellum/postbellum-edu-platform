@@ -71,18 +71,21 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
           '„Používám videa pamětníků jako úvod do tématu a následně rozvíjím diskuzi se studenty. Materiály mi šetří čas a hodiny jsou mnohem živější."',
         name: 'Dominika Kopčiková',
         role: 'učitelka dějepisu',
+        imageUrl: '/team/dominika-kopcikova.jpg',
       },
       {
         quote:
           '„Platforma je jednoduchá na použití a skvěle zapadá do RVP. Oceňuji přehlednost a že nemusíme nic instalovat."',
         name: 'Eva Mikulášková',
         role: 'učitelka dějepisu',
+        imageUrl: '/team/eva-mikulaskova.jpg',
       },
       {
         quote:
           '„Je to super, že můžeme používat platformu i u dětí, kteří nemají přístup k internetu."',
         name: 'Tomáš Spáčil',
         role: 'učitel dějepisu',
+        imageUrl: '/team/tomas-spacil.jpg',
       },
     ],
   },

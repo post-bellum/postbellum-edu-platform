@@ -96,7 +96,7 @@ export function HomepageContentForm({ content, onChange }: HomepageContentFormPr
         <ArrayEditor<HomepageTestimonial>
           items={content.testimonials.items}
           onChange={(items) => update('testimonials', { ...content.testimonials, items })}
-          createEmpty={() => ({ quote: '', name: '', role: '' })}
+          createEmpty={() => ({ quote: '', name: '', role: '', imageUrl: '' })}
           maxItems={20}
           addLabel="Přidat referenci"
           renderItem={(item, _index, onChange) => (
@@ -104,6 +104,14 @@ export function HomepageContentForm({ content, onChange }: HomepageContentFormPr
               <TextAreaInput label="Citát" value={item.quote} onChange={(quote) => onChange({ ...item, quote })} />
               <TextInput label="Jméno" value={item.name} onChange={(name) => onChange({ ...item, name })} />
               <TextInput label="Role" value={item.role} onChange={(role) => onChange({ ...item, role })} />
+              <ImageUploadField
+                label="Fotka"
+                value={item.imageUrl || ''}
+                onChange={(imageUrl) => onChange({ ...item, imageUrl })}
+                folder="team"
+                previewWidth={80}
+                previewHeight={80}
+              />
             </div>
           )}
         />

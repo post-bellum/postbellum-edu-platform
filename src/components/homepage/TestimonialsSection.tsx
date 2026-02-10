@@ -56,6 +56,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
               quote={testimonial.quote}
               name={testimonial.name}
               role={testimonial.role}
+              avatarUrl={testimonial.imageUrl}
             />
           ))}
         </div>
@@ -66,6 +67,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
             quote={mobileTestimonial.quote}
             name={mobileTestimonial.name}
             role={mobileTestimonial.role}
+            avatarUrl={mobileTestimonial.imageUrl}
           />
         </div>
 

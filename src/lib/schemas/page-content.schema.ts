@@ -32,6 +32,7 @@ const homepageTestimonialSchema = z.object({
   quote: z.string().min(1).max(1000).transform(sanitizeString),
   name: z.string().min(1).max(200).transform(sanitizeString),
   role: z.string().min(1).max(200).transform(sanitizeString),
+  imageUrl: z.string().max(500).optional().default(''),
 })
 
 const homepageTestimonialsSchema = z.object({

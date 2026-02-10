@@ -15,6 +15,17 @@ interface ImageUploadFieldProps {
   previewHeight?: number
 }
 
+function isValidImageSrc(value: string): boolean {
+  if (!value || value.length < 2) return false
+  if (value.startsWith('/')) return true
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 export function ImageUploadField({
   value,
   onChange,
@@ -55,14 +66,23 @@ export function ImageUploadField({
       <div className="flex items-center gap-3">
         {value && (
           <div className="relative shrink-0 border border-grey-200 rounded-lg overflow-hidden bg-grey-50">
-            <Image
-              src={value}
-              alt={label}
-              width={previewWidth}
-              height={previewHeight}
-              className="object-contain"
-              style={{ width: previewWidth, height: previewHeight }}
-            />
+            {isValidImageSrc(value) ? (
+              <Image
+                src={value}
+                alt={label}
+                width={previewWidth}
+                height={previewHeight}
+                className="object-contain"
+                style={{ width: previewWidth, height: previewHeight }}
+              />
+            ) : (
+              <div
+                className="flex items-center justify-center text-grey-400 text-xs"
+                style={{ width: previewWidth, height: previewHeight }}
+              >
+                Zadávejte URL…
+              </div>
+            )}
             <button
               type="button"
               onClick={() => onChange('')}

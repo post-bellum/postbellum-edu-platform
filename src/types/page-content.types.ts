@@ -29,6 +29,7 @@ export interface HomepageTestimonial {
   quote: string
   name: string
   role: string
+  imageUrl?: string
 }
 
 export interface HomepageTestimonials {
