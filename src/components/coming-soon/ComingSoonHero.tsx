@@ -17,12 +17,12 @@ export function ComingSoonHero() {
 
       {/* Main headline */}
       <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-text-strong text-center leading-tight mb-6 max-w-3xl">
-        Již brzy
+        Již brzy!
       </h1>
 
       {/* Subheadline */}
       <p className="text-xl sm:text-2xl md:text-3xl text-text-subtle text-center max-w-2xl leading-relaxed mb-4">
-        Připravujeme pro vás něco speciálního
+        Připravujeme pro vás něco speciálního.
       </p>
 
       <p className="text-lg text-grey-500 text-center max-w-xl">
