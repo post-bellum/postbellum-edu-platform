@@ -20,7 +20,7 @@ export function ArrayEditor<T>({
   createEmpty,
   maxItems = 20,
   minItems = 1,
-  addLabel = 'Pridat',
+  addLabel = 'Přidat',
 }: ArrayEditorProps<T>) {
   const handleAdd = () => {
     if (items.length < maxItems) {

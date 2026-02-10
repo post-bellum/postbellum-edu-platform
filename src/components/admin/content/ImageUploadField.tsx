@@ -38,7 +38,7 @@ export function ImageUploadField({
       const url = await uploadImageToStorage(file, 'page-content', folder)
       onChange(url)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Chyba pri nahravani'
+      const message = err instanceof Error ? err.message : 'Chyba při nahrávání'
       setError(message)
       logger.error('Error uploading page content image', err)
     } finally {
@@ -81,7 +81,7 @@ export function ImageUploadField({
             className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-grey-200 rounded-lg hover:bg-grey-50 transition-colors disabled:opacity-50"
           >
             <Upload className="w-4 h-4" />
-            {uploading ? 'Nahravam...' : value ? 'Zmenit' : 'Nahrat'}
+            {uploading ? 'Nahrávám...' : value ? 'Změnit' : 'Nahrát'}
           </button>
           {error && <p className="text-xs text-red-500">{error}</p>}
         </div>

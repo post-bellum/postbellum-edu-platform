@@ -25,9 +25,9 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* Introduction */}
-      <ContentFormSection title="Uvod" defaultOpen={true}>
+      <ContentFormSection title="Úvod" defaultOpen={true}>
         <TextInput
-          label="Titulek stranky"
+          label="Titulek stránky"
           value={content.intro.pageTitle}
           onChange={(pageTitle) => update('intro', { ...content.intro, pageTitle })}
         />
@@ -52,7 +52,7 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
       </ContentFormSection>
 
       {/* Principles */}
-      <ContentFormSection title="Pedagogicke principy">
+      <ContentFormSection title="Pedagogické principy">
         <TextInput
           label="Titulek sekce"
           value={content.principles.sectionTitle}
@@ -63,10 +63,10 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
           onChange={(items) => update('principles', { ...content.principles, items })}
           createEmpty={() => ({ title: '', description: '' })}
           maxItems={10}
-          addLabel="Pridat princip"
+          addLabel="Přidat princip"
           renderItem={(item, _index, onChange) => (
             <div className="flex flex-col gap-3">
-              <TextInput label="Nazev" value={item.title} onChange={(title) => onChange({ ...item, title })} />
+              <TextInput label="Název" value={item.title} onChange={(title) => onChange({ ...item, title })} />
               <TextAreaInput label="Popis" value={item.description} onChange={(description) => onChange({ ...item, description })} rows={4} />
             </div>
           )}
@@ -74,7 +74,7 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
       </ContentFormSection>
 
       {/* School Network */}
-      <ContentFormSection title="Sit skol Pameti naroda">
+      <ContentFormSection title="Síť škol Paměti národa">
         <TextInput
           label="Titulek sekce"
           value={content.schoolNetwork.sectionTitle}
@@ -92,19 +92,19 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
           onChange={(bannerTitle) => update('schoolNetwork', { ...content.schoolNetwork, bannerTitle })}
         />
         <TextInput
-          label="Text tlacitka"
+          label="Text tlačítka"
           value={content.schoolNetwork.bannerButtonText}
           onChange={(bannerButtonText) => update('schoolNetwork', { ...content.schoolNetwork, bannerButtonText })}
         />
         <TextInput
-          label="Odkaz tlacitka"
+          label="Odkaz tlačítka"
           value={content.schoolNetwork.bannerButtonHref}
           onChange={(bannerButtonHref) => update('schoolNetwork', { ...content.schoolNetwork, bannerButtonHref })}
         />
       </ContentFormSection>
 
       {/* Project Team */}
-      <ContentFormSection title="Projektovy tym">
+      <ContentFormSection title="Projektový tým">
         <TextInput
           label="Titulek sekce"
           value={content.projectTeam.sectionTitle}
@@ -115,10 +115,10 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
           onChange={(members) => update('projectTeam', { ...content.projectTeam, members })}
           createEmpty={() => ({ name: '', role: '', imageUrl: '', email: '' })}
           maxItems={20}
-          addLabel="Pridat clena"
+          addLabel="Přidat člena"
           renderItem={(item, _index, onChange) => (
             <div className="flex flex-col gap-3">
-              <TextInput label="Jmeno" value={item.name} onChange={(name) => onChange({ ...item, name })} />
+              <TextInput label="Jméno" value={item.name} onChange={(name) => onChange({ ...item, name })} />
               <TextInput label="Role" value={item.role} onChange={(role) => onChange({ ...item, role })} />
               <TextInput label="Email" value={item.email || ''} onChange={(email) => onChange({ ...item, email })} />
               <ImageUploadField
@@ -135,7 +135,7 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
       </ContentFormSection>
 
       {/* Additional Team */}
-      <ContentFormSection title="Dalsi clenove tymu">
+      <ContentFormSection title="Další členové týmu">
         <TextInput
           label="Titulek sekce"
           value={content.additionalTeam.sectionTitle}
@@ -152,7 +152,7 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
       </ContentFormSection>
 
       {/* Expert Council */}
-      <ContentFormSection title="Expertne-metodicka rada">
+      <ContentFormSection title="Expertně-metodická rada">
         <TextInput
           label="Titulek sekce"
           value={content.expertCouncil.sectionTitle}
@@ -163,10 +163,10 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
           onChange={(members) => update('expertCouncil', { ...content.expertCouncil, members })}
           createEmpty={() => ({ name: '', role: '', imageUrl: '' })}
           maxItems={20}
-          addLabel="Pridat clena"
+          addLabel="Přidat člena"
           renderItem={(item, _index, onChange) => (
             <div className="flex flex-col gap-3">
-              <TextInput label="Jmeno" value={item.name} onChange={(name) => onChange({ ...item, name })} />
+              <TextInput label="Jméno" value={item.name} onChange={(name) => onChange({ ...item, name })} />
               <TextInput label="Role" value={item.role} onChange={(role) => onChange({ ...item, role })} />
               <ImageUploadField
                 label="Fotka"
@@ -182,7 +182,7 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
       </ContentFormSection>
 
       {/* Advisory Board */}
-      <ContentFormSection title="Poradni sbor">
+      <ContentFormSection title="Poradní sbor">
         <TextInput
           label="Titulek sekce"
           value={content.advisoryBoard.sectionTitle}
@@ -199,7 +199,7 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
       </ContentFormSection>
 
       {/* Partners */}
-      <ContentFormSection title="Partneri">
+      <ContentFormSection title="Partneři">
         <TextInput
           label="Titulek sekce"
           value={content.partners.sectionTitle}
@@ -207,9 +207,9 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
         />
 
         <div className="border border-grey-200 rounded-xl p-4 bg-grey-50">
-          <h4 className="font-medium text-sm text-grey-700 mb-3">Hlavni partner</h4>
+          <h4 className="font-medium text-sm text-grey-700 mb-3">Hlavní partner</h4>
           <div className="flex flex-col gap-3">
-            <TextInput label="Nazev" value={content.partners.mainSponsor.name} onChange={(name) => update('partners', { ...content.partners, mainSponsor: { ...content.partners.mainSponsor, name } })} />
+            <TextInput label="Název" value={content.partners.mainSponsor.name} onChange={(name) => update('partners', { ...content.partners, mainSponsor: { ...content.partners.mainSponsor, name } })} />
             <TextInput label="Popis" value={content.partners.mainSponsor.description} onChange={(description) => update('partners', { ...content.partners, mainSponsor: { ...content.partners.mainSponsor, description } })} />
             <ImageUploadField
               label="Logo"
@@ -228,10 +228,10 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
           createEmpty={() => ({ name: '', description: '', logoSrc: '' })}
           maxItems={10}
           minItems={0}
-          addLabel="Pridat partnera"
+          addLabel="Přidat partnera"
           renderItem={(item, _index, onChange) => (
             <div className="flex flex-col gap-3">
-              <TextInput label="Nazev" value={item.name} onChange={(name) => onChange({ ...item, name })} />
+              <TextInput label="Název" value={item.name} onChange={(name) => onChange({ ...item, name })} />
               <TextInput label="Popis" value={item.description} onChange={(description) => onChange({ ...item, description })} />
               <ImageUploadField
                 label="Logo"

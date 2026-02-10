@@ -77,7 +77,7 @@ export function AdminContentSection() {
       setTimeout(() => setSaveStatus('idle'), 2000)
     } else {
       setSaveStatus('error')
-      setErrorMessage(result.error || 'Chyba pri ukladani')
+      setErrorMessage(result.error || 'Chyba při ukládání')
     }
   }
 
@@ -104,7 +104,7 @@ export function AdminContentSection() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-display font-semibold">Obsah stranek</h2>
+        <h2 className="text-2xl font-display font-semibold">Obsah stránek</h2>
         <Button
           variant="primary"
           size="medium"
@@ -114,17 +114,17 @@ export function AdminContentSection() {
           {saveStatus === 'saving' ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Ukladam...
+              Ukládám...
             </>
           ) : saveStatus === 'saved' ? (
             <>
               <CheckCircle2 className="w-4 h-4" />
-              Ulozeno
+              Uloženo
             </>
           ) : (
             <>
               <Save className="w-4 h-4" />
-              Ulozit
+              Uložit
             </>
           )}
         </Button>

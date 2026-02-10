@@ -14,9 +14,9 @@ interface TermsContentFormProps {
 export function TermsContentForm({ content, onChange }: TermsContentFormProps) {
   return (
     <div className="flex flex-col gap-4">
-      <ContentFormSection title="Nastaveni stranky" defaultOpen={true}>
+      <ContentFormSection title="Nastavení stránky" defaultOpen={true}>
         <TextInput
-          label="Titulek stranky"
+          label="Titulek stránky"
           value={content.pageTitle}
           onChange={(pageTitle) => onChange({ ...content, pageTitle })}
         />
@@ -34,7 +34,7 @@ export function TermsContentForm({ content, onChange }: TermsContentFormProps) {
           onChange={(sections) => onChange({ ...content, sections })}
           createEmpty={() => ({ title: '', content: '' })}
           maxItems={20}
-          addLabel="Pridat sekci"
+          addLabel="Přidat sekci"
           renderItem={(item, _index, onItemChange) => (
             <div className="flex flex-col gap-3">
               <TextInput

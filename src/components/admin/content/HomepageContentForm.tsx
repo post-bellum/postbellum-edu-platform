@@ -26,19 +26,19 @@ export function HomepageContentForm({ content, onChange }: HomepageContentFormPr
           onChange={(title) => update('hero', { ...content.hero, title })}
         />
         <TextInput
-          label="Text tlacitka"
+          label="Text tlačítka"
           value={content.hero.buttonText}
           onChange={(buttonText) => update('hero', { ...content.hero, buttonText })}
         />
         <TextInput
-          label="Odkaz tlacitka"
+          label="Odkaz tlačítka"
           value={content.hero.buttonHref}
           onChange={(buttonHref) => update('hero', { ...content.hero, buttonHref })}
         />
       </ContentFormSection>
 
       {/* Features Section */}
-      <ContentFormSection title="Co platforma nabizi">
+      <ContentFormSection title="Co platforma nabízí">
         <TextInput
           label="Titulek sekce"
           value={content.features.sectionTitle}
@@ -54,10 +54,10 @@ export function HomepageContentForm({ content, onChange }: HomepageContentFormPr
           onChange={(items) => update('features', { ...content.features, items })}
           createEmpty={() => ({ title: '', description: '', icon: '' })}
           maxItems={12}
-          addLabel="Pridat funkci"
+          addLabel="Přidat funkci"
           renderItem={(item, _index, onChange) => (
             <div className="flex flex-col gap-3">
-              <TextInput label="Nazev" value={item.title} onChange={(title) => onChange({ ...item, title })} />
+              <TextInput label="Název" value={item.title} onChange={(title) => onChange({ ...item, title })} />
               <TextAreaInput label="Popis" value={item.description} onChange={(description) => onChange({ ...item, description })} />
               <ImageUploadField
                 label="Ikonka"
@@ -73,7 +73,7 @@ export function HomepageContentForm({ content, onChange }: HomepageContentFormPr
       </ContentFormSection>
 
       {/* Lessons Section */}
-      <ContentFormSection title="Vybrane lekce">
+      <ContentFormSection title="Vybrané lekce">
         <TextInput
           label="Titulek sekce"
           value={content.lessons.sectionTitle}
@@ -87,7 +87,7 @@ export function HomepageContentForm({ content, onChange }: HomepageContentFormPr
       </ContentFormSection>
 
       {/* Testimonials Section */}
-      <ContentFormSection title="Reference ucitelu">
+      <ContentFormSection title="Reference učitelů">
         <TextInput
           label="Titulek sekce"
           value={content.testimonials.sectionTitle}
@@ -98,11 +98,11 @@ export function HomepageContentForm({ content, onChange }: HomepageContentFormPr
           onChange={(items) => update('testimonials', { ...content.testimonials, items })}
           createEmpty={() => ({ quote: '', name: '', role: '' })}
           maxItems={20}
-          addLabel="Pridat referenci"
+          addLabel="Přidat referenci"
           renderItem={(item, _index, onChange) => (
             <div className="flex flex-col gap-3">
-              <TextAreaInput label="Citat" value={item.quote} onChange={(quote) => onChange({ ...item, quote })} />
-              <TextInput label="Jmeno" value={item.name} onChange={(name) => onChange({ ...item, name })} />
+              <TextAreaInput label="Citát" value={item.quote} onChange={(quote) => onChange({ ...item, quote })} />
+              <TextInput label="Jméno" value={item.name} onChange={(name) => onChange({ ...item, name })} />
               <TextInput label="Role" value={item.role} onChange={(role) => onChange({ ...item, role })} />
             </div>
           )}
@@ -110,7 +110,7 @@ export function HomepageContentForm({ content, onChange }: HomepageContentFormPr
       </ContentFormSection>
 
       {/* Ticker */}
-      <ContentFormSection title="Ticker (bezici text)">
+      <ContentFormSection title="Ticker (běžící text)">
         <TextInput
           label="Text tickeru"
           value={content.ticker.text}
