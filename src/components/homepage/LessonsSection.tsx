@@ -6,8 +6,13 @@ import { SectionHeadline } from './SectionHeadline';
 import { getLessons } from '@/lib/supabase/lessons';
 import { logger } from '@/lib/logger';
 import type { Lesson } from '@/types/lesson.types';
+import type { HomepageLessons } from '@/types/page-content.types';
 
-export function LessonsSection() {
+interface LessonsSectionProps {
+  content?: HomepageLessons
+}
+
+export function LessonsSection({ content }: LessonsSectionProps) {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -39,8 +44,8 @@ export function LessonsSection() {
         {/* Section Header - OUTSIDE grey background */}
         <div className="px-5 xl:px-12 2xl:px-20 py-3 mb-10">
         <SectionHeadline
-          title="Vybrané lekce pro vás"
-          description="Pravidelně přidáváme nové materiály, které reagují na aktuální výuková témata. Vše připraveno tak, aby šlo ihned použít ve třídě – bez složité přípravy."
+          title={content?.sectionTitle ?? 'Vybrané lekce pro vás'}
+          description={content?.sectionDescription ?? 'Pravidelně přidáváme nové materiály, které reagují na aktuální výuková témata. Vše připraveno tak, aby šlo ihned použít ve třídě – bez složité přípravy.'}
         />
       </div>
       

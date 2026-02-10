@@ -41,6 +41,7 @@ export type Database = {
     Tables: {
       additional_activities: {
         Row: {
+          attachment_type: string | null
           created_at: string | null
           description: string | null
           id: string
@@ -50,6 +51,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          attachment_type?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -59,6 +61,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          attachment_type?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -240,6 +243,30 @@ export type Database = {
           subscribed_at?: string | null
           unsubscribe_token?: string
           unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      page_content: {
+        Row: {
+          content: Json
+          id: string
+          page_slug: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          content?: Json
+          id?: string
+          page_slug: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          content?: Json
+          id?: string
+          page_slug?: string
+          updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: []
       }
