@@ -48,7 +48,7 @@ export function OAuthButtons({ returnTo }: OAuthButtonsProps) {
           data-testid={`oauth-${provider.id}-button`}
         >
           <span className="size-5 flex items-center justify-center">{provider.icon}</span>
-          <span className="text-lg font-semibold leading-7 text-grey-950">{provider.text}</span>
+          <span className="text-md sm:text-lg font-semibold leading-7 text-grey-950">{provider.text}</span>
         </button>
       ))}
     </div>
