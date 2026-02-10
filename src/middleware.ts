@@ -4,7 +4,43 @@ import { authConfig } from '@/lib/supabase/config';
 import type { Database } from '@/types/database.types';
 import { logger } from '@/lib/logger';
 
+function checkBasicAuth(request: NextRequest): NextResponse | null {
+  const password = process.env.PASSWORD_PROTECTION_PASSWORD;
+  if (!password) return null;
+
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Basic ')) {
+    return new NextResponse('Authentication required', {
+      status: 401,
+      headers: { 'WWW-Authenticate': 'Basic realm="StoryOn", charset="UTF-8"' },
+    });
+  }
+
+  try {
+    const base64Credentials = authHeader.slice(6);
+    const decoded = atob(base64Credentials);
+    const colonIndex = decoded.indexOf(':');
+    const providedPassword = colonIndex === -1 ? decoded : decoded.slice(colonIndex + 1);
+    if (providedPassword !== password) {
+      return new NextResponse('Invalid credentials', {
+        status: 401,
+        headers: { 'WWW-Authenticate': 'Basic realm="StoryOn", charset="UTF-8"' },
+      });
+    }
+  } catch {
+    return new NextResponse('Invalid credentials', {
+      status: 401,
+      headers: { 'WWW-Authenticate': 'Basic realm="StoryOn", charset="UTF-8"' },
+    });
+  }
+
+  return null;
+}
+
 export default async function proxy(request: NextRequest) {
+  const basicAuthResponse = checkBasicAuth(request);
+  if (basicAuthResponse) return basicAuthResponse;
+
   let supabaseResponse = NextResponse.next({
     request,
   });
