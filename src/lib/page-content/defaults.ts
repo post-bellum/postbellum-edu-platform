@@ -301,7 +301,7 @@ export const DEFAULT_TERMS_CONTENT: TermsContent = {
       title: '6. Závěrečná ustanovení',
       content: `<p><strong>6.1.</strong> Tato pravidla se řídí platnými právními předpisy České republiky, zejména zákonem č. 89/2012 Sb., občanským zákoníkem, ve znění pozdějších předpisů.</p>
 <p><strong>6.2.</strong> Máte-li jakýkoli dotaz či připomínku, kontaktujte nás prosím na e-mailové adrese <a href="mailto:storyon@postbellum.cz">storyon@postbellum.cz</a>.</p>
-<p class="text-sm pt-4" style="opacity: 0.8">Publikováno POST BELLUM, z.ú. dne 05. 02. 2026.</p>`,
+<p style="font-size: 0.875rem; padding-top: 1rem; opacity: 0.8">Publikováno POST BELLUM, z.ú. dne 05. 02. 2026.</p>`,
     },
   ],
 }

@@ -1,11 +1,11 @@
 import Image from 'next/image';
 
 interface TickerProps {
-  text?: string
+  text: string
 }
 
 export function Ticker({ text }: TickerProps) {
-  const tickerText = text ?? 'StoryOn přináší paměť národa.'
+  const tickerText = text
 
   return (
     <div className="w-full overflow-hidden py-8">

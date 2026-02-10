@@ -9,7 +9,7 @@ import type { Lesson } from '@/types/lesson.types';
 import type { HomepageLessons } from '@/types/page-content.types';
 
 interface LessonsSectionProps {
-  content?: HomepageLessons
+  content: HomepageLessons
 }
 
 export function LessonsSection({ content }: LessonsSectionProps) {
@@ -44,8 +44,8 @@ export function LessonsSection({ content }: LessonsSectionProps) {
         {/* Section Header - OUTSIDE grey background */}
         <div className="px-5 xl:px-12 2xl:px-20 py-3 mb-10">
         <SectionHeadline
-          title={content?.sectionTitle ?? 'Vybrané lekce pro vás'}
-          description={content?.sectionDescription ?? 'Pravidelně přidáváme nové materiály, které reagují na aktuální výuková témata. Vše připraveno tak, aby šlo ihned použít ve třídě – bez složité přípravy.'}
+          title={content.sectionTitle}
+          description={content.sectionDescription}
         />
       </div>
       

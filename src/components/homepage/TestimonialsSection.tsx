@@ -5,15 +5,13 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { TestimonialCard } from './TestimonialCard';
 import { SectionHeadline } from './SectionHeadline';
 import type { HomepageTestimonials } from '@/types/page-content.types';
-import { DEFAULT_HOMEPAGE_CONTENT } from '@/lib/page-content/defaults';
 
 interface TestimonialsSectionProps {
-  content?: HomepageTestimonials
+  content: HomepageTestimonials
 }
 
 export function TestimonialsSection({ content }: TestimonialsSectionProps) {
-  const data = content ?? DEFAULT_HOMEPAGE_CONTENT.testimonials
-  const items = data.items
+  const items = content.items
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Desktop shows 2 testimonials, mobile shows 1
@@ -42,7 +40,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
         {/* Section Header - matching LessonsSection structure */}
         <div className="px-5 xl:px-12 2xl:px-20 py-7 mb-6">
         <SectionHeadline
-          title={data.sectionTitle}
+          title={content.sectionTitle}
         />
       </div>
 

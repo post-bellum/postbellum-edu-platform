@@ -9,6 +9,7 @@ import {
   Illustration,
 } from '@/components/about'
 import { getPageContent } from '@/lib/supabase/page-content'
+import { sanitizeHTML } from '@/lib/sanitize'
 import type { AboutContent } from '@/types/page-content.types'
 
 export default async function AboutPage() {
@@ -84,7 +85,7 @@ export default async function AboutPage() {
         <ContentSection title={content.additionalTeam.sectionTitle}>
           <div
             className="font-body text-sm sm:text-md md:text-lg text-text-subtle leading-[1.5] max-w-[800px] [&_strong]:font-semibold [&_strong]:text-text-strong"
-            dangerouslySetInnerHTML={{ __html: content.additionalTeam.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHTML(content.additionalTeam.content) }}
           />
         </ContentSection>
 
@@ -106,7 +107,7 @@ export default async function AboutPage() {
         <ContentSection title={content.advisoryBoard.sectionTitle}>
           <div
             className="font-body text-sm sm:text-md text-text-subtle leading-[1.5] max-w-[800px] [&_strong]:font-semibold [&_strong]:text-text-strong"
-            dangerouslySetInnerHTML={{ __html: content.advisoryBoard.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHTML(content.advisoryBoard.content) }}
           />
         </ContentSection>
 

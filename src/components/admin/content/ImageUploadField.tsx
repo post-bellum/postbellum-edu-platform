@@ -38,9 +38,24 @@ export function ImageUploadField({
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB — matches storage bucket limit
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    if (file.size > MAX_FILE_SIZE) {
+      setError('Soubor je příliš velký (max 5 MB)')
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Nepodporovaný formát souboru. Povolené: JPEG, PNG, GIF, WebP, SVG')
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
 
     setError(null)
     setUploading(true)

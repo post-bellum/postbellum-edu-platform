@@ -14,7 +14,7 @@ import type {
  * Database values take priority; defaults fill in any gaps.
  * Arrays are NOT deep-merged — the DB array replaces the default.
  */
-function deepMergeWithDefaults(
+export function deepMergeWithDefaults(
   defaults: Record<string, unknown>,
   overrides: Record<string, unknown>
 ): Record<string, unknown> {

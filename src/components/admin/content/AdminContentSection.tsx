@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Save, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { PageContentSubTabs } from './PageContentSubTabs'
@@ -9,6 +9,7 @@ import { AboutContentForm } from './AboutContentForm'
 import { TermsContentForm } from './TermsContentForm'
 import { getPageContentForAdmin, savePageContent } from '@/app/actions/page-content'
 import { PAGE_DEFAULTS } from '@/lib/page-content/defaults'
+import { deepMergeWithDefaults } from '@/lib/supabase/page-content'
 import type {
   PageSlug,
   PageContent,
@@ -30,6 +31,15 @@ export function AdminContentSection() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [loadedTabs, setLoadedTabs] = useState<PageSlug[]>([])
+  const [dirtyTabs, setDirtyTabs] = useState<Set<PageSlug>>(new Set())
+  const dirtyTabsRef = useRef(dirtyTabs)
+
+  const mergeWithDefaults = (slug: PageSlug, dbContent: PageContent): PageContent => {
+    return deepMergeWithDefaults(
+      PAGE_DEFAULTS[slug] as unknown as Record<string, unknown>,
+      dbContent as unknown as Record<string, unknown>
+    ) as unknown as PageContent
+  }
 
   const loadContent = async (slug: PageSlug) => {
     setLoading(true)
@@ -40,7 +50,7 @@ export function AdminContentSection() {
       if (result.data?.content) {
         setContent((prev) => ({
           ...prev,
-          [slug]: result.data!.content as PageContent,
+          [slug]: mergeWithDefaults(slug, result.data!.content as PageContent),
         }))
       }
       setLoadedTabs((prev) => (prev.includes(slug) ? prev : [...prev, slug]))
@@ -60,7 +70,7 @@ export function AdminContentSection() {
         if (result.data?.content) {
           setContent((prev) => ({
             ...prev,
-            homepage: result.data!.content as PageContent,
+            homepage: mergeWithDefaults('homepage', result.data!.content as PageContent),
           }))
         }
         setLoadedTabs(['homepage'])
@@ -71,6 +81,41 @@ export function AdminContentSection() {
     })
 
     return () => { cancelled = true }
+   
+  }, [])
+
+  // Keep ref in sync for beforeunload handler
+  useEffect(() => {
+    dirtyTabsRef.current = dirtyTabs
+  }, [dirtyTabs])
+
+  // Warn on browser close/refresh if there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (dirtyTabsRef.current.size > 0) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [])
+
+  const markDirty = useCallback((tab: PageSlug) => {
+    setDirtyTabs((prev) => {
+      if (prev.has(tab)) return prev
+      const next = new Set(prev)
+      next.add(tab)
+      return next
+    })
+  }, [])
+
+  const markClean = useCallback((tab: PageSlug) => {
+    setDirtyTabs((prev) => {
+      if (!prev.has(tab)) return prev
+      const next = new Set(prev)
+      next.delete(tab)
+      return next
+    })
   }, [])
 
   const handleSave = async () => {
@@ -81,6 +126,7 @@ export function AdminContentSection() {
 
     if (result.success) {
       setSaveStatus('saved')
+      markClean(activeTab)
       setTimeout(() => setSaveStatus('idle'), 2000)
     } else {
       setSaveStatus('error')
@@ -89,6 +135,13 @@ export function AdminContentSection() {
   }
 
   const handleTabChange = (tab: PageSlug) => {
+    if (dirtyTabs.has(activeTab)) {
+      const confirmed = window.confirm(
+        'Máte neuložené změny. Opravdu chcete přepnout záložku? Neuložené změny zůstanou zachovány.'
+      )
+      if (!confirmed) return
+    }
+
     setActiveTab(tab)
     setSaveStatus('idle')
     setErrorMessage(null)
@@ -102,6 +155,7 @@ export function AdminContentSection() {
       ...prev,
       [activeTab]: pageContent,
     }))
+    markDirty(activeTab)
     // Reset saved status when content changes
     if (saveStatus === 'saved') {
       setSaveStatus('idle')
