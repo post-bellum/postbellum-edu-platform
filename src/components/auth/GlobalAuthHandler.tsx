@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import { usePathname } from 'next/navigation';
 import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { CompleteRegistrationModal } from './CompleteRegistrationModal';
 import { OAuthErrorDisplay } from './OAuthErrorDisplay';
@@ -17,7 +18,11 @@ import { logger } from '@/lib/logger';
  */
 export function GlobalAuthHandler() {
   const [showCompleteRegistration, setShowCompleteRegistration] = useState(false);
+  const pathname = usePathname();
   const { loading, isLoggedIn } = useAuth();
+
+  // Don't show registration modal on /terms - user may have opened it in a new tab to read
+  const isOnTermsPage = pathname === '/terms';
 
   // Check if user needs to complete registration (OAuth users)
   useEffect(() => {
@@ -55,9 +60,9 @@ export function GlobalAuthHandler() {
         <OAuthErrorDisplay />
       </Suspense>
 
-      {/* Complete registration modal for OAuth users */}
+      {/* Complete registration modal for OAuth users (hidden on /terms so user can read terms) */}
       <Dialog 
-        open={showCompleteRegistration} 
+        open={showCompleteRegistration && !isOnTermsPage} 
         onOpenChange={(open) => {
           if (!open) return;
           setShowCompleteRegistration(open);

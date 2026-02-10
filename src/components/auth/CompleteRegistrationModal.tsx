@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
@@ -267,7 +268,17 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
               htmlFor="terms"
               className="text-sm leading-[1.4] text-text-subtle cursor-pointer select-none hover:text-grey-950 transition-colors peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              Souhlasím s podmínkami používání <span className="text-red-500">*</span>
+              Souhlasím s{' '}
+              <Link
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-primary hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                podmínkami používání
+              </Link>{' '}
+              <span className="text-red-500">*</span>
             </label>
           </div>
 

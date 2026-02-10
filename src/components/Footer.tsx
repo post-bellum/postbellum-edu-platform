@@ -33,9 +33,6 @@ export function Footer() {
             © Post Bellum, {new Date().getFullYear()}
           </p>
           <div className="flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-0.5 md:gap-8 font-body text-xs text-text-subtle">
-            <Link href="/privacy" className="leading-6 hover:text-text-strong transition-colors">
-              Zásady ochrany osobních údajů
-            </Link>
             <Link href="/terms" className="leading-6 hover:text-text-strong transition-colors">
               Podmínky služby
             </Link>
