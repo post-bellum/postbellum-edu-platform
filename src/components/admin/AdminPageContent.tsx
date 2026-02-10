@@ -4,6 +4,7 @@ import * as React from 'react'
 import { NewsletterSubscribersSection } from '@/components/admin/NewsletterSubscribersSection'
 import { AdminLessonsSection } from '@/components/admin/AdminLessonsSection'
 import { AdminSchoolsSection } from '@/components/admin/AdminSchoolsSection'
+import { AdminContentSection } from '@/components/admin/content/AdminContentSection'
 import { AdminTabs, type AdminTabId } from '@/components/admin/AdminTabs'
 
 export function AdminPageContent() {
@@ -31,6 +32,7 @@ export function AdminPageContent() {
           {activeTab === 'lessons' && <AdminLessonsSection />}
           {activeTab === 'newsletter' && <NewsletterSubscribersSection />}
           {activeTab === 'schools' && <AdminSchoolsSection />}
+          {activeTab === 'content' && <AdminContentSection />}
         </div>
       </div>
     </div>

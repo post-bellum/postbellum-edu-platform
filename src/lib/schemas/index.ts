@@ -6,3 +6,4 @@
 export * from './env.schema';
 export * from './auth.schema';
 export * from './lesson.schema';
+export * from './page-content.schema';
