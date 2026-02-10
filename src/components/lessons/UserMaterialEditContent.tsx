@@ -304,8 +304,8 @@ export function UserMaterialEditContent({
       </div>
 
       {/* Title and Actions - Full Width Header */}
-      <div className="flex flex-wrap items-end gap-4 mb-6">
-        <div className="flex-1 min-w-[200px]">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div className="w-full max-w-[860px] shrink-0">
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Název
           </label>
@@ -323,6 +323,7 @@ export function UserMaterialEditContent({
           <Button
             variant="outline"
             size="sm"
+            className="h-12"
             onClick={() => setViewModalOpen(true)}
           >
             <Eye className="w-4 h-4" />
@@ -332,6 +333,7 @@ export function UserMaterialEditContent({
           <Button
             variant="outline"
             size="sm"
+            className="h-12"
             onClick={handleExportPDF}
             disabled={!content || isExportingPDF}
           >
@@ -355,6 +357,7 @@ export function UserMaterialEditContent({
           <Button
             variant="destructive"
             size="icon"
+            className="h-12 w-12"
             onClick={() => setDeleteDialogOpen(true)}
             disabled={isDeleting}
             title="Smazat"
