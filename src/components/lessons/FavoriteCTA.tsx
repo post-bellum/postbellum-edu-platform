@@ -1,10 +1,11 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { AuthModal } from '@/components/auth'
-import { Lock, Bookmark } from 'lucide-react'
+import { LockOpen } from 'lucide-react'
 
 interface FavoriteCTAProps {
   variant?: 'default' | 'sidebar'
@@ -23,24 +24,47 @@ export function FavoriteCTA({ variant = 'default' }: FavoriteCTAProps) {
     }
   }
 
-  // Sidebar variant - simple button that opens auth modal
+  // Sidebar variant - registration banner card matching Figma design
   if (variant === 'sidebar') {
     return (
       <>
-        <Button 
-          variant="secondary" 
-          size="medium" 
-          className="w-full justify-center"
-          onClick={() => setIsAuthModalOpen(true)}
-        >
-          <Bookmark className="w-5 h-5" />
-          Přidat do oblíbených
-        </Button>
+        <div className="bg-[#ddffee] border border-[rgba(12,17,29,0.05)] rounded-[28px] p-6 flex flex-col gap-4 overflow-hidden">
+          {/* Lock Open Icon */}
+          <LockOpen className="w-6 h-6 text-brand-primary" />
 
-        <AuthModal 
-          open={isAuthModalOpen} 
+          {/* Illustration */}
+          <Image
+            src="/illustrations/lesson/registration-cta.png"
+            alt="Ilustrace - odemkněte plný přístup"
+            width={400}
+            height={300}
+            className="w-full h-auto -mt-4 -mb-2"
+          />
+
+          {/* Heading */}
+          <h3 className="font-display text-2xl font-semibold leading-display text-text-strong">
+            Upravujte materiály, ukládejte vlastní verze a zapojte se do hodnocení.
+          </h3>
+
+          {/* Subtitle */}
+          <p className="font-body text-md leading-body text-[#052120]">
+            Odemkněte si plný přístup k lekcím.
+          </p>
+
+          {/* Registration Button */}
+          <Button
+            variant="primary"
+            size="medium"
+            onClick={() => setIsAuthModalOpen(true)}
+          >
+            Registrovat
+          </Button>
+        </div>
+
+        <AuthModal
+          open={isAuthModalOpen}
           onOpenChange={handleModalClose}
-          defaultStep="login"
+          defaultStep="register"
           returnTo={pathname}
         />
       </>
@@ -50,31 +74,41 @@ export function FavoriteCTA({ variant = 'default' }: FavoriteCTAProps) {
   // Default variant - full CTA card
   return (
     <>
-      <div className="pt-4 border-t bg-gradient-to-br from-blue-50 to-indigo-50 -mx-6 -mb-6 px-6 pb-6 mt-4 rounded-b-lg">
-        <div className="flex flex-col items-center text-center gap-3 py-4">
-          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-            <Lock className="h-6 w-6 text-blue-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-1">
-              Upravujte materiály, ukládejte vlastní verze a zapojte se do hodnocení.
-            </h3>
-            <p className="text-sm text-gray-600">
-              Odemkněte si plný přístup k lekcím.
-            </p>
-          </div>
-          <Button 
-            onClick={() => setIsAuthModalOpen(true)}
-            className="w-full"
-            size="lg"
-          >
-            Zaregistrovat
-          </Button>
-        </div>
+      <div className="bg-[#ddffee] border border-[rgba(12,17,29,0.05)] rounded-[28px] p-6 flex flex-col gap-4 overflow-hidden">
+        {/* Lock Open Icon */}
+        <LockOpen className="w-6 h-6 text-brand-primary" />
+
+        {/* Illustration */}
+        <Image
+          src="/illustrations/lesson/registration-cta.png"
+          alt="Ilustrace - odemkněte plný přístup"
+          width={400}
+          height={300}
+          className="w-full h-auto -mt-4 -mb-2"
+        />
+
+        {/* Heading */}
+        <h3 className="font-display text-2xl font-semibold leading-display text-text-strong">
+          Upravujte materiály, ukládejte vlastní verze a zapojte se do hodnocení.
+        </h3>
+
+        {/* Subtitle */}
+        <p className="font-body text-md leading-body text-[#052120]">
+          Odemkněte si plný přístup k lekcím.
+        </p>
+
+        {/* Registration Button */}
+        <Button
+          variant="primary"
+          size="medium"
+          onClick={() => setIsAuthModalOpen(true)}
+        >
+          Registrovat
+        </Button>
       </div>
 
-      <AuthModal 
-        open={isAuthModalOpen} 
+      <AuthModal
+        open={isAuthModalOpen}
         onOpenChange={handleModalClose}
         defaultStep="register"
         returnTo={pathname}

@@ -93,21 +93,21 @@ export async function LessonDetailContent({ id, usePublicClient = false, isAdmin
           </div>
 
           {/* Side Action Buttons */}
-          <div className="flex flex-col gap-1.5 px-6">
-            {user ? (
+          {user ? (
+            <div className="flex flex-col gap-1.5 px-6">
               <FavoriteButton 
                 lessonId={lesson.id} 
                 initialIsFavorited={isFavorited}
                 variant="sidebar"
               />
-            ) : (
-              <FavoriteCTA variant="sidebar" />
-            )}
-            <Button variant="secondary" size="medium" className="w-full justify-center">
-              <Lightbulb className="w-5 h-5" />
-              Poslat návrh na zlepšení
-            </Button>
-          </div>
+              <Button variant="secondary" size="medium" className="w-full justify-center">
+                <Lightbulb className="w-5 h-5" />
+                Poslat návrh na zlepšení
+              </Button>
+            </div>
+          ) : (
+            <FavoriteCTA variant="sidebar" />
+          )}
         </div>
       </div>
       <div className="xl:my-16">
