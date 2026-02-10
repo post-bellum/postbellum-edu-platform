@@ -59,7 +59,7 @@ export function TestimonialsSection() {
       {/* Testimonials */}
       <div className="pb-10 flex flex-col gap-8">
         {/* Desktop: Show 2 testimonials at a time */}
-        <div className="hidden md:grid md:grid-cols-2 gap-5">
+        <div className="hidden md:grid md:grid-cols-2 md:items-stretch gap-5">
           {desktopTestimonials.map((testimonial, index) => (
             <TestimonialCard 
               key={`${currentIndex}-${index}`}
