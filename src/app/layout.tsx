@@ -1,12 +1,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { NavigationBarServer } from '@/components/NavigationBarServer';
-import { Footer } from '@/components/Footer';
-import { GlobalAuthHandler } from '@/components/auth';
 
 export const metadata: Metadata = {
-  title: 'Post Bellum Educational Platform',
-  description: 'Vzdělávací platforma pro učitele k objevování a používání historických učebních materiálů',
+  title: 'StoryOn - Již brzy',
+  description: 'Připravujeme pro vás něco speciálního. Brzy zde najdete platformu pro vzdělávání a sdílení příběhů.',
 };
 
 export default function RootLayout({
@@ -20,12 +17,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://use.typekit.net/anz3jmg.css" />
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col bg-white">
-        <NavigationBarServer />
-        <main className="flex-1 max-w-[1920px] mx-auto w-full bg-white">
-          {children}
-        </main>
-        <Footer />
-        <GlobalAuthHandler />
+        <main className="flex-1 w-full">{children}</main>
       </body>
     </html>
   );
