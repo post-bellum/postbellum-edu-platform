@@ -4,7 +4,7 @@ import { NewsletterSignup } from '@/components/homepage/NewsletterSignup'
 
 export function Footer() {
   return (
-    <footer className="w-full max-w-[1920px] mx-auto px-5 md:px-10 py-0">
+    <footer className="w-full max-w-[1920px] mx-auto px-5 xl:px-10 py-0">
       <div className="flex flex-col items-start md:items-center w-full rounded-[28px] gap-1 md:gap-0">
         {/* Main footer content */}
         <div className="w-full bg-[#ddffee] border border-[rgba(12,17,29,0.05)] rounded-[40px] overflow-hidden pt-10 md:pt-15 pb-[120px] md:pb-[200px] px-5 md:px-11">

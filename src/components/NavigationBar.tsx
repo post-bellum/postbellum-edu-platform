@@ -65,7 +65,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-surface py-4">
-      <div className="w-full max-w-[1920px] mx-auto px-5 lg:px-10">
+      <div className="w-full max-w-[1920px] mx-auto px-5 xl:px-10">
         <div className="flex h-12 items-center justify-between">
           {/* Left - Logo */}
           <div className="flex items-center md:min-w-[240px]">
