@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export function ComingSoonHero() {
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-linear-to-b from-[#e2f2f2] via-mint-light to-white">
+    <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-16 bg-linear-to-b from-white via-mint-light to-[#e2f2f2]">
       {/* Logo */}
       <div className="mb-12 md:mb-16">
         <Image
