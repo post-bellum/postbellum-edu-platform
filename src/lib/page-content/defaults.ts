@@ -134,7 +134,7 @@ export const DEFAULT_ABOUT_CONTENT: AboutContent = {
     bannerTitle:
       'Na seminář v síti škol Paměti národa se můžete registrovat zde',
     bannerButtonText: 'Registrovat',
-    bannerButtonHref: 'https://www.pametnaroda.cz/cs/sit-skol',
+    bannerButtonHref: 'https://skoly.pametnaroda.cz/pro-pedagogy/sit-skol-pameti-naroda/',
   },
   projectTeam: {
     sectionTitle: 'Projektový tým',
