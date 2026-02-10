@@ -17,7 +17,7 @@ export function SectionHeadline({
       {(description || showArrow) && (
         <div className="flex items-start gap-10 flex-1 justify-end">
           {description && (
-            <p className="font-body text-md text-text-subtle leading-[1.5] max-w-[560px]">
+            <p className="font-body text-md text-text-subtle leading-[1.5] lg:max-w-[560px]">
               {description}
             </p>
           )}
