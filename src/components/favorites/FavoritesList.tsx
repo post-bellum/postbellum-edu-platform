@@ -5,7 +5,7 @@ import { getUserFavoriteLessonIds } from '@/lib/supabase/favorites'
 import { getLessonsByIds } from '@/lib/supabase/lessons'
 import { LessonCard } from '@/components/lessons/LessonCard'
 import { Button } from '@/components/ui/Button'
-import { Heart } from 'lucide-react'
+import { Bookmark } from 'lucide-react'
 
 export async function FavoritesList() {
   const supabase = await createClient()
@@ -20,7 +20,7 @@ export async function FavoritesList() {
   if (favoriteLessonIds.length === 0) {
     return (
       <div className="text-center py-24 border border-grey-200 rounded-3xl bg-grey-50/50">
-        <Heart className="mx-auto h-12 w-12 text-text-subtle mb-4" />
+        <Bookmark className="mx-auto h-12 w-12 text-text-subtle mb-4" />
         <p className="text-text-subtle mb-6 text-lg">Zatím nemáte žádné oblíbené lekce</p>
         <Link href="/lessons">
           <Button>Procházet katalog</Button>
@@ -35,7 +35,7 @@ export async function FavoritesList() {
   if (favoriteLessons.length === 0) {
     return (
       <div className="text-center py-24 border border-grey-200 rounded-3xl bg-grey-50/50">
-        <Heart className="mx-auto h-12 w-12 text-text-subtle mb-4" />
+        <Bookmark className="mx-auto h-12 w-12 text-text-subtle mb-4" />
         <p className="text-text-subtle mb-6 text-lg">Zatím nemáte žádné oblíbené lekce</p>
         <Link href="/lessons">
           <Button>Procházet katalog</Button>

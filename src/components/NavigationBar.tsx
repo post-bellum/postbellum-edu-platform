@@ -117,7 +117,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                 <button
                   onClick={() => router.push('/favorites')}
                   className="flex items-center gap-0 bg-[#caffe6] rounded-full p-2 cursor-pointer hover:bg-mint transition-colors"
-                  title="Uložené lekce"
+                  title="Oblíbené lekce"
                 >
                   <BookmarkIcon className="h-5 w-5 text-grey-950" />
                   {favoriteCount > 0 && (
@@ -247,7 +247,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
                         <span className="text-grey-600">
                           <Bookmark className="h-4 w-4" />
                         </span>
-                        <span className="leading-normal">Uložené lekce</span>
+                        <span className="leading-normal">Oblíbené lekce</span>
                       </button>
 
                       {/* Edited Materials */}

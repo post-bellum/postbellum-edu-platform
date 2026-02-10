@@ -50,7 +50,7 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
         icon={<Bookmark className="h-4 w-4" />}
         data-testid="profile-dropdown-favorites"
       >
-        Uložené lekce
+        Oblíbené lekce
       </DropdownMenuItem>
 
       <DropdownMenuItem

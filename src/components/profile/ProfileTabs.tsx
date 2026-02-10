@@ -41,8 +41,8 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
         <span className={cn(isFavoritesActive ? 'text-brand-primary' : 'text-grey-600')}>
           <Bookmark className="w-4 h-4 min-[390px]:w-5 min-[390px]:h-5 md:w-6 md:h-6" />
         </span>
-        <span className="leading-normal md:hidden">Uložené</span>
-        <span className="leading-normal hidden md:inline">Uložené lekce</span>
+        <span className="leading-normal md:hidden">Oblíbené</span>
+        <span className="leading-normal hidden md:inline">Oblíbené lekce</span>
       </Link>
 
       {/* Upravené materiály tab */}
