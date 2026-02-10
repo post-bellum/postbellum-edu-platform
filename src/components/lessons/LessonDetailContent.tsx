@@ -5,6 +5,7 @@ import { getUserLessonMaterials } from '@/lib/supabase/user-lesson-materials'
 import { getUser } from '@/lib/supabase/auth-helpers'
 import { Button } from '@/components/ui/Button'
 import { Lightbulb } from 'lucide-react'
+import Link from 'next/link'
 import { Breadcrumbs } from '@/components/lessons/Breadcrumbs'
 import { LessonDetailHeader } from '@/components/lessons/LessonDetailHeader'
 import { LessonMaterialsWrapper } from '@/components/lessons/LessonMaterialsWrapper'
@@ -93,21 +94,23 @@ export async function LessonDetailContent({ id, usePublicClient = false, isAdmin
           </div>
 
           {/* Side Action Buttons */}
-          {user ? (
-            <div className="flex flex-col gap-1.5 px-6">
+          <div className="flex flex-col gap-1.5 px-6">
+            {user ? (
               <FavoriteButton 
                 lessonId={lesson.id} 
                 initialIsFavorited={isFavorited}
                 variant="sidebar"
               />
-              <Button variant="secondary" size="medium" className="w-full justify-center">
+            ) : (
+              <FavoriteCTA variant="sidebar" />
+            )}
+            <Button asChild variant="secondary" size="medium" className="w-full justify-center">
+              <Link href="mailto:storyon@postbellum.cz?subject=Zpětná vazba k platformě storyON">
                 <Lightbulb className="w-5 h-5" />
                 Poslat návrh na zlepšení
-              </Button>
-            </div>
-          ) : (
-            <FavoriteCTA variant="sidebar" />
-          )}
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
       <div className="xl:my-16">
