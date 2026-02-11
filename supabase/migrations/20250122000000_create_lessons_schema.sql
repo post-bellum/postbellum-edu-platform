@@ -1,6 +1,9 @@
 -- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Ensure uuid_generate_v4() is findable (Supabase installs it in extensions schema)
+SET search_path TO public, extensions;
+
 -- Add admin column to profiles table
 ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false NOT NULL;

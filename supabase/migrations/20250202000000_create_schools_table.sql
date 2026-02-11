@@ -4,6 +4,9 @@
 -- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Ensure uuid_generate_v4() is findable (Supabase installs it in extensions schema)
+SET search_path TO public, extensions;
+
 -- Drop existing schools table if it exists (with old structure)
 -- This is safe because we're creating a new table structure
 -- If you need to preserve old data, modify this migration first!

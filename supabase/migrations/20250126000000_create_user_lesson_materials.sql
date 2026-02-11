@@ -1,6 +1,8 @@
 -- Create user_lesson_materials table for user copies of lesson materials
 -- This allows users to create their own customized versions of lesson materials
 
+SET search_path TO public, extensions;
+
 CREATE TABLE IF NOT EXISTS public.user_lesson_materials (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
