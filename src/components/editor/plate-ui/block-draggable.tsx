@@ -495,7 +495,7 @@ function InsertButton({ style }: { style?: React.CSSProperties }) {
               'absolute flex h-5 w-5 items-center justify-center rounded cursor-pointer',
               'text-gray-300 transition-colors',
               'hover:bg-gray-100 hover:text-gray-500',
-              '-right-1',
+              'right-0.5',
             )}
             style={style}
             onClick={() => setOpen(!open)}
