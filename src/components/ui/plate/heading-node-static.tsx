@@ -37,6 +37,21 @@ export function HeadingElementStatic({
   );
 }
 
+export function TitleElementStatic(props: SlateElementProps) {
+  const id = props.element.id as string | undefined;
+
+  return (
+    <SlateElement
+      as="h1"
+      className="relative mt-[2em] mb-2 pb-1 font-bold font-heading text-[36px] leading-tight tracking-tight"
+      {...props}
+    >
+      {id && <span id={id} />}
+      {props.children}
+    </SlateElement>
+  );
+}
+
 export function H1ElementStatic(props: SlateElementProps) {
   return <HeadingElementStatic variant="h1" {...props} />;
 }

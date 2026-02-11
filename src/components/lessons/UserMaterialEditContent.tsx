@@ -305,7 +305,7 @@ export function UserMaterialEditContent({
 
       {/* Title and Actions - Full Width Header */}
       <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-        <div className="w-full max-w-[860px] shrink-0">
+        <div className="w-full max-w-[630px] shrink-0">
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Název
           </label>

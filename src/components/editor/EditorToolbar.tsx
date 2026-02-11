@@ -2,10 +2,16 @@
 
 import * as React from 'react'
 import { useEditorRef, useEditorSelector } from 'platejs/react'
+import { KEYS } from 'platejs'
+import {
+  useListToolbarButton,
+  useListToolbarButtonState,
+} from '@platejs/list-classic/react'
 import {
   Bold,
   Italic,
   Underline,
+  Highlighter,
   Heading1,
   Heading2,
   Heading3,
@@ -22,6 +28,7 @@ import {
   AlignRight,
   AlignJustify,
   Pilcrow,
+  Type,
   Link,
 } from 'lucide-react'
 
@@ -73,6 +80,10 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
     (editor) => !!(editor.api.marks() as Record<string, unknown> | null)?.underline,
     []
   )
+  const isHighlight = useEditorSelector(
+    (editor) => !!(editor.api.marks() as Record<string, unknown> | null)?.highlight,
+    []
+  )
 
   // Track active block type
   const activeBlockType = useEditorSelector((editor) => {
@@ -83,6 +94,7 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
   // Block type labels (Czech)
   const blockTypeLabels: Record<string, string> = {
     p: 'Odstavec',
+    title: 'Název',
     h1: 'Nadpis 1',
     h2: 'Nadpis 2',
     h3: 'Nadpis 3',
@@ -92,6 +104,7 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
 
   const blockTypeIcons: Record<string, React.ReactNode> = {
     p: <Pilcrow className="h-4 w-4" />,
+    title: <Type className="h-4 w-4" />,
     h1: <Heading1 className="h-4 w-4" />,
     h2: <Heading2 className="h-4 w-4" />,
     h3: <Heading3 className="h-4 w-4" />,
@@ -126,12 +139,12 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
     editor.tf.focus()
   }
 
-  const insertTable = () => {
+  const insertTable = (rows: number, cols: number) => {
     const tableNode = {
       type: 'table',
-      children: Array.from({ length: 3 }, () => ({
+      children: Array.from({ length: rows }, () => ({
         type: 'tr',
-        children: Array.from({ length: 3 }, () => ({
+        children: Array.from({ length: cols }, () => ({
           type: 'td',
           children: [{ type: 'p', children: [{ text: '' }] }],
         })),
@@ -151,18 +164,6 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
       url,
       children: [{ text }],
     } as never)
-    editor.tf.focus()
-  }
-
-  const toggleList = (listType: 'ul' | 'ol') => {
-    // Check if currently in a list
-    if (activeBlockType === listType) {
-      // Unwrap the list
-      editor.tf.setNodes({ type: 'p' } as never)
-    } else {
-      // Wrap in list
-      editor.tf.setNodes({ type: listType } as never)
-    }
     editor.tf.focus()
   }
 
@@ -225,6 +226,13 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
       >
         <Underline className="h-4 w-4" />
       </ToolbarButton>
+      <ToolbarButton
+        tooltip="Zvýraznění"
+        isActive={isHighlight}
+        onClick={() => toggleMark('highlight')}
+      >
+        <Highlighter className="h-4 w-4" />
+      </ToolbarButton>
 
       {/* Text color */}
       <ToolbarDropdown label="" tooltip="Barva textu">
@@ -261,18 +269,8 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
       <ToolbarSeparator />
 
       {/* Lists */}
-      <ToolbarButton
-        tooltip="Odrážkový seznam"
-        onClick={() => toggleList('ul')}
-      >
-        <List className="h-4 w-4" />
-      </ToolbarButton>
-      <ToolbarButton
-        tooltip="Číslovaný seznam"
-        onClick={() => toggleList('ol')}
-      >
-        <ListOrdered className="h-4 w-4" />
-      </ToolbarButton>
+      <BulletedListToolbarButton />
+      <NumberedListToolbarButton />
 
       <ToolbarSeparator />
 
@@ -289,13 +287,108 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
       >
         <Link className="h-4 w-4" />
       </ToolbarButton>
+      <TableGridPicker onInsert={insertTable} />
+
+    </Toolbar>
+  )
+}
+
+// ============================================================================
+// List Toolbar Buttons (using official Plate hooks)
+// ============================================================================
+
+function BulletedListToolbarButton() {
+  const state = useListToolbarButtonState({ nodeType: KEYS.ulClassic })
+  const { props } = useListToolbarButton(state)
+
+  return (
+    <ToolbarButton {...props} tooltip="Odrážkový seznam">
+      <List className="h-4 w-4" />
+    </ToolbarButton>
+  )
+}
+
+function NumberedListToolbarButton() {
+  const state = useListToolbarButtonState({ nodeType: KEYS.olClassic })
+  const { props } = useListToolbarButton(state)
+
+  return (
+    <ToolbarButton {...props} tooltip="Číslovaný seznam">
+      <ListOrdered className="h-4 w-4" />
+    </ToolbarButton>
+  )
+}
+
+// ============================================================================
+// Table Grid Picker
+// ============================================================================
+
+const MAX_GRID = 8
+
+function TableGridPicker({ onInsert }: { onInsert: (rows: number, cols: number) => void }) {
+  const [open, setOpen] = React.useState(false)
+  const [hoverRow, setHoverRow] = React.useState(0)
+  const [hoverCol, setHoverCol] = React.useState(0)
+  const dropdownRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!open) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  return (
+    <div ref={dropdownRef} className="relative">
       <ToolbarButton
         tooltip="Vložit tabulku"
-        onClick={insertTable}
+        onClick={() => setOpen(!open)}
       >
         <Table className="h-4 w-4" />
       </ToolbarButton>
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-1 rounded-md border border-gray-200 bg-white p-2 shadow-lg">
+          <div className="mb-1.5 text-center text-xs text-gray-500">
+            {hoverRow > 0 && hoverCol > 0
+              ? `${hoverRow} × ${hoverCol}`
+              : 'Vyberte velikost'}
+          </div>
+          <div
+            className="grid gap-0.5"
+            style={{ gridTemplateColumns: `repeat(${MAX_GRID}, 1fr)` }}
+            onMouseLeave={() => { setHoverRow(0); setHoverCol(0) }}
+          >
+            {Array.from({ length: MAX_GRID * MAX_GRID }, (_, i) => {
+              const row = Math.floor(i / MAX_GRID) + 1
+              const col = (i % MAX_GRID) + 1
+              const isHighlighted = row <= hoverRow && col <= hoverCol
 
-    </Toolbar>
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  className={`h-4 w-4 rounded-[2px] border transition-colors ${
+                    isHighlighted
+                      ? 'border-brand-primary bg-brand-primary/20'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                  onMouseEnter={() => { setHoverRow(row); setHoverCol(col) }}
+                  onClick={() => {
+                    onInsert(row, col)
+                    setOpen(false)
+                    setHoverRow(0)
+                    setHoverCol(0)
+                  }}
+                />
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

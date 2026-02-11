@@ -26,6 +26,26 @@ export function ParagraphElement(props: PlateElementProps) {
 }
 
 // ============================================================================
+// Title (Název) - bigger than H1
+// ============================================================================
+
+export function TitleElement(props: PlateElementProps) {
+  const { children, element, className } = props
+  const align = (element as Record<string, unknown>).align as string | undefined
+
+  return (
+    <PlateElement
+      {...props}
+      as="h1"
+      className={cn('mt-10 mb-5 font-display text-[36px] font-bold leading-tight tracking-tight', className)}
+      style={align ? { textAlign: align as React.CSSProperties['textAlign'] } : undefined}
+    >
+      {children}
+    </PlateElement>
+  )
+}
+
+// ============================================================================
 // Headings
 // ============================================================================
 
@@ -152,135 +172,4 @@ export function LinkElement(props: PlateElementProps) {
   )
 }
 
-// ============================================================================
-// Image
-// ============================================================================
-
-export function ImageElement(props: PlateElementProps) {
-  const { element, children, className } = props
-  const el = element as Record<string, unknown>
-  const url = el.url as string | undefined
-  const width = el.width as number | undefined
-  const align = el.align as string | undefined
-
-  const alignClass = cn(
-    'my-4',
-    align === 'center' && 'mx-auto',
-    align === 'left' && 'float-left mr-4 mb-2',
-    align === 'right' && 'float-right ml-4 mb-2',
-    !align && 'mx-auto',
-  )
-
-  return (
-    <PlateElement {...props} as="div" className={cn(alignClass, className)}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={url}
-        alt=""
-        className="max-w-full rounded-md block"
-        style={width ? { width } : undefined}
-        draggable={false}
-      />
-      {children}
-    </PlateElement>
-  )
-}
-
-// ============================================================================
-// Table
-// ============================================================================
-
-export function TableElement(props: PlateElementProps) {
-  const { children, className } = props
-
-  return (
-    <PlateElement {...props} as="div" className={cn('my-4 overflow-x-auto', className)}>
-      <table className="w-full border-collapse">
-        <tbody>{children}</tbody>
-      </table>
-    </PlateElement>
-  )
-}
-
-export function TableRowElement(props: PlateElementProps) {
-  const { children, className } = props
-
-  return (
-    <PlateElement {...props} as="tr" className={cn('border-b border-gray-200', className)}>
-      {children}
-    </PlateElement>
-  )
-}
-
-export function TableCellElement(props: PlateElementProps) {
-  const { children, className } = props
-
-  return (
-    <PlateElement
-      {...props}
-      as="td"
-      className={cn('border border-gray-300 p-2 align-top min-w-[80px]', className)}
-    >
-      {children}
-    </PlateElement>
-  )
-}
-
-export function TableCellHeaderElement(props: PlateElementProps) {
-  const { children, className } = props
-
-  return (
-    <PlateElement
-      {...props}
-      as="th"
-      className={cn('border border-gray-300 bg-gray-50 p-2 align-top font-semibold min-w-[80px]', className)}
-    >
-      {children}
-    </PlateElement>
-  )
-}
-
-// ============================================================================
-// List
-// ============================================================================
-
-export function BulletedListElement(props: PlateElementProps) {
-  const { children, className } = props
-
-  return (
-    <PlateElement {...props} as="ul" className={cn('my-3 ml-6 list-disc', className)}>
-      {children}
-    </PlateElement>
-  )
-}
-
-export function NumberedListElement(props: PlateElementProps) {
-  const { children, className } = props
-
-  return (
-    <PlateElement {...props} as="ol" className={cn('my-3 ml-6 list-decimal', className)}>
-      {children}
-    </PlateElement>
-  )
-}
-
-export function ListItemElement(props: PlateElementProps) {
-  const { children, className } = props
-
-  return (
-    <PlateElement {...props} as="li" className={cn('my-1', className)}>
-      {children}
-    </PlateElement>
-  )
-}
-
-export function ListItemContentElement(props: PlateElementProps) {
-  const { children } = props
-
-  return (
-    <PlateElement {...props} as="span">
-      {children}
-    </PlateElement>
-  )
-}
 

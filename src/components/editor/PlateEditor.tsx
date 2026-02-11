@@ -1,13 +1,12 @@
 'use client'
 
 import * as React from 'react'
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
 import { Plate, usePlateEditor } from 'platejs/react'
 import type { Value } from 'platejs'
 import { cn } from '@/lib/utils'
 import { uploadImageToStorage } from '@/lib/supabase/storage'
 import { logger } from '@/lib/logger'
+import { TooltipProvider } from '@/components/ui/Tooltip'
 
 import { editorPlugins } from './plate-plugins'
 import { EditorContainer, Editor } from './plate-ui/editor'
@@ -52,6 +51,12 @@ export function PlateEditor({
   className,
   resetKey = 0,
 }: PlateEditorProps) {
+  // Wait for client-side hydration before rendering the editor.
+  // Slate/Plate produces different DOM on server vs client which causes
+  // hydration mismatches in Next.js.
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => { setMounted(true) }, [])
+
   // Refs for debounced content sync
   const onChangeRef = React.useRef(onChange)
   React.useEffect(() => { onChangeRef.current = onChange }, [onChange])
@@ -135,8 +140,23 @@ export function PlateEditor({
     input.click()
   }, [editor])
 
+  if (!mounted) {
+    return (
+      <div
+        className={cn(
+          'plate-editor-wrapper',
+          'border border-gray-200 rounded-xl bg-white overflow-hidden',
+          'shadow-lg shadow-gray-200/50',
+          'ring-1 ring-gray-100',
+          'min-h-[300px] animate-pulse bg-gray-50',
+          className
+        )}
+      />
+    )
+  }
+
   return (
-    <DndProvider backend={HTML5Backend}>
+    <TooltipProvider>
       <div
         className={cn(
           'plate-editor-wrapper',
@@ -164,7 +184,7 @@ export function PlateEditor({
           </EditorContainer>
         </Plate>
       </div>
-    </DndProvider>
+    </TooltipProvider>
   )
 }
 
@@ -236,8 +256,10 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
       case 'h5':
       case 'h6': {
         const align = el.style.textAlign || undefined
+        // Check for document title (h1 with document-title class)
+        const isTitle = tag === 'h1' && el.classList.contains('document-title')
         nodes.push({
-          type: tag === 'h5' || tag === 'h6' ? 'h4' : tag,
+          type: isTitle ? 'title' : (tag === 'h5' || tag === 'h6' ? 'h4' : tag),
           ...(align && { align }),
           children: convertInlineChildren(el),
         })
@@ -373,6 +395,9 @@ function convertInlineChildren(parent: Node): Array<Record<string, unknown>> {
         return
       case 'code':
         children.push(...convertInlineChildren(el).map((c) => ({ ...c, code: true })))
+        return
+      case 'mark':
+        children.push(...convertInlineChildren(el).map((c) => ({ ...c, highlight: true })))
         return
       case 'a': {
         const url = (el as HTMLAnchorElement).href
@@ -531,6 +556,8 @@ function serializeNode(node: Record<string, unknown>): string {
   const isEmpty = !children || children.trim() === ''
 
   switch (type) {
+    case 'title':
+      return `<h1 class="document-title"${style}>${isEmpty ? '<br>' : children}</h1>`
     case 'p':
       return `<p${style}>${isEmpty ? '<br>' : children}</p>`
     case 'h1':
@@ -587,6 +614,7 @@ function serializeText(node: Record<string, unknown>): string {
   if (node.underline) text = `<u>${text}</u>`
   if (node.strikethrough) text = `<s>${text}</s>`
   if (node.code) text = `<code>${text}</code>`
+  if (node.highlight) text = `<mark>${text}</mark>`
 
   // Wrap with span if color is set
   const styles: string[] = []
