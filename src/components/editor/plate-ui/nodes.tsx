@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { PlateElement, PlateLeaf } from 'platejs/react'
-import type { PlateElementProps, PlateLeafProps } from 'platejs/react'
+import { PlateElement } from 'platejs/react'
+import type { PlateElementProps } from 'platejs/react'
 import { cn } from '@/lib/utils'
 
 // ============================================================================
@@ -284,47 +284,3 @@ export function ListItemContentElement(props: PlateElementProps) {
   )
 }
 
-// ============================================================================
-// Marks (Leaf rendering)
-// ============================================================================
-
-export function EditorLeaf(props: PlateLeafProps) {
-  const { leaf, children } = props
-  const l = leaf as Record<string, unknown>
-
-  let result = children
-
-  if (l.bold) {
-    result = <strong>{result}</strong>
-  }
-  if (l.italic) {
-    result = <em>{result}</em>
-  }
-  if (l.underline) {
-    result = <u>{result}</u>
-  }
-  if (l.strikethrough) {
-    result = <s>{result}</s>
-  }
-  if (l.code) {
-    result = (
-      <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-sm">
-        {result}
-      </code>
-    )
-  }
-
-  const style: React.CSSProperties = {}
-  if (l.color) {
-    style.color = l.color as string
-  }
-  if (l.backgroundColor) {
-    style.backgroundColor = l.backgroundColor as string
-  }
-
-  return (
-    <PlateLeaf {...props} style={Object.keys(style).length > 0 ? style : undefined}>
-      {result}
-    </PlateLeaf>
-  )
-}

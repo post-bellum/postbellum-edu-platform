@@ -41,6 +41,7 @@ import {
   TableCellElement,
   TableCellHeaderElement,
 } from './plate-ui/nodes'
+import { CodeLeaf } from '@/components/ui/plate/code-node'
 import { useDraggableAboveNodes } from './plate-ui/block-draggable'
 
 // ============================================================================
@@ -85,7 +86,7 @@ export const editorPlugins = [
   ItalicPlugin,
   UnderlinePlugin,
   StrikethroughPlugin,
-  CodePlugin,
+  CodePlugin.withComponent(CodeLeaf),
 
   // Node IDs (required for DnD)
   NodeIdPlugin,
