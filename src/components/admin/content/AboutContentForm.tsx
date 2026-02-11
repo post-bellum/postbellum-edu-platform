@@ -4,7 +4,7 @@ import { ContentFormSection } from './ContentFormSection'
 import { ArrayEditor } from './ArrayEditor'
 import { ImageUploadField } from './ImageUploadField'
 import { TextInput, TextAreaInput } from './FormField'
-import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { PlateEditor } from '@/components/editor/PlateEditor'
 import type {
   AboutContent,
   AboutPrinciple,
@@ -143,9 +143,9 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
         />
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-grey-700">Obsah (rich text)</label>
-          <RichTextEditor
+          <PlateEditor
             content={content.additionalTeam.content}
-            onChange={(html) => update('additionalTeam', { ...content.additionalTeam, content: html })}
+            onChange={(html: string) => update('additionalTeam', { ...content.additionalTeam, content: html })}
             className="min-h-[200px] [&_.tox-tinymce]:!h-[200px]"
           />
         </div>
@@ -190,9 +190,9 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
         />
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-grey-700">Obsah (rich text)</label>
-          <RichTextEditor
+          <PlateEditor
             content={content.advisoryBoard.content}
-            onChange={(html) => update('advisoryBoard', { ...content.advisoryBoard, content: html })}
+            onChange={(html: string) => update('advisoryBoard', { ...content.advisoryBoard, content: html })}
             className="min-h-[200px] [&_.tox-tinymce]:!h-[200px]"
           />
         </div>
