@@ -4,9 +4,18 @@ import * as React from 'react'
 import { Plate, usePlateEditor } from 'platejs/react'
 import type { Value } from 'platejs'
 import { cn } from '@/lib/utils'
-import { uploadImageToStorage } from '@/lib/supabase/storage'
+import { uploadImageToStorage, STORAGE_LIMITS } from '@/lib/supabase/storage'
 import { logger } from '@/lib/logger'
 import { TooltipProvider } from '@/components/ui/Tooltip'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/Dialog'
+import { Button } from '@/components/ui/Button'
 
 import { editorPlugins } from './plate-plugins'
 import { EditorContainer, Editor } from './plate-ui/editor'
@@ -56,6 +65,9 @@ export function PlateEditor({
   // hydration mismatches in Next.js.
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => { setMounted(true) }, [])
+
+  // "Image too large" info dialog
+  const [imageTooLargeInfo, setImageTooLargeInfo] = React.useState<{ sizeMB: string; maxMB: string } | null>(null)
 
   // Refs for debounced content sync
   const onChangeRef = React.useRef(onChange)
@@ -115,7 +127,17 @@ export function PlateEditor({
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Image upload handler
+  // Listen for "image too large" events from the ImagePlugin (drag-and-drop / paste)
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { sizeMB: string; maxMB: string }
+      setImageTooLargeInfo(detail)
+    }
+    window.addEventListener('plate-image-too-large', handler)
+    return () => window.removeEventListener('plate-image-too-large', handler)
+  }, [])
+
+  // Image upload handler (toolbar button)
   const handleInsertImage = React.useCallback(async () => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -123,6 +145,15 @@ export function PlateEditor({
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
+
+      // Hard reject images > 2MB
+      if (file.size > STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE) {
+        setImageTooLargeInfo({
+          sizeMB: (file.size / 1024 / 1024).toFixed(1),
+          maxMB: STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE_DISPLAY,
+        })
+        return
+      }
 
       try {
         const url = await uploadImageToStorage(file, 'lesson-materials', 'images')
@@ -184,6 +215,23 @@ export function PlateEditor({
           </EditorContainer>
         </Plate>
       </div>
+
+      {/* Image too large info dialog */}
+      <Dialog open={!!imageTooLargeInfo} onOpenChange={() => setImageTooLargeInfo(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="mb-4">Obrázek je příliš velký</DialogTitle>
+            <DialogDescription>
+              Vybraný obrázek má {imageTooLargeInfo?.sizeMB ?? '?'}MB. Maximální povolená velikost obrázku je {imageTooLargeInfo?.maxMB ?? '2MB'}. Prosím zmenšete obrázek a zkuste to znovu.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setImageTooLargeInfo(null)}>
+              Rozumím
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   )
 }

@@ -45,6 +45,7 @@ export function UserMaterialEditContent({
   const [title, setTitle] = React.useState(initialMaterial.title)
   const [content, setContent] = React.useState(initialMaterial.content || '')
   const [saveStatus, setSaveStatus] = React.useState<SaveStatus>('idle')
+  const [saveError, setSaveError] = React.useState<string | null>(null)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -81,25 +82,39 @@ export function UserMaterialEditContent({
     }
 
     setSaveStatus('saving')
+    setSaveError(null)
 
-    const formData = new FormData()
-    formData.set('title', newTitle)
-    formData.set('content', newContent)
+    try {
+      const formData = new FormData()
+      formData.set('title', newTitle)
+      formData.set('content', newContent)
 
-    const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
+      const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
 
-    // Check again if material was deleted during the request
-    if (isDeletedRef.current) {
-      return
-    }
+      // Check again if material was deleted during the request
+      if (isDeletedRef.current) {
+        return
+      }
 
-    if (result.success) {
-      setSaveStatus('saved')
-      lastSavedRef.current = { title: newTitle, content: newContent }
-      // Reset to idle after 2 seconds
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    } else {
+      if (result.success) {
+        setSaveStatus('saved')
+        lastSavedRef.current = { title: newTitle, content: newContent }
+        // Reset to idle after 2 seconds
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        setSaveStatus('error')
+        setSaveError(result.error || 'Neznámá chyba')
+      }
+    } catch (error) {
+      if (isDeletedRef.current) return
       setSaveStatus('error')
+      const message = error instanceof Error ? error.message : String(error)
+      // Detect body size limit errors
+      if (message.includes('Body exceeded') || message.includes('body size')) {
+        setSaveError('Obsah je příliš velký. Zkuste zmenšit obrázky nebo zkrátit text.')
+      } else {
+        setSaveError(message || 'Neznámá chyba při ukládání')
+      }
     }
   }, [initialMaterial.id])
 
@@ -266,8 +281,8 @@ export function UserMaterialEditContent({
         )
       case 'error':
         return (
-          <span className="text-red-600 text-sm">
-            Chyba při ukládání
+          <span className="text-red-600 text-sm" title={saveError || undefined}>
+            Chyba při ukládání{saveError ? `: ${saveError}` : ''}
           </span>
         )
       default:

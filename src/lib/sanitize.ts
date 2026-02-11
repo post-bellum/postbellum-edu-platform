@@ -50,7 +50,7 @@ export function sanitizeHTML(html: string): string {
       // Headings
       'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
       // Text formatting
-      'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'sub', 'sup',
+      'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'sub', 'sup', 'mark',
       // Lists
       'ul', 'ol', 'li',
       // Links and media

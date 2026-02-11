@@ -31,6 +31,7 @@ import {
   NumberedListPlugin,
 } from '@platejs/list-classic/react'
 import { TablePlugin, TableRowPlugin, TableCellPlugin, TableCellHeaderPlugin } from '@platejs/table/react'
+import { FontColorPlugin, FontBackgroundColorPlugin } from '@platejs/basic-styles/react'
 import { DndPlugin } from '@platejs/dnd'
 import { BlockSelectionPlugin } from '@platejs/selection/react'
 import { DndProvider } from 'react-dnd'
@@ -105,7 +106,35 @@ export const editorPlugins = [
 
   // Inline elements
   LinkPlugin.withComponent(LinkElement),
-  ImagePlugin.withComponent(ImageElement),
+  ImagePlugin.configure({
+    options: {
+      uploadImage: async (dataUrl: ArrayBuffer | string): Promise<string> => {
+        // Convert data URL to Blob for size check and upload
+        const dataUrlStr = typeof dataUrl === 'string' ? dataUrl : ''
+        if (!dataUrlStr.startsWith('data:')) return dataUrlStr
+
+        const res = await fetch(dataUrlStr)
+        const blob = await res.blob()
+        const ext = blob.type.split('/')[1]?.replace('svg+xml', 'svg') || 'png'
+        const file = new File([blob], `pasted-image.${ext}`, { type: blob.type })
+
+        const { STORAGE_LIMITS, uploadImageToStorage } = await import('@/lib/supabase/storage')
+
+        // Hard reject images > 2MB
+        if (file.size > STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE) {
+          const sizeMB = (file.size / 1024 / 1024).toFixed(1)
+          // Dispatch a custom event so PlateEditor can show the modal
+          window.dispatchEvent(new CustomEvent('plate-image-too-large', {
+            detail: { sizeMB, maxMB: STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE_DISPLAY },
+          }))
+          throw new Error('IMAGE_TOO_LARGE')
+        }
+
+        const url = await uploadImageToStorage(file, 'lesson-materials', 'images')
+        return url
+      },
+    },
+  }).withComponent(ImageElement),
   CaptionPlugin.configure({
     options: { query: { allow: ['img'] } },
   }),
@@ -117,6 +146,10 @@ export const editorPlugins = [
   StrikethroughPlugin,
   CodePlugin.withComponent(CodeLeaf),
   HighlightPlugin.withComponent(HighlightLeaf),
+
+  // Font styling (renders color/backgroundColor marks as inline styles)
+  FontColorPlugin,
+  FontBackgroundColorPlugin,
 
   // Node IDs (required for DnD and block selection)
   NodeIdPlugin,

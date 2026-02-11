@@ -38,6 +38,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/Tooltip'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/Dialog'
 import { cn } from '@/lib/utils'
 
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td]
@@ -400,6 +408,7 @@ function InsertButton({ style }: { style?: React.CSSProperties }) {
   const element = useElement()
   const [open, setOpen] = React.useState(false)
   const menuRef = React.useRef<HTMLDivElement>(null)
+  const [imageTooLargeInfo, setImageTooLargeInfo] = React.useState<{ sizeMB: string; maxMB: string } | null>(null)
 
   React.useEffect(() => {
     if (!open) return
@@ -451,23 +460,18 @@ function InsertButton({ style }: { style?: React.CSSProperties }) {
       input.onchange = async (e) => {
         const file = (e.target as HTMLInputElement).files?.[0]
         if (!file) return
-        try {
-          const { uploadImageToStorage } = await import('@/lib/supabase/storage')
-          const url = await uploadImageToStorage(file, 'lesson-materials', 'images')
-          if (url) {
-            editor.tf.insertNodes(
-              { type: 'img', url, children: [{ text: '' }] } as never,
-              { at: nextPath },
-            )
-          }
-        } catch {
-          // Fallback: insert image with placeholder
-          const url = URL.createObjectURL(file)
-          editor.tf.insertNodes(
-            { type: 'img', url, children: [{ text: '' }] } as never,
-            { at: nextPath },
-          )
+
+        // Hard reject images > 2MB
+        const { STORAGE_LIMITS } = await import('@/lib/supabase/storage')
+        if (file.size > STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE) {
+          setImageTooLargeInfo({
+            sizeMB: (file.size / 1024 / 1024).toFixed(1),
+            maxMB: STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE_DISPLAY,
+          })
+          return
         }
+
+        await doImageUpload(file, nextPath)
       }
       input.click()
     } else {
@@ -483,6 +487,26 @@ function InsertButton({ style }: { style?: React.CSSProperties }) {
       editor.tf.select(nextPath)
       editor.tf.focus()
     }, 0)
+  }
+
+  const doImageUpload = async (file: File, targetPath: number[]) => {
+    try {
+      const { uploadImageToStorage } = await import('@/lib/supabase/storage')
+      const url = await uploadImageToStorage(file, 'lesson-materials', 'images')
+      if (url) {
+        editor.tf.insertNodes(
+          { type: 'img', url, children: [{ text: '' }] } as never,
+          { at: targetPath },
+        )
+      }
+    } catch {
+      // Fallback: insert image with placeholder
+      const url = URL.createObjectURL(file)
+      editor.tf.insertNodes(
+        { type: 'img', url, children: [{ text: '' }] } as never,
+        { at: targetPath },
+      )
+    }
   }
 
   return (
@@ -532,6 +556,23 @@ function InsertButton({ style }: { style?: React.CSSProperties }) {
           ))}
         </div>
       )}
+
+      {/* Image too large info dialog */}
+      <Dialog open={!!imageTooLargeInfo} onOpenChange={() => setImageTooLargeInfo(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Obrázek je příliš velký</DialogTitle>
+            <DialogDescription>
+              Vybraný obrázek má {imageTooLargeInfo?.sizeMB ?? '?'}MB. Maximální povolená velikost obrázku je {imageTooLargeInfo?.maxMB ?? '2MB'}. Prosím zmenšete obrázek a zkuste to znovu.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setImageTooLargeInfo(null)}>
+              Rozumím
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
