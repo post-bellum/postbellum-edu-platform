@@ -1,0 +1,200 @@
+'use client'
+
+import * as React from 'react'
+import { useRouter } from 'next/navigation'
+import { generateLessonUrl } from '@/lib/utils'
+import { UserMaterialsTable } from './UserMaterialsTable'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { MobileEditWarningDialog } from '@/components/ui/MobileEditWarningDialog'
+import { LessonMaterialViewModal } from './LessonMaterialViewModal'
+import { UserEditedMaterialCard } from './UserEditedMaterialCard'
+import { deleteUserLessonMaterialAction, copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
+import type { UserLessonMaterial } from '@/types/lesson.types'
+import { ErrorDialog } from '@/components/ui/ErrorDialog'
+import { exportToPDF } from '@/lib/utils/pdf-export'
+import { useIsMobile } from '@/hooks/useIsMobile'
+
+interface UserLessonMaterialsSectionProps {
+  materials: UserLessonMaterial[]
+  lessonId: string
+  lessonTitle: string
+  lessonShortId?: string | null
+  onMaterialDeleted?: (materialId: string) => void
+}
+
+export function UserLessonMaterialsSection({ 
+  materials, 
+  lessonId,
+  lessonTitle,
+  lessonShortId,
+  onMaterialDeleted,
+}: UserLessonMaterialsSectionProps) {
+  const router = useRouter()
+  const isMobile = useIsMobile()
+  const [viewModalOpen, setViewModalOpen] = React.useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
+  const [selectedMaterial, setSelectedMaterial] = React.useState<UserLessonMaterial | null>(null)
+  const [materialToDelete, setMaterialToDelete] = React.useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = React.useState(false)
+  const [duplicatingMaterialId, setDuplicatingMaterialId] = React.useState<string | null>(null)
+  const [isExportingPDF, setIsExportingPDF] = React.useState<string | null>(null)
+  const [errorDialogOpen, setErrorDialogOpen] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [mobileEditWarningOpen, setMobileEditWarningOpen] = React.useState(false)
+
+  // Generate base lesson URL using short_id if available
+  const idToUse = lessonShortId || lessonId
+  const baseLessonUrl = generateLessonUrl(idToUse, lessonTitle)
+
+  const handleView = (material: UserLessonMaterial) => {
+    setSelectedMaterial(material)
+    setViewModalOpen(true)
+  }
+
+  const handleEdit = (material: UserLessonMaterial) => {
+    if (isMobile) {
+      setMobileEditWarningOpen(true)
+    } else {
+      router.push(`${baseLessonUrl}/materials/${material.id}`)
+    }
+  }
+
+  const handleDeleteClick = (materialId: string) => {
+    setMaterialToDelete(materialId)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDuplicate = async (material: UserLessonMaterial) => {
+    if (isMobile) {
+      setMobileEditWarningOpen(true)
+      return
+    }
+
+    setDuplicatingMaterialId(material.id)
+    const result = await copyLessonMaterialAction(material.source_material_id, lessonId)
+
+    if (result.success && result.data) {
+      router.push(`${baseLessonUrl}/materials/${result.data.id}`)
+    } else {
+      setErrorMessage(result.error || 'Chyba při duplikování materiálu')
+      setErrorDialogOpen(true)
+    }
+    setDuplicatingMaterialId(null)
+  }
+
+  const handleExportPDF = async (material: UserLessonMaterial) => {
+    if (!material.content) return
+
+    setIsExportingPDF(material.id)
+    setErrorMessage(null)
+
+    try {
+      await exportToPDF(material.title, material.content)
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Chyba při exportu do PDF'
+      setErrorMessage(errorMsg)
+      setErrorDialogOpen(true)
+    } finally {
+      setIsExportingPDF(null)
+    }
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!materialToDelete) return
+
+    setIsDeleting(true)
+    const result = await deleteUserLessonMaterialAction(materialToDelete, lessonId)
+    
+    if (result.success) {
+      onMaterialDeleted?.(materialToDelete)
+      setDeleteDialogOpen(false)
+    } else {
+      setErrorMessage(result.error || 'Chyba při mazání materiálu')
+      setErrorDialogOpen(true)
+    }
+    
+    setIsDeleting(false)
+    setMaterialToDelete(null)
+  }
+
+  if (materials.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="flex flex-col gap-7">
+      {/* Section Title */}
+      <div className="px-4">
+        <h2 className="font-display text-2xl font-semibold leading-display text-text-strong">
+          Moje upravené materiály k lekci
+        </h2>
+      </div>
+
+      {/* Desktop Table View */}
+      <UserMaterialsTable<UserLessonMaterial>
+        materials={materials}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDownload={handleExportPDF}
+        onDuplicate={handleDuplicate}
+        onDelete={(material) => handleDeleteClick(material.id)}
+        isDownloading={isExportingPDF}
+        isDuplicating={duplicatingMaterialId}
+      />
+
+      {/* Mobile Card View */}
+      <div className="md:hidden flex flex-col gap-3">
+        {materials.map((material) => (
+          <UserEditedMaterialCard
+            key={material.id}
+            material={material}
+            onView={() => handleView(material)}
+            onEdit={() => handleEdit(material)}
+            onDownload={() => handleExportPDF(material)}
+            onDuplicate={() => handleDuplicate(material)}
+            onDelete={() => handleDeleteClick(material.id)}
+            isExportingPDF={isExportingPDF === material.id}
+            isDuplicating={duplicatingMaterialId === material.id}
+          />
+        ))}
+      </div>
+
+      {/* View Modal */}
+      {selectedMaterial && (
+        <LessonMaterialViewModal
+          open={viewModalOpen}
+          onOpenChange={setViewModalOpen}
+          title={selectedMaterial.title}
+          content={selectedMaterial.content}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open)
+          if (!open) setMaterialToDelete(null)
+        }}
+        title="Smazat materiál"
+        description="Opravdu chcete smazat tento materiál? Tato akce je nevratná."
+        confirmText="Smazat"
+        cancelText="Zrušit"
+        variant="destructive"
+        isLoading={isDeleting}
+        onConfirm={handleDeleteConfirm}
+      />
+
+      <ErrorDialog
+        open={errorDialogOpen}
+        onOpenChange={setErrorDialogOpen}
+        message={errorMessage}
+      />
+
+      <MobileEditWarningDialog 
+        open={mobileEditWarningOpen} 
+        onOpenChange={setMobileEditWarningOpen} 
+      />
+    </div>
+  )
+}

@@ -1,0 +1,115 @@
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
+import { authConfig } from '@/lib/supabase/config';
+import type { Database } from '@/types/database.types';
+import { logger } from '@/lib/logger';
+
+function checkBasicAuth(request: NextRequest): NextResponse | null {
+  const password = process.env.PASSWORD_PROTECTION_PASSWORD;
+  if (!password) return null;
+
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Basic ')) {
+    return new NextResponse('Authentication required', {
+      status: 401,
+      headers: { 'WWW-Authenticate': 'Basic realm="StoryOn", charset="UTF-8"' },
+    });
+  }
+
+  try {
+    const base64Credentials = authHeader.slice(6);
+    const decoded = atob(base64Credentials);
+    const colonIndex = decoded.indexOf(':');
+    const providedPassword = colonIndex === -1 ? decoded : decoded.slice(colonIndex + 1);
+    if (providedPassword !== password) {
+      return new NextResponse('Invalid credentials', {
+        status: 401,
+        headers: { 'WWW-Authenticate': 'Basic realm="StoryOn", charset="UTF-8"' },
+      });
+    }
+  } catch {
+    return new NextResponse('Invalid credentials', {
+      status: 401,
+      headers: { 'WWW-Authenticate': 'Basic realm="StoryOn", charset="UTF-8"' },
+    });
+  }
+
+  return null;
+}
+
+export default async function proxy(request: NextRequest) {
+  const basicAuthResponse = checkBasicAuth(request);
+  if (basicAuthResponse) return basicAuthResponse;
+
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !anonKey) {
+    logger.error('Missing Supabase environment variables in middleware');
+    return supabaseResponse; // Continue without auth rather than breaking the app
+  }
+
+  const supabase = createServerClient<Database>(url, anonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  try {
+    // Refresh session if expired - required for Server Components
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error) {
+      logger.error('Auth error in middleware', error);
+    }
+
+    // Protected routes
+    const isProtectedPath = authConfig.protectedPaths.some((path) =>
+      request.nextUrl.pathname.startsWith(path)
+    );
+
+    if (isProtectedPath && !user) {
+      // Redirect to login if trying to access protected route without auth
+      return NextResponse.redirect(new URL(authConfig.redirects.login, request.url));
+    }
+  } catch (error) {
+    logger.error('Middleware error', error);
+    // Continue without auth rather than breaking the app
+  }
+
+  return supabaseResponse;
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+};

@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
+import type { Metadata } from 'next';
+import './globals.css';
+import { NavigationBarServer } from '@/components/NavigationBarServer';
+import { Footer } from '@/components/Footer';
+import { GlobalAuthHandler } from '@/components/auth';
 
 export const metadata: Metadata = {
-  title: "Post Bellum Educational Platform",
-  description: "Vzdělávací platforma pro učitele k objevování a používání historických učebních materiálů",
+  title: 'Post Bellum Educational Platform',
+  description: 'Vzdělávací platforma pro učitele k objevování a používání historických učebních materiálů',
 };
 
 export default function RootLayout({
@@ -16,7 +16,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="cs">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <link rel="stylesheet" href="https://use.typekit.net/anz3jmg.css" />
+      </head>
+      <body className="font-body antialiased min-h-screen flex flex-col bg-white">
+        <NavigationBarServer />
+        <main className="flex-1 max-w-[1920px] mx-auto w-full bg-white">
+          {children}
+        </main>
+        <Footer />
+        <GlobalAuthHandler />
+      </body>
     </html>
   );
 }
