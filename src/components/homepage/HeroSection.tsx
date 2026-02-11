@@ -31,13 +31,20 @@ export function HeroSection({ content, tickerText }: HeroSectionProps) {
         {/* Mobile Hero Illustration - Students */}
         <div className="md:hidden relative w-full h-[283px] flex items-center justify-center">
           <div className="relative w-[320px] h-[293px] -mb-4">
-            <Image
-              src="/illustrations/homepage/illustration-studenti-colored.png"
+          <ImageReveal
+              strokeSrc="/illustrations/homepage/illustration-studenti-stroke.png"
+              coloredSrc="/illustrations/homepage/illustration-studenti-colored.png"
               alt="Studenti u stolu"
-              fill
-              className="object-contain"
-              sizes="320px"
-              priority
+              width={320}
+              height={320}
+              animation="crossfade"
+              duration={1000}
+              autoPlay={true}
+              autoPlayDelay={200}
+              fill={true}
+              objectFit="cover"
+              sizes="100vw"
+              className="w-full h-full"
             />
           </div>
         </div>
