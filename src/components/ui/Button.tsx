@@ -34,8 +34,8 @@ const buttonVariants = cva(
       size: {
         // Post Bellum sizes
         // Asymmetric vertical padding compensates for Tablet Gothic font sitting slightly high
-        large: 'h-[52px] px-7 pt-[10px] pb-[11px] text-lg leading-7 rounded-full',
-        medium: 'h-12 px-5 pt-[7px] pb-[9px] text-lg leading-7 rounded-full',
+        large: 'h-[52px] px-7 pt-[9px] pb-[11px] text-lg leading-7 rounded-full',
+        medium: 'h-12 px-5 pt-[6px] pb-[9px] text-lg leading-7 rounded-full',
         small: 'h-10 px-4 pt-[4px] pb-[5px] text-base leading-7 rounded-full',
         // Legacy sizes (mapped to Post Bellum)
         default: 'h-12 px-5 pt-[11px] pb-[9px] text-lg leading-7 rounded-full',
