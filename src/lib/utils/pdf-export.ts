@@ -724,6 +724,12 @@ export async function exportToPDF(
     for (let i = 0; i < pages.length; i++) {
       const { element } = pages[i]
 
+      // Position element off-screen so it's not visible during rendering
+      element.style.position = 'fixed'
+      element.style.left = '-9999px'
+      element.style.top = '0'
+      element.style.zIndex = '-1'
+
       // Temporarily add to DOM for rendering
       document.body.appendChild(element)
 
