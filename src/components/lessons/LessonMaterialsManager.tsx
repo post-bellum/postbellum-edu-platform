@@ -29,7 +29,7 @@ const specificationLabels: Record<LessonSpecification, string> = {
 }
 
 const durationLabels: Record<LessonDuration, string> = {
-  30: '30 min',
+  30: '20 min',
   45: '45 min',
   90: '90 min',
 }

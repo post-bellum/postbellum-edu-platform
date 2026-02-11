@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { ImageReveal } from '@/components/ui/ImageReveal';
 import { Button } from '@/components/ui/Button';
 import { Ticker } from './Ticker';

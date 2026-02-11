@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
-import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { PlateEditor } from '@/components/editor/PlateEditor'
 import { updateUserLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
@@ -94,7 +94,7 @@ export function UserLessonMaterialEditModal({
           <div className="flex-1 overflow-hidden flex flex-col min-h-0">
             <Label className="mb-2">Obsah</Label>
             <div className="flex-1 overflow-y-auto">
-              <RichTextEditor
+              <PlateEditor
                 content={content}
                 onChange={setContent}
                 placeholder="Obsah materiálu..."

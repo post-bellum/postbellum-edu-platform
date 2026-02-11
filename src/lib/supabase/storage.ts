@@ -3,8 +3,11 @@ import { logger } from '@/lib/logger'
 
 // Storage limits (must match bucket configuration in migration)
 export const STORAGE_LIMITS = {
-  MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+  MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB (general uploads)
   MAX_FILE_SIZE_DISPLAY: '5MB',
+  /** Hard limit for images in the editor (2MB) */
+  MAX_EDITOR_IMAGE_SIZE: 2 * 1024 * 1024,
+  MAX_EDITOR_IMAGE_SIZE_DISPLAY: '2MB',
   ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
   /** Image + PDF for additional activity attachments */
   ALLOWED_ACTIVITY_FILE_TYPES: [

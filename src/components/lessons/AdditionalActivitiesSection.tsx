@@ -25,7 +25,7 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
   const [previewTitle, setPreviewTitle] = React.useState<string>('')
   const [isQrCode, setIsQrCode] = React.useState(false)
 
-  const openPreview = async (url: string, title: string, activity: AdditionalActivity) => {
+  const openPreview = async (url: string, title: string) => {
     // Preload image to detect QR code before opening modal
     const img = new Image()
     img.src = url
@@ -129,7 +129,7 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
                         variant="secondary"
                         size="medium"
                         className="w-full"
-                        onClick={() => openPreview(activity.image_url!, activity.title, activity)}
+                        onClick={() => openPreview(activity.image_url!, activity.title)}
                       >
                         <ImageIcon className="w-5 h-5 mr-2" />
                         Zvětšit
