@@ -24,13 +24,13 @@ import {
 // Page dimensions (imported from shared constants)
 // ============================================================================
 
-const PAGE_WIDTH = PAGE_DIMS.width  // 794px - A4 width at 96 DPI
-const PAGE_HEIGHT = PAGE_DIMS.height // 1123px - A4 height at 96 DPI
+const PAGE_WIDTH = PAGE_DIMS.width  // 850px - A4 width (scaled for screen display)
+const PAGE_HEIGHT = PAGE_DIMS.height // 1202px - A4 height (maintains 1:1.414 ratio)
 const MARGIN_TOP = PAGE_DIMS.margin.top // 60px
 const MARGIN_BOTTOM = PAGE_DIMS.margin.bottom // 80px
 const MARGIN_LEFT = PAGE_DIMS.margin.left // 60px
 const MARGIN_RIGHT = PAGE_DIMS.margin.right // 60px
-const USABLE_WIDTH = USABLE_PAGE_WIDTH // 674px
+const USABLE_WIDTH = USABLE_PAGE_WIDTH // 730px
 
 
 // ============================================================================
@@ -105,6 +105,14 @@ const PRINT_STYLES = `
     font-weight: 600;
     margin-top: 1em;
     margin-bottom: 0.5em;
+  }
+
+  /* Remove top margin from first heading in content */
+  body > h1:first-child,
+  body > h2:first-child,
+  body > h3:first-child,
+  body > h4:first-child {
+    margin-top: 0;
   }
 
   p {
@@ -294,6 +302,14 @@ const PDF_CONTENT_STYLES = `
     margin-top: 1em;
     margin-bottom: 0.5em;
     clear: both;
+  }
+
+  /* Remove top margin from first heading in content */
+  .pdf-page-render h1:first-child,
+  .pdf-page-render h2:first-child,
+  .pdf-page-render h3:first-child,
+  .pdf-page-render h4:first-child {
+    margin-top: 0;
   }
 
   .pdf-page-render p {

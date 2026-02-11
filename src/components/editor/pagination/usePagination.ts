@@ -4,7 +4,7 @@
  * Creates a Word/Google Docs-like pagination experience with fixed A4 pages.
  *
  * Key principles:
- * - Pages are ALWAYS exactly 1123px tall (A4 at 96 DPI)
+ * - Pages are ALWAYS exactly 1202px tall (A4 proportions, scaled for display)
  * - Pages never resize - content flows to the next page
  * - At least 1 full page is always shown
  * - Pages are pre-allocated (always show 1 buffer page ahead)
@@ -37,14 +37,14 @@ function getBlockHeight(element: Element): number {
 
 /**
  * Calculate total height for N complete pages.
- * Each page is exactly PAGE_HEIGHT (1123px) with gaps between.
+ * Each page is exactly PAGE_HEIGHT (1202px) with gaps between.
  */
 function calculatePagesHeight(pageCount: number): number {
   if (pageCount <= 0) pageCount = 1
 
-  // Each page: usable height (983px) + top/bottom margins (60+80)
+  // Each page: usable height (1062px) + top/bottom margins (60+80)
   // Between pages: gap (40px) + margins that create the break visual (60+80)
-  const PAGE_HEIGHT = PAGE_DIMS.height // 1123px
+  const PAGE_HEIGHT = PAGE_DIMS.height // 1202px
   const GAP_HEIGHT = PAGE_GAP // 40px
 
   // Total: N pages + (N-1) gaps
@@ -96,7 +96,7 @@ function debounce<T extends (...args: unknown[]) => void>(
  * - Measures content blocks and calculates which blocks overflow to next page
  * - Always pre-allocates complete pages (minimum 1 page)
  * - Adds buffer page when content approaches end of last page
- * - Pages are FIXED height (1123px) - they never resize
+ * - Pages are FIXED height (1202px) - they never resize
  *
  * @param editorRef - Ref to the Slate editor DOM element
  * @param surfaceRef - Ref to the paper surface container

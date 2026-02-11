@@ -5,7 +5,7 @@
  * Ensures consistent rendering across all output modes.
  *
  * A4 dimensions: 210mm x 297mm
- * At 96 DPI: 794px x 1123px
+ * Display size: 850px x 1202px (scaled for better screen readability)
  * Editor padding: 60px top, 80px bottom, 60px sides
  */
 
@@ -43,6 +43,14 @@
   box-sizing: border-box;
 }
 
+/* Remove top margin from first heading in continuous editor (only the very first block) */
+.continuous-editor-content > :first-child h1,
+.continuous-editor-content > :first-child h2,
+.continuous-editor-content > :first-child h3,
+.continuous-editor-content > :first-child h4 {
+  margin-top: 0;
+}
+
 /* ============================================================================
    Preview Container - used for paginated preview mode
    ============================================================================ */
@@ -65,10 +73,18 @@
 }
 
 .page-preview-page-continuous {
-  max-width: 674px;
+  max-width: 730px;
   margin: 0 auto;
   padding: 24px 60px 48px;
   width: 100%;
+}
+
+/* Remove top margin from first heading in continuous preview */
+.page-preview-page-continuous > h1:first-child,
+.page-preview-page-continuous > h2:first-child,
+.page-preview-page-continuous > h3:first-child,
+.page-preview-page-continuous > h4:first-child {
+  margin-top: 0;
 }
 
 .page-preview-page-wrapper {
@@ -143,6 +159,14 @@
   font-weight: 600;
   margin-top: 1em;
   margin-bottom: 0.5em;
+}
+
+/* Remove top margin from first heading only on the very first page */
+.page-preview-page-wrapper:first-child .page-preview-page > h1:first-child,
+.page-preview-page-wrapper:first-child .page-preview-page > h2:first-child,
+.page-preview-page-wrapper:first-child .page-preview-page > h3:first-child,
+.page-preview-page-wrapper:first-child .page-preview-page > h4:first-child {
+  margin-top: 0;
 }
 
 .page-preview-page p {
