@@ -235,7 +235,7 @@ export function LessonMaterialForm({
                   <SelectValue placeholder="Vyberte délku" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="30">30 min</SelectItem>
+                  <SelectItem value="30">20 min</SelectItem>
                   <SelectItem value="45">45 min</SelectItem>
                   <SelectItem value="90">90 min</SelectItem>
                 </SelectContent>
