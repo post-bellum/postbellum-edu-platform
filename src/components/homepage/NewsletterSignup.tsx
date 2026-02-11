@@ -60,7 +60,7 @@ export function NewsletterSignup() {
       <div className="flex-1 flex flex-col gap-5 items-start max-w-full md:max-w-[500px] w-full">
         <div className="flex flex-col gap-3 items-start px-3 w-full">
           <h3 className="font-display text-2xl font-semibold leading-none text-text-strong w-full">
-            Nechte mě vědět o novinkách
+            Dejte mi vědět o novinkách
           </h3>
           <p className="font-body text-xs sm:text-sm leading-[1.4] text-text-subtle w-full">
             Buďte první, kdo se dozví o nové lekci inspirované životními příběhy.
