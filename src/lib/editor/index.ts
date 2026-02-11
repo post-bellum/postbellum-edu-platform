@@ -1,9 +1,8 @@
 /**
  * Editor Configuration Exports
- * 
- * Centralized exports for TinyMCE editor configuration and commands.
+ *
+ * Centralized exports for the Plate.js block editor.
  */
 
-export * from './tinymce-config'
-export { setupEditor, type SetupEditorOptions } from './tinymce-commands'
-
+export { PlateEditor } from '@/components/editor/PlateEditor'
+export { PagedPreview } from '@/components/editor/PagedPreview'

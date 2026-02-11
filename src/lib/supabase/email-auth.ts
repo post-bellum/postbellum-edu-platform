@@ -122,6 +122,7 @@ export async function signInWithEmail(email: string, password: string) {
  * Verify OTP code
  * For QA emails, accepts the configured QA OTP code and creates a valid session
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function verifyOTP(email: string, token: string, _password?: string) {
   try {
     // Try QA verification first via server action (server has reliable env var access)

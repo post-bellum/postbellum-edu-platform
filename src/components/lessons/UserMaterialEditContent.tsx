@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { FeedbackModal } from '@/components/ui/FeedbackModal'
-import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { PlateEditor } from '@/components/editor/PlateEditor'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { MaterialEditSidebar } from './MaterialEditSidebar'
 import { Breadcrumbs } from './Breadcrumbs'
@@ -45,6 +45,7 @@ export function UserMaterialEditContent({
   const [title, setTitle] = React.useState(initialMaterial.title)
   const [content, setContent] = React.useState(initialMaterial.content || '')
   const [saveStatus, setSaveStatus] = React.useState<SaveStatus>('idle')
+  const [saveError, setSaveError] = React.useState<string | null>(null)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -81,25 +82,39 @@ export function UserMaterialEditContent({
     }
 
     setSaveStatus('saving')
+    setSaveError(null)
 
-    const formData = new FormData()
-    formData.set('title', newTitle)
-    formData.set('content', newContent)
+    try {
+      const formData = new FormData()
+      formData.set('title', newTitle)
+      formData.set('content', newContent)
 
-    const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
+      const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
 
-    // Check again if material was deleted during the request
-    if (isDeletedRef.current) {
-      return
-    }
+      // Check again if material was deleted during the request
+      if (isDeletedRef.current) {
+        return
+      }
 
-    if (result.success) {
-      setSaveStatus('saved')
-      lastSavedRef.current = { title: newTitle, content: newContent }
-      // Reset to idle after 2 seconds
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    } else {
+      if (result.success) {
+        setSaveStatus('saved')
+        lastSavedRef.current = { title: newTitle, content: newContent }
+        // Reset to idle after 2 seconds
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        setSaveStatus('error')
+        setSaveError(result.error || 'Neznámá chyba')
+      }
+    } catch (error) {
+      if (isDeletedRef.current) return
       setSaveStatus('error')
+      const message = error instanceof Error ? error.message : String(error)
+      // Detect body size limit errors
+      if (message.includes('Body exceeded') || message.includes('body size')) {
+        setSaveError('Obsah je příliš velký. Zkuste zmenšit obrázky nebo zkrátit text.')
+      } else {
+        setSaveError(message || 'Neznámá chyba při ukládání')
+      }
     }
   }, [initialMaterial.id])
 
@@ -218,7 +233,7 @@ export function UserMaterialEditContent({
           message: result.error || 'Nepodařilo se smazat materiál',
         })
       }
-    } catch (error) {
+    } catch {
       setFeedbackModal({
         open: true,
         type: 'error',
@@ -249,6 +264,13 @@ export function UserMaterialEditContent({
   }, [title, content])
 
   const getSaveStatusDisplay = () => {
+    if (isExportingPDF) {
+      return (
+        <span className="flex items-center gap-1 text-gray-500 text-sm">
+          Exportuji...
+        </span>
+      )
+    }
     switch (saveStatus) {
       case 'saving':
         return (
@@ -266,8 +288,8 @@ export function UserMaterialEditContent({
         )
       case 'error':
         return (
-          <span className="text-red-600 text-sm">
-            Chyba při ukládání
+          <span className="text-red-600 text-sm" title={saveError || undefined}>
+            Chyba při ukládání{saveError ? `: ${saveError}` : ''}
           </span>
         )
       default:
@@ -305,7 +327,7 @@ export function UserMaterialEditContent({
 
       {/* Title and Actions - Full Width Header */}
       <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-        <div className="w-full max-w-[860px] shrink-0">
+        <div className="w-full max-w-[630px] shrink-0">
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Název
           </label>
@@ -337,17 +359,8 @@ export function UserMaterialEditContent({
             onClick={handleExportPDF}
             disabled={!content || isExportingPDF}
           >
-            {isExportingPDF ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Exportuji...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                Stáhnout PDF
-              </>
-            )}
+            <Download className="w-4 h-4" />
+            Stáhnout PDF
           </Button>
 
           {exportError && (
@@ -371,7 +384,7 @@ export function UserMaterialEditContent({
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Main Editor - Left Side */}
         <div className="flex-1 lg:flex-2 lg:w-0">
-          <RichTextEditor
+          <PlateEditor
             content={content}
             onChange={handleContentChange}
             placeholder="Obsah materiálu..."

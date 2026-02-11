@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { Textarea } from '@/components/ui/Textarea'
-import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { PlateEditor } from '@/components/editor/PlateEditor'
 import {
   Dialog,
   DialogContent,
@@ -183,7 +183,7 @@ export function LessonMaterialForm({
 
           <div className="space-y-2">
             <Label htmlFor="content">Obsah</Label>
-            <RichTextEditor
+            <PlateEditor
               content={content}
               onChange={setContent}
               placeholder="Začněte psát obsah materiálu... Můžete kopírovat z Wordu nebo Google Docs."
