@@ -161,8 +161,17 @@ export function PlateEditor({
           editor.tf.insertNodes({
             type: 'img',
             url,
+            align: 'center',
             children: [{ text: '' }],
           } as never)
+          // Trigger immediate sync bypassing debounce to ensure parent has latest HTML
+          setTimeout(() => {
+            const html = serializeToHtml(editor.children as Value)
+            if (html !== lastSyncedRef.current) {
+              lastSyncedRef.current = html
+              onChangeRef.current(html)
+            }
+          }, 100)
         }
       } catch (error) {
         logger.error('Error uploading image', error)
@@ -347,9 +356,16 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
         if (imgs.length === 1 && el.childNodes.length === 1) {
           const img = imgs[0] as HTMLImageElement
           const width = parseImgWidth(img)
+          // Check for alignment class on the img element
+          const className = img.className || ''
+          let imgAlign: string | undefined = 'center' // default to center
+          if (className.includes('img-align-left')) imgAlign = 'left'
+          else if (className.includes('img-align-right')) imgAlign = 'right'
+          else if (className.includes('img-align-center')) imgAlign = 'center'
           nodes.push({
             type: 'img',
             url: img.src,
+            align: imgAlign,
             ...(width !== undefined && { width }),
             children: [{ text: '' }],
           })
@@ -385,17 +401,17 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
         return
       case 'img': {
         const className = el.className || ''
-        let align: string | undefined
-        if (className.includes('img-align-center')) align = 'center'
-        else if (className.includes('img-align-left')) align = 'left'
+        let align: string = 'center' // default to center
+        if (className.includes('img-align-left')) align = 'left'
         else if (className.includes('img-align-right')) align = 'right'
+        else if (className.includes('img-align-center')) align = 'center'
 
         const width = parseImgWidth(el as HTMLImageElement)
 
         nodes.push({
           type: 'img',
           url: (el as HTMLImageElement).src,
-          ...(align && { align }),
+          align,
           ...(width !== undefined && { width }),
           children: [{ text: '' }],
         })
@@ -405,9 +421,16 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
         const img = el.querySelector('img') as HTMLImageElement | null
         if (img) {
           const width = parseImgWidth(img) ?? parseImgWidth(el as HTMLElement)
+          // Check for alignment class on the img element
+          const className = img.className || ''
+          let align: string = 'center' // default to center
+          if (className.includes('img-align-left')) align = 'left'
+          else if (className.includes('img-align-right')) align = 'right'
+          else if (className.includes('img-align-center')) align = 'center'
           nodes.push({
             type: 'img',
             url: img.src,
+            align,
             ...(width !== undefined && { width }),
             children: [{ text: '' }],
           })
@@ -695,8 +718,14 @@ function serializeNode(node: Record<string, unknown>): string {
     }
       case 'img': {
         const url = (node.url as string) || ''
-        const imgAlign = node.align as string | undefined
+        const imgAlign = (node.align as string | undefined) || 'center' // default to center
         const imgWidth = node.width as number | string | undefined
+        
+        // Debug: log image node to see what properties it actually has
+        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.log('[Image Serialization] node:', { type: node.type, url: node.url, align: node.align, hasAlign: 'align' in node })
+        }
+        
         let className = ''
         if (imgAlign === 'left') className = 'img-align-left'
         else if (imgAlign === 'right') className = 'img-align-right'

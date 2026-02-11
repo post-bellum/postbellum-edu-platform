@@ -112,7 +112,12 @@ export const editorPlugins = [
 
   // Inline elements
   LinkPlugin.withComponent(LinkElement),
-  ImagePlugin.configure({
+  ImagePlugin.extend({
+    node: {
+      props: () => ({
+        align: 'center', // Default alignment for all image nodes
+      }),
+    },
     options: {
       uploadImage: async (dataUrl: ArrayBuffer | string): Promise<string> => {
         // Convert data URL to Blob for size check and upload
