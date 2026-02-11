@@ -16,7 +16,6 @@
 import { logger } from '@/lib/logger'
 import {
   PAGE_DIMS,
-  USABLE_PAGE_HEIGHT,
   USABLE_PAGE_WIDTH,
 } from '@/components/editor/pagination/constants'
 

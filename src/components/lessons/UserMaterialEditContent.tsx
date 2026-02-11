@@ -233,7 +233,7 @@ export function UserMaterialEditContent({
           message: result.error || 'Nepodařilo se smazat materiál',
         })
       }
-    } catch (error) {
+    } catch {
       setFeedbackModal({
         open: true,
         type: 'error',

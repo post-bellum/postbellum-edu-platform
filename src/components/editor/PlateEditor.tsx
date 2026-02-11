@@ -178,7 +178,7 @@ export function PlateEditor({
       }
     }
     input.click()
-  }, [editor])
+  }, [editor, serializeToHtml])
 
   if (!mounted) {
     return (
@@ -659,9 +659,14 @@ function convertTable(tableEl: HTMLElement): Record<string, unknown> {
 /**
  * Serialize Plate value to HTML string.
  * Produces clean HTML compatible with the existing PDF/print pipeline.
+ * Always returns at least a single empty paragraph to prevent empty content issues.
  */
 function serializePlateToHtml(value: Value): string {
-  return value.map((node) => serializeNode(node as Record<string, unknown>)).join('')
+  if (!value || value.length === 0) {
+    return '<p><br></p>'
+  }
+  const html = value.map((node) => serializeNode(node as Record<string, unknown>)).join('')
+  return html || '<p><br></p>'
 }
 
 function serializeNode(node: Record<string, unknown>): string {
@@ -723,7 +728,7 @@ function serializeNode(node: Record<string, unknown>): string {
         
         // Debug: log image node to see what properties it actually has
         if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-          console.log('[Image Serialization] node:', { type: node.type, url: node.url, align: node.align, hasAlign: 'align' in node })
+          logger.debug('[Image Serialization] node:', { type: node.type, url: node.url, align: node.align, hasAlign: 'align' in node })
         }
         
         let className = ''
