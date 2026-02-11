@@ -39,7 +39,7 @@ export function Footer() {
             <p className="leading-6">
               Ilustrace:{' '}
               <a 
-                href="https://www.instagram.com/jakubmikulastik" 
+                href="https://www.behance.net/jmikulastik" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-brand-primary hover:text-text-strong hover:underline"
