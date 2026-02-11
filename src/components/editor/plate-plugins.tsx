@@ -31,6 +31,7 @@ import {
   NumberedListPlugin,
 } from '@platejs/list-classic/react'
 import { TablePlugin, TableRowPlugin, TableCellPlugin, TableCellHeaderPlugin } from '@platejs/table/react'
+import { ColumnPlugin, ColumnItemPlugin } from '@platejs/layout/react'
 import { FontColorPlugin, FontBackgroundColorPlugin } from '@platejs/basic-styles/react'
 import { DndPlugin } from '@platejs/dnd'
 import { BlockSelectionPlugin } from '@platejs/selection/react'
@@ -67,6 +68,7 @@ import {
   NumberedListElement,
   ListItemElement,
 } from '@/components/ui/plate/list-classic-node'
+import { ColumnGroupElement, ColumnElement } from '@/components/ui/column-node'
 import { CodeLeaf } from '@/components/ui/plate/code-node'
 import { HighlightLeaf } from '@/components/ui/plate/highlight-node'
 import { BlockSelection } from '@/components/ui/plate/block-selection'
@@ -97,6 +99,10 @@ export const editorPlugins = [
   ListItemContentPlugin,
   BulletedListPlugin.withComponent(BulletedListElement),
   NumberedListPlugin.withComponent(NumberedListElement),
+
+  // Columns (multi-column layout for side-by-side content)
+  ColumnPlugin.withComponent(ColumnGroupElement),
+  ColumnItemPlugin.withComponent(ColumnElement),
 
   // Table
   TablePlugin.withComponent(TableElement),

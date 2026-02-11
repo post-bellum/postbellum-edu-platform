@@ -204,6 +204,26 @@
   margin-right: auto;
 }
 
+/* Column layout (side-by-side content) */
+.plate-column-group,
+.page-preview-page .plate-column-group {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.plate-column,
+.page-preview-page .plate-column {
+  min-width: 0;
+}
+
+/* Ensure gutter controls (add block, drag handle) are visible inside columns */
+.plate-column-group .slate-gutterLeft,
+.plate-column .slate-gutterLeft {
+  z-index: 60;
+}
+
 .page-preview-page table {
   border-collapse: collapse;
   border-spacing: 0;

@@ -19,8 +19,10 @@ import {
   Minus,
   Image as ImageIcon,
   Table,
+  Columns2,
 } from 'lucide-react'
 import { type TElement, getPluginByType, isType, KEYS } from 'platejs'
+import { insertColumnGroup } from '@platejs/layout'
 import {
   type PlateEditor,
   type PlateElementProps,
@@ -147,13 +149,12 @@ function Draggable(props: PlateElementProps) {
         setDragButtonTop(calcDragButtonTop(editor, element))
       }}
     >
-      {!isInTable && (
+      {!isInTable && !isInColumn && (
         <Gutter>
           <div
             className={cn(
               'slate-blockToolbarWrapper',
               'flex h-[1.5em]',
-              isInColumn && 'h-4',
             )}
           >
             {/* Insert block button */}
@@ -169,27 +170,26 @@ function Draggable(props: PlateElementProps) {
 
             {/* Drag handle */}
             <div
-              className={cn(
-                'slate-blockToolbar relative w-4.5',
-                'pointer-events-auto mr-1 flex items-center',
-                isInColumn && 'mr-1.5',
-              )}
-            >
-              <Button
-                ref={handleRef}
-                variant="ghost"
-                className="left-0 absolute h-6 w-full p-0"
-                style={{ top: `${dragButtonTop + 3}px` }}
-                data-plate-prevent-deselect
+                className={cn(
+                  'slate-blockToolbar relative w-4.5',
+                  'pointer-events-auto mr-1 flex items-center',
+                )}
               >
-                <DragHandle
-                  isDragging={isDragging}
-                  previewRef={previewRef}
-                  resetPreview={resetPreview}
-                  setPreviewTop={setPreviewTop}
-                />
-              </Button>
-            </div>
+                <Button
+                  ref={handleRef}
+                  variant="ghost"
+                  className="left-0 absolute h-6 w-full p-0"
+                  style={{ top: `${dragButtonTop + 3}px` }}
+                  data-plate-prevent-deselect
+                >
+                  <DragHandle
+                    isDragging={isDragging}
+                    previewRef={previewRef}
+                    resetPreview={resetPreview}
+                    setPreviewTop={setPreviewTop}
+                  />
+                </Button>
+              </div>
           </div>
         </Gutter>
       )}
@@ -399,6 +399,7 @@ const INSERT_ITEMS = [
   { type: 'ul', label: 'Odrážkový seznam', icon: List },
   { type: 'ol', label: 'Číslovaný seznam', icon: ListOrdered },
   { type: 'hr', label: 'Oddělovač', icon: Minus },
+  { type: 'column_group', label: 'Dva sloupce', icon: Columns2 },
   { type: 'table', label: 'Tabulka', icon: Table },
   { type: 'img', label: 'Obrázek', icon: ImageIcon },
 ] as const
@@ -438,6 +439,8 @@ function InsertButton({ style }: { style?: React.CSSProperties }) {
         } as never,
         { at: nextPath },
       )
+    } else if (type === 'column_group') {
+      insertColumnGroup(editor, { columns: 2, at: nextPath })
     } else if (type === 'table') {
       editor.tf.insertNodes(
         {

@@ -7,6 +7,7 @@ import {
   useListToolbarButton,
   useListToolbarButtonState,
 } from '@platejs/list-classic/react'
+import { insertColumnGroup } from '@platejs/layout'
 import {
   Bold,
   Italic,
@@ -30,6 +31,7 @@ import {
   Pilcrow,
   Type,
   Link,
+  Columns2,
 } from 'lucide-react'
 
 import {
@@ -167,6 +169,13 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
     editor.tf.focus()
   }
 
+  const insertColumns = () => {
+    const entry = editor.api.block()
+    const nextPath = entry ? [entry[1][0] + 1] : undefined
+    insertColumnGroup(editor, { columns: 2, at: nextPath })
+    editor.tf.focus()
+  }
+
   return (
     <Toolbar className="flex-wrap rounded-t-xl border-gray-200">
       {/* Undo / Redo */}
@@ -286,6 +295,12 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
         onClick={insertLink}
       >
         <Link className="h-4 w-4" />
+      </ToolbarButton>
+      <ToolbarButton
+        tooltip="Dva sloupce"
+        onClick={insertColumns}
+      >
+        <Columns2 className="h-4 w-4" />
       </ToolbarButton>
       <TableGridPicker onInsert={insertTable} />
 

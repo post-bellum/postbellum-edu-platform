@@ -270,6 +270,33 @@ function deserializeHtmlToPlate(html: string): Value {
 }
 
 /**
+ * Parse width from an HTML img/figure element for Plate image node.
+ * Checks style.width (e.g. "400px", "50%") and width attribute.
+ */
+function parseImgWidth(el: HTMLElement): number | string | undefined {
+  const styleWidth = el.style?.width
+  if (styleWidth) {
+    const trimmed = styleWidth.trim()
+    if (trimmed.endsWith('px')) {
+      const num = parseInt(trimmed, 10)
+      return Number.isNaN(num) ? undefined : num
+    }
+    if (trimmed.endsWith('%')) return trimmed
+    if (/^\d+$/.test(trimmed)) {
+      const num = parseInt(trimmed, 10)
+      return Number.isNaN(num) ? undefined : num
+    }
+    return trimmed
+  }
+  const attrWidth = (el as HTMLImageElement).getAttribute?.('width')
+  if (attrWidth) {
+    const num = parseInt(attrWidth, 10)
+    return Number.isNaN(num) ? undefined : num
+  }
+  return undefined
+}
+
+/**
  * Convert DOM nodes to Plate value recursively.
  */
 function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
@@ -318,10 +345,12 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
         // Check if paragraph contains only an image
         const imgs = el.querySelectorAll('img')
         if (imgs.length === 1 && el.childNodes.length === 1) {
-          const img = imgs[0]
+          const img = imgs[0] as HTMLImageElement
+          const width = parseImgWidth(img)
           nodes.push({
             type: 'img',
             url: img.src,
+            ...(width !== undefined && { width }),
             children: [{ text: '' }],
           })
           return
@@ -361,20 +390,25 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
         else if (className.includes('img-align-left')) align = 'left'
         else if (className.includes('img-align-right')) align = 'right'
 
+        const width = parseImgWidth(el as HTMLImageElement)
+
         nodes.push({
           type: 'img',
           url: (el as HTMLImageElement).src,
           ...(align && { align }),
+          ...(width !== undefined && { width }),
           children: [{ text: '' }],
         })
         return
       }
       case 'figure': {
-        const img = el.querySelector('img')
+        const img = el.querySelector('img') as HTMLImageElement | null
         if (img) {
+          const width = parseImgWidth(img) ?? parseImgWidth(el as HTMLElement)
           nodes.push({
             type: 'img',
             url: img.src,
+            ...(width !== undefined && { width }),
             children: [{ text: '' }],
           })
         }
@@ -384,7 +418,28 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
         nodes.push({ type: 'hr', children: [{ text: '' }] })
         return
       case 'div': {
-        // Divs might contain block content
+        // Column group: div.plate-column-group with div.plate-column children
+        if (el.classList.contains('plate-column-group')) {
+          const columnDivs = el.querySelectorAll(':scope > .plate-column')
+          if (columnDivs.length >= 2) {
+            const columns: Array<Record<string, unknown>> = []
+            columnDivs.forEach((colEl) => {
+              const width =
+                (colEl as HTMLElement).style.flex?.match(/0 0 ([^)]+)/)?.[1] ??
+                (colEl as HTMLElement).dataset.width ??
+                `${100 / columnDivs.length}%`
+              const colChildren = convertDomToPlate(colEl as Node)
+              columns.push({
+                type: 'column',
+                width: String(width).endsWith('%') ? width : `${width}%`,
+                children: colChildren.length > 0 ? colChildren : [{ type: 'p', children: [{ text: '' }] }],
+              })
+            })
+            nodes.push({ type: 'column_group', children: columns })
+            return
+          }
+        }
+        // Generic divs - contain block content
         const children = convertDomToPlate(el)
         if (children.length > 0) {
           nodes.push(...children)
@@ -638,17 +693,34 @@ function serializeNode(node: Record<string, unknown>): string {
       const url = (node.url as string) || '#'
       return `<a href="${escapeAttr(url)}">${children}</a>`
     }
-    case 'img': {
-      const url = (node.url as string) || ''
-      const imgAlign = node.align as string | undefined
-      let className = ''
-      if (imgAlign === 'left') className = 'img-align-left'
-      else if (imgAlign === 'right') className = 'img-align-right'
-      else if (imgAlign === 'center') className = 'img-align-center'
-      return `<img src="${escapeAttr(url)}"${className ? ` class="${className}"` : ''} />`
-    }
+      case 'img': {
+        const url = (node.url as string) || ''
+        const imgAlign = node.align as string | undefined
+        const imgWidth = node.width as number | string | undefined
+        let className = ''
+        if (imgAlign === 'left') className = 'img-align-left'
+        else if (imgAlign === 'right') className = 'img-align-right'
+        else if (imgAlign === 'center') className = 'img-align-center'
+        const widthStyle =
+          imgWidth !== undefined && imgWidth !== null
+            ? ` style="width: ${typeof imgWidth === 'number' ? `${imgWidth}px` : imgWidth}"`
+            : ''
+        return `<img src="${escapeAttr(url)}"${className ? ` class="${className}"` : ''}${widthStyle} />`
+      }
     case 'hr':
       return '<hr />'
+    case 'column_group': {
+      const colChildren = (node.children as Array<Record<string, unknown>>) || []
+      const colHtml = colChildren
+        .map((col) => {
+          const width = (col.width as string) || '50%'
+          return `<div class="plate-column" style="flex: 0 0 ${width}">${serializeNode(col)}</div>`
+        })
+        .join('')
+      return `<div class="plate-column-group" style="display: flex; gap: 0.5rem;">${colHtml}</div>`
+    }
+    case 'column':
+      return children
     default:
       return children
   }
