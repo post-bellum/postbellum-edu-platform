@@ -99,6 +99,12 @@
   line-height: 1.2;
 }
 
+.page-preview-page h1.document-title {
+  font-size: 36px;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+}
+
 .page-preview-page h2 {
   font-family: 'tablet-gothic-narrow', system-ui, sans-serif;
   font-size: 24px;
@@ -147,6 +153,11 @@
 
 .page-preview-page li {
   margin: 0.5em 0;
+}
+
+.page-preview-page li::marker {
+  font-family: system-ui, sans-serif;
+  font-size: 1em;
 }
 
 .page-preview-page a {
@@ -209,6 +220,13 @@
   margin: 1em 0;
   padding-left: 1em;
   color: #6b7280;
+  font-style: italic;
+}
+
+.page-preview-page mark {
+  background-color: oklch(0.852 0.199 91.936 / 0.3);
+  color: inherit;
+  padding: 0.1em 0;
 }
 
 .page-preview-page strong,

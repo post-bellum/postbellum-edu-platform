@@ -1,16 +1,16 @@
 /**
  * PDF Export Utilities
  *
- * Uses html2canvas + jsPDF for page-by-page PDF rendering.
- * Ported from the richtexteditor library's pdfRenderer.ts / exportPdf.ts.
+ * Uses html2canvas-pro + pdf-lib for page-by-page PDF rendering.
  *
  * Algorithm:
  * 1. Clones editor HTML content into an off-screen container
  * 2. Measures each top-level block element's height
- * 3. Splits blocks into page-sized groups
- * 4. Renders each page group as a properly sized DOM element
- * 5. Captures each page with html2canvas at 2x resolution
- * 6. Assembles all page images into a jsPDF document
+ * 3. Splits blocks into page-sized groups (with room for header/footer)
+ * 4. Injects header (StoryON logo) and footer (text + pagination)
+ * 5. Captures each page with html2canvas-pro at 4x resolution
+ * 6. Assembles all page images into a pdf-lib document
+ * 7. Downloads the PDF directly (no print dialog)
  */
 
 import { logger } from '@/lib/logger'
@@ -79,6 +79,12 @@ const PRINT_STYLES = `
     line-height: 1.2;
   }
 
+  h1.document-title {
+    font-size: 36px;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+  }
+
   h2 {
     font-family: 'tablet-gothic-narrow', system-ui, sans-serif;
     font-size: 24px;
@@ -126,9 +132,20 @@ const PRINT_STYLES = `
     page-break-inside: avoid;
   }
 
+  li::marker {
+    font-family: system-ui, sans-serif;
+    font-size: 1em;
+  }
+
   a {
     color: #075985;
     text-decoration: underline;
+  }
+
+  mark {
+    background-color: oklch(0.852 0.199 91.936 / 0.3);
+    color: inherit;
+    padding: 0.1em 0;
   }
 
   img {
@@ -188,6 +205,7 @@ const PRINT_STYLES = `
     margin: 1em 0;
     padding-left: 1em;
     color: #6b7280;
+    font-style: italic;
     page-break-inside: avoid;
   }
 
@@ -247,6 +265,12 @@ const PDF_CONTENT_STYLES = `
     clear: both;
   }
 
+  .pdf-page-render h1.document-title {
+    font-size: 36px;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+  }
+
   .pdf-page-render h2 {
     font-family: 'tablet-gothic-narrow', system-ui, sans-serif;
     font-size: 24px;
@@ -293,6 +317,11 @@ const PDF_CONTENT_STYLES = `
 
   .pdf-page-render li {
     margin: 0.5em 0;
+  }
+
+  .pdf-page-render li::marker {
+    font-family: system-ui, sans-serif;
+    font-size: 1em;
   }
 
   .pdf-page-render a {
@@ -355,6 +384,7 @@ const PDF_CONTENT_STYLES = `
     margin: 1em 0;
     padding-left: 1em;
     color: #6b7280;
+    font-style: italic;
   }
 
   .pdf-page-render strong,
@@ -371,7 +401,26 @@ const PDF_CONTENT_STYLES = `
     border-radius: 3px;
     font-size: 0.9em;
   }
+
+  .pdf-page-render mark {
+    background-color: oklch(0.852 0.199 91.936 / 0.3);
+    color: inherit;
+    padding: 0.1em 0;
+  }
 `
+
+// ============================================================================
+// PDF header / footer configuration
+// ============================================================================
+
+/** Extra top margin to make room for the header logo above content */
+const PDF_HEADER_HEIGHT = 35 // px
+
+/** Logo path served from the public directory */
+const PDF_LOGO_PATH = '/logo-pdf-storyon.png'
+
+/** Footer text shown on every PDF page */
+const PDF_FOOTER_TEXT = 'StoryON přináší Paměť národa'
 
 // ============================================================================
 // Off-screen page rendering
@@ -379,6 +428,11 @@ const PDF_CONTENT_STYLES = `
 
 interface RenderedPage {
   element: HTMLElement
+}
+
+interface PageLayoutOptions {
+  /** Additional top margin (px) to reserve space for header */
+  extraTopMargin?: number
 }
 
 /** Inject PDF content styles into <head>; returns a remove function. */
@@ -393,14 +447,42 @@ function injectPdfStyles(): () => void {
 }
 
 /**
+ * Fetch an image from a URL and return it as a base64 data URL.
+ * Returns null if the fetch fails (header will be omitted gracefully).
+ */
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) return null
+    const blob = await response.blob()
+    return new Promise<string>((resolve) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.readAsDataURL(blob)
+    })
+  } catch {
+    return null
+  }
+}
+
+/**
  * Creates an off-screen container, splits HTML content into page-sized
  * chunks by measuring block heights, and returns a page-sized DOM element
  * for each page (ready for html2canvas capture).
  *
  * Each page element has the class "pdf-page-render" so the injected
  * PDF_CONTENT_STYLES apply to it.
+ *
+ * @param options.extraTopMargin - Additional top margin to reserve for header
  */
-function renderPagesOffScreen(htmlContent: string): RenderedPage[] {
+function renderPagesOffScreen(
+  htmlContent: string,
+  options?: PageLayoutOptions,
+): RenderedPage[] {
+  const extraTop = options?.extraTopMargin ?? 0
+  const effectiveTopMargin = MARGIN_TOP + extraTop
+  const effectiveUsableHeight = PAGE_HEIGHT - effectiveTopMargin - MARGIN_BOTTOM
+
   // Create measurement container matching usable content width
   const container = document.createElement('div')
   container.className = 'pdf-page-render'
@@ -427,9 +509,10 @@ function renderPagesOffScreen(htmlContent: string): RenderedPage[] {
 
     const pageEl = document.createElement('div')
     pageEl.className = 'pdf-page-render'
+    pageEl.style.position = 'relative'
     pageEl.style.width = `${PAGE_WIDTH}px`
     pageEl.style.height = `${PAGE_HEIGHT}px`
-    pageEl.style.padding = `${MARGIN_TOP}px ${MARGIN_RIGHT}px ${MARGIN_BOTTOM}px ${MARGIN_LEFT}px`
+    pageEl.style.padding = `${effectiveTopMargin}px ${MARGIN_RIGHT}px ${MARGIN_BOTTOM}px ${MARGIN_LEFT}px`
     pageEl.style.boxSizing = 'border-box'
     pageEl.style.background = '#fff'
     pageEl.style.overflow = 'hidden'
@@ -450,7 +533,7 @@ function renderPagesOffScreen(htmlContent: string): RenderedPage[] {
     const height =
       child.getBoundingClientRect().height + marginTop + marginBottom
 
-    if (currentHeight > 0 && currentHeight + height > USABLE_HEIGHT) {
+    if (currentHeight > 0 && currentHeight + height > effectiveUsableHeight) {
       flushPage()
     }
 
@@ -466,6 +549,7 @@ function renderPagesOffScreen(htmlContent: string): RenderedPage[] {
   if (pages.length === 0) {
     const blankPage = document.createElement('div')
     blankPage.className = 'pdf-page-render'
+    blankPage.style.position = 'relative'
     blankPage.style.width = `${PAGE_WIDTH}px`
     blankPage.style.height = `${PAGE_HEIGHT}px`
     blankPage.style.background = '#fff'
@@ -475,15 +559,81 @@ function renderPagesOffScreen(htmlContent: string): RenderedPage[] {
   return pages
 }
 
+/**
+ * Injects header (logo) and footer (text + page number) into each page element.
+ * These are absolutely positioned within the page margins so they don't
+ * overlap with content.
+ */
+function injectHeaderFooter(
+  pages: RenderedPage[],
+  logoDataUrl: string | null,
+): void {
+  const totalPages = pages.length
+
+  for (let i = 0; i < pages.length; i++) {
+    const { element } = pages[i]
+
+    // --- Header: logo at top-right ---
+    if (logoDataUrl) {
+      const header = document.createElement('div')
+      header.style.cssText = `
+        position: absolute;
+        top: 18px;
+        left: ${MARGIN_LEFT}px;
+        right: ${MARGIN_RIGHT}px;
+        height: 28px;
+        line-height: 28px;
+        text-align: right;
+      `
+      const logo = document.createElement('img')
+      logo.src = logoDataUrl
+      logo.style.cssText = 'height: 22px; width: auto; display: inline-block;'
+      header.appendChild(logo)
+      element.appendChild(header)
+    }
+
+    // --- Footer: text on left, page number on right ---
+    const footer = document.createElement('div')
+    footer.style.cssText = `
+      position: absolute;
+      bottom: 28px;
+      left: ${MARGIN_LEFT}px;
+      right: ${MARGIN_RIGHT}px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'tablet-gothic-wide', ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 11px;
+      color: #9ca3af;
+      line-height: 1;
+    `
+
+    const footerText = document.createElement('span')
+    footerText.textContent = PDF_FOOTER_TEXT
+    footer.appendChild(footerText)
+
+    const pageNum = document.createElement('span')
+    pageNum.textContent = `${i + 1}/${totalPages}`
+    footer.appendChild(pageNum)
+
+    element.appendChild(footer)
+  }
+}
+
 // ============================================================================
 // Public API
 // ============================================================================
 
 /**
- * Exports content as a PDF file using html2canvas + jsPDF.
+ * Exports content as a PDF file using html2canvas-pro + pdf-lib.
  *
- * Captures each page as a high-resolution image (4x scale) and adds
- * it to the PDF. This ensures the PDF matches the preview exactly.
+ * Each page includes:
+ * - Header: StoryON logo at top-left
+ * - Content: the material HTML, paginated to fit A4
+ * - Footer: "StoryON přináší Paměť národa" on left, page number on right
+ *
+ * Downloads the PDF directly (no print dialog).
  *
  * @param title - Document title (used for filename)
  * @param content - HTML content to export
@@ -492,103 +642,99 @@ export async function exportToPDF(
   title: string,
   content: string,
 ): Promise<void> {
+  if (!content || content.trim().length === 0) {
+    throw new Error('Obsah materiálu je prázdný')
+  }
+
+  // Strip legacy page break comments
+  const processedContent = content.replace(
+    /<!--\s*pagebreak\s*-->/gi,
+    '<div class="page-break-after"></div>',
+  )
+
+  // Dynamic imports + fetch logo in parallel
+  const [html2canvasModule, PDFLib, logoDataUrl] = await Promise.all([
+    import('html2canvas-pro'),
+    import('pdf-lib'),
+    fetchImageAsDataUrl(PDF_LOGO_PATH),
+  ])
+  const html2canvas = html2canvasModule.default
+
+  // Inject PDF content styles
+  const removePdfStyles = injectPdfStyles()
+
   try {
-    if (!content || content.trim().length === 0) {
-      throw new Error('Obsah materiálu je prázdný')
-    }
+    // Render pages with extra top margin for the header logo
+    const pages = renderPagesOffScreen(processedContent, {
+      extraTopMargin: PDF_HEADER_HEIGHT,
+    })
+    const filename = sanitizeFilename(title) || 'document'
 
-    // Strip legacy page break comments
-    const processedContent = content.replace(
-      /<!--\s*pagebreak\s*-->/gi,
-      '<div class="page-break-after"></div>',
-    )
+    // Inject header (logo) and footer (text + pagination) into each page
+    injectHeaderFooter(pages, logoDataUrl)
 
-    // Dynamic imports
-    const [jsPDFModule, html2canvasModule] = await Promise.all([
-      import('jspdf'),
-      import('html2canvas'),
-    ])
-    const { jsPDF } = jsPDFModule
-    const html2canvas = html2canvasModule.default
+    // Wait for fonts to load before rendering
+    await document.fonts.ready
 
-    // Inject PDF content styles
-    const removePdfStyles = injectPdfStyles()
+    const pdfDoc = await PDFLib.PDFDocument.create()
 
-    try {
-      const pages = renderPagesOffScreen(processedContent)
-      const filename = sanitizeFilename(title) || 'document'
+    // Render each page with html2canvas-pro at 4x resolution
+    for (let i = 0; i < pages.length; i++) {
+      const { element } = pages[i]
 
-      // Wait for fonts to load before rendering
-      await document.fonts.ready
+      // Temporarily add to DOM for rendering
+      document.body.appendChild(element)
 
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true,
+      // Force layout calculation
+      void element.offsetHeight
+
+      // Allow async rendering to complete
+      await new Promise((resolve) => setTimeout(resolve, 50))
+
+      // Capture page as high-resolution image
+      const canvas = await html2canvas(element, {
+        width: PAGE_WIDTH,
+        height: PAGE_HEIGHT,
+        scale: 4, // 4x resolution for crisp text
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        logging: false,
       })
 
-      // Render each page with html2canvas at 4x resolution
-      for (let i = 0; i < pages.length; i++) {
-        const { element } = pages[i]
+      // Remove from DOM
+      document.body.removeChild(element)
 
-        // Temporarily add to DOM for rendering
-        document.body.appendChild(element)
+      // Add page image to PDF
+      const pngData = canvas.toDataURL('image/png')
+      const pngImage = await pdfDoc.embedPng(pngData)
 
-        // Force layout calculation
-        void element.offsetHeight
+      // A4 page dimensions in points (72 DPI)
+      const pageWidthPt = (PAGE_WIDTH / 96) * 72
+      const pageHeightPt = (PAGE_HEIGHT / 96) * 72
+      const page = pdfDoc.addPage([pageWidthPt, pageHeightPt])
 
-        // Allow async rendering to complete
-        await new Promise((resolve) => setTimeout(resolve, 50))
-
-        // Capture page as high-resolution image
-        const canvas = await html2canvas(element, {
-          width: PAGE_WIDTH,
-          height: PAGE_HEIGHT,
-          scale: 4, // 4x resolution for crisp text
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: '#ffffff',
-          logging: false,
-          removeContainer: true,
-          imageTimeout: 0,
-        })
-
-        // Remove from DOM
-        document.body.removeChild(element)
-
-        // Add page image to PDF
-        const imgData = canvas.toDataURL('image/png')
-        if (i > 0) {
-          pdf.addPage('a4', 'portrait')
-        }
-        pdf.addImage(
-          imgData,
-          'PNG',
-          0,
-          0,
-          PAGE_WIDTH_MM,
-          PAGE_HEIGHT_MM,
-          undefined,
-          'FAST',
-        )
-      }
-
-      pdf.save(`${filename}.pdf`)
-      logger.info('PDF export completed successfully')
-    } finally {
-      // Always clean up injected styles
-      removePdfStyles()
+      page.drawImage(pngImage, {
+        x: 0,
+        y: 0,
+        width: pageWidthPt,
+        height: pageHeightPt,
+      })
     }
-  } catch (error) {
-    logger.error('Error in PDF export', error)
 
-    // Fallback: open print dialog
-    try {
-      await printContent(title, content)
-    } catch {
-      throw error
-    }
+    // Save and download PDF directly
+    const pdfBase64 = await pdfDoc.saveAsBase64({ dataUri: true })
+    const link = document.createElement('a')
+    link.href = pdfBase64
+    link.download = `${filename}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+
+    logger.info('PDF export completed successfully')
+  } finally {
+    // Always clean up injected styles
+    removePdfStyles()
   }
 }
 

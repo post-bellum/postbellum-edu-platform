@@ -247,6 +247,12 @@
   line-height: 1.2;
 }
 
+.lesson-material-content h1.document-title {
+  font-size: 36px;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+}
+
 .lesson-material-content h2 {
   font-family: var(--font-display);
   font-size: 24px;
@@ -303,6 +309,11 @@
 
 .lesson-material-content li {
   margin: 0.5em 0;
+}
+
+.lesson-material-content li::marker {
+  font-family: system-ui, sans-serif;
+  font-size: 1em;
 }
 
 .lesson-material-content a {
@@ -436,6 +447,20 @@
 
 .lesson-material-content u {
   text-decoration: underline;
+}
+
+.lesson-material-content blockquote {
+  border-left: 4px solid #d1d5db;
+  margin: 1em 0;
+  padding-left: 1em;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.lesson-material-content mark {
+  background-color: oklch(0.852 0.199 91.936 / 0.3);
+  color: inherit;
+  padding: 0.1em 0;
 }
 
 /* ============================================
