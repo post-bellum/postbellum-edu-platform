@@ -40,7 +40,7 @@ export function NavigationBar({ favoriteCount = 0, userEmail }: NavigationBarPro
   const email = userEmail || user?.email || ''
 
   const navLinks = [
-    { href: '/', label: 'Domov' },
+    { href: '/', label: 'Domů' },
     { href: '/lessons', label: 'Katalog' },
     { href: '/about', label: 'O projektu' },
   ]
