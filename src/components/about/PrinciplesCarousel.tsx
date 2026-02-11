@@ -10,10 +10,11 @@ interface Principle {
 }
 
 interface PrinciplesCarouselProps {
+  sectionTitle: string
   principles: Principle[]
 }
 
-export function PrinciplesCarousel({ principles }: PrinciplesCarouselProps) {
+export function PrinciplesCarousel({ sectionTitle, principles }: PrinciplesCarouselProps) {
   const totalRealCards = principles.length
   
   // Clone ALL cards on both ends for smooth infinite scroll with 3 visible cards
@@ -74,7 +75,7 @@ export function PrinciplesCarousel({ principles }: PrinciplesCarouselProps) {
       {/* Header with title and navigation arrows */}
       <div className="flex items-center gap-1">
         <h2 className="flex-1 font-display text-xl sm:text-2xl lg:text-[28px] xl:text-[32px] font-semibold text-text-strong leading-display">
-          Pedagogické principy a východiska
+          {sectionTitle}
         </h2>
         
         {/* Navigation Arrows */}
