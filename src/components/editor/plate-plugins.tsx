@@ -45,6 +45,33 @@ const TitlePlugin = createPlatePlugin({
   node: { isElement: true, type: 'title' },
 })
 
+/**
+ * Ensures the editor always contains at least one paragraph.
+ * Without this, CMD+A → Delete removes all blocks and the editor collapses.
+ * Uses Slate's normalizeNode — the standard way to enforce document constraints.
+ */
+const ForceNonEmptyPlugin = createPlatePlugin({
+  key: 'forceNonEmpty',
+  extendEditor: ({ editor }) => {
+    const normalizeNode = editor.normalizeNode as (entry: [unknown, number[]]) => void
+    editor.normalizeNode = ((entry: [unknown, number[]]) => {
+      const [node] = entry
+      if (
+        node === editor &&
+        editor.children.length === 0
+      ) {
+        editor.tf.insertNodes(
+          { type: 'p', children: [{ text: '' }] } as never,
+          { at: [0] }
+        )
+        return
+      }
+      normalizeNode(entry)
+    }) as typeof editor.normalizeNode
+    return editor
+  },
+})
+
 import {
   TitleElement,
   ParagraphElement,
@@ -83,6 +110,9 @@ import { BlockDraggable } from './plate-ui/block-draggable'
  * Order matters: plugins are processed in order.
  */
 export const editorPlugins = [
+  // Ensure editor always has at least one paragraph (must be first)
+  ForceNonEmptyPlugin,
+
   // Block elements
   TitlePlugin.withComponent(TitleElement),
   ParagraphPlugin.withComponent(ParagraphElement),
