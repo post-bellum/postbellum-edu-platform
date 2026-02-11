@@ -10,19 +10,17 @@ interface PagedPreviewProps {
   content: string
   title?: string
   className?: string
+  /** When false, renders content as a single continuous scroll (no page breaks). Default: true */
+  paginate?: boolean
 }
 
 /**
- * Paginated preview component that renders HTML content
- * split across multiple A4 page cards — matching how it will
- * look when printed or saved as PDF.
- *
- * Uses off-screen measurement to split content into page-sized
- * chunks, then renders each chunk inside a styled page card
- * with page numbers.
+ * Preview component that renders HTML content.
+ * When paginate=true: splits across multiple A4 page cards — matching printed/PDF.
+ * When paginate=false: renders as a single continuous scroll without page breaks.
  */
-export function PagedPreview({ content, className }: PagedPreviewProps) {
-  const pages = usePreviewPagination(content)
+export function PagedPreview({ content, className, paginate = true }: PagedPreviewProps) {
+  const pages = usePreviewPagination(paginate ? content : '')
 
   if (!content) {
     return (
@@ -30,6 +28,17 @@ export function PagedPreview({ content, className }: PagedPreviewProps) {
         <div className="page-preview-page" data-page-number="1">
           <p className="text-gray-400 italic">Prázdný obsah</p>
         </div>
+      </div>
+    )
+  }
+
+  if (!paginate) {
+    return (
+      <div className={cn('page-preview-container page-preview-continuous', className)}>
+        <div
+          className="page-preview-page page-preview-page-continuous"
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
       </div>
     )
   }

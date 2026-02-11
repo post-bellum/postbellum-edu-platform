@@ -8,7 +8,7 @@
  * 2. Measures each top-level block element's height
  * 3. Splits blocks into page-sized groups (with room for header/footer)
  * 4. Injects header (StoryON logo) and footer (text + pagination)
- * 5. Captures each page with html2canvas-pro at 4x resolution
+ * 5. Captures each page with html2canvas-pro at 2x resolution
  * 6. Assembles all page images into a pdf-lib document
  * 7. Downloads the PDF directly (no print dialog)
  */
@@ -30,12 +30,8 @@ const MARGIN_TOP = PAGE_DIMS.margin.top // 60px
 const MARGIN_BOTTOM = PAGE_DIMS.margin.bottom // 80px
 const MARGIN_LEFT = PAGE_DIMS.margin.left // 60px
 const MARGIN_RIGHT = PAGE_DIMS.margin.right // 60px
-const USABLE_HEIGHT = USABLE_PAGE_HEIGHT // 983px
 const USABLE_WIDTH = USABLE_PAGE_WIDTH // 674px
 
-// A4 in mm: 210 x 297
-const PAGE_WIDTH_MM = (PAGE_WIDTH / 96) * 25.4  // ~210mm
-const PAGE_HEIGHT_MM = (PAGE_HEIGHT / 96) * 25.4 // ~297mm
 
 // ============================================================================
 // Shared print styles (used by browser print dialog)
@@ -312,16 +308,22 @@ const PDF_CONTENT_STYLES = `
     margin: 1em 0;
   }
 
-  .pdf-page-render ul { list-style-type: disc; }
-  .pdf-page-render ol { list-style-type: decimal; }
+  .pdf-page-render ul,
+  .pdf-page-render ol {
+    list-style: none;
+  }
 
   .pdf-page-render li {
     margin: 0.5em 0;
   }
 
-  .pdf-page-render li::marker {
+  /* Explicit markers (html2canvas ignores ::marker, draws its own – we use spans instead) */
+  .pdf-page-render .pdf-list-marker {
+    display: inline;
+    margin-right: 0.35em;
     font-family: system-ui, sans-serif;
     font-size: 1em;
+    vertical-align: 3px;
   }
 
   .pdf-page-render a {
@@ -413,9 +415,6 @@ const PDF_CONTENT_STYLES = `
 // PDF header / footer configuration
 // ============================================================================
 
-/** Extra top margin to make room for the header logo above content */
-const PDF_HEADER_HEIGHT = 35 // px
-
 /** Logo path served from the public directory */
 const PDF_LOGO_PATH = '/logo-pdf-storyon.png'
 
@@ -466,6 +465,32 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 }
 
 /**
+ * Transforms native ul/ol list markers into explicit span elements.
+ * html2canvas-pro draws its own list markers (ignoring ::marker) and positions
+ * them incorrectly. By using list-style:none and explicit spans, we get full
+ * control over marker positioning via CSS.
+ */
+function transformListsForPdf(container: HTMLElement): void {
+  container.querySelectorAll('ul, ol').forEach((list) => {
+    const ol = list as HTMLOListElement
+    ;(list as HTMLElement).style.listStyle = 'none'
+    const isOl = list.tagName === 'OL'
+    const start = isOl ? Math.max(1, parseInt(ol.getAttribute('start') || '1', 10)) : 0
+    const items = Array.from(list.children).filter((el) => el.tagName === 'LI')
+    items.forEach((li, index) => {
+      const marker = document.createElement('span')
+      marker.className = 'pdf-list-marker'
+      if (isOl) {
+        marker.textContent = `${start + index}.`
+      } else {
+        marker.textContent = '•'
+      }
+      li.insertBefore(marker, li.firstChild)
+    })
+  })
+}
+
+/**
  * Creates an off-screen container, splits HTML content into page-sized
  * chunks by measuring block heights, and returns a page-sized DOM element
  * for each page (ready for html2canvas capture).
@@ -496,6 +521,9 @@ function renderPagesOffScreen(
   container
     .querySelectorAll('[data-pagination-break], .plate-page-break')
     .forEach((el) => el.remove())
+
+  // Replace native list markers with explicit spans (html2canvas ignores ::marker)
+  transformListsForPdf(container)
 
   document.body.appendChild(container)
 
@@ -664,10 +692,8 @@ export async function exportToPDF(
   const removePdfStyles = injectPdfStyles()
 
   try {
-    // Render pages with extra top margin for the header logo
-    const pages = renderPagesOffScreen(processedContent, {
-      extraTopMargin: PDF_HEADER_HEIGHT,
-    })
+    // Render pages – header (18px top, 28px height) fits within MARGIN_TOP (60px)
+    const pages = renderPagesOffScreen(processedContent)
     const filename = sanitizeFilename(title) || 'document'
 
     // Inject header (logo) and footer (text + pagination) into each page
@@ -678,7 +704,7 @@ export async function exportToPDF(
 
     const pdfDoc = await PDFLib.PDFDocument.create()
 
-    // Render each page with html2canvas-pro at 4x resolution
+    // Render each page with html2canvas-pro at 2x resolution
     for (let i = 0; i < pages.length; i++) {
       const { element } = pages[i]
 
@@ -695,7 +721,7 @@ export async function exportToPDF(
       const canvas = await html2canvas(element, {
         width: PAGE_WIDTH,
         height: PAGE_HEIGHT,
-        scale: 4, // 4x resolution for crisp text
+        scale: 2, // 2x resolution – good balance of speed and quality
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',

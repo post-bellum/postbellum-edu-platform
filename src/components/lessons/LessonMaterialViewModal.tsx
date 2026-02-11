@@ -30,13 +30,13 @@ export function LessonMaterialViewModal({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Náhled obsahu materiálu (stránkový)
+            Náhled obsahu materiálu
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto">
           {content ? (
-            <PagedPreview title={title} content={content} />
+            <PagedPreview title={title} content={content} paginate={false} />
           ) : (
             <p className="text-gray-500 text-center py-8">
               Tento materiál nemá žádný obsah.

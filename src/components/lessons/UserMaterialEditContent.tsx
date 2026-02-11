@@ -264,6 +264,13 @@ export function UserMaterialEditContent({
   }, [title, content])
 
   const getSaveStatusDisplay = () => {
+    if (isExportingPDF) {
+      return (
+        <span className="flex items-center gap-1 text-gray-500 text-sm">
+          Exportuji...
+        </span>
+      )
+    }
     switch (saveStatus) {
       case 'saving':
         return (
@@ -352,17 +359,8 @@ export function UserMaterialEditContent({
             onClick={handleExportPDF}
             disabled={!content || isExportingPDF}
           >
-            {isExportingPDF ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Exportuji...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                Stáhnout PDF
-              </>
-            )}
+            <Download className="w-4 h-4" />
+            Stáhnout PDF
           </Button>
 
           {exportError && (

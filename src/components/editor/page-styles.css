@@ -57,6 +57,20 @@
   min-height: 100%;
 }
 
+/* Continuous preview - single scrollable block, no page breaks */
+.page-preview-continuous {
+  gap: 0;
+  align-items: stretch;
+  padding-top: 16px;
+}
+
+.page-preview-page-continuous {
+  max-width: 674px;
+  margin: 0 auto;
+  padding: 24px 60px 48px;
+  width: 100%;
+}
+
 .page-preview-page-wrapper {
   position: relative;
 }
