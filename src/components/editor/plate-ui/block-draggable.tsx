@@ -5,7 +5,21 @@ import * as React from 'react'
 import { DndPlugin, useDraggable, useDropLine } from '@platejs/dnd'
 import { expandListItemsWithChildren } from '@platejs/list'
 import { BlockSelectionPlugin } from '@platejs/selection/react'
-import { GripVertical } from 'lucide-react'
+import {
+  GripVertical,
+  Plus,
+  Pilcrow,
+  Heading1,
+  Heading2,
+  Heading3,
+  Type,
+  Quote,
+  List,
+  ListOrdered,
+  Minus,
+  Image as ImageIcon,
+  Table,
+} from 'lucide-react'
 import { type TElement, getPluginByType, isType, KEYS } from 'platejs'
 import {
   type PlateEditor,
@@ -134,6 +148,18 @@ function Draggable(props: PlateElementProps) {
               isInColumn && 'h-4',
             )}
           >
+            {/* Insert block button */}
+            <div
+              className={cn(
+                'pointer-events-auto mr-0.5 flex items-center',
+              )}
+            >
+              <InsertButton
+                style={{ top: `${dragButtonTop - 6}px` }}
+              />
+            </div>
+
+            {/* Drag handle */}
             <div
               className={cn(
                 'slate-blockToolbar relative w-4.5',
@@ -234,7 +260,7 @@ const DragHandle = React.memo(function DragHandle({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="flex size-full items-center justify-center"
+          className="flex size-full items-center justify-center cursor-grab active:cursor-grabbing"
           onClick={(e) => {
             e.preventDefault()
             editor.getApi(BlockSelectionPlugin).blockSelection.focus()
@@ -350,6 +376,169 @@ const DropLine = React.memo(function DropLine({
     />
   )
 })
+
+// ============================================================================
+// Insert Block Button (+)
+// ============================================================================
+
+const INSERT_ITEMS = [
+  { type: 'p', label: 'Odstavec', icon: Pilcrow },
+  { type: 'title', label: 'Název', icon: Type },
+  { type: 'h1', label: 'Nadpis 1', icon: Heading1 },
+  { type: 'h2', label: 'Nadpis 2', icon: Heading2 },
+  { type: 'h3', label: 'Nadpis 3', icon: Heading3 },
+  { type: 'blockquote', label: 'Citace', icon: Quote },
+  { type: 'ul', label: 'Odrážkový seznam', icon: List },
+  { type: 'ol', label: 'Číslovaný seznam', icon: ListOrdered },
+  { type: 'hr', label: 'Oddělovač', icon: Minus },
+  { type: 'table', label: 'Tabulka', icon: Table },
+  { type: 'img', label: 'Obrázek', icon: ImageIcon },
+] as const
+
+function InsertButton({ style }: { style?: React.CSSProperties }) {
+  const editor = useEditorRef()
+  const element = useElement()
+  const [open, setOpen] = React.useState(false)
+  const menuRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!open) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  const insertBlock = (type: string) => {
+    const path = editor.api.findPath(element)
+    if (!path) return
+
+    const nextPath = [path[0] + 1]
+
+    if (type === 'ul' || type === 'ol') {
+      editor.tf.insertNodes(
+        {
+          type,
+          children: [{
+            type: 'li',
+            children: [{ type: 'lic', children: [{ text: '' }] }],
+          }],
+        } as never,
+        { at: nextPath },
+      )
+    } else if (type === 'table') {
+      editor.tf.insertNodes(
+        {
+          type: 'table',
+          children: Array.from({ length: 2 }, () => ({
+            type: 'tr',
+            children: Array.from({ length: 2 }, () => ({
+              type: 'td',
+              children: [{ type: 'p', children: [{ text: '' }] }],
+            })),
+          })),
+        } as never,
+        { at: nextPath },
+      )
+    } else if (type === 'img') {
+      // Trigger file picker for image
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0]
+        if (!file) return
+        try {
+          const { uploadImageToStorage } = await import('@/lib/supabase/storage')
+          const url = await uploadImageToStorage(file, 'lesson-materials', 'images')
+          if (url) {
+            editor.tf.insertNodes(
+              { type: 'img', url, children: [{ text: '' }] } as never,
+              { at: nextPath },
+            )
+          }
+        } catch {
+          // Fallback: insert image with placeholder
+          const url = URL.createObjectURL(file)
+          editor.tf.insertNodes(
+            { type: 'img', url, children: [{ text: '' }] } as never,
+            { at: nextPath },
+          )
+        }
+      }
+      input.click()
+    } else {
+      editor.tf.insertNodes(
+        { type, children: [{ text: '' }] } as never,
+        { at: nextPath },
+      )
+    }
+
+    setOpen(false)
+    // Focus the newly inserted block
+    setTimeout(() => {
+      editor.tf.select(nextPath)
+      editor.tf.focus()
+    }, 0)
+  }
+
+  return (
+    <div ref={menuRef} className="relative">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className={cn(
+              'absolute flex h-5 w-5 items-center justify-center rounded cursor-pointer',
+              'text-gray-300 transition-colors',
+              'hover:bg-gray-100 hover:text-gray-500',
+              '-right-1',
+            )}
+            style={style}
+            onClick={() => setOpen(!open)}
+            data-plate-prevent-deselect
+          >
+            <Plus className="size-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>Přidat blok</TooltipContent>
+      </Tooltip>
+
+      {open && (
+        <div
+          className={cn(
+            'absolute left-0 top-full z-100 mt-1',
+            'w-52 rounded-lg border border-gray-200 bg-white py-1 shadow-lg',
+          )}
+          contentEditable={false}
+        >
+          {INSERT_ITEMS.map(({ type, label, icon: Icon }) => (
+            <button
+              key={type}
+              type="button"
+              className={cn(
+                'flex w-full items-center gap-2.5 px-3 py-1.5 text-left text-sm',
+                'text-gray-700 hover:bg-gray-50 transition-colors',
+              )}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => insertBlock(type)}
+            >
+              <Icon className="size-4 text-gray-400" />
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================================
+// Drag Preview Helpers
+// ============================================================================
 
 const createDragPreviewElements = (
   editor: PlateEditor,
