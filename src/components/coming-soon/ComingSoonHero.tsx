@@ -26,7 +26,7 @@ export function ComingSoonHero() {
       </p>
 
       <p className="text-lg text-grey-500 text-center max-w-xl">
-        Brzy zde najdete platformu pro vzdělávání a sdílení příběhů.
+        Najdete tu platformu plnou pamětnických příběhů do výuky.
       </p>
 
       {/* Illustration - mobile */}
