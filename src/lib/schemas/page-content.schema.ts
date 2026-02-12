@@ -56,7 +56,7 @@ export const homepageContentSchema = z.object({
 
 const aboutTeamMemberSchema = z.object({
   name: z.string().min(1).max(200).transform(sanitizeString),
-  role: z.string().min(1).max(500).transform(sanitizeString),
+  role: z.string().max(500).optional().default('').transform(sanitizeString),
   imageUrl: z.string().max(500).optional().default(''),
   email: z.string().max(200).optional().default(''),
 })
