@@ -5,8 +5,8 @@ import { Footer } from '@/components/Footer';
 import { GlobalAuthHandler } from '@/components/auth';
 
 export const metadata: Metadata = {
-  title: 'Post Bellum Educational Platform',
-  description: 'Vzdělávací platforma pro učitele k objevování a používání historických učebních materiálů',
+  title: 'StoryOn – Vzdělávací platforma',
+  description: 'Platforma StoryOn od Post Bellum pro učitele k objevování a používání učebních materiálů inspirovaných životními příběhy.',
 };
 
 export default function RootLayout({
