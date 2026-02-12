@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { NavigationBarServer } from '@/components/NavigationBarServer';
 import { Footer } from '@/components/Footer';
@@ -26,6 +27,13 @@ export default function RootLayout({
         </main>
         <Footer />
         <GlobalAuthHandler />
+        {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
+          <Script
+            defer
+            src="https://cloud.umami.is/script.js"
+            data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+          />
+        )}
       </body>
     </html>
   );
