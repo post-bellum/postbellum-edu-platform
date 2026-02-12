@@ -11,7 +11,7 @@ export function Footer() {
           <div className="flex flex-col md:flex-row md:justify-between gap-12 md:gap-0 w-full">
             {/* Left - Logo */}
             <div className="flex-1 flex gap-3 px-3 md:px-0 w-full md:w-auto">
-              <Link href="/">
+              <Link href="https://www.postbellum.cz/" target="_blank">
                 <Image
                   src="/logo-postbellum.svg"
                   alt="Post Bellum"
