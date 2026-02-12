@@ -79,7 +79,7 @@ export interface AboutSchoolNetwork {
 
 export interface AboutTeamMember {
   name: string
-  role: string
+  role?: string
   imageUrl?: string
   email?: string
 }

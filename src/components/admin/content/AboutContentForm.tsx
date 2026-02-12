@@ -119,7 +119,7 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
           renderItem={(item, _index, onChange) => (
             <div className="flex flex-col gap-3">
               <TextInput label="Jméno" value={item.name} onChange={(name) => onChange({ ...item, name })} />
-              <TextInput label="Role" value={item.role} onChange={(role) => onChange({ ...item, role })} />
+              <TextInput label="Role" value={item.role || ''} onChange={(role) => onChange({ ...item, role })} />
               <TextInput label="Email" value={item.email || ''} onChange={(email) => onChange({ ...item, email })} />
               <ImageUploadField
                 label="Fotka"
@@ -167,15 +167,35 @@ export function AboutContentForm({ content, onChange }: AboutContentFormProps) {
           renderItem={(item, _index, onChange) => (
             <div className="flex flex-col gap-3">
               <TextInput label="Jméno" value={item.name} onChange={(name) => onChange({ ...item, name })} />
-              <TextInput label="Role" value={item.role} onChange={(role) => onChange({ ...item, role })} />
-              <ImageUploadField
-                label="Fotka"
-                value={item.imageUrl || ''}
-                onChange={(imageUrl) => onChange({ ...item, imageUrl })}
-                folder="team"
-                previewWidth={80}
-                previewHeight={80}
-              />
+              {item.role ? (
+                <TextInput label="Role" value={item.role} onChange={(role) => onChange({ ...item, role })} />
+              ) : (
+                <button
+                  type="button"
+                  className="text-sm text-primary-600 hover:text-primary-700 self-start"
+                  onClick={() => onChange({ ...item, role: ' ' })}
+                >
+                  + Přidat roli
+                </button>
+              )}
+              {item.imageUrl ? (
+                <ImageUploadField
+                  label="Fotka"
+                  value={item.imageUrl}
+                  onChange={(imageUrl) => onChange({ ...item, imageUrl })}
+                  folder="team"
+                  previewWidth={80}
+                  previewHeight={80}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="text-sm text-primary-600 hover:text-primary-700 self-start"
+                  onClick={() => onChange({ ...item, imageUrl: ' ' })}
+                >
+                  + Přidat fotku
+                </button>
+              )}
             </div>
           )}
         />

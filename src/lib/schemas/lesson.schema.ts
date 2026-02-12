@@ -247,7 +247,7 @@ export const createLessonMaterialSchema = z.object({
     .transform((val) => val ? sanitizeString(val) : undefined),
   content: z
     .string()
-    .max(50000, 'Obsah může mít maximálně 50000 znaků')
+    .max(150000, 'Obsah může mít maximálně 150000 znaků')
     .optional()
     .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
   specification: requiredSpecificationSchema,
@@ -272,7 +272,7 @@ export const updateLessonMaterialSchema = z.object({
     .transform((val) => val ? sanitizeString(val) : undefined),
   content: z
     .string()
-    .max(50000, 'Obsah může mít maximálně 50000 znaků')
+    .max(150000, 'Obsah může mít maximálně 150000 znaků')
     .optional()
     .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
   specification: lessonSpecificationSchema.optional(),
@@ -390,7 +390,7 @@ export const createUserLessonMaterialSchema = z.object({
     .transform(sanitizeString),
   content: z
     .string()
-    .max(50000, 'Obsah může mít maximálně 50000 znaků')
+    .max(150000, 'Obsah může mít maximálně 150000 znaků')
     .optional()
     .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
 })
@@ -407,7 +407,7 @@ export const updateUserLessonMaterialSchema = z.object({
     .optional(),
   content: z
     .string()
-    .max(50000, 'Obsah může mít maximálně 50000 znaků')
+    .max(150000, 'Obsah může mít maximálně 150000 znaků')
     .optional()
     .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
 })

@@ -168,6 +168,9 @@ export const DEFAULT_ABOUT_CONTENT: AboutContent = {
     sectionTitle: 'Expertně-metodická rada',
     members: [
       {
+        name: 'Expertně-metodická rada konzultuje a garantuje didaktické a metodické směřování celého projektu i jednotlivých materiálů do výuky.',
+      },
+      {
         name: 'Aleš Sedlmeier',
         role: 'Učitel, metodik, expert na didaktiku dějepisu',
         imageUrl: '/team/ales-sedlmeier.jpg',
