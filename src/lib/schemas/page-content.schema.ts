@@ -116,7 +116,7 @@ export const aboutContentSchema = z.object({
 
 const termsSectionSchema = z.object({
   title: z.string().min(1).max(200).transform(sanitizeString),
-  content: z.string().min(1).max(50000).transform(sanitizeHTML),
+  content: z.string().min(1).max(150000).transform(sanitizeHTML),
 })
 
 export const termsContentSchema = z.object({
