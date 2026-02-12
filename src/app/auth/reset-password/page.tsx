@@ -78,7 +78,7 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8 bg-grey-50">
+      <main className="flex flex-1 items-start justify-center p-8 pt-24">
         <div className="w-full max-w-[440px] bg-white rounded-3xl shadow-lg p-8 sm:p-10">
           <div className="flex justify-center mb-8">
             <Image
@@ -111,7 +111,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8 bg-grey-50">
+    <main className="flex flex-1 items-start justify-center p-8 pt-24">
       <div className="w-full max-w-[440px] bg-white rounded-3xl shadow-lg p-8 sm:p-10">
         <div className="flex justify-center mb-8">
           <Image
