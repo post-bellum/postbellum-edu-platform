@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export function ComingSoonHero() {
   return (
@@ -53,6 +54,14 @@ export function ComingSoonHero() {
 
       {/* Decorative element */}
       <div className="mt-12 md:mt-16 w-24 h-1 rounded-full bg-brand-primary/30" />
+
+      {/* Terms link */}
+      <Link
+        href="/terms"
+        className="mt-8 text-sm text-text-subtle hover:text-text-strong transition-colors"
+      >
+        Podmínky služby
+      </Link>
     </div>
   );
 }
