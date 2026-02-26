@@ -63,6 +63,7 @@ export function LessonMaterialForm({
     title?: string
     specification?: string
     duration?: string
+    content?: string
   }>({})
 
   // Reset form when modal opens/closes or material changes
@@ -95,6 +96,11 @@ export function LessonMaterialForm({
     }
   }, [state, onOpenChange, onSuccess])
 
+  // next.config.ts sets bodySizeLimit to 5mb, but Vercel's hard platform
+  // ceiling for serverless functions is ~4.5MB regardless of Next.js config.
+  // We guard at 4MB to leave headroom for other fields and HTTP overhead.
+  const MAX_CONTENT_BYTES = 4_000_000
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
@@ -108,6 +114,13 @@ export function LessonMaterialForm({
     }
     if (!duration) {
       errors.duration = 'Vyberte délku materiálu'
+    }
+
+    const contentBytes = new TextEncoder().encode(content).length
+    if (contentBytes > MAX_CONTENT_BYTES) {
+      const kb = Math.round(contentBytes / 1024)
+      const maxKb = Math.round(MAX_CONTENT_BYTES / 1024)
+      errors.content = `Obsah je příliš velký (${kb} KB). Maximální povolená velikost je ${maxKb} KB. Zkraťte nebo zjednodušte obsah materiálu.`
     }
 
     if (Object.keys(errors).length > 0) {
@@ -185,12 +198,20 @@ export function LessonMaterialForm({
             <Label htmlFor="content">Obsah</Label>
             <PlateEditor
               content={content}
-              onChange={setContent}
+              onChange={(val) => {
+                setContent(val)
+                if (fieldErrors.content) {
+                  setFieldErrors((prev) => ({ ...prev, content: undefined }))
+                }
+              }}
               placeholder="Začněte psát obsah materiálu... Můžete kopírovat z Wordu nebo Google Docs."
               resetKey={editorResetKey}
             />
             {/* Hidden input for form submission */}
             <input type="hidden" name="content" value={content} />
+            {fieldErrors.content && (
+              <p className="text-sm text-red-600">{fieldErrors.content}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
