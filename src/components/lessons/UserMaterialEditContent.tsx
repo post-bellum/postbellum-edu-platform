@@ -16,6 +16,7 @@ import {
   updateUserLessonMaterialAction,
   deleteUserLessonMaterialAction,
 } from '@/app/actions/user-lesson-materials'
+import { uploadEmbeddedImages } from '@/lib/supabase/storage'
 import type { UserLessonMaterial, LessonWithRelations } from '@/types/lesson.types'
 import { exportToPDF } from '@/lib/utils/pdf-export'
 import { logger } from '@/lib/logger'
@@ -85,9 +86,14 @@ export function UserMaterialEditContent({
     setSaveError(null)
 
     try {
+      // Upload any base64 images embedded by Word/Google Docs paste before saving.
+      // Without this the raw data: URLs can easily exceed the 5 MB body limit and
+      // cause Next.js to abort the request before the server action even runs.
+      const processedContent = await uploadEmbeddedImages(newContent)
+
       const formData = new FormData()
       formData.set('title', newTitle)
-      formData.set('content', newContent)
+      formData.set('content', processedContent)
 
       const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
 
@@ -109,8 +115,14 @@ export function UserMaterialEditContent({
       if (isDeletedRef.current) return
       setSaveStatus('error')
       const message = error instanceof Error ? error.message : String(error)
-      // Detect body size limit errors
-      if (message.includes('Body exceeded') || message.includes('body size')) {
+      if (
+        message.includes('Body exceeded') ||
+        message.includes('body size') ||
+        message.includes('payload too large') ||
+        // Next.js production server action errors when body limit is hit
+        message.includes('Server Components render') ||
+        message.includes('FUNCTION_PAYLOAD_TOO_LARGE')
+      ) {
         setSaveError('Obsah je příliš velký. Zkuste zmenšit obrázky nebo zkrátit text.')
       } else {
         setSaveError(message || 'Neznámá chyba při ukládání')
