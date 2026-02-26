@@ -159,19 +159,21 @@ export const editorPlugins = [
         const ext = blob.type.split('/')[1]?.replace('svg+xml', 'svg') || 'png'
         const file = new File([blob], `pasted-image.${ext}`, { type: blob.type })
 
-        const { STORAGE_LIMITS, uploadImageToStorage } = await import('@/lib/supabase/storage')
+        const { STORAGE_LIMITS, uploadImageToStorage, compressImageFile } = await import('@/lib/supabase/storage')
 
-        // Hard reject images > 2MB
-        if (file.size > STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE) {
-          const sizeMB = (file.size / 1024 / 1024).toFixed(1)
-          // Dispatch a custom event so PlateEditor can show the modal
+        // Compress before checking size — this raises the effective accepted ceiling
+        const compressed = await compressImageFile(file)
+
+        // Hard reject if still too large after compression
+        if (compressed.size > STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE) {
+          const sizeMB = (compressed.size / 1024 / 1024).toFixed(1)
           window.dispatchEvent(new CustomEvent('plate-image-too-large', {
             detail: { sizeMB, maxMB: STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE_DISPLAY },
           }))
           throw new Error('IMAGE_TOO_LARGE')
         }
 
-        const url = await uploadImageToStorage(file, 'lesson-materials', 'images')
+        const url = await uploadImageToStorage(compressed, 'lesson-materials', 'images')
         return url
       },
     },

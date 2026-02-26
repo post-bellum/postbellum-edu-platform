@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Plate, usePlateEditor } from 'platejs/react'
 import type { Value } from 'platejs'
 import { cn } from '@/lib/utils'
-import { uploadImageToStorage, STORAGE_LIMITS } from '@/lib/supabase/storage'
+import { uploadImageToStorage, compressImageFile, STORAGE_LIMITS } from '@/lib/supabase/storage'
 import { logger } from '@/lib/logger'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import {
@@ -146,17 +146,19 @@ export function PlateEditor({
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
 
-      // Hard reject images > 2MB
-      if (file.size > STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE) {
-        setImageTooLargeInfo({
-          sizeMB: (file.size / 1024 / 1024).toFixed(1),
-          maxMB: STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE_DISPLAY,
-        })
-        return
-      }
-
       try {
-        const url = await uploadImageToStorage(file, 'lesson-materials', 'images')
+        const compressed = await compressImageFile(file)
+
+        // Hard reject if still too large after compression
+        if (compressed.size > STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE) {
+          setImageTooLargeInfo({
+            sizeMB: (compressed.size / 1024 / 1024).toFixed(1),
+            maxMB: STORAGE_LIMITS.MAX_EDITOR_IMAGE_SIZE_DISPLAY,
+          })
+          return
+        }
+
+        const url = await uploadImageToStorage(compressed, 'lesson-materials', 'images')
         if (url) {
           editor.tf.insertNodes({
             type: 'img',
@@ -351,14 +353,20 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
       }
       case 'p': {
         const align = el.style.textAlign || undefined
-        // Check if paragraph contains only an image
+        // Check if paragraph contains only an image (allow surrounding whitespace text nodes)
         const imgs = el.querySelectorAll('img')
-        if (imgs.length === 1 && el.childNodes.length === 1) {
+        const hasOnlyImgAndWhitespace =
+          imgs.length === 1 &&
+          Array.from(el.childNodes).every(
+            (node) =>
+              node === imgs[0] ||
+              (node.nodeType === Node.TEXT_NODE && !(node.textContent ?? '').trim())
+          )
+        if (hasOnlyImgAndWhitespace) {
           const img = imgs[0] as HTMLImageElement
           const width = parseImgWidth(img)
-          // Check for alignment class on the img element
           const className = img.className || ''
-          let imgAlign: string | undefined = 'center' // default to center
+          let imgAlign: string | undefined = 'center'
           if (className.includes('img-align-left')) imgAlign = 'left'
           else if (className.includes('img-align-right')) imgAlign = 'right'
           else if (className.includes('img-align-center')) imgAlign = 'center'
@@ -368,6 +376,35 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
             align: imgAlign,
             ...(width !== undefined && { width }),
             children: [{ text: '' }],
+          })
+          return
+        }
+        // Mixed content (text + image): split into separate blocks
+        if (imgs.length >= 1) {
+          Array.from(el.childNodes).forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE && (node as HTMLElement).tagName.toLowerCase() === 'img') {
+              const img = node as HTMLImageElement
+              const width = parseImgWidth(img)
+              const className = img.className || ''
+              let imgAlign: string | undefined = 'center'
+              if (className.includes('img-align-left')) imgAlign = 'left'
+              else if (className.includes('img-align-right')) imgAlign = 'right'
+              else if (className.includes('img-align-center')) imgAlign = 'center'
+              nodes.push({
+                type: 'img',
+                url: img.src,
+                align: imgAlign,
+                ...(width !== undefined && { width }),
+                children: [{ text: '' }],
+              })
+            } else if (node.nodeType === Node.TEXT_NODE) {
+              const text = (node.textContent ?? '').trim()
+              if (text) nodes.push({ type: 'p', children: [{ text }] })
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+              const inlineNodes = convertInlineChildren(node as HTMLElement)
+              const hasText = inlineNodes.some((n) => typeof (n as {text?: string}).text === 'string' && (n as {text?: string}).text!.trim())
+              if (hasText) nodes.push({ type: 'p', ...(align && { align }), children: inlineNodes })
+            }
           })
           return
         }
@@ -407,10 +444,11 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
         else if (className.includes('img-align-center')) align = 'center'
 
         const width = parseImgWidth(el as HTMLImageElement)
+        const resolvedSrc = (el as HTMLImageElement).src
 
         nodes.push({
           type: 'img',
-          url: (el as HTMLImageElement).src,
+          url: resolvedSrc,
           align,
           ...(width !== undefined && { width }),
           children: [{ text: '' }],
