@@ -39,7 +39,10 @@ export function ProfileDropdown({ email, displayName }: ProfileDropdownProps) {
         </div>
       }
     >
-      <DropdownMenuHeader data-testid="profile-dropdown-header">
+      <DropdownMenuHeader
+        onClick={() => router.push('/profile')}
+        data-testid="profile-dropdown-header"
+      >
         {displayName || email}
       </DropdownMenuHeader>
 
