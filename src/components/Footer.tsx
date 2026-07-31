@@ -25,7 +25,7 @@ export function Footer() {
       <div className="flex flex-col items-start md:items-center w-full rounded-[28px] gap-1 md:gap-0">
         {/* Main footer content */}
         <div className="w-full bg-[#ddffee] border border-[rgba(12,17,29,0.05)] rounded-[40px] overflow-hidden py-10 md:py-15 px-5 md:px-11">
-          <div className="flex flex-col gap-12 md:grid md:grid-cols-2 md:grid-rows-[1fr_auto] md:gap-x-8 md:gap-y-10 md:min-h-[260px] w-full">
+          <div className="flex flex-col gap-12 md:grid md:grid-cols-2 md:grid-rows-[1fr_auto] md:gap-x-16 lg:gap-x-24 md:gap-y-10 md:min-h-65 w-full">
             {/* Left top - Logo & contact info */}
             <div className="order-1 md:col-start-1 md:row-start-1 flex flex-col gap-10 items-start px-3 md:px-0">
               <Link href="https://www.postbellum.cz/" target="_blank">
@@ -67,7 +67,7 @@ export function Footer() {
             </div>
 
             {/* Right - Newsletter (spans both rows on desktop) */}
-            <div className="order-2 md:col-start-2 md:row-span-2 md:justify-self-end w-full">
+            <div className="order-2 md:col-start-2 md:row-span-2 w-full flex md:justify-end">
               <NewsletterSignup />
             </div>
 
