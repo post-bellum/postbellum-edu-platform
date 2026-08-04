@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Eye, Trash2, Check, Loader2, Download } from 'lucide-react'
+import { ArrowLeft, Eye, Trash2, Check, Loader2, Download, Save } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -52,6 +52,8 @@ export function UserMaterialEditContent({
   const [content, setContent] = React.useState(initialMaterial.content || '')
   const [saveStatus, setSaveStatus] = React.useState<SaveStatus>('idle')
   const [saveError, setSaveError] = React.useState<string | null>(null)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false)
+  const [lastSaveWasManual, setLastSaveWasManual] = React.useState(false)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -75,6 +77,7 @@ export function UserMaterialEditContent({
   const lastSavedRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
   const latestDraftRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
   const isDeletedRef = React.useRef(false) // Flag to prevent auto-save after deletion
+  const manualSaveRef = React.useRef(false) // Set while a save was triggered by the Save button
 
   // Titles already used by the user's other materials in this lesson.
   // Mirrored into a ref so saveChanges stays referentially stable.
@@ -111,6 +114,7 @@ export function UserMaterialEditContent({
 
     // Skip if nothing changed
     if (newTitle === lastSavedRef.current.title && newContent === lastSavedRef.current.content) {
+      setHasUnsavedChanges(false)
       return
     }
 
@@ -136,16 +140,25 @@ export function UserMaterialEditContent({
 
       if (result.success) {
         setSaveStatus('saved')
+        setLastSaveWasManual(manualSaveRef.current)
+        manualSaveRef.current = false
         lastSavedRef.current = { title: newTitle, content: newContent }
+        // Edits made while the request was in flight are still unsaved
+        setHasUnsavedChanges(
+          latestDraftRef.current.title !== newTitle ||
+          latestDraftRef.current.content !== newContent
+        )
         // Reset to idle after 2 seconds
         setTimeout(() => setSaveStatus('idle'), 2000)
       } else {
         setSaveStatus('error')
+        manualSaveRef.current = false
         setSaveError(result.error || 'Neznámá chyba')
       }
     } catch (error) {
       if (isDeletedRef.current) return
       setSaveStatus('error')
+      manualSaveRef.current = false
       const message = error instanceof Error ? error.message : String(error)
       if (
         message.includes('Body exceeded') ||
@@ -224,6 +237,7 @@ export function UserMaterialEditContent({
     const newTitle = e.target.value
     setTitle(newTitle)
     latestDraftRef.current = { ...latestDraftRef.current, title: newTitle }
+    setHasUnsavedChanges(true)
     scheduleSave()
   }
 
@@ -231,8 +245,43 @@ export function UserMaterialEditContent({
   const handleContentChange = (newContent: string) => {
     setContent(newContent)
     latestDraftRef.current = { ...latestDraftRef.current, content: newContent }
+    setHasUnsavedChanges(true)
     scheduleSave()
   }
+
+  // Explicit save - skips the debounce and saves right away. Stays available
+  // even when auto-save already persisted everything; it just confirms.
+  const handleManualSave = React.useCallback(() => {
+    manualSaveRef.current = true
+
+    const isUpToDate =
+      latestDraftRef.current.title === lastSavedRef.current.title &&
+      latestDraftRef.current.content === lastSavedRef.current.content
+
+    if (isUpToDate) {
+      manualSaveRef.current = false
+      setSaveStatus('saved')
+      setLastSaveWasManual(true)
+      setHasUnsavedChanges(false)
+      setTimeout(() => setSaveStatus('idle'), 2000)
+      return Promise.resolve()
+    }
+
+    return flushPendingSave()
+  }, [flushPendingSave])
+
+  // Ctrl/Cmd+S saves without waiting for the debounce
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        void handleManualSave()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleManualSave])
 
   // Cleanup and save on unmount if there are unsaved changes
   React.useEffect(() => {
@@ -327,7 +376,7 @@ export function UserMaterialEditContent({
         return (
           <span className="flex items-center gap-1 text-green-600 text-sm">
             <Check className="w-4 h-4" />
-            Uloženo automaticky
+            {lastSaveWasManual ? 'Uloženo' : 'Uloženo automaticky'}
           </span>
         )
       case 'error':
@@ -337,7 +386,9 @@ export function UserMaterialEditContent({
           </span>
         )
       default:
-        return null
+        return hasUnsavedChanges ? (
+          <span className="text-gray-500 text-sm">Neuložené změny</span>
+        ) : null
     }
   }
 
@@ -393,6 +444,17 @@ export function UserMaterialEditContent({
 
         <div className="flex items-center gap-2 flex-wrap">
           {getSaveStatusDisplay()}
+
+          <Button
+            size="sm"
+            className="h-12"
+            onClick={() => void handleManualSave()}
+            disabled={titleError !== null}
+            title={titleError ?? 'Uložit změny (Ctrl+S)'}
+          >
+            <Save className="w-4 h-4" />
+            Uložit
+          </Button>
 
           <Button
             variant="outline"
