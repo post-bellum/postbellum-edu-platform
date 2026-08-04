@@ -9,6 +9,7 @@ import {
   useListToolbarButtonState,
 } from '@platejs/list-classic/react'
 import { insertColumnGroup } from '@platejs/layout'
+import { upsertLink } from '@platejs/link'
 import {
   Bold,
   Italic,
@@ -186,15 +187,17 @@ export function EditorToolbar({ onInsertImage, className }: EditorToolbarProps) 
   }
 
   const insertLink = () => {
+    // Selection is lost while window.prompt is open, so read it upfront.
+    const selection = editor.selection
+    const selectedText = selection ? editor.api.string(selection) : ''
+
     const url = window.prompt('Zadejte URL adresu:')
     if (!url) return
-    const text = window.prompt('Text odkazu:', url) || url
+    // Selected text becomes the link text; only ask for it when nothing is selected.
+    const text = selectedText || window.prompt('Text odkazu:', url) || url
 
-    editor.tf.insertNodes({
-      type: 'a',
-      url,
-      children: [{ text }],
-    } as never)
+    if (selection) editor.tf.select(selection)
+    upsertLink(editor, { text, url })
     editor.tf.focus()
   }
 
