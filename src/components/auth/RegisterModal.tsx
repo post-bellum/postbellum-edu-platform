@@ -7,7 +7,7 @@ import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Label } from '@/components/ui/Label'
 import { OAuthButtons } from './OAuthButtons'
 import { signUpWithEmail, getErrorMessage } from '@/lib/supabase/email-auth'
-import { validatePassword, passwordsMatch, validateEmail } from '@/lib/validation'
+import { validatePassword, validateEmail } from '@/lib/validation'
 import { logger } from '@/lib/logger'
 
 interface RegisterModalProps {
@@ -19,14 +19,12 @@ interface RegisterModalProps {
 export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: RegisterModalProps) {
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
-  const [confirmPassword, setConfirmPassword] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [emailTouched, setEmailTouched] = React.useState(false)
   const [emailError, setEmailError] = React.useState<string | null>(null)
   const [passwordErrors, setPasswordErrors] = React.useState<string[]>([])
   const [passwordTouched, setPasswordTouched] = React.useState(false)
-  const [confirmPasswordTouched, setConfirmPasswordTouched] = React.useState(false)
 
   const handleEmailChange = (value: string) => {
     setEmail(value)
@@ -75,12 +73,6 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
         return
       }
 
-      // Check passwords match
-      if (!passwordsMatch(password, confirmPassword)) {
-        setConfirmPasswordTouched(true)
-        return
-      }
-
       // Register with Supabase
       const { error: signUpError } = await signUpWithEmail(email, password)
       
@@ -101,15 +93,10 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
 
   return (
     <div className="flex flex-col gap-7">
-      {/* Title & Description */}
-      <div className="text-center">
-        <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-display text-grey-950 mb-2.5">
-          Vytvořte si účet
-        </h2>
-        <p className="text-base leading-[1.5] text-text-subtle">
-          Začněte tím, že vyplníte své údaje. Váš účet vám umožní upravovat materiály, ukládat vlastní lekce a hodnotit obsah.
-        </p>
-      </div>
+      {/* Title */}
+      <h2 className="font-display text-[32px] sm:text-[32px] font-semibold leading-display text-center text-grey-950">
+        Vytvořte si účet
+      </h2>
 
       {/* Content Stack */}
       <div className="flex flex-col gap-[15px]">
@@ -170,25 +157,6 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
                 <p className="text-xs text-text-subtle px-2.5 py-1.5">
                   Minimálně 8 znaků, velké a malé písmeno, číslo
                 </p>
-              )}
-            </div>
-
-            <div className="flex flex-col">
-              <Label htmlFor="confirmPassword" className="px-2.5 py-1 text-sm leading-[1.4] text-text-subtle">
-                Zopakujte heslo
-              </Label>
-              <PasswordInput
-                id="confirmPassword"
-                placeholder="Zopakujte heslo"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                onBlur={() => setConfirmPasswordTouched(true)}
-                required
-                disabled={isLoading}
-                data-testid="register-confirm-password-input"
-              />
-              {confirmPasswordTouched && confirmPassword && !passwordsMatch(password, confirmPassword) && (
-                <p className="text-xs text-red-600 px-2.5 py-1.5">Hesla se neshodují</p>
               )}
             </div>
           </div>
