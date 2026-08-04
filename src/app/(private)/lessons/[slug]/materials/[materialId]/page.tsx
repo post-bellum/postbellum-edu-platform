@@ -1,7 +1,10 @@
 import * as React from 'react'
 import { notFound, redirect } from 'next/navigation'
 import { getUser } from '@/lib/supabase/auth-helpers'
-import { getUserLessonMaterialById } from '@/lib/supabase/user-lesson-materials'
+import {
+  getUserLessonMaterialById,
+  getUserMaterialTitlesForLesson,
+} from '@/lib/supabase/user-lesson-materials'
 import { getLessonById } from '@/lib/supabase/lessons'
 import { extractLessonId } from '@/lib/utils'
 import { UserMaterialEditContent } from '@/components/lessons/UserMaterialEditContent'
@@ -51,11 +54,16 @@ export default async function UserMaterialEditPage({ params }: UserMaterialEditP
     notFound()
   }
 
+  // Titles of the user's other materials in this lesson - the editor uses them
+  // to warn about a duplicate name without a round trip on every keystroke
+  const siblingTitles = await getUserMaterialTitlesForLesson(material.lesson_id, material.id)
+
   return (
     <div className="w-full px-5 xl:px-10 2xl:px-[120px] py-5">
       <UserMaterialEditContent
         material={material}
         lesson={lesson}
+        siblingTitles={siblingTitles}
       />
     </div>
   )

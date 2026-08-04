@@ -25,7 +25,11 @@ import { generateLessonUrlFromLesson } from '@/lib/utils'
 interface UserMaterialEditContentProps {
   material: UserLessonMaterial
   lesson: LessonWithRelations
+  /** Titles of the user's other materials in this lesson - must stay unique */
+  siblingTitles?: string[]
 }
+
+const normalizeTitle = (title: string) => title.trim().toLocaleLowerCase('cs-CZ')
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -35,6 +39,7 @@ const AUTO_SAVE_DELAY_MS = 1000
 export function UserMaterialEditContent({
   material: initialMaterial,
   lesson,
+  siblingTitles = [],
 }: UserMaterialEditContentProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -71,9 +76,36 @@ export function UserMaterialEditContent({
   const latestDraftRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
   const isDeletedRef = React.useRef(false) // Flag to prevent auto-save after deletion
 
+  // Titles already used by the user's other materials in this lesson.
+  // Mirrored into a ref so saveChanges stays referentially stable.
+  const takenTitles = React.useMemo(
+    () => new Set(siblingTitles.map(normalizeTitle)),
+    [siblingTitles]
+  )
+  const takenTitlesRef = React.useRef(takenTitles)
+  React.useEffect(() => {
+    takenTitlesRef.current = takenTitles
+  }, [takenTitles])
+
+  const titleError = title.trim().length === 0
+    ? 'Název je povinný.'
+    : takenTitles.has(normalizeTitle(title))
+      ? 'Materiál s tímto názvem už v této lekci máte.'
+      : null
+
   const saveChanges = React.useCallback(async (newTitle: string, newContent: string) => {
     // Skip if material was deleted
     if (isDeletedRef.current) {
+      return
+    }
+
+    // Title must be present and unique within the lesson - don't send invalid
+    // data to the server, the inline message tells the user what to fix
+    if (
+      newTitle.trim().length === 0 ||
+      takenTitlesRef.current.has(normalizeTitle(newTitle))
+    ) {
+      setSaveStatus('idle')
       return
     }
 
@@ -341,14 +373,22 @@ export function UserMaterialEditContent({
       <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div className="w-full max-w-[630px] shrink-0">
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Název
+            Název <span className="text-red-500">*</span>
           </label>
           <Input
             id="title"
             value={title}
             onChange={handleTitleChange}
             placeholder="Název materiálu"
+            required
+            aria-invalid={titleError !== null}
+            aria-describedby={titleError ? 'title-error' : undefined}
           />
+          {titleError && (
+            <p id="title-error" className="mt-1 text-sm text-red-600">
+              {titleError}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
