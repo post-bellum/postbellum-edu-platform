@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useEditorRef, useEditorSelector } from 'platejs/react'
+import { cn } from '@/lib/utils'
 import { KEYS } from 'platejs'
 import {
   useListToolbarButton,
@@ -64,6 +65,12 @@ const COLORS = [
 
 interface EditorToolbarProps {
   onInsertImage?: () => void
+  /**
+   * Overrides the sticky offset from the top of the nearest scroll container.
+   * Defaults to `top-20` to sit below the site's sticky nav bar on full page
+   * layouts - pass `top-0` when the editor is embedded in a dialog/modal.
+   */
+  className?: string
 }
 
 /**
@@ -88,7 +95,7 @@ function scrollCaretIntoView(editor: ReturnType<typeof useEditorRef>) {
   }
 }
 
-export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
+export function EditorToolbar({ onInsertImage, className }: EditorToolbarProps) {
   const editor = useEditorRef()
 
   // Track active marks using editor.api.marks()
@@ -199,7 +206,7 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
   }
 
   return (
-    <Toolbar className="flex-wrap rounded-t-xl border-gray-200">
+    <Toolbar className={cn('sticky top-20 z-20 flex-wrap rounded-t-xl border-gray-200 shadow-sm', className)}>
       {/* Undo / Redo */}
       <ToolbarButton
         tooltip="Zpět (Ctrl+Z)"

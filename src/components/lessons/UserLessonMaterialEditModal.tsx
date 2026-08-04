@@ -100,6 +100,7 @@ export function UserLessonMaterialEditModal({
                 placeholder="Obsah materiálu..."
                 className="min-h-[400px]"
                 resetKey={editorResetKey}
+                toolbarClassName="top-0"
               />
             </div>
           </div>
