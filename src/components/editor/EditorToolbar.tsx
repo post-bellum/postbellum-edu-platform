@@ -66,6 +66,28 @@ interface EditorToolbarProps {
   onInsertImage?: () => void
 }
 
+/**
+ * Scroll the current selection's caret into view.
+ *
+ * Slate/Plate only auto-scroll the caret when the DOM selection is out of
+ * sync with `editor.selection` at render time. Calling `editor.tf.focus()`
+ * actually pre-syncs the DOM selection itself, which short-circuits that
+ * mechanism - so after programmatic changes like undo/redo we scroll the
+ * caret into view manually instead of relying on it.
+ */
+function scrollCaretIntoView(editor: ReturnType<typeof useEditorRef>) {
+  if (!editor.selection) return
+  try {
+    const domRange = editor.api.toDOMRange(editor.selection)
+    if (!domRange) return
+    const container = domRange.startContainer
+    const el = container.nodeType === Node.TEXT_NODE ? container.parentElement : (container as Element)
+    el?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  } catch {
+    // Selection may not resolve to a DOM range yet - safe to ignore.
+  }
+}
+
 export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
   const editor = useEditorRef()
 
@@ -181,13 +203,25 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
       {/* Undo / Redo */}
       <ToolbarButton
         tooltip="Zpět (Ctrl+Z)"
-        onClick={() => editor.tf.undo()}
+        onClick={() => {
+          editor.tf.undo()
+          requestAnimationFrame(() => {
+            editor.tf.focus()
+            scrollCaretIntoView(editor)
+          })
+        }}
       >
         <Undo2 className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         tooltip="Vpřed (Ctrl+Y)"
-        onClick={() => editor.tf.redo()}
+        onClick={() => {
+          editor.tf.redo()
+          requestAnimationFrame(() => {
+            editor.tf.focus()
+            scrollCaretIntoView(editor)
+          })
+        }}
       >
         <Redo2 className="h-4 w-4" />
       </ToolbarButton>
