@@ -89,13 +89,16 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
             className="bg-grey-100 border border-black/5 rounded-[28px] px-7 py-10"
           >
             <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1 space-y-4">
+              <div className="flex-1 min-w-0 space-y-4">
                 <h3 className="text-lg font-semibold text-text-strong leading-display">
                   {activity.title}
                 </h3>
 
                 {activity.description && (
-                  <p className="text-text-subtle text-lg leading-headline">
+                  <p
+                    className="w-full max-w-full min-w-0 text-text-subtle text-lg leading-headline"
+                    style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}
+                  >
                     {activity.description}
                   </p>
                 )}
