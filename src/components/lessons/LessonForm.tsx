@@ -49,6 +49,7 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
   const [period, setPeriod] = React.useState(lesson?.period || '')
   const [targetGroup, setTargetGroup] = React.useState(lesson?.target_group || '')
   const [lessonType, setLessonType] = React.useState(lesson?.lesson_type || '')
+  const [authorTeam, setAuthorTeam] = React.useState(lesson?.author_team || '')
   const [publicationDate, setPublicationDate] = React.useState(
     lesson?.publication_date ? new Date(lesson.publication_date).toISOString().split('T')[0] : ''
   )
@@ -73,6 +74,7 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
     period: 200,
     targetGroup: 200,
     lessonType: 200,
+    authorTeam: 500,
   }
 
   // Vimeo URL validation helper
@@ -108,8 +110,11 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
     targetGroup: targetGroup.length > limits.targetGroup 
       ? `Cílová skupina může mít maximálně ${limits.targetGroup} znaků` 
       : null,
-    lessonType: lessonType.length > limits.lessonType 
-      ? `Typ lekce může mít maximálně ${limits.lessonType} znaků` 
+    lessonType: lessonType.length > limits.lessonType
+      ? `Typ lekce může mít maximálně ${limits.lessonType} znaků`
+      : null,
+    authorTeam: authorTeam.length > limits.authorTeam
+      ? `Autorský tým může mít maximálně ${limits.authorTeam} znaků`
       : null,
   }
 
@@ -355,6 +360,26 @@ export function LessonForm({ lesson, tags }: LessonFormProps) {
                 />
                 {showError('period') && (
                   <p className="text-sm text-red-600">{errors.period}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="author_team">Autorský tým výukového setu</Label>
+                  <CharCounter current={authorTeam.length} max={limits.authorTeam} />
+                </div>
+                <Input
+                  id="author_team"
+                  name="author_team"
+                  value={authorTeam}
+                  onChange={(e) => setAuthorTeam(e.target.value)}
+                  onBlur={() => setTouched(prev => ({ ...prev, authorTeam: true }))}
+                  maxLength={limits.authorTeam}
+                  placeholder="např. Jan Novák, Eva Nováková"
+                  className={showError('authorTeam') ? 'border-red-500 focus:border-red-500' : ''}
+                />
+                {showError('authorTeam') && (
+                  <p className="text-sm text-red-600">{errors.authorTeam}</p>
                 )}
               </div>
 

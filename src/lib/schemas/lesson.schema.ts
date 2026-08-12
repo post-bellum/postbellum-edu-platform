@@ -82,6 +82,11 @@ export const createLessonSchema = z.object({
     .max(200, 'Typ lekce může mít maximálně 200 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
+  author_team: z
+    .string()
+    .max(500, 'Autorský tým může mít maximálně 500 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
   publication_date: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Neplatný formát data (YYYY-MM-DD)')
@@ -148,6 +153,7 @@ export const updateLessonSchema = z.object({
   period: nullableStringSchema(200, 'Období může mít maximálně 200 znaků'),
   target_group: nullableStringSchema(200, 'Cílová skupina může mít maximálně 200 znaků'),
   lesson_type: nullableStringSchema(200, 'Typ lekce může mít maximálně 200 znaků'),
+  author_team: nullableStringSchema(500, 'Autorský tým může mít maximálně 500 znaků'),
   publication_date: nullableDateSchema,
   published: z.boolean().optional(),
   rvp_connection: z
@@ -196,6 +202,7 @@ export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
     period: getOptionalValue('period'),
     target_group: getOptionalValue('target_group'),
     lesson_type: getOptionalValue('lesson_type'),
+    author_team: getOptionalValue('author_team'),
     publication_date: getOptionalValue('publication_date'),
     published: isUpdate && publishedValue === null ? undefined : published,
     rvp_connection: rvpConnection && rvpConnection.trim()

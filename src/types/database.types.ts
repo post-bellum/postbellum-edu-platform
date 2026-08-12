@@ -209,6 +209,7 @@ export type Database = {
       }
       lessons: {
         Row: {
+          author_team: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -227,6 +228,7 @@ export type Database = {
           vimeo_video_url: string | null
         }
         Insert: {
+          author_team?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -245,6 +247,7 @@ export type Database = {
           vimeo_video_url?: string | null
         }
         Update: {
+          author_team?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null

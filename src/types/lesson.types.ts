@@ -19,6 +19,7 @@ export interface Lesson {
   period: string | null
   target_group: string | null
   lesson_type: string | null
+  author_team: string | null
   publication_date: string | null // ISO date string
   published: boolean
   created_by: string | null
