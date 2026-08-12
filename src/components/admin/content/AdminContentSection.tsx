@@ -9,9 +9,12 @@ import { AboutContentForm } from './AboutContentForm'
 import { TermsContentForm } from './TermsContentForm'
 import { SaveChangesDialog } from './SaveChangesDialog'
 import { getPageContentForAdmin, savePageContent } from '@/app/actions/page-content'
+import { getLessons } from '@/lib/supabase/lessons'
+import { logger } from '@/lib/logger'
 import { PAGE_DEFAULTS } from '@/lib/page-content/defaults'
 import { changeCountLabel, diffPageContent, getPageLabel } from '@/lib/page-content/diff'
 import { deepMergeWithDefaults } from '@/lib/supabase/page-content'
+import type { Lesson } from '@/types/lesson.types'
 import type {
   PageSlug,
   PageContent,
@@ -42,6 +45,9 @@ export function AdminContentSection() {
   const [loadedTabs, setLoadedTabs] = useState<PageSlug[]>([])
   const [dirtyTabs, setDirtyTabs] = useState<Set<PageSlug>>(new Set())
   const dirtyTabsRef = useRef(dirtyTabs)
+  /** Published lessons offered in the homepage lesson picker */
+  const [publishedLessons, setPublishedLessons] = useState<Lesson[]>([])
+  const [lessonsLoading, setLessonsLoading] = useState(true)
 
   const mergeWithDefaults = (slug: PageSlug, dbContent: PageContent): PageContent => {
     return deepMergeWithDefaults(
@@ -91,6 +97,24 @@ export function AdminContentSection() {
    
   }, [])
 
+  // Lessons for the homepage picker — loaded once, independent of the active tab
+  useEffect(() => {
+    let cancelled = false
+
+    getLessons({ published_only: true })
+      .then((lessons) => {
+        if (!cancelled) setPublishedLessons(lessons)
+      })
+      .catch((error) => {
+        logger.error('Error loading lessons for content editor', error)
+      })
+      .finally(() => {
+        if (!cancelled) setLessonsLoading(false)
+      })
+
+    return () => { cancelled = true }
+  }, [])
+
   // Keep ref in sync for beforeunload handler
   useEffect(() => {
     dirtyTabsRef.current = dirtyTabs
@@ -125,9 +149,15 @@ export function AdminContentSection() {
     })
   }, [])
 
+  /** Lesson IDs render as titles in the save dialog instead of raw UUIDs */
+  const lessonTitles = useMemo(
+    () => Object.fromEntries(publishedLessons.map((lesson) => [lesson.id, lesson.title])),
+    [publishedLessons]
+  )
+
   const pendingChanges = useMemo(
-    () => diffPageContent(baseline[activeTab], content[activeTab]),
-    [baseline, content, activeTab]
+    () => diffPageContent(baseline[activeTab], content[activeTab], lessonTitles),
+    [baseline, content, activeTab, lessonTitles]
   )
 
   const handleSaveClick = () => {
@@ -245,6 +275,8 @@ export function AdminContentSection() {
             <HomepageContentForm
               content={content.homepage as HomepageContent}
               onChange={handleContentChange}
+              lessons={publishedLessons}
+              lessonsLoading={lessonsLoading}
             />
           )}
           {activeTab === 'about' && (

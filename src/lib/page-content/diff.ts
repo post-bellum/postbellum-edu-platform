@@ -58,6 +58,7 @@ const FIELD_LABELS: Record<string, string> = {
   email: 'E-mail',
   imageUrl: 'Obrázek',
   items: 'Položky',
+  featuredLessonIds: 'Lekce na domovské stránce',
 }
 
 const PAGE_LABELS: Record<PageSlug, string> = {
@@ -151,8 +152,22 @@ function focusStringDiff(before: string, after: string): [string, string] {
   return [window(a), window(b)]
 }
 
-function walk(before: unknown, after: unknown, path: string[], changes: ContentChange[]): void {
+/**
+ * Maps opaque stored values (e.g. lesson IDs) to something a human recognises.
+ * Anything not in the map is left as-is.
+ */
+export type ValueLabels = Record<string, string>
+
+function walk(
+  before: unknown,
+  after: unknown,
+  path: string[],
+  changes: ContentChange[],
+  valueLabels: ValueLabels
+): void {
   const label = path.map(labelFor).join(' › ')
+  const display = (value: unknown): unknown =>
+    typeof value === 'string' && valueLabels[value] ? valueLabels[value] : value
 
   if (Array.isArray(before) && Array.isArray(after)) {
     const max = Math.max(before.length, after.length)
@@ -163,17 +178,17 @@ function walk(before: unknown, after: unknown, path: string[], changes: ContentC
           label: itemPath.map(labelFor).join(' › '),
           kind: 'added',
           before: '',
-          after: formatValue(after[i]),
+          after: formatValue(display(after[i])),
         })
       } else if (i >= after.length) {
         changes.push({
           label: itemPath.map(labelFor).join(' › '),
           kind: 'removed',
-          before: formatValue(before[i]),
+          before: formatValue(display(before[i])),
           after: '',
         })
       } else {
-        walk(before[i], after[i], itemPath, changes)
+        walk(before[i], after[i], itemPath, changes, valueLabels)
       }
     }
     return
@@ -182,7 +197,7 @@ function walk(before: unknown, after: unknown, path: string[], changes: ContentC
   if (isPlainObject(before) && isPlainObject(after)) {
     const keys = new Set([...Object.keys(before), ...Object.keys(after)])
     for (const key of keys) {
-      walk(before[key], after[key], [...path, key], changes)
+      walk(before[key], after[key], [...path, key], changes, valueLabels)
     }
     return
   }
@@ -193,7 +208,10 @@ function walk(before: unknown, after: unknown, path: string[], changes: ContentC
   if (JSON.stringify(before) === JSON.stringify(after)) return
 
   if (!beforeEmpty && !afterEmpty && typeof before === 'string' && typeof after === 'string') {
-    const [beforeText, afterText] = focusStringDiff(before, after)
+    const [beforeText, afterText] = focusStringDiff(
+      String(display(before)),
+      String(display(after))
+    )
     changes.push({ label, kind: 'modified', before: beforeText, after: afterText })
     return
   }
@@ -201,14 +219,21 @@ function walk(before: unknown, after: unknown, path: string[], changes: ContentC
   changes.push({
     label,
     kind: beforeEmpty ? 'added' : afterEmpty ? 'removed' : 'modified',
-    before: beforeEmpty ? '' : formatValue(before),
-    after: afterEmpty ? '' : formatValue(after),
+    before: beforeEmpty ? '' : formatValue(display(before)),
+    after: afterEmpty ? '' : formatValue(display(after)),
   })
 }
 
-/** Compare two versions of a page's content and list every field-level change */
-export function diffPageContent(before: PageContent, after: PageContent): ContentChange[] {
+/**
+ * Compare two versions of a page's content and list every field-level change.
+ * `valueLabels` makes opaque stored values (lesson IDs) readable in the diff.
+ */
+export function diffPageContent(
+  before: PageContent,
+  after: PageContent,
+  valueLabels: ValueLabels = {}
+): ContentChange[] {
   const changes: ContentChange[] = []
-  walk(before, after, [], changes)
+  walk(before, after, [], changes, valueLabels)
   return changes
 }

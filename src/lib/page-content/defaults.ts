@@ -62,6 +62,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     sectionTitle: 'Vybrané lekce pro vás',
     sectionDescription:
       'Pravidelně přidáváme nové materiály, které reagují na aktuální výuková témata. Vše připraveno tak, aby šlo ihned použít ve třídě – bez složité přípravy.',
+    featuredLessonIds: [],
   },
   testimonials: {
     sectionTitle: 'Co o platformě říkají učitelé',

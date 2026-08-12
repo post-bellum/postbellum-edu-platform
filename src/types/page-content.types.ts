@@ -23,6 +23,12 @@ export interface HomepageFeatures {
 export interface HomepageLessons {
   sectionTitle: string
   sectionDescription: string
+  /**
+   * IDs of the lessons shown on the homepage, in display order.
+   * Admin-curated in the content editor; empty means "fall back to the
+   * newest published lessons".
+   */
+  featuredLessonIds: string[]
 }
 
 export interface HomepageTestimonial {

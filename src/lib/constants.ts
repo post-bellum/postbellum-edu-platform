@@ -2,6 +2,9 @@
  * Application-wide constants
  */
 
+// Number of lesson slots in the homepage "Vybrané lekce" section
+export const HOMEPAGE_LESSONS_COUNT = 4
+
 // Authentication
 export const AUTH_CONSTANTS = {
   PASSWORD_MIN_LENGTH: 8,

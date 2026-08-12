@@ -4,14 +4,24 @@ import { ContentFormSection } from './ContentFormSection'
 import { ArrayEditor } from './ArrayEditor'
 import { ImageUploadField } from './ImageUploadField'
 import { TextInput, TextAreaInput } from './FormField'
+import { FeaturedLessonsPicker } from './FeaturedLessonsPicker'
+import type { Lesson } from '@/types/lesson.types'
 import type { HomepageContent, HomepageFeature, HomepageTestimonial } from '@/types/page-content.types'
 
 interface HomepageContentFormProps {
   content: HomepageContent
   onChange: (content: HomepageContent) => void
+  /** Published lessons offered in the homepage lesson picker */
+  lessons: Lesson[]
+  lessonsLoading?: boolean
 }
 
-export function HomepageContentForm({ content, onChange }: HomepageContentFormProps) {
+export function HomepageContentForm({
+  content,
+  onChange,
+  lessons,
+  lessonsLoading,
+}: HomepageContentFormProps) {
   const update = <K extends keyof HomepageContent>(key: K, value: HomepageContent[K]) => {
     onChange({ ...content, [key]: value })
   }
@@ -83,6 +93,12 @@ export function HomepageContentForm({ content, onChange }: HomepageContentFormPr
           label="Popis sekce"
           value={content.lessons.sectionDescription}
           onChange={(sectionDescription) => update('lessons', { ...content.lessons, sectionDescription })}
+        />
+        <FeaturedLessonsPicker
+          value={content.lessons.featuredLessonIds ?? []}
+          onChange={(featuredLessonIds) => update('lessons', { ...content.lessons, featuredLessonIds })}
+          lessons={lessons}
+          loading={lessonsLoading}
         />
       </ContentFormSection>
 

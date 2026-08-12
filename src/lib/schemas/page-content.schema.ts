@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { sanitizeInput, sanitizeHTML } from '@/lib/sanitize'
+import { HOMEPAGE_LESSONS_COUNT } from '@/lib/constants'
 
 const sanitizeString = (val: string) => sanitizeInput(val.trim())
 
@@ -26,6 +27,11 @@ const homepageFeaturesSchema = z.object({
 const homepageLessonsSchema = z.object({
   sectionTitle: z.string().min(1).max(200).transform(sanitizeString),
   sectionDescription: z.string().min(1).max(2000).transform(sanitizeString),
+  featuredLessonIds: z
+    .array(z.string().uuid())
+    .max(HOMEPAGE_LESSONS_COUNT)
+    .optional()
+    .default([]),
 })
 
 const homepageTestimonialSchema = z.object({
