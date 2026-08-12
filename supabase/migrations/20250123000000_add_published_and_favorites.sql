@@ -13,6 +13,7 @@ COMMENT ON COLUMN public.lessons.published IS 'Whether the lesson is published a
 DROP POLICY IF EXISTS "Lessons are viewable by everyone" ON public.lessons;
 
 -- New policy: Public can only view published lessons
+DROP POLICY IF EXISTS "Public can view published lessons" ON public.lessons;
 CREATE POLICY "Public can view published lessons"
   ON public.lessons
   FOR SELECT
@@ -20,6 +21,7 @@ CREATE POLICY "Public can view published lessons"
   USING (published = true);
 
 -- Policy: Authenticated users can view all lessons (for admins to see drafts)
+DROP POLICY IF EXISTS "Authenticated users can view all lessons" ON public.lessons;
 CREATE POLICY "Authenticated users can view all lessons"
   ON public.lessons
   FOR SELECT
@@ -38,6 +40,7 @@ CREATE TABLE IF NOT EXISTS public.user_favorites (
 ALTER TABLE public.user_favorites ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can view their own favorites
+DROP POLICY IF EXISTS "Users can view own favorites" ON public.user_favorites;
 CREATE POLICY "Users can view own favorites"
   ON public.user_favorites
   FOR SELECT
@@ -45,6 +48,7 @@ CREATE POLICY "Users can view own favorites"
   USING (auth.uid() = user_id);
 
 -- Policy: Users can insert their own favorites
+DROP POLICY IF EXISTS "Users can insert own favorites" ON public.user_favorites;
 CREATE POLICY "Users can insert own favorites"
   ON public.user_favorites
   FOR INSERT
@@ -52,6 +56,7 @@ CREATE POLICY "Users can insert own favorites"
   WITH CHECK (auth.uid() = user_id);
 
 -- Policy: Users can delete their own favorites
+DROP POLICY IF EXISTS "Users can delete own favorites" ON public.user_favorites;
 CREATE POLICY "Users can delete own favorites"
   ON public.user_favorites
   FOR DELETE

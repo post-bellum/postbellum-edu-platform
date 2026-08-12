@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS public.tags (
 ALTER TABLE public.tags ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Everyone can view tags
+DROP POLICY IF EXISTS "Tags are viewable by everyone" ON public.tags;
 CREATE POLICY "Tags are viewable by everyone"
   ON public.tags
   FOR SELECT
@@ -32,6 +33,7 @@ CREATE POLICY "Tags are viewable by everyone"
   USING (true);
 
 -- Policy: Only admins can insert tags
+DROP POLICY IF EXISTS "Admins can insert tags" ON public.tags;
 CREATE POLICY "Admins can insert tags"
   ON public.tags
   FOR INSERT
@@ -44,6 +46,7 @@ CREATE POLICY "Admins can insert tags"
   );
 
 -- Policy: Only admins can update tags
+DROP POLICY IF EXISTS "Admins can update tags" ON public.tags;
 CREATE POLICY "Admins can update tags"
   ON public.tags
   FOR UPDATE
@@ -62,6 +65,7 @@ CREATE POLICY "Admins can update tags"
   );
 
 -- Policy: Only admins can delete tags
+DROP POLICY IF EXISTS "Admins can delete tags" ON public.tags;
 CREATE POLICY "Admins can delete tags"
   ON public.tags
   FOR DELETE
@@ -98,6 +102,7 @@ CREATE TABLE IF NOT EXISTS public.lessons (
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Everyone can view lessons
+DROP POLICY IF EXISTS "Lessons are viewable by everyone" ON public.lessons;
 CREATE POLICY "Lessons are viewable by everyone"
   ON public.lessons
   FOR SELECT
@@ -105,6 +110,7 @@ CREATE POLICY "Lessons are viewable by everyone"
   USING (true);
 
 -- Policy: Only admins can insert lessons
+DROP POLICY IF EXISTS "Admins can insert lessons" ON public.lessons;
 CREATE POLICY "Admins can insert lessons"
   ON public.lessons
   FOR INSERT
@@ -117,6 +123,7 @@ CREATE POLICY "Admins can insert lessons"
   );
 
 -- Policy: Only admins can update lessons
+DROP POLICY IF EXISTS "Admins can update lessons" ON public.lessons;
 CREATE POLICY "Admins can update lessons"
   ON public.lessons
   FOR UPDATE
@@ -135,6 +142,7 @@ CREATE POLICY "Admins can update lessons"
   );
 
 -- Policy: Only admins can delete lessons
+DROP POLICY IF EXISTS "Admins can delete lessons" ON public.lessons;
 CREATE POLICY "Admins can delete lessons"
   ON public.lessons
   FOR DELETE
@@ -154,6 +162,7 @@ CREATE INDEX IF NOT EXISTS idx_lessons_period ON public.lessons(period);
 CREATE INDEX IF NOT EXISTS idx_lessons_target_group ON public.lessons(target_group);
 
 -- Create trigger for updated_at on lessons
+DROP TRIGGER IF EXISTS set_lessons_updated_at ON public.lessons;
 CREATE TRIGGER set_lessons_updated_at
   BEFORE UPDATE ON public.lessons
   FOR EACH ROW
@@ -170,6 +179,7 @@ CREATE TABLE IF NOT EXISTS public.lesson_tags (
 ALTER TABLE public.lesson_tags ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Everyone can view lesson tags
+DROP POLICY IF EXISTS "Lesson tags are viewable by everyone" ON public.lesson_tags;
 CREATE POLICY "Lesson tags are viewable by everyone"
   ON public.lesson_tags
   FOR SELECT
@@ -177,6 +187,7 @@ CREATE POLICY "Lesson tags are viewable by everyone"
   USING (true);
 
 -- Policy: Only admins can insert lesson tags
+DROP POLICY IF EXISTS "Admins can insert lesson tags" ON public.lesson_tags;
 CREATE POLICY "Admins can insert lesson tags"
   ON public.lesson_tags
   FOR INSERT
@@ -189,6 +200,7 @@ CREATE POLICY "Admins can insert lesson tags"
   );
 
 -- Policy: Only admins can delete lesson tags
+DROP POLICY IF EXISTS "Admins can delete lesson tags" ON public.lesson_tags;
 CREATE POLICY "Admins can delete lesson tags"
   ON public.lesson_tags
   FOR DELETE
@@ -221,6 +233,7 @@ CREATE TABLE IF NOT EXISTS public.lesson_materials (
 ALTER TABLE public.lesson_materials ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Everyone can view lesson materials
+DROP POLICY IF EXISTS "Lesson materials are viewable by everyone" ON public.lesson_materials;
 CREATE POLICY "Lesson materials are viewable by everyone"
   ON public.lesson_materials
   FOR SELECT
@@ -228,6 +241,7 @@ CREATE POLICY "Lesson materials are viewable by everyone"
   USING (true);
 
 -- Policy: Only admins can insert lesson materials
+DROP POLICY IF EXISTS "Admins can insert lesson materials" ON public.lesson_materials;
 CREATE POLICY "Admins can insert lesson materials"
   ON public.lesson_materials
   FOR INSERT
@@ -240,6 +254,7 @@ CREATE POLICY "Admins can insert lesson materials"
   );
 
 -- Policy: Only admins can update lesson materials
+DROP POLICY IF EXISTS "Admins can update lesson materials" ON public.lesson_materials;
 CREATE POLICY "Admins can update lesson materials"
   ON public.lesson_materials
   FOR UPDATE
@@ -258,6 +273,7 @@ CREATE POLICY "Admins can update lesson materials"
   );
 
 -- Policy: Only admins can delete lesson materials
+DROP POLICY IF EXISTS "Admins can delete lesson materials" ON public.lesson_materials;
 CREATE POLICY "Admins can delete lesson materials"
   ON public.lesson_materials
   FOR DELETE
@@ -276,6 +292,7 @@ CREATE INDEX IF NOT EXISTS idx_lesson_materials_duration ON public.lesson_materi
 CREATE INDEX IF NOT EXISTS idx_lesson_materials_spec_duration ON public.lesson_materials(specification, duration);
 
 -- Create trigger for updated_at on lesson_materials
+DROP TRIGGER IF EXISTS set_lesson_materials_updated_at ON public.lesson_materials;
 CREATE TRIGGER set_lesson_materials_updated_at
   BEFORE UPDATE ON public.lesson_materials
   FOR EACH ROW
@@ -296,6 +313,7 @@ CREATE TABLE IF NOT EXISTS public.additional_activities (
 ALTER TABLE public.additional_activities ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Everyone can view additional activities
+DROP POLICY IF EXISTS "Additional activities are viewable by everyone" ON public.additional_activities;
 CREATE POLICY "Additional activities are viewable by everyone"
   ON public.additional_activities
   FOR SELECT
@@ -303,6 +321,7 @@ CREATE POLICY "Additional activities are viewable by everyone"
   USING (true);
 
 -- Policy: Only admins can insert additional activities
+DROP POLICY IF EXISTS "Admins can insert additional activities" ON public.additional_activities;
 CREATE POLICY "Admins can insert additional activities"
   ON public.additional_activities
   FOR INSERT
@@ -315,6 +334,7 @@ CREATE POLICY "Admins can insert additional activities"
   );
 
 -- Policy: Only admins can update additional activities
+DROP POLICY IF EXISTS "Admins can update additional activities" ON public.additional_activities;
 CREATE POLICY "Admins can update additional activities"
   ON public.additional_activities
   FOR UPDATE
@@ -333,6 +353,7 @@ CREATE POLICY "Admins can update additional activities"
   );
 
 -- Policy: Only admins can delete additional activities
+DROP POLICY IF EXISTS "Admins can delete additional activities" ON public.additional_activities;
 CREATE POLICY "Admins can delete additional activities"
   ON public.additional_activities
   FOR DELETE
@@ -349,6 +370,7 @@ CREATE INDEX IF NOT EXISTS idx_additional_activities_lesson_id ON public.additio
 CREATE INDEX IF NOT EXISTS idx_additional_activities_created_at ON public.additional_activities(created_at);
 
 -- Create trigger for updated_at on additional_activities
+DROP TRIGGER IF EXISTS set_additional_activities_updated_at ON public.additional_activities;
 CREATE TRIGGER set_additional_activities_updated_at
   BEFORE UPDATE ON public.additional_activities
   FOR EACH ROW

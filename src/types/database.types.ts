@@ -154,6 +154,59 @@ export type Database = {
           },
         ]
       }
+      lesson_witnesses: {
+        Row: {
+          bio: string | null
+          birth_year: number | null
+          created_at: string | null
+          id: string
+          lesson_id: string
+          memory_of_nations_url: string | null
+          name: string
+          portrait_url: string | null
+          role_full: string | null
+          role_short: string | null
+          sort_order: number
+          updated_at: string | null
+        }
+        Insert: {
+          bio?: string | null
+          birth_year?: number | null
+          created_at?: string | null
+          id?: string
+          lesson_id: string
+          memory_of_nations_url?: string | null
+          name: string
+          portrait_url?: string | null
+          role_full?: string | null
+          role_short?: string | null
+          sort_order?: number
+          updated_at?: string | null
+        }
+        Update: {
+          bio?: string | null
+          birth_year?: number | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string
+          memory_of_nations_url?: string | null
+          name?: string
+          portrait_url?: string | null
+          role_full?: string | null
+          role_short?: string | null
+          sort_order?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lesson_witnesses_lesson_id_fkey'
+            columns: ['lesson_id']
+            isOneToOne: false
+            referencedRelation: 'lessons'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       lessons: {
         Row: {
           created_at: string | null

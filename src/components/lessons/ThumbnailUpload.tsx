@@ -7,9 +7,28 @@ interface ThumbnailUploadProps {
   value: string
   onChange: (url: string) => void
   className?: string
+  /** 'thumbnail' is the default 316×200 landscape box; 'avatar' is a 160px circle */
+  variant?: 'thumbnail' | 'avatar'
+  /** Storage folder inside the lesson-materials bucket */
+  folder?: string
+  /** Accessible label for the preview image */
+  alt?: string
 }
 
-export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUploadProps) {
+/** Box geometry per variant — shared by the preview and the drop zone */
+const VARIANT_BOX = {
+  thumbnail: 'w-[316px] h-[200px] rounded-xl',
+  avatar: 'w-[160px] h-[160px] rounded-full',
+} as const
+
+export function ThumbnailUpload({
+  value,
+  onChange,
+  className = '',
+  variant = 'thumbnail',
+  folder = 'thumbnails',
+  alt = 'Náhledový obrázek',
+}: ThumbnailUploadProps) {
   const [isDragging, setIsDragging] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -65,7 +84,7 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
 
     try {
       // Direct client-side upload to Supabase Storage
-      const url = await uploadImageToStorage(file, 'lesson-materials', 'thumbnails')
+      const url = await uploadImageToStorage(file, 'lesson-materials', folder)
 
       if (url) {
         onChange(url)
@@ -82,7 +101,7 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
     } finally {
       setIsUploading(false)
     }
-  }, [onChange])
+  }, [onChange, folder])
 
   const handleDragOver = React.useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -144,17 +163,17 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
       {value && !imageError ? (
         // Preview mode
         <div className="relative group">
-          <div className="relative w-[316px] h-[200px] rounded-xl overflow-hidden border border-grey-200 bg-grey-50">
+          <div className={`relative ${VARIANT_BOX[variant]} overflow-hidden border border-grey-200 bg-grey-50`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={value}
-              alt="Náhledový obrázek"
+              alt={alt}
               className="w-full h-full object-cover"
               onError={handleImageError}
             />
-            
+
             {/* Overlay on hover */}
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+            <div className={`absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 ${variant === 'avatar' ? 'flex-col gap-1.5' : ''}`}>
               <button
                 type="button"
                 onClick={handleClick}
@@ -180,7 +199,7 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={`
-            relative w-[316px] h-[200px] rounded-xl border-2 border-dashed
+            relative ${VARIANT_BOX[variant]} border-2 border-dashed
             flex flex-col items-center justify-center gap-3 cursor-pointer
             transition-colors
             ${isDragging 
@@ -212,12 +231,14 @@ export function ThumbnailUpload({ value, onChange, className = '' }: ThumbnailUp
                   />
                 </svg>
               </div>
-              <div className="text-center">
+              <div className="text-center px-3">
                 <p className="text-sm font-medium text-text-strong">
                   {isDragging ? 'Pusťte pro nahrání' : 'Přetáhněte obrázek'}
                 </p>
                 <p className="text-xs text-text-subtle mt-1">
-                  nebo klikněte pro výběr • max {STORAGE_LIMITS.MAX_FILE_SIZE_DISPLAY}
+                  {variant === 'avatar'
+                    ? `nebo klikněte • max ${STORAGE_LIMITS.MAX_FILE_SIZE_DISPLAY}`
+                    : `nebo klikněte pro výběr • max ${STORAGE_LIMITS.MAX_FILE_SIZE_DISPLAY}`}
                 </p>
               </div>
             </>
