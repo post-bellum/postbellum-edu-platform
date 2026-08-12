@@ -223,6 +223,7 @@ export function LessonMaterialForm({
               }}
               placeholder="Začněte psát obsah materiálu... Můžete kopírovat z Wordu nebo Google Docs."
               resetKey={editorResetKey}
+              toolbarClassName="top-0"
             />
             {/* Hidden input for form submission */}
             <input type="hidden" name="content" value={content} />
