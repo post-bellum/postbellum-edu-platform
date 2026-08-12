@@ -3,6 +3,9 @@
 -- detail page as a horizontal row of cards; each card opens a detail modal with
 -- a short biography and a link to the witness's profile on pametnaroda.cz.
 
+-- Ensure uuid_generate_v4() is findable (Supabase installs it in extensions schema)
+SET search_path TO public, extensions;
+
 CREATE TABLE IF NOT EXISTS public.lesson_witnesses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   lesson_id UUID REFERENCES public.lessons(id) ON DELETE CASCADE NOT NULL,
@@ -24,6 +27,7 @@ CREATE TABLE IF NOT EXISTS public.lesson_witnesses (
 ALTER TABLE public.lesson_witnesses ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Public can only view witnesses for published lessons
+DROP POLICY IF EXISTS "Public can view lesson_witnesses for published lessons" ON public.lesson_witnesses;
 CREATE POLICY "Public can view lesson_witnesses for published lessons"
   ON public.lesson_witnesses
   FOR SELECT
@@ -37,6 +41,7 @@ CREATE POLICY "Public can view lesson_witnesses for published lessons"
   );
 
 -- Policy: Authenticated users can view all witnesses
+DROP POLICY IF EXISTS "Authenticated users can view all lesson_witnesses" ON public.lesson_witnesses;
 CREATE POLICY "Authenticated users can view all lesson_witnesses"
   ON public.lesson_witnesses
   FOR SELECT
@@ -44,6 +49,7 @@ CREATE POLICY "Authenticated users can view all lesson_witnesses"
   USING (true);
 
 -- Policy: Only admins can insert witnesses
+DROP POLICY IF EXISTS "Admins can insert lesson_witnesses" ON public.lesson_witnesses;
 CREATE POLICY "Admins can insert lesson_witnesses"
   ON public.lesson_witnesses
   FOR INSERT
@@ -56,6 +62,7 @@ CREATE POLICY "Admins can insert lesson_witnesses"
   );
 
 -- Policy: Only admins can update witnesses
+DROP POLICY IF EXISTS "Admins can update lesson_witnesses" ON public.lesson_witnesses;
 CREATE POLICY "Admins can update lesson_witnesses"
   ON public.lesson_witnesses
   FOR UPDATE
@@ -74,6 +81,7 @@ CREATE POLICY "Admins can update lesson_witnesses"
   );
 
 -- Policy: Only admins can delete witnesses
+DROP POLICY IF EXISTS "Admins can delete lesson_witnesses" ON public.lesson_witnesses;
 CREATE POLICY "Admins can delete lesson_witnesses"
   ON public.lesson_witnesses
   FOR DELETE
@@ -91,6 +99,7 @@ CREATE INDEX IF NOT EXISTS idx_lesson_witnesses_lesson_id ON public.lesson_witne
 CREATE INDEX IF NOT EXISTS idx_lesson_witnesses_lesson_sort ON public.lesson_witnesses(lesson_id, sort_order, created_at);
 
 -- Create trigger for updated_at on lesson_witnesses
+DROP TRIGGER IF EXISTS set_lesson_witnesses_updated_at ON public.lesson_witnesses;
 CREATE TRIGGER set_lesson_witnesses_updated_at
   BEFORE UPDATE ON public.lesson_witnesses
   FOR EACH ROW

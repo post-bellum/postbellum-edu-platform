@@ -32,18 +32,21 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can view their own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
 CREATE POLICY "Users can view own profile" 
   ON public.profiles 
   FOR SELECT 
   USING (auth.uid() = id);
 
 -- Policy: Users can insert their own profile
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
 CREATE POLICY "Users can insert own profile" 
   ON public.profiles 
   FOR INSERT 
   WITH CHECK (auth.uid() = id);
 
 -- Policy: Users can update their own profile
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile" 
   ON public.profiles 
   FOR UPDATE 
@@ -67,6 +70,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to auto-update updated_at
+DROP TRIGGER IF EXISTS set_updated_at ON public.profiles;
 CREATE TRIGGER set_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW

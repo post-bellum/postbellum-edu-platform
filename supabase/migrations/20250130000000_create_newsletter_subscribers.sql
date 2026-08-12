@@ -17,12 +17,14 @@ CREATE TABLE IF NOT EXISTS public.newsletter_subscribers (
 ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Allow anyone to insert (subscribe) - no authentication required
+DROP POLICY IF EXISTS "Anyone can subscribe to newsletter" ON public.newsletter_subscribers;
 CREATE POLICY "Anyone can subscribe to newsletter" 
   ON public.newsletter_subscribers 
   FOR INSERT 
   WITH CHECK (true);
 
 -- Policy: Allow anyone to update via unsubscribe token (for unsubscribing)
+DROP POLICY IF EXISTS "Anyone can unsubscribe via token" ON public.newsletter_subscribers;
 CREATE POLICY "Anyone can unsubscribe via token" 
   ON public.newsletter_subscribers 
   FOR UPDATE 
@@ -30,6 +32,7 @@ CREATE POLICY "Anyone can unsubscribe via token"
   WITH CHECK (true);
 
 -- Policy: Allow anyone to select by unsubscribe token (for unsubscribe page)
+DROP POLICY IF EXISTS "Anyone can lookup by unsubscribe token" ON public.newsletter_subscribers;
 CREATE POLICY "Anyone can lookup by unsubscribe token" 
   ON public.newsletter_subscribers 
   FOR SELECT 
