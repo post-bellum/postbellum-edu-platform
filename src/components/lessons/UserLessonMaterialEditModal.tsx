@@ -81,7 +81,9 @@ export function UserLessonMaterialEditModal({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="title">Název</Label>
+            <Label htmlFor="title">
+              Název <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="title"
               value={title}
@@ -100,6 +102,7 @@ export function UserLessonMaterialEditModal({
                 placeholder="Obsah materiálu..."
                 className="min-h-[400px]"
                 resetKey={editorResetKey}
+                toolbarClassName="top-0"
               />
             </div>
           </div>

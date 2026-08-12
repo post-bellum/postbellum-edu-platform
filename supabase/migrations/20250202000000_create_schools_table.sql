@@ -7,12 +7,10 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Ensure uuid_generate_v4() is findable (Supabase installs it in extensions schema)
 SET search_path TO public, extensions;
 
--- Drop existing schools table if it exists (with old structure)
--- This is safe because we're creating a new table structure
--- If you need to preserve old data, modify this migration first!
-DROP TABLE IF EXISTS public.schools CASCADE;
-
-CREATE TABLE public.schools (
+-- NOTE: previously this migration dropped and recreated the table unconditionally.
+-- That is destructive if the table already contains data (e.g. imported registry rows),
+-- so table creation is now idempotent via IF NOT EXISTS instead.
+CREATE TABLE IF NOT EXISTS public.schools (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   red_izo TEXT UNIQUE NOT NULL, -- RED IZO identifier from registry
   fullname TEXT NOT NULL,

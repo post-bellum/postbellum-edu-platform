@@ -32,6 +32,12 @@ interface PlateEditorProps {
   className?: string
   /** Increment this to force the editor to reset with new content */
   resetKey?: number
+  /**
+   * Sticky offset class for the toolbar (e.g. `top-0` inside a dialog, or
+   * `top-20` on a full page below the sticky nav bar). Passed through to
+   * `EditorToolbar`.
+   */
+  toolbarClassName?: string
 }
 
 /**
@@ -59,6 +65,7 @@ export function PlateEditor({
   placeholder = 'Začněte psát...',
   className,
   resetKey = 0,
+  toolbarClassName,
 }: PlateEditorProps) {
   // Wait for client-side hydration before rendering the editor.
   // Slate/Plate produces different DOM on server vs client which causes
@@ -202,7 +209,11 @@ export function PlateEditor({
       <div
         className={cn(
           'plate-editor-wrapper',
-          'border border-gray-200 rounded-xl bg-white overflow-hidden',
+          // No `overflow-hidden` here - it would establish a scroll container
+          // that breaks `position: sticky` on the toolbar below. Corner
+          // clipping instead happens on the toolbar (rounded-t) and the
+          // editor container (rounded-b) individually.
+          'border border-gray-200 rounded-xl bg-white',
           'shadow-lg shadow-gray-200/50',
           'ring-1 ring-gray-100',
           className
@@ -212,13 +223,14 @@ export function PlateEditor({
           editor={editor}
           onChange={({ value }) => syncContent(value)}
         >
-          {/* Toolbar */}
+          {/* Toolbar - sticky so it stays visible while scrolling */}
           <EditorToolbar
             onInsertImage={handleInsertImage}
+            className={toolbarClassName}
           />
 
           {/* Continuous editor - pagination only in preview/PDF */}
-          <EditorContainer className="continuous-editor-container">
+          <EditorContainer className="continuous-editor-container rounded-b-xl">
             <Editor
               placeholder={placeholder}
               className="continuous-editor-content"

@@ -37,7 +37,7 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
   const { isLoggedIn } = useAuth()
   
   const [selectedSpecification, setSelectedSpecification] = React.useState<LessonSpecification>('2nd_grade_elementary')
-  const [selectedDuration, setSelectedDuration] = React.useState<LessonDuration>(30)
+  const [selectedDuration, setSelectedDuration] = React.useState<LessonDuration>(45)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [selectedMaterial, setSelectedMaterial] = React.useState<LessonMaterial | null>(null)
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false)

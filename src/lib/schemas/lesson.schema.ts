@@ -378,6 +378,130 @@ export function parseFormDataForAdditionalActivity(formData: FormData) {
 }
 
 /**
+ * Memory of Nations profile URL (pametnaroda.cz / memoryofnations.eu)
+ */
+const memoryOfNationsUrlSchema = z
+  .string()
+  .url('Neplatná URL adresa')
+  .refine(
+    (val) => /^https:\/\/(www\.)?(pametnaroda\.cz|memoryofnations\.eu)\//.test(val),
+    { message: 'Musí být odkaz na profil na pametnaroda.cz' }
+  )
+  .optional()
+
+const witnessBirthYearSchema = z
+  .number()
+  .int('Rok narození musí být celé číslo')
+  .min(1850, 'Rok narození musí být alespoň 1850')
+  .max(2100, 'Rok narození může být maximálně 2100')
+  .optional()
+
+const witnessSortOrderSchema = z
+  .number()
+  .int('Pořadí musí být celé číslo')
+  .min(0, 'Pořadí nemůže být negativní')
+  .max(9999, 'Pořadí může být maximálně 9999')
+  .optional()
+
+/**
+ * Create lesson witness schema
+ */
+export const createLessonWitnessSchema = z.object({
+  lesson_id: uuidSchema,
+  name: z
+    .string()
+    .min(1, 'Jméno pamětníka je povinné')
+    .max(200, 'Jméno pamětníka může mít maximálně 200 znaků')
+    .transform(sanitizeString),
+  role_short: z
+    .string()
+    .max(200, 'Krátká role může mít maximálně 200 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  role_full: z
+    .string()
+    .max(500, 'Dlouhá role může mít maximálně 500 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  birth_year: witnessBirthYearSchema,
+  bio: z
+    .string()
+    .max(5000, 'Životopis může mít maximálně 5000 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  portrait_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  memory_of_nations_url: memoryOfNationsUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  sort_order: witnessSortOrderSchema,
+})
+
+/**
+ * Update lesson witness schema
+ */
+export const updateLessonWitnessSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Jméno pamětníka je povinné')
+    .max(200, 'Jméno pamětníka může mít maximálně 200 znaků')
+    .transform(sanitizeString)
+    .optional(),
+  role_short: z
+    .string()
+    .max(200, 'Krátká role může mít maximálně 200 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  role_full: z
+    .string()
+    .max(500, 'Dlouhá role může mít maximálně 500 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  birth_year: witnessBirthYearSchema,
+  bio: z
+    .string()
+    .max(5000, 'Životopis může mít maximálně 5000 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  portrait_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  memory_of_nations_url: memoryOfNationsUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  sort_order: witnessSortOrderSchema,
+})
+
+/**
+ * Helper to parse FormData into object for lesson witness schemas
+ * Converts empty strings to undefined for proper Zod validation
+ */
+export function parseFormDataForLessonWitness(formData: FormData) {
+  // Helper to convert empty strings to undefined for optional fields
+  // Zod's .optional() expects undefined, not null
+  const getOptionalValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    return value && value.trim() ? value : undefined
+  }
+
+  const getRequiredValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    return value ?? ''
+  }
+
+  // Numeric fields arrive as strings from FormData; NaN is rejected by Zod
+  const getNumericValue = (key: string) => {
+    const value = getOptionalValue(key)
+    return value !== undefined ? Number(value) : undefined
+  }
+
+  return {
+    lesson_id: getRequiredValue('lesson_id'),
+    name: getRequiredValue('name'),
+    role_short: getOptionalValue('role_short'),
+    role_full: getOptionalValue('role_full'),
+    birth_year: getNumericValue('birth_year'),
+    bio: getOptionalValue('bio'),
+    portrait_url: getOptionalValue('portrait_url'),
+    memory_of_nations_url: getOptionalValue('memory_of_nations_url'),
+    sort_order: getNumericValue('sort_order'),
+  }
+}
+
+/**
  * Create user lesson material schema (for user copies of lesson materials)
  */
 export const createUserLessonMaterialSchema = z.object({
@@ -441,6 +565,8 @@ export type CreateLessonMaterialInput = z.infer<typeof createLessonMaterialSchem
 export type UpdateLessonMaterialInput = z.infer<typeof updateLessonMaterialSchema>
 export type CreateAdditionalActivityInput = z.infer<typeof createAdditionalActivitySchema>
 export type UpdateAdditionalActivityInput = z.infer<typeof updateAdditionalActivitySchema>
+export type CreateLessonWitnessInput = z.infer<typeof createLessonWitnessSchema>
+export type UpdateLessonWitnessInput = z.infer<typeof updateLessonWitnessSchema>
 export type CreateUserLessonMaterialInput = z.infer<typeof createUserLessonMaterialSchema>
 export type UpdateUserLessonMaterialInput = z.infer<typeof updateUserLessonMaterialSchema>
 
