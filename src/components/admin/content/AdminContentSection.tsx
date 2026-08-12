@@ -1,14 +1,16 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Save, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { PageContentSubTabs } from './PageContentSubTabs'
 import { HomepageContentForm } from './HomepageContentForm'
 import { AboutContentForm } from './AboutContentForm'
 import { TermsContentForm } from './TermsContentForm'
+import { SaveChangesDialog } from './SaveChangesDialog'
 import { getPageContentForAdmin, savePageContent } from '@/app/actions/page-content'
 import { PAGE_DEFAULTS } from '@/lib/page-content/defaults'
+import { changeCountLabel, diffPageContent, getPageLabel } from '@/lib/page-content/diff'
 import { deepMergeWithDefaults } from '@/lib/supabase/page-content'
 import type {
   PageSlug,
@@ -27,6 +29,13 @@ export function AdminContentSection() {
     about: PAGE_DEFAULTS.about,
     terms: PAGE_DEFAULTS.terms,
   })
+  /** Last persisted state per tab — the baseline the save dialog diffs against */
+  const [baseline, setBaseline] = useState<Record<PageSlug, PageContent>>({
+    homepage: PAGE_DEFAULTS.homepage,
+    about: PAGE_DEFAULTS.about,
+    terms: PAGE_DEFAULTS.terms,
+  })
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -48,10 +57,9 @@ export function AdminContentSection() {
     const result = await getPageContentForAdmin(slug)
     if (result.success) {
       if (result.data?.content) {
-        setContent((prev) => ({
-          ...prev,
-          [slug]: mergeWithDefaults(slug, result.data!.content as PageContent),
-        }))
+        const merged = mergeWithDefaults(slug, result.data.content as PageContent)
+        setContent((prev) => ({ ...prev, [slug]: merged }))
+        setBaseline((prev) => ({ ...prev, [slug]: merged }))
       }
       setLoadedTabs((prev) => (prev.includes(slug) ? prev : [...prev, slug]))
     } else {
@@ -68,10 +76,9 @@ export function AdminContentSection() {
       if (cancelled) return
       if (result.success) {
         if (result.data?.content) {
-          setContent((prev) => ({
-            ...prev,
-            homepage: mergeWithDefaults('homepage', result.data!.content as PageContent),
-          }))
+          const merged = mergeWithDefaults('homepage', result.data.content as PageContent)
+          setContent((prev) => ({ ...prev, homepage: merged }))
+          setBaseline((prev) => ({ ...prev, homepage: merged }))
         }
         setLoadedTabs(['homepage'])
       } else {
@@ -118,19 +125,33 @@ export function AdminContentSection() {
     })
   }, [])
 
-  const handleSave = async () => {
+  const pendingChanges = useMemo(
+    () => diffPageContent(baseline[activeTab], content[activeTab]),
+    [baseline, content, activeTab]
+  )
+
+  const handleSaveClick = () => {
+    setErrorMessage(null)
+    setConfirmOpen(true)
+  }
+
+  const handleConfirmSave = async () => {
     setSaveStatus('saving')
     setErrorMessage(null)
 
-    const result = await savePageContent(activeTab, content[activeTab])
+    const saved = content[activeTab]
+    const result = await savePageContent(activeTab, saved)
 
     if (result.success) {
       setSaveStatus('saved')
+      setBaseline((prev) => ({ ...prev, [activeTab]: saved }))
       markClean(activeTab)
+      setConfirmOpen(false)
       setTimeout(() => setSaveStatus('idle'), 2000)
     } else {
       setSaveStatus('error')
       setErrorMessage(result.error || 'Chyba při ukládání')
+      setConfirmOpen(false)
     }
   }
 
@@ -164,31 +185,45 @@ export function AdminContentSection() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-display font-semibold">Obsah stránek</h2>
-        <Button
-          variant="primary"
-          size="medium"
-          onClick={handleSave}
-          disabled={saveStatus === 'saving' || loading}
-        >
-          {saveStatus === 'saving' ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Ukládám...
-            </>
-          ) : saveStatus === 'saved' ? (
-            <>
-              <CheckCircle2 className="w-4 h-4" />
-              Uloženo
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4" />
-              Uložit
-            </>
-          )}
-        </Button>
+      {/*
+        Sticks below the sticky NavigationBar (top-0, 80px tall), under its z-50.
+        The bottom spacing is padding, not margin, so the white background keeps
+        covering content that scrolls underneath instead of letting it show through.
+      */}
+      <div className="sticky top-20 z-30 bg-white mb-6">
+        <div className="flex items-center justify-between gap-4 pb-6">
+          <div className="flex gap-3 min-w-0 items-center">
+            <h2 className="text-2xl font-display font-semibold">Obsah stránek</h2>
+            {pendingChanges.length > 0 && (
+              <span className="text-sm text-grey-500 truncate mt-1">
+                {pendingChanges.length} {changeCountLabel(pendingChanges.length)}
+              </span>
+            )}
+          </div>
+          <Button
+            variant="primary"
+            size="medium"
+            onClick={handleSaveClick}
+            disabled={saveStatus === 'saving' || loading}
+          >
+            {saveStatus === 'saving' ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Ukládám...
+              </>
+            ) : saveStatus === 'saved' ? (
+              <>
+                <CheckCircle2 className="w-4 h-4" />
+                Uloženo
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Uložit
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {errorMessage && (
@@ -226,6 +261,18 @@ export function AdminContentSection() {
           )}
         </>
       )}
+
+      <SaveChangesDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (saveStatus === 'saving') return
+          setConfirmOpen(open)
+        }}
+        pageLabel={getPageLabel(activeTab)}
+        changes={pendingChanges}
+        isSaving={saveStatus === 'saving'}
+        onConfirm={handleConfirmSave}
+      />
     </div>
   )
 }
