@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { useProfile } from '@/lib/supabase/hooks/useProfile'
+import { useNewsletterSubscription } from '@/lib/supabase/hooks/useNewsletterSubscription'
 import { FeedbackModal } from '@/components/ui/FeedbackModal'
 import {
   AlertMessage,
@@ -13,6 +14,7 @@ import {
   AvatarSection,
   DisplayNameSection,
   DeleteAccountSection,
+  NewsletterSection,
   UserEditedMaterialsList,
 } from '@/components/profile'
 import { ProfileTabs, type TabId } from '@/components/profile/ProfileTabs'
@@ -46,6 +48,11 @@ function ProfilePageContent() {
     updateDisplayName,
     updateSchoolName,
   } = useProfile(isLoggedIn)
+  const {
+    isSubscribed,
+    isSaving: isNewsletterSaving,
+    toggle: toggleNewsletter,
+  } = useNewsletterSubscription(isLoggedIn)
 
   // Tab state - initialize from URL query param
   const tabParam = searchParams.get('tab')
@@ -127,6 +134,18 @@ function ProfilePageContent() {
 
   const handleSaveSchoolName = () => {
     updateSchoolName(schoolName)
+  }
+
+  const handleToggleNewsletter = async (next: boolean) => {
+    const result = await toggleNewsletter(next)
+    if (!result.success) {
+      setFeedbackModal({
+        open: true,
+        type: 'error',
+        title: 'Chyba',
+        message: result.error || 'Nepodařilo se změnit odběr newsletteru.',
+      })
+    }
   }
 
   const handleDeleteMaterial = async (materialId: string, lessonId: string) => {
@@ -249,6 +268,13 @@ function ProfilePageContent() {
                   onDisplayNameChange={setDisplayName}
                   onSave={handleSaveDisplayName}
                   isSaving={isSaving}
+                />
+
+                {/* Newsletter Section */}
+                <NewsletterSection
+                  isSubscribed={isSubscribed}
+                  onToggle={handleToggleNewsletter}
+                  isSaving={isNewsletterSaving}
                 />
 
                 {/* Delete Account Section */}
