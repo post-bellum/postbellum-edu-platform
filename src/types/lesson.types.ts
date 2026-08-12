@@ -57,10 +57,26 @@ export interface AdditionalActivity {
   updated_at: string
 }
 
+export interface LessonWitness {
+  id: string
+  lesson_id: string
+  name: string
+  role_short: string | null // Short role shown on the card, e.g. "Poslankyně"
+  role_full: string | null // Full role shown in the detail modal
+  birth_year: number | null // Rendered as "*1953"
+  bio: string | null // Short biography (~900 chars) shown in the detail modal
+  portrait_url: string | null
+  memory_of_nations_url: string | null // Profile on pametnaroda.cz
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
 export interface LessonWithRelations extends Lesson {
   tags?: Tag[]
   materials?: LessonMaterial[]
   additional_activities?: AdditionalActivity[]
+  witnesses?: LessonWitness[]
 }
 
 // Input types are now defined in @/lib/schemas/lesson.schema.ts using Zod
@@ -72,6 +88,8 @@ export type {
   UpdateLessonMaterialInput,
   CreateAdditionalActivityInput,
   UpdateAdditionalActivityInput,
+  CreateLessonWitnessInput,
+  UpdateLessonWitnessInput,
   CreateUserLessonMaterialInput,
   UpdateUserLessonMaterialInput,
 } from '@/lib/schemas/lesson.schema'

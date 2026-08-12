@@ -10,6 +10,7 @@ import { Breadcrumbs } from '@/components/lessons/Breadcrumbs'
 import { LessonDetailHeader } from '@/components/lessons/LessonDetailHeader'
 import { LessonMaterialsWrapper } from '@/components/lessons/LessonMaterialsWrapper'
 import { AdditionalActivitiesSection } from '@/components/lessons/AdditionalActivitiesSection'
+import { LessonWitnessesSection } from '@/components/lessons/LessonWitnessesSection'
 import { FavoriteButton } from '@/components/lessons/FavoriteButton'
 import { FavoriteCTA } from '@/components/lessons/FavoriteCTA'
 import { LessonVideoEmbed } from '@/components/lessons/LessonVideoEmbed'
@@ -81,6 +82,9 @@ export async function LessonDetailContent({ id, usePublicClient = false, isAdmin
             lessonShortId={lesson.short_id}
             isLoggedIn={!!user}
           />
+
+          {/* Witnesses from the story */}
+          <LessonWitnessesSection witnesses={lesson.witnesses || []} />
 
           {/* Additional Activities */}
           <AdditionalActivitiesSection activities={lesson.additional_activities || []} />
