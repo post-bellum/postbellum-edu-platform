@@ -32,6 +32,30 @@ const imageUrlSchema = z
   .optional()
 
 /**
+ * External link URL validation (http/https only)
+ * Used for the optional clickable link on additional activities.
+ */
+const externalLinkUrlSchema = z
+  .string()
+  .transform((val) => val.replace(/\0/g, '').trim())
+  .pipe(
+    z
+      .string()
+      .max(2000, 'Odkaz může mít maximálně 2000 znaků')
+      .url('Neplatná URL adresa odkazu')
+      .refine((url) => /^https?:\/\//i.test(url), {
+        message: 'Odkaz musí začínat http:// nebo https://',
+      })
+      // Reject characters that could break out of an href attribute.
+      // The URL is intentionally NOT passed through sanitizeInput(), which
+      // would mangle legitimate query strings (it strips `on<word>=` patterns).
+      .refine((url) => !/["'<>`\s]/.test(url), {
+        message: 'Odkaz obsahuje nepovolené znaky',
+      })
+  )
+  .optional()
+
+/**
  * Lesson specification enum
  */
 export const lessonSpecificationSchema = z.enum([
@@ -308,6 +332,7 @@ export const createAdditionalActivitySchema = z.object({
     .transform((val) => val ? sanitizeString(val) : undefined),
   image_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
   attachment_type: attachmentTypeSchema.optional(),
+  link_url: externalLinkUrlSchema,
 })
 
 /**
@@ -327,6 +352,8 @@ export const updateAdditionalActivitySchema = z.object({
     .transform((val) => val ? sanitizeString(val) : undefined),
   image_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
   attachment_type: attachmentTypeSchema.optional(),
+  // null clears an existing link; undefined leaves it untouched
+  link_url: externalLinkUrlSchema.nullable(),
 })
 
 /**
@@ -381,6 +408,7 @@ export function parseFormDataForAdditionalActivity(formData: FormData) {
     description: getOptionalValue('description'),
     image_url: getOptionalValue('image_url'),
     attachment_type: getOptionalValue('attachment_type') as 'image' | 'pdf' | undefined,
+    link_url: getOptionalValue('link_url'),
   }
 }
 

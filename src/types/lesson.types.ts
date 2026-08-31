@@ -54,6 +54,7 @@ export interface AdditionalActivity {
   description: string | null
   image_url: string | null
   attachment_type: AdditionalActivityAttachmentType | null
+  link_url: string | null
   created_at: string
   updated_at: string
 }
