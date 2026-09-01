@@ -329,6 +329,153 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_answers: {
+        Row: {
+          answer_text: string | null
+          created_at: string | null
+          id: string
+          option_id: string | null
+          question_id: string
+          scale_value: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          answer_text?: string | null
+          created_at?: string | null
+          id?: string
+          option_id?: string | null
+          question_id: string
+          scale_value?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          answer_text?: string | null
+          created_at?: string | null
+          id?: string
+          option_id?: string | null
+          question_id?: string
+          scale_value?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'profile_answers_option_id_fkey'
+            columns: ['option_id']
+            isOneToOne: false
+            referencedRelation: 'profile_question_options'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'profile_answers_question_id_fkey'
+            columns: ['question_id']
+            isOneToOne: false
+            referencedRelation: 'profile_questions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'profile_answers_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      profile_question_options: {
+        Row: {
+          created_at: string | null
+          id: string
+          label: string
+          position: number
+          question_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          label: string
+          position?: number
+          question_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          label?: string
+          position?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'profile_question_options_question_id_fkey'
+            columns: ['question_id']
+            isOneToOne: false
+            referencedRelation: 'profile_questions'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      profile_survey_settings: {
+        Row: {
+          id: boolean
+          is_active: boolean
+          launcher_label: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: boolean
+          is_active?: boolean
+          launcher_label?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: boolean
+          is_active?: boolean
+          launcher_label?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profile_questions: {
+        Row: {
+          answer_type: string
+          created_at: string | null
+          help_text: string | null
+          id: string
+          is_active: boolean
+          position: number
+          question_text: string
+          scale_max_label: string | null
+          scale_min_label: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          answer_type: string
+          created_at?: string | null
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          position?: number
+          question_text: string
+          scale_max_label?: string | null
+          scale_min_label?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          answer_type?: string
+          created_at?: string | null
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          position?: number
+          question_text?: string
+          scale_max_label?: string | null
+          scale_min_label?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           category: string | null

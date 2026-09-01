@@ -34,6 +34,17 @@ export const CATEGORY_LABELS: Record<string, string> = {
   other: 'ostatní',
 } as const
 
+// Profile survey (optional questions in profile settings, managed in admin)
+export const PROFILE_SURVEY_CONSTANTS = {
+  QUESTION_TEXT_MAX_LENGTH: 200,
+  HELP_TEXT_MAX_LENGTH: 300,
+  OPTION_LABEL_MAX_LENGTH: 200,
+  ANSWER_TEXT_MAX_LENGTH: 500,
+  SCALE_LABEL_MAX_LENGTH: 60,
+  LAUNCHER_LABEL_MAX_LENGTH: 60,
+  MAX_OPTIONS_PER_QUESTION: 20,
+} as const
+
 // User Types
 export const USER_TYPES = {
   TEACHER: 'teacher',

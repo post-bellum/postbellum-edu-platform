@@ -1,9 +1,9 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Mail, BookOpen, School, FileText } from 'lucide-react'
+import { Mail, BookOpen, School, FileText, ClipboardList } from 'lucide-react'
 
-type AdminTabId = 'newsletter' | 'lessons' | 'schools' | 'content'
+type AdminTabId = 'newsletter' | 'lessons' | 'schools' | 'content' | 'survey'
 
 interface Tab {
   id: AdminTabId
@@ -30,6 +30,12 @@ const tabs: Tab[] = [
     label: 'Správa škol',
     shortLabel: 'Školy',
     icon: <School className="w-6 h-6" />
+  },
+  {
+    id: 'survey',
+    label: 'Dotazník v profilu',
+    shortLabel: 'Dotazník',
+    icon: <ClipboardList className="w-6 h-6" />
   },
   {
     id: 'content',
