@@ -177,6 +177,41 @@ const PRINT_STYLES = `
     margin-right: auto;
   }
 
+  figure.image {
+    display: table;
+    margin: 1.5em auto;
+    max-width: 100%;
+  }
+
+  figure.image img {
+    display: block;
+    margin: 0 auto;
+    float: none;
+    max-width: 100%;
+  }
+
+  figure.image figcaption {
+    display: table-caption;
+    caption-side: bottom;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+    padding: 8px 0;
+    font-style: italic;
+  }
+
+  figure.image.img-align-left {
+    float: left;
+    margin: 0.5em 1.5em 1em 0;
+    max-width: 50%;
+  }
+
+  figure.image.img-align-right {
+    float: right;
+    margin: 0.5em 0 1em 1.5em;
+    max-width: 50%;
+  }
+
   table {
     border-collapse: collapse;
     border-spacing: 0;
@@ -369,6 +404,41 @@ const PDF_CONTENT_STYLES = `
     display: block;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .pdf-page-render figure.image {
+    display: table;
+    margin: 1.5em auto;
+    max-width: 100%;
+  }
+
+  .pdf-page-render figure.image img {
+    display: block;
+    margin: 0 auto;
+    float: none;
+    max-width: 100%;
+  }
+
+  .pdf-page-render figure.image figcaption {
+    display: table-caption;
+    caption-side: bottom;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+    padding: 8px 0;
+    font-style: italic;
+  }
+
+  .pdf-page-render figure.image.img-align-left {
+    float: left;
+    margin: 0.5em 1.5em 1em 0;
+    max-width: 50%;
+  }
+
+  .pdf-page-render figure.image.img-align-right {
+    float: right;
+    margin: 0.5em 0 1em 1.5em;
+    max-width: 50%;
   }
 
   .pdf-page-render table {

@@ -54,7 +54,7 @@ export function sanitizeHTML(html: string): string {
       // Lists
       'ul', 'ol', 'li',
       // Links and media
-      'a', 'img',
+      'a', 'img', 'figure', 'figcaption',
       // Tables
       'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col',
       // Other
