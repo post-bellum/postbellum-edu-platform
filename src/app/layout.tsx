@@ -4,6 +4,7 @@ import './globals.css';
 import { NavigationBarServer } from '@/components/NavigationBarServer';
 import { Footer } from '@/components/Footer';
 import { GlobalAuthHandler } from '@/components/auth';
+import { ProfileSurveyWidget } from '@/components/survey/ProfileSurveyWidget';
 
 export const metadata: Metadata = {
   title: 'StoryOn – Vzdělávací platforma',
@@ -27,6 +28,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <GlobalAuthHandler />
+        <ProfileSurveyWidget />
         {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
           <Script
             defer

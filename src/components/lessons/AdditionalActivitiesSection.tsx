@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/Dialog'
-import { Download, ImageIcon } from 'lucide-react'
+import { Download, ExternalLink, ImageIcon } from 'lucide-react'
 
 interface AdditionalActivitiesSectionProps {
   activities: AdditionalActivity[]
@@ -139,7 +139,18 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
                       </Button>
                     </>
                   )
-                ) : (
+                ) : null}
+
+                {activity.link_url ? (
+                  <Button variant="secondary" size="medium" className="w-full" asChild>
+                    <a href={activity.link_url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-5 h-5 mr-2" />
+                      Otevřít odkaz
+                    </a>
+                  </Button>
+                ) : null}
+
+                {!activity.image_url && !activity.link_url && (
                   <Button variant="secondary" size="medium" className="w-full" disabled>
                     Bez odkazu
                   </Button>
