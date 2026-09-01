@@ -84,34 +84,75 @@ export async function getActiveProfileQuestions(): Promise<ProfileQuestion[]> {
 }
 
 /**
- * The current user's answers, keyed by question id
+ * The current user's answers.
+ *
+ * `values` holds what they answered; `handledQuestionIds` also contains the
+ * questions they skipped, so the caller can tell a skipped question from one
+ * the user has not been through yet.
  */
-export async function getMyProfileAnswers(): Promise<ProfileAnswerMap> {
+export async function getMyProfileAnswers(): Promise<{
+  values: ProfileAnswerMap
+  handledQuestionIds: string[]
+}> {
+  const empty = { values: {}, handledQuestionIds: [] }
+
   try {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) return {}
+    if (!user) return empty
 
     const { data, error } = await supabase
       .from('profile_answers')
-      .select('question_id, option_id, answer_text, scale_value')
+      .select('question_id, option_id, answer_text, scale_value, skipped')
       .eq('user_id', user.id)
 
     if (error) {
       logger.error('Error fetching profile answers:', error)
-      return {}
+      return empty
     }
 
-    const answers: ProfileAnswerMap = {}
+    const values: ProfileAnswerMap = {}
+    const handledQuestionIds: string[] = []
+
     for (const answer of data || []) {
-      answers[answer.question_id] =
+      handledQuestionIds.push(answer.question_id)
+      values[answer.question_id] =
         answer.option_id || answer.answer_text || answer.scale_value?.toString() || ''
     }
-    return answers
+
+    return { values, handledQuestionIds }
   } catch (error) {
     logger.error('Error fetching profile answers:', error)
-    return {}
+    return empty
+  }
+}
+
+/**
+ * Record that the user moved past a question without answering it
+ */
+export async function skipMyProfileQuestion(question: ProfileQuestion): Promise<void> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('No user logged in')
+  }
+
+  const { error } = await supabase
+    .from('profile_answers')
+    .upsert({
+      user_id: user.id,
+      question_id: question.id,
+      option_id: null,
+      answer_text: null,
+      scale_value: null,
+      skipped: true,
+    }, { onConflict: 'user_id,question_id' })
+
+  if (error) {
+    logger.error('Error skipping profile question:', error)
+    throw error
   }
 }
 
@@ -164,6 +205,8 @@ function buildAnswerRow(question: ProfileQuestion, value: string, userId: string
     option_id: null as string | null,
     answer_text: null as string | null,
     scale_value: null as number | null,
+    // Answering a previously skipped question turns the skip back off
+    skipped: false,
   }
 
   if (question.answerType === 'select') {

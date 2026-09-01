@@ -47,6 +47,7 @@ export function ProfileSurveyWidget() {
     wasCompleteOnLoad,
     setAnswer,
     saveAnswer,
+    skipQuestion,
   } = useProfileSurvey(isLoggedIn)
 
   const [isOpen, setIsOpen] = React.useState(false)
@@ -92,12 +93,8 @@ export function ProfileSurveyWidget() {
     rememberDismissal()
   }
 
-  const handleContinue = async () => {
-    if (!question) return
-
-    const saved = await saveAnswer(question, value)
-    if (!saved) return
-
+  /** Move to the next question, or finish after the last one */
+  const advance = () => {
     if (stepIndex === questions.length - 1) {
       setIsFinished(true)
       setCompletedNow(true)
@@ -105,6 +102,21 @@ export function ProfileSurveyWidget() {
       return
     }
     setStepIndex((prev) => prev + 1)
+  }
+
+  const handleContinue = async () => {
+    if (!question) return
+
+    const saved = await saveAnswer(question, value)
+    if (saved) advance()
+  }
+
+  const handleSkip = async () => {
+    if (!question) return
+
+    // The skip is stored, so the question is not offered again
+    const skipped = await skipQuestion(question)
+    if (skipped) advance()
   }
 
   return (
@@ -116,6 +128,7 @@ export function ProfileSurveyWidget() {
           value={value}
           onChange={(next) => question && setAnswer(question.id, next)}
           onContinue={handleContinue}
+          onSkip={handleSkip}
           onClose={handleClose}
           isFinished={isFinished}
           isSaving={isSaving}

@@ -16,6 +16,7 @@ interface ProfileSurveyPopupProps {
   value: string
   onChange: (value: string) => void
   onContinue: () => void
+  onSkip: () => void
   onClose: () => void
   /** Thank-you state shown after the last question */
   isFinished: boolean
@@ -29,6 +30,7 @@ export function ProfileSurveyPopup({
   value,
   onChange,
   onContinue,
+  onSkip,
   onClose,
   isFinished,
   isSaving,
@@ -108,6 +110,17 @@ export function ProfileSurveyPopup({
           >
             {isSaving ? 'Ukládám...' : isLastStep ? 'Odeslat' : 'Pokračovat'}
           </Button>
+
+          {/* Every question is optional, so there is always a way past it */}
+          <button
+            type="button"
+            onClick={onSkip}
+            disabled={isSaving}
+            className="mt-2 w-full cursor-pointer py-1 text-sm leading-body text-text-subtle transition-colors hover:text-text-strong disabled:cursor-not-allowed disabled:text-grey-300"
+            data-testid="survey-skip"
+          >
+            {isLastStep ? 'Přeskočit a zavřít' : 'Přeskočit otázku'}
+          </button>
         </>
       )}
     </div>

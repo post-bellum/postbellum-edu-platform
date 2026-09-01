@@ -337,6 +337,7 @@ export type Database = {
           option_id: string | null
           question_id: string
           scale_value: number | null
+          skipped: boolean
           updated_at: string | null
           user_id: string
         }
@@ -347,6 +348,7 @@ export type Database = {
           option_id?: string | null
           question_id: string
           scale_value?: number | null
+          skipped?: boolean
           updated_at?: string | null
           user_id: string
         }
@@ -357,6 +359,7 @@ export type Database = {
           option_id?: string | null
           question_id?: string
           scale_value?: number | null
+          skipped?: boolean
           updated_at?: string | null
           user_id?: string
         }

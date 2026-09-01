@@ -6,6 +6,7 @@ import {
   getMyProfileAnswers,
   getProfileSurveySettings,
   saveMyProfileAnswer,
+  skipMyProfileQuestion,
 } from '@/lib/supabase/profile-survey'
 import { logger } from '@/lib/logger'
 import type {
@@ -53,11 +54,15 @@ export function useProfileSurvey(isLoggedIn: boolean) {
         ])
         if (cancelled) return
 
+        const handled = new Set(loadedAnswers.handledQuestionIds)
+
         setQuestions(loadedQuestions)
-        setAnswers(loadedAnswers)
+        setAnswers(loadedAnswers.values)
+        // A skipped question counts as dealt with, otherwise a user who does
+        // not want to answer would keep being offered the questionnaire
         setWasCompleteOnLoad(
           loadedQuestions.length > 0
-          && loadedQuestions.every((question) => loadedAnswers[question.id])
+          && loadedQuestions.every((question) => handled.has(question.id))
         )
       } finally {
         if (!cancelled) {
@@ -75,6 +80,20 @@ export function useProfileSurvey(isLoggedIn: boolean) {
   /** Remember an answer locally, without touching the database yet */
   const setAnswer = React.useCallback((questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }))
+  }, [])
+
+  /** Move past a question without answering it */
+  const skipQuestion = React.useCallback(async (question: ProfileQuestion) => {
+    setIsSaving(true)
+    try {
+      await skipMyProfileQuestion(question)
+      return true
+    } catch (err) {
+      logger.error('Error skipping profile survey question', err)
+      return false
+    } finally {
+      setIsSaving(false)
+    }
   }, [])
 
   /** Persist the answer to a single question */
@@ -100,5 +119,6 @@ export function useProfileSurvey(isLoggedIn: boolean) {
     wasCompleteOnLoad,
     setAnswer,
     saveAnswer,
+    skipQuestion,
   }
 }

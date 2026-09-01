@@ -25,9 +25,7 @@ import {
   deleteProfileQuestion,
   exportProfileSurveyCSV,
   getAdminProfileQuestions,
-  getAdminProfileSurveySettings,
-  getProfileSurveyResponses,
-  getProfileSurveySummary,
+  getProfileSurveyOverview,
   moveProfileQuestion,
   setProfileQuestionActive,
   updateProfileQuestion,
@@ -68,42 +66,44 @@ export function ProfileSurveySection() {
   const [editing, setEditing] = React.useState<string | null>(null)
   const [questionToDelete, setQuestionToDelete] = React.useState<ProfileQuestion | null>(null)
 
+  /** Table, counts and summaries all come from one pass over the answers */
   const load = React.useCallback(async () => {
-    const [questionsResult, responsesResult, summaryResult, settingsResult] = await Promise.all([
-      getAdminProfileQuestions(),
-      getProfileSurveyResponses(),
-      getProfileSurveySummary(),
-      getAdminProfileSurveySettings(),
-    ])
+    const result = await getProfileSurveyOverview()
 
-    if (questionsResult.success && questionsResult.data) {
-      setQuestions(questionsResult.data)
+    if (result.success && result.data) {
+      setQuestions(result.data.questions)
+      setRespondents(result.data.respondents)
+      setStats(result.data.stats)
+      setSummaries(result.data.summaries)
+      setSettings(result.data.settings)
       setError(null)
     } else {
-      setError(questionsResult.error || 'Chyba při načítání')
-    }
-
-    if (responsesResult.success && responsesResult.data) {
-      setRespondents(responsesResult.data)
-      setStats(responsesResult.stats || null)
-    }
-
-    if (summaryResult.success && summaryResult.data) {
-      setSummaries(summaryResult.data)
-    }
-
-    if (settingsResult.success && settingsResult.data) {
-      setSettings(settingsResult.data)
+      setError(result.error || 'Chyba při načítání')
     }
 
     setLoading(false)
+  }, [])
+
+  /** Refresh just the question list - the answers cannot have changed */
+  const reloadQuestions = React.useCallback(async () => {
+    const result = await getAdminProfileQuestions()
+    if (result.success && result.data) {
+      setQuestions(result.data)
+    }
   }, [])
 
   React.useEffect(() => {
     load()
   }, [load])
 
-  const runAction = async (action: () => Promise<{ success: boolean; error?: string }>) => {
+  /**
+   * Runs a mutation and refreshes what it could have changed. Reordering or
+   * hiding a question leaves the answers alone, so those skip the full reload.
+   */
+  const runAction = async (
+    action: () => Promise<{ success: boolean; error?: string }>,
+    affectsAnswers = true
+  ) => {
     setSaving(true)
     try {
       const result = await action()
@@ -112,7 +112,7 @@ export function ProfileSurveySection() {
         return false
       }
       setError(null)
-      await load()
+      await (affectsAnswers ? load() : reloadQuestions())
       return true
     } finally {
       setSaving(false)
@@ -121,11 +121,17 @@ export function ProfileSurveySection() {
 
   const handleSaveSettings = async (next: ProfileSurveySettings) => {
     setSettings(next)
-    await runAction(() => updateProfileSurveySettings(next))
+    setSaving(true)
+    try {
+      const result = await updateProfileSurveySettings(next)
+      setError(result.success ? null : result.error || 'Nastavení se nepodařilo uložit')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleCreate = async (input: ProfileQuestionInput) => {
-    const ok = await runAction(() => createProfileQuestion(input))
+    const ok = await runAction(() => createProfileQuestion(input), false)
     if (ok) setEditing(null)
   }
 
@@ -311,7 +317,7 @@ export function ProfileSurveySection() {
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
-                      onClick={() => runAction(() => moveProfileQuestion(question.id, 'up'))}
+                      onClick={() => runAction(() => moveProfileQuestion(question.id, 'up'), false)}
                       disabled={index === 0 || saving}
                       className="p-2 rounded-lg hover:bg-grey-100 disabled:opacity-30 transition-colors"
                       title="Posunout nahoru"
@@ -320,7 +326,7 @@ export function ProfileSurveySection() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => runAction(() => moveProfileQuestion(question.id, 'down'))}
+                      onClick={() => runAction(() => moveProfileQuestion(question.id, 'down'), false)}
                       disabled={index === questions.length - 1 || saving}
                       className="p-2 rounded-lg hover:bg-grey-100 disabled:opacity-30 transition-colors"
                       title="Posunout dolů"
@@ -329,7 +335,7 @@ export function ProfileSurveySection() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => runAction(() => setProfileQuestionActive(question.id, !question.isActive))}
+                      onClick={() => runAction(() => setProfileQuestionActive(question.id, !question.isActive), false)}
                       disabled={saving}
                       className="p-2 rounded-lg hover:bg-grey-100 disabled:opacity-30 transition-colors"
                       title={question.isActive ? 'Skrýt v profilu' : 'Zobrazit v profilu'}
