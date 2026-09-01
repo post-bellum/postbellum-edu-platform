@@ -16,7 +16,7 @@ const socialLinks = [
   { label: 'Facebook', href: 'https://www.facebook.com/VzdelavaniPametiNaroda/', Icon: FacebookIcon },
   { label: 'YouTube', href: 'https://www.youtube.com/@pametnaroda', Icon: YoutubeIcon },
   { label: 'Instagram', href: 'https://www.instagram.com/vzdelavani_pameti_naroda/', Icon: InstagramIcon },
-  { label: 'LinkedIn', href: null, Icon: LinkedinIcon },
+  // { label: 'LinkedIn', href: null, Icon: LinkedinIcon },
 ]
 
 export function Footer() {
