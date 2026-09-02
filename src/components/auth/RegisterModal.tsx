@@ -170,6 +170,7 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
           {/* Submit Button */}
           <Button 
             type="submit" 
+            variant="ultra"
             size="large"
             className="w-full"
             disabled={isLoading}

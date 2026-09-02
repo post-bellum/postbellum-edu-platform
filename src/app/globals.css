@@ -97,6 +97,11 @@
   --color-brand-primary-hover: #204f4e;
   --color-mint: #9bffd2;
   --color-mint-light: #f0fff7;
+  /* Button hover fills, flattened from the Figma overlay fills.
+     Figma "type=ultra, state=hover"    = mint + 10% grey-950 overlay -> used by <Button variant="mint">
+     Figma "type=register, state=hover" = grey-950 + 20% white overlay -> used by <Button variant="ultra"> */
+  --color-mint-hover: #9fe3c2;
+  --color-grey-950-hover: #3e4149;
 
   /* Turquoise Scale */
   --color-turquoise-50: #f0fdfa;
