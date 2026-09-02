@@ -12,6 +12,20 @@ import type {
 } from '@/types/lesson.types'
 
 /**
+ * Extract the object path from a public storage URL.
+ * Inlined instead of imported from lib/supabase/storage so this server module
+ * does not pull in the browser Supabase client.
+ */
+function extractStoragePath(url: string, bucket = 'lesson-materials'): string | null {
+  try {
+    const pathMatch = new URL(url).pathname.match(new RegExp(`/${bucket}/(.+)`))
+    return pathMatch ? pathMatch[1] : null
+  } catch {
+    return null
+  }
+}
+
+/**
  * Get all materials for a lesson
  */
 export async function getLessonMaterials(lessonId: string): Promise<LessonMaterial[]> {
@@ -159,6 +173,28 @@ export async function deleteLessonMaterial(id: string): Promise<void> {
 
   try {
     const supabase = await createClient()
+
+    // Remove the uploaded PDF first so deleting a material never leaves an
+    // orphaned file behind. A storage failure must not block the row delete.
+    const { data: existing } = await supabase
+      .from('lesson_materials')
+      .select('pdf_url')
+      .eq('id', id)
+      .single()
+
+    const pdfUrl = (existing as { pdf_url: string | null } | null)?.pdf_url
+    if (pdfUrl) {
+      const path = extractStoragePath(pdfUrl)
+      if (path) {
+        const { error: storageError } = await supabase.storage
+          .from('lesson-materials')
+          .remove([path])
+        if (storageError) {
+          logger.error('Error deleting material PDF from storage:', storageError)
+        }
+      }
+    }
+
     const { error } = await supabase
       .from('lesson_materials')
       .delete()

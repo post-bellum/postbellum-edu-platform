@@ -14,6 +14,25 @@
  */
 
 import { logger } from '@/lib/logger'
+
+/**
+ * Build a download URL for an admin-uploaded material PDF.
+ *
+ * Supabase serves public files inline; the `download` query param makes storage
+ * send a Content-Disposition attachment header. The HTML `download` attribute
+ * alone would be ignored because storage lives on a different origin.
+ */
+export function buildPdfDownloadUrl(
+  pdfUrl: string,
+  fallbackTitle: string,
+  pdfFileName?: string | null
+): string {
+  const fallbackName = `${fallbackTitle.replace(/[^a-z0-9\u00C0-\u024F.-]/gi, '_')}.pdf`
+  const fileName = pdfFileName || fallbackName
+  const separator = pdfUrl.includes('?') ? '&' : '?'
+  return `${pdfUrl}${separator}download=${encodeURIComponent(fileName)}`
+}
+
 import {
   PAGE_DIMS,
   USABLE_PAGE_WIDTH,

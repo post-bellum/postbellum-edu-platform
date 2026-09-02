@@ -142,6 +142,8 @@ export type Database = {
           duration: number | null
           id: string
           lesson_id: string
+          pdf_file_name: string | null
+          pdf_url: string | null
           specification: string | null
           title: string
           updated_at: string | null
@@ -153,6 +155,8 @@ export type Database = {
           duration?: number | null
           id?: string
           lesson_id: string
+          pdf_file_name?: string | null
+          pdf_url?: string | null
           specification?: string | null
           title: string
           updated_at?: string | null
@@ -164,6 +168,8 @@ export type Database = {
           duration?: number | null
           id?: string
           lesson_id?: string
+          pdf_file_name?: string | null
+          pdf_url?: string | null
           specification?: string | null
           title?: string
           updated_at?: string | null

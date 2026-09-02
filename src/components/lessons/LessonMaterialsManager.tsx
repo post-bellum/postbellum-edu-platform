@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { deleteLessonMaterialAction } from '@/app/actions/lesson-materials'
 import type { LessonMaterial, LessonSpecification, LessonDuration } from '@/types/lesson.types'
 import { Button } from '@/components/ui/Button'
-import { Plus, Edit, Trash2 } from 'lucide-react'
+import { Plus, Edit, Trash2, FileText, Type } from 'lucide-react'
 import { LessonMaterialForm } from './LessonMaterialForm'
 import {
   Dialog,
@@ -167,6 +167,30 @@ export function LessonMaterialsManager({
                     {material.description}
                   </p>
                 )}
+                <div className="flex gap-2 mt-2">
+                  {material.pdf_url ? (
+                    <span className="inline-flex items-center gap-1 text-xs bg-red-50 text-red-700 rounded-full px-2 py-0.5">
+                      <FileText className="w-3 h-3" />
+                      PDF ke stažení
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">
+                      <FileText className="w-3 h-3" />
+                      PDF se generuje z obsahu
+                    </span>
+                  )}
+                  {material.content ? (
+                    <span className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 rounded-full px-2 py-0.5">
+                      <Type className="w-3 h-3" />
+                      Text k úpravě
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">
+                      <Type className="w-3 h-3" />
+                      Bez textu
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2 ml-4">
                 <Button

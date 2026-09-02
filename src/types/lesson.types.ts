@@ -39,6 +39,10 @@ export interface LessonMaterial {
   title: string
   description: string | null
   content: string | null
+  /** Admin-uploaded PDF served by the download button; NULL falls back to generating from content */
+  pdf_url: string | null
+  /** Original file name of the uploaded PDF, used as the download file name */
+  pdf_file_name: string | null
   specification: LessonSpecification | null
   duration: LessonDuration | null
   created_at: string
