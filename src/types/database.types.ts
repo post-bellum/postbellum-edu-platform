@@ -83,6 +83,57 @@ export type Database = {
           },
         ]
       }
+      improvement_suggestions: {
+        Row: {
+          created_at: string
+          email_error: string | null
+          email_sent_at: string | null
+          id: string
+          lesson_id: string | null
+          lesson_title: string | null
+          message: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          lesson_title?: string | null
+          message: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          lesson_title?: string | null
+          message?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'improvement_suggestions_lesson_id_fkey'
+            columns: ['lesson_id']
+            isOneToOne: false
+            referencedRelation: 'lessons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'improvement_suggestions_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       lesson_materials: {
         Row: {
           content: string | null

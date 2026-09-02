@@ -32,7 +32,7 @@ export function FeedbackModal({
 }: FeedbackModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" data-testid="feedback-modal">
         <div className="flex flex-col items-center text-center space-y-4">
           <div className={cn(
             'w-16 h-16 rounded-full flex items-center justify-center',

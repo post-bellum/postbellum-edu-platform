@@ -7,6 +7,17 @@ import { z } from 'zod';
  * 
  * Note: Uses console for startup logging before logger is available.
  */
+/**
+ * An optional variable where a blank value means "not set". Without this an
+ * empty `FOO=` line (as copied from .env.example) would count as present and
+ * fail a `min(1)` check at startup.
+ */
+const optionalString = () =>
+  z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().min(1).optional()
+  );
+
 export const envSchema = z.object({
   // Public Supabase configuration
   NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL'),
@@ -20,7 +31,19 @@ export const envSchema = z.object({
   
   // Schools registry data URL (required for schools import)
   SCHOOLS_REGISTRY_URL: z.string().url('Invalid schools registry URL'),
-  
+
+  // Transactional email via Resend (improvement suggestions sent to the admin
+  // inbox). All optional: without them suggestions are still stored in the
+  // database, only the notification email is skipped and recorded as an error.
+  // `optionalString` treats an empty value as unset, so copying .env.example
+  // with blank values does not fail validation.
+  RESEND_API_KEY: optionalString(),
+  // Dedicated admin mailbox(es) that receive the improvement suggestions.
+  // Comma-separated for several recipients.
+  SUGGESTIONS_EMAIL_TO: optionalString(),
+  // Verified Resend sender, e.g. "storyON <noreply@postbellum.cz>"
+  SUGGESTIONS_EMAIL_FROM: optionalString(),
+
   // QA Testing Configuration (optional)
   // Pattern to match QA emails (e.g., "\\+qa" matches emails like test+qa@example.com)
   NEXT_PUBLIC_QA_EMAIL_PATTERN: z.string().optional(),
