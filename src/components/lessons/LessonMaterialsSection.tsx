@@ -9,7 +9,7 @@ import { AuthModal } from '@/components/auth'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import { ErrorDialog } from '@/components/ui/ErrorDialog'
-import { exportToPDF } from '@/lib/utils/pdf-export'
+import { exportToPDF, buildPdfDownloadUrl } from '@/lib/utils/pdf-export'
 import { generateLessonUrl } from '@/lib/utils'
 
 interface LessonMaterialsSectionProps {
@@ -82,6 +82,15 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
   }
 
   const handleExportPDF = async (material: LessonMaterial) => {
+    if (material.pdf_url) {
+      window.open(
+        buildPdfDownloadUrl(material.pdf_url, material.title, material.pdf_file_name),
+        '_blank',
+        'noopener,noreferrer'
+      )
+      return
+    }
+
     if (!material.content) return
 
     setIsExportingPDF(material.id)
@@ -186,6 +195,7 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
           onOpenChange={setViewModalOpen}
           title={selectedMaterial.title}
           content={selectedMaterial.content}
+          pdfUrl={selectedMaterial.pdf_url}
         />
       )}
 

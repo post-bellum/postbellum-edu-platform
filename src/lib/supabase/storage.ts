@@ -18,6 +18,9 @@ export const STORAGE_LIMITS = {
     'image/svg+xml',
     'application/pdf',
   ],
+  /** Print-ready material PDFs are allowed to be larger than images (bucket limit is 20MB) */
+  MAX_MATERIAL_PDF_SIZE: 20 * 1024 * 1024,
+  MAX_MATERIAL_PDF_SIZE_DISPLAY: '20MB',
 } as const
 
 /**
@@ -194,6 +197,67 @@ export async function uploadActivityFileToStorage(
     logger.error('Error in uploadActivityFileToStorage', error)
     throw new StorageUploadError(
       'Nepodařilo se nahrát soubor. Zkuste to prosím znovu.',
+      error as Error
+    )
+  }
+}
+
+/**
+ * Upload a lesson material PDF to Supabase Storage (client-side)
+ *
+ * Uploaded straight from the browser so the file never passes through a server
+ * action (Vercel caps those payloads at ~4.5MB).
+ *
+ * @param file - PDF file to upload
+ * @param bucket - Storage bucket name (default: 'lesson-materials')
+ * @param folder - Optional folder path (default: 'material-pdfs')
+ * @returns Public URL of the uploaded file
+ * @throws StorageUploadError with user-friendly message
+ */
+export async function uploadMaterialPdfToStorage(
+  file: File,
+  bucket: string = 'lesson-materials',
+  folder: string = 'material-pdfs'
+): Promise<string> {
+  try {
+    if (file.type !== 'application/pdf') {
+      throw new StorageUploadError('Nepodporovaný formát souboru. Nahrajte prosím PDF.')
+    }
+
+    if (file.size > STORAGE_LIMITS.MAX_MATERIAL_PDF_SIZE) {
+      throw new StorageUploadError(
+        `Soubor je příliš velký (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximální velikost je ${STORAGE_LIMITS.MAX_MATERIAL_PDF_SIZE_DISPLAY}.`
+      )
+    }
+
+    const supabase = createClient()
+    const timestamp = Date.now()
+    const randomString = Math.random().toString(36).substring(2, 15)
+    const filePath = `${folder}/${timestamp}-${randomString}.pdf`
+
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: 'application/pdf',
+      })
+
+    if (error) {
+      logger.error('Error uploading material PDF to storage', error)
+      throw new StorageUploadError(getUploadErrorMessage(error), error as Error)
+    }
+
+    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath)
+    if (!urlData?.publicUrl) {
+      throw new StorageUploadError('Nepodařilo se získat URL nahraného souboru.')
+    }
+    return urlData.publicUrl
+  } catch (error) {
+    if (error instanceof StorageUploadError) throw error
+    logger.error('Error in uploadMaterialPdfToStorage', error)
+    throw new StorageUploadError(
+      'Nepodařilo se nahrát PDF. Zkuste to prosím znovu.',
       error as Error
     )
   }

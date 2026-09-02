@@ -39,6 +39,10 @@ export interface LessonMaterial {
   title: string
   description: string | null
   content: string | null
+  /** Admin-uploaded PDF served by the download button; NULL falls back to generating from content */
+  pdf_url: string | null
+  /** Original file name of the uploaded PDF, used as the download file name */
+  pdf_file_name: string | null
   specification: LessonSpecification | null
   duration: LessonDuration | null
   created_at: string
@@ -66,7 +70,7 @@ export interface LessonWitness {
   role_short: string | null // Short role shown on the card, e.g. "Poslankyně"
   role_full: string | null // Full role shown in the detail modal
   birth_year: number | null // Rendered as "*1953"
-  bio: string | null // Short biography (~900 chars) shown in the detail modal
+  bio: string | null // Short biography (max 1800 chars) shown in the detail modal
   portrait_url: string | null
   memory_of_nations_url: string | null // Profile on pametnaroda.cz
   sort_order: number

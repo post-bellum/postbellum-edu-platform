@@ -3,9 +3,6 @@ import { getLessonById } from '@/lib/supabase/lessons'
 import { isLessonFavorited } from '@/lib/supabase/favorites'
 import { getUserLessonMaterials } from '@/lib/supabase/user-lesson-materials'
 import { getUser } from '@/lib/supabase/auth-helpers'
-import { Button } from '@/components/ui/Button'
-import { Lightbulb } from 'lucide-react'
-import Link from 'next/link'
 import { Breadcrumbs } from '@/components/lessons/Breadcrumbs'
 import { LessonDetailHeader } from '@/components/lessons/LessonDetailHeader'
 import { LessonMaterialsWrapper } from '@/components/lessons/LessonMaterialsWrapper'
@@ -13,6 +10,7 @@ import { AdditionalActivitiesSection } from '@/components/lessons/AdditionalActi
 import { LessonWitnessesSection } from '@/components/lessons/LessonWitnessesSection'
 import { FavoriteButton } from '@/components/lessons/FavoriteButton'
 import { FavoriteCTA } from '@/components/lessons/FavoriteCTA'
+import { ImprovementSuggestionButton } from '@/components/lessons/ImprovementSuggestionButton'
 import { LessonVideoEmbed } from '@/components/lessons/LessonVideoEmbed'
 import { LessonDetailInfo } from '@/components/lessons/LessonDetailInfo'
 import { BottomIllustration } from '@/components/homepage/BottomIllustration'
@@ -108,12 +106,7 @@ export async function LessonDetailContent({ id, usePublicClient = false, isAdmin
             ) : (
               <FavoriteCTA variant="sidebar" />
             )}
-            <Button asChild variant="secondary" size="medium" className="w-full justify-center">
-              <Link href="mailto:storyon@postbellum.cz?subject=Zpětná vazba k platformě storyON">
-                <Lightbulb className="w-5 h-5" />
-                Poslat návrh na zlepšení
-              </Link>
-            </Button>
+            <ImprovementSuggestionButton lessonId={lesson.id} isLoggedIn={!!user} />
           </div>
         </div>
       </div>

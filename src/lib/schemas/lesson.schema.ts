@@ -32,6 +32,38 @@ const imageUrlSchema = z
   .optional()
 
 /**
+ * Material rich-text content (nullable so clearing the editor removes the text,
+ * leaving a PDF-only material).
+ */
+const materialContentSchema = z
+  .string()
+  .max(150000, 'Obsah může mít maximálně 150000 znaků')
+  .nullable()
+  .optional()
+  .transform((val) => {
+    if (val === undefined) return undefined
+    return val && val.trim() ? sanitizeHTML(val.trim()) : null
+  })
+
+/**
+ * Uploaded material PDF (nullable so the admin can clear it).
+ * `undefined` = field not submitted (leave unchanged), `null` = remove the PDF.
+ */
+const materialPdfUrlSchema = z
+  .string()
+  .max(2000, 'URL PDF může mít maximálně 2000 znaků')
+  .url('Neplatná URL adresa PDF')
+  .nullable()
+  .optional()
+
+const materialPdfFileNameSchema = z
+  .string()
+  .max(255, 'Název souboru může mít maximálně 255 znaků')
+  .transform(sanitizeString)
+  .nullable()
+  .optional()
+
+/**
  * External link URL validation (http/https only)
  * Used for the optional clickable link on additional activities.
  */
@@ -276,11 +308,9 @@ export const createLessonMaterialSchema = z.object({
     .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
-  content: z
-    .string()
-    .max(150000, 'Obsah může mít maximálně 150000 znaků')
-    .optional()
-    .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
+  content: materialContentSchema,
+  pdf_url: materialPdfUrlSchema,
+  pdf_file_name: materialPdfFileNameSchema,
   specification: requiredSpecificationSchema,
   duration: requiredDurationSchema,
 })
@@ -301,11 +331,9 @@ export const updateLessonMaterialSchema = z.object({
     .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
-  content: z
-    .string()
-    .max(150000, 'Obsah může mít maximálně 150000 znaků')
-    .optional()
-    .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
+  content: materialContentSchema,
+  pdf_url: materialPdfUrlSchema,
+  pdf_file_name: materialPdfFileNameSchema,
   specification: lessonSpecificationSchema.optional(),
   duration: z.union([z.literal(30), z.literal(45), z.literal(90)]).optional(),
 })
@@ -375,11 +403,21 @@ export function parseFormDataForLessonMaterial(formData: FormData) {
     return value ?? ''
   }
   
+  // Nullable fields distinguish "not submitted" (undefined -> leave unchanged)
+  // from "submitted empty" (null -> clear the value in the database).
+  const getNullableValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    if (value === null) return undefined
+    return value.trim() ? value.trim() : null
+  }
+
   return {
     lesson_id: getRequiredValue('lesson_id'),
     title: getRequiredValue('title'),
     description: getOptionalValue('description'),
-    content: getOptionalValue('content'),
+    content: getNullableValue('content'),
+    pdf_url: getNullableValue('pdf_url'),
+    pdf_file_name: getNullableValue('pdf_file_name'),
     specification: getOptionalValue('specification'),
     duration: duration && duration.trim() ? parseInt(duration) : undefined,
   }
@@ -461,7 +499,7 @@ export const createLessonWitnessSchema = z.object({
   birth_year: witnessBirthYearSchema,
   bio: z
     .string()
-    .max(5000, 'Životopis může mít maximálně 5000 znaků')
+    .max(1800, 'Životopis může mít maximálně 1800 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   portrait_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
@@ -492,7 +530,7 @@ export const updateLessonWitnessSchema = z.object({
   birth_year: witnessBirthYearSchema,
   bio: z
     .string()
-    .max(5000, 'Životopis může mít maximálně 5000 znaků')
+    .max(1800, 'Životopis může mít maximálně 1800 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   portrait_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),

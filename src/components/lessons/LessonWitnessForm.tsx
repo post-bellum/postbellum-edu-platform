@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/Dialog'
 import { ThumbnailUpload } from '@/components/lessons/ThumbnailUpload'
 
+const BIO_MAX_LENGTH = 1800
+
 interface LessonWitnessFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -178,9 +180,12 @@ export function LessonWitnessForm({
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               rows={8}
-              placeholder="Stručný text o životě pamětníka (cca 900 znaků)..."
+              maxLength={BIO_MAX_LENGTH}
+              placeholder="Stručný text o životě pamětníka (cca 1500 znaků)..."
             />
-            <p className="text-xs text-text-subtle">{bio.length} / 5000 znaků</p>
+            <p className="text-xs text-text-subtle">
+              {bio.length} / {BIO_MAX_LENGTH} znaků — delší text se v detailu pamětníka roluje
+            </p>
           </div>
 
           <div className="space-y-2">

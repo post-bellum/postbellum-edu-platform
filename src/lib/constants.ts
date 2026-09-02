@@ -45,6 +45,14 @@ export const PROFILE_SURVEY_CONSTANTS = {
   MAX_OPTIONS_PER_QUESTION: 20,
 } as const
 
+// Improvement suggestions ("Poslat návrh na zlepšení" dialog on lesson detail).
+export const IMPROVEMENT_SUGGESTION_CONSTANTS = {
+  MESSAGE_MIN_LENGTH: 10,
+  MESSAGE_MAX_LENGTH: 2000,
+  THROTTLE_WINDOW_MINUTES: 10,
+  THROTTLE_MAX_SUBMISSIONS: 3,
+} as const
+
 // User Types
 export const USER_TYPES = {
   TEACHER: 'teacher',

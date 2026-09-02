@@ -152,6 +152,7 @@ export function LoginModal({ onSwitchToRegister, onSuccess, onForgotPassword, re
           {/* Submit Button */}
           <Button 
             type="submit" 
+            variant="ultra"
             size="large"
             className="w-full"
             disabled={isLoading}
