@@ -499,7 +499,7 @@ export const createLessonWitnessSchema = z.object({
   birth_year: witnessBirthYearSchema,
   bio: z
     .string()
-    .max(5000, 'Životopis může mít maximálně 5000 znaků')
+    .max(1800, 'Životopis může mít maximálně 1800 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   portrait_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
@@ -530,7 +530,7 @@ export const updateLessonWitnessSchema = z.object({
   birth_year: witnessBirthYearSchema,
   bio: z
     .string()
-    .max(5000, 'Životopis může mít maximálně 5000 znaků')
+    .max(1800, 'Životopis může mít maximálně 1800 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   portrait_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),

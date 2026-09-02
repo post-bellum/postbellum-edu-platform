@@ -34,7 +34,7 @@ export function WitnessDetailModal({
   return (
     <Dialog open={!!witness} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="max-w-[860px] w-[calc(100%-16px)] max-h-[90vh] sm:h-[600px] p-0 gap-0 flex flex-col overflow-hidden"
+        className="max-w-[860px] w-[calc(100%-16px)] max-h-[90vh] sm:h-180 p-0 gap-0 flex flex-col overflow-hidden"
         onCloseAutoFocus={(event) => {
           const trigger = restoreFocusRef?.current
           if (trigger) {
@@ -44,7 +44,7 @@ export function WitnessDetailModal({
         }}
       >
         {witness && (
-          <div className="flex flex-col md:flex-row gap-6 md:gap-10 p-6 pt-12 sm:p-10 min-h-0 overflow-y-auto md:overflow-hidden">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-10 p-4 min-h-0 overflow-y-auto md:overflow-hidden">
             {/* Portrait + Paměť národa link */}
             <div className="w-[200px] shrink-0 mx-auto md:mx-0 flex flex-col gap-5 items-center">
               <WitnessPortrait src={witness.portrait_url} name={witness.name} size={200} />
@@ -64,8 +64,8 @@ export function WitnessDetailModal({
             </div>
 
             {/* Name, birth year, role, biography */}
-            <div className="flex-1 min-w-0 md:max-w-[480px] flex flex-col gap-6 min-h-0 md:overflow-y-auto md:pr-2">
-              <div className="flex flex-col gap-1">
+            <div className="flex-1 min-w-0 flex flex-col gap-6 min-h-0 md:overflow-y-auto md:pr-2">
+              <div className="flex flex-col gap-1 md:pr-10">
                 <DialogTitle className="font-display text-3xl font-semibold leading-display text-text-strong">
                   {witness.name}
                 </DialogTitle>

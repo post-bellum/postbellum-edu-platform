@@ -70,7 +70,7 @@ export interface LessonWitness {
   role_short: string | null // Short role shown on the card, e.g. "Poslankyně"
   role_full: string | null // Full role shown in the detail modal
   birth_year: number | null // Rendered as "*1953"
-  bio: string | null // Short biography (~900 chars) shown in the detail modal
+  bio: string | null // Short biography (max 1800 chars) shown in the detail modal
   portrait_url: string | null
   memory_of_nations_url: string | null // Profile on pametnaroda.cz
   sort_order: number
