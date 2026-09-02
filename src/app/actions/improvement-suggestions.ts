@@ -1,19 +1,11 @@
 'use server'
 
-import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendAdminEmail } from '@/lib/email/resend'
 import { improvementSuggestionSchema } from '@/lib/schemas/improvement-suggestion.schema'
 import { IMPROVEMENT_SUGGESTION_CONSTANTS } from '@/lib/constants'
 import { logger } from '@/lib/logger'
-
-async function getBaseUrl() {
-  const headersList = await headers()
-  const host = headersList.get('host') || 'localhost:3000'
-  const protocol = host.includes('localhost') ? 'http' : 'https'
-  return `${protocol}://${host}`
-}
 
 export interface SubmitImprovementSuggestionResult {
   success: boolean
@@ -101,7 +93,15 @@ export async function submitImprovementSuggestionAction(
         logger.error('Error loading lesson for improvement suggestion', lessonError)
       } else if (lesson) {
         lessonTitle = lesson.title
-        lessonUrl = `${await getBaseUrl()}/lessons/${lesson.short_id || lesson.id}`
+        // Built from configuration, never from the request's Host header - that
+        // header is client-controlled and would let a submitter put an arbitrary
+        // domain into the link the admin clicks.
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+        if (baseUrl) {
+          lessonUrl = `${baseUrl.replace(/\/+$/, '')}/lessons/${lesson.short_id || lesson.id}`
+        } else {
+          logger.error('NEXT_PUBLIC_APP_URL is not set - improvement suggestion email will have no lesson link')
+        }
       }
     }
 

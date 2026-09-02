@@ -67,10 +67,14 @@ export function LessonMaterialForm({
   const [pdfError, setPdfError] = React.useState<string | null>(null)
   const pdfInputRef = React.useRef<HTMLInputElement>(null)
   const pdfInputId = React.useId()
-  // PDFs that were uploaded or replaced during this session and are no longer
-  // referenced. Purged from storage only once the form saves successfully, so a
-  // cancelled edit never leaves the database pointing at a deleted file.
+  // PDFs that were displaced (replaced or removed) during this session and are
+  // no longer referenced by the form. Purged from storage only once the form is
+  // closed, so a cancelled edit never leaves the database pointing at a deleted
+  // file - see `purgeUnreferencedPdfs`.
   const orphanedPdfUrls = React.useRef<string[]>([])
+  // The PDF the database currently points at. Anything else uploaded in this
+  // session is garbage the moment the form closes without saving.
+  const persistedPdfUrl = React.useRef(material?.pdf_url || '')
   const [specification, setSpecification] = React.useState<LessonSpecification | ''>(
     material?.specification || ''
   )
@@ -100,6 +104,7 @@ export function LessonMaterialForm({
       setPdfFileName(material?.pdf_file_name || '')
       setPdfError(null)
       orphanedPdfUrls.current = []
+      persistedPdfUrl.current = material?.pdf_url || ''
       setEditorResetKey(prev => prev + 1)
       setFieldErrors({})
     }
@@ -115,22 +120,65 @@ export function LessonMaterialForm({
 
   const [state, formAction] = useActionState(action, null)
 
+  /**
+   * Delete every uploaded PDF the database does not point at.
+   *
+   * `keptUrl` is the URL that survives: the freshly saved one after a
+   * successful submit, or the previously persisted one when the form is
+   * cancelled. Everything else was uploaded straight from the browser and would
+   * otherwise sit in the bucket forever, unreferenced.
+   */
+  const purgeUnreferencedPdfs = React.useCallback((keptUrl: string) => {
+    const orphans = orphanedPdfUrls.current
+    orphanedPdfUrls.current = []
+    const unique = new Set(orphans.filter((url) => url && url !== keptUrl))
+    unique.forEach((url) => {
+      const path = extractFilePathFromUrl(url)
+      if (path) {
+        deleteImageFromStorage(path).catch((err) => {
+          logger.error('[LessonMaterialForm] failed to delete orphaned PDF:', err)
+        })
+      }
+    })
+  }, [])
+
   React.useEffect(() => {
     if (state?.success) {
-      const orphans = orphanedPdfUrls.current
-      orphanedPdfUrls.current = []
-      orphans.forEach((url) => {
-        const path = extractFilePathFromUrl(url)
-        if (path) {
-          deleteImageFromStorage(path).catch((err) => {
-            logger.error('[LessonMaterialForm] failed to delete orphaned PDF:', err)
-          })
-        }
-      })
+      // The submitted PDF is now the persisted one, so a later close must not
+      // treat it as garbage.
+      persistedPdfUrl.current = pdfUrl
+      purgeUnreferencedPdfs(pdfUrl)
       onOpenChange(false)
       onSuccess?.()
     }
-  }, [state, onOpenChange, onSuccess])
+  }, [state, pdfUrl, purgeUnreferencedPdfs, onOpenChange, onSuccess])
+
+  /**
+   * Close without saving: the database still points at `persistedPdfUrl`, so
+   * the PDF currently shown in the form is garbage too unless it is that one.
+   */
+  const handleCancel = React.useCallback(() => {
+    // Closing mid-upload would let the in-flight file land in the bucket after
+    // the purge has already run, leaking it. The upload takes a moment, so we
+    // ignore the close request rather than track the request to cancel it.
+    if (isUploadingPdf) return
+    if (pdfUrl && pdfUrl !== persistedPdfUrl.current) {
+      orphanedPdfUrls.current.push(pdfUrl)
+    }
+    purgeUnreferencedPdfs(persistedPdfUrl.current)
+    onOpenChange(false)
+  }, [isUploadingPdf, pdfUrl, purgeUnreferencedPdfs, onOpenChange])
+
+  const handleOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        onOpenChange(true)
+        return
+      }
+      handleCancel()
+    },
+    [handleCancel, onOpenChange]
+  )
 
   // next.config.ts sets bodySizeLimit to 5mb, but Vercel's hard platform
   // ceiling for serverless functions is ~4.5MB regardless of Next.js config.
@@ -262,7 +310,7 @@ export function LessonMaterialForm({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-[1152px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -513,7 +561,8 @@ export function LessonMaterialForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={handleCancel}
+              disabled={isUploadingPdf}
             >
               Zrušit
             </Button>

@@ -32,6 +32,14 @@ export const envSchema = z.object({
   // Schools registry data URL (required for schools import)
   SCHOOLS_REGISTRY_URL: z.string().url('Invalid schools registry URL'),
 
+  // Public base URL of the deployment, used to build absolute links in
+  // outgoing emails and exports. Optional so local development works without
+  // it; the features that need it log an error and degrade instead.
+  NEXT_PUBLIC_APP_URL: optionalString().refine(
+    (value) => !value || /^https?:\/\//.test(value),
+    'NEXT_PUBLIC_APP_URL must start with http:// or https://'
+  ),
+
   // Transactional email via Resend (improvement suggestions sent to the admin
   // inbox). All optional: without them suggestions are still stored in the
   // database, only the notification email is skipped and recorded as an error.
