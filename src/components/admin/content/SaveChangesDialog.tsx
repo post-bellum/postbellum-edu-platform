@@ -106,7 +106,7 @@ export function SaveChangesDialog({
           </ul>
         )}
 
-        <DialogFooter className="gap-3 sm:gap-3 sm:space-x-0">
+        <DialogFooter className="gap-3">
           <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={isSaving}>
             Zrušit
           </Button>
