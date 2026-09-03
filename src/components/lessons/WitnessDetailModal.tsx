@@ -34,7 +34,7 @@ export function WitnessDetailModal({
   return (
     <Dialog open={!!witness} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="max-w-[860px] w-[calc(100%-16px)] max-h-[90vh] sm:h-180 p-0 gap-0 flex flex-col overflow-hidden"
+        className="max-w-[860px] w-[calc(100%-16px)] max-h-[90dvh] sm:max-h-[90vh] sm:h-180 p-0 gap-0 flex flex-col overflow-hidden"
         onCloseAutoFocus={(event) => {
           const trigger = restoreFocusRef?.current
           if (trigger) {
