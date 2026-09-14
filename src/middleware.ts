@@ -4,9 +4,22 @@ import { authConfig } from '@/lib/supabase/config';
 import type { Database } from '@/types/database.types';
 import { logger } from '@/lib/logger';
 
+/**
+ * Cron jobs authenticate with `Authorization: Bearer ${CRON_SECRET}`, which the
+ * basic-auth gate below would reject. Let a correctly signed cron request past
+ * it; the route handler verifies the same secret again.
+ */
+function isAuthorizedCronRequest(request: NextRequest): boolean {
+  if (!request.nextUrl.pathname.startsWith('/api/cron/')) return false;
+  const secret = process.env.CRON_SECRET?.trim();
+  if (!secret) return false;
+  return request.headers.get('authorization') === `Bearer ${secret}`;
+}
+
 function checkBasicAuth(request: NextRequest): NextResponse | null {
   const password = process.env.PASSWORD_PROTECTION_PASSWORD;
   if (!password) return null;
+  if (isAuthorizedCronRequest(request)) return null;
 
   const authHeader = request.headers.get('authorization');
   if (!authHeader?.startsWith('Basic ')) {

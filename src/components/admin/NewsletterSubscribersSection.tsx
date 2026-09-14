@@ -2,34 +2,143 @@
 
 import * as React from 'react'
 import { Button } from '@/components/ui/Button'
-import { Download, Mail, UserMinus, Users } from 'lucide-react'
-import { 
-  getNewsletterSubscribers, 
+import { Download, Mail, MailX, RefreshCw, RotateCw, UserMinus, Users } from 'lucide-react'
+import {
+  getNewsletterSubscribers,
   exportNewsletterSubscribersCSV,
+  syncNewsletterToSmartEmailing,
   type NewsletterSubscriber,
-  type NewsletterStats 
+  type NewsletterStats
 } from '@/app/actions/admin-newsletter'
+
+const BADGE = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium'
+
+/**
+ * What SmartEmailing reports about the address itself: an undeliverable one
+ * (permanent bounce) or a blacklisted contact never receives a newsletter,
+ * whatever its subscription status here says.
+ */
+function ContactStateBadges({ subscriber }: { subscriber: NewsletterSubscriber }) {
+  const badges: React.ReactNode[] = []
+
+  if (subscriber.se_hardbounced) {
+    badges.push(
+      <span
+        key="bounce"
+        title="SmartEmailing dostal trvalou chybu doručení - adresa pravděpodobně neexistuje"
+        className={`${BADGE} bg-red-100 text-red-800`}
+      >
+        Neexistující adresa
+      </span>
+    )
+  }
+
+  if (subscriber.se_blacklisted) {
+    badges.push(
+      <span
+        key="blacklist"
+        title="Kontakt je ve SmartEmailing na blacklistu - nedostane žádný marketingový e-mail z účtu"
+        className={`${BADGE} bg-grey-200 text-text-strong`}
+      >
+        Blacklist
+      </span>
+    )
+  }
+
+  if (badges.length === 0 && subscriber.se_list_status === 'unsubscribed') {
+    badges.push(
+      <span key="unsub" className={`${BADGE} bg-grey-100 text-text-subtle`}>
+        Odhlášen v SE
+      </span>
+    )
+  }
+
+  if (badges.length === 0) return <span className="text-sm text-text-subtle">-</span>
+
+  return <div className="flex flex-wrap justify-center gap-1">{badges}</div>
+}
+
+/**
+ * State of the row in the SmartEmailing contact list: synced, waiting for the
+ * retry job, or failing with an error (shown in the title attribute).
+ */
+function SyncBadge({ subscriber }: { subscriber: NewsletterSubscriber }) {
+  if (!subscriber.se_pending) {
+    return (
+      <span
+        title={
+          subscriber.se_synced_at
+            ? `Synchronizováno ${new Date(subscriber.se_synced_at).toLocaleString('cs-CZ')}`
+            : undefined
+        }
+        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"
+      >
+        Synchronizováno
+      </span>
+    )
+  }
+
+  if (subscriber.se_sync_error) {
+    return (
+      <span
+        title={subscriber.se_sync_error}
+        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+      >
+        Chyba
+      </span>
+    )
+  }
+
+  return (
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+      Čeká
+    </span>
+  )
+}
 
 export function NewsletterSubscribersSection() {
   const [subscribers, setSubscribers] = React.useState<NewsletterSubscriber[]>([])
   const [stats, setStats] = React.useState<NewsletterStats | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [exporting, setExporting] = React.useState(false)
+  const [syncing, setSyncing] = React.useState(false)
+  const [syncMessage, setSyncMessage] = React.useState<string | null>(null)
   const [error, setError] = React.useState<string | null>(null)
 
-  React.useEffect(() => {
-    async function loadSubscribers() {
-      const result = await getNewsletterSubscribers()
-      if (result.success && result.data) {
-        setSubscribers(result.data)
-        setStats(result.stats || null)
-      } else {
-        setError(result.error || 'Chyba při načítání')
-      }
-      setLoading(false)
+  const loadSubscribers = React.useCallback(async () => {
+    const result = await getNewsletterSubscribers()
+    if (result.success && result.data) {
+      setSubscribers(result.data)
+      setStats(result.stats || null)
+    } else {
+      setError(result.error || 'Chyba při načítání')
     }
-    loadSubscribers()
+    setLoading(false)
   }, [])
+
+  React.useEffect(() => {
+    loadSubscribers()
+  }, [loadSubscribers])
+
+  const handleSync = async (full = false) => {
+    setSyncing(true)
+    setSyncMessage(null)
+    try {
+      const result = await syncNewsletterToSmartEmailing({ full })
+      const summary = result.summary
+        ? `Odesláno: ${result.summary.pushed}, chyb: ${result.summary.failed}, odhlášení ze SmartEmailing: ${result.summary.reconciled}, chybějících vráceno do fronty: ${result.summary.requeued}.`
+        : ''
+      setSyncMessage(
+        result.success
+          ? `Synchronizace dokončena. ${summary}`.trim()
+          : `${result.error ?? 'Synchronizace selhala'} ${summary}`.trim()
+      )
+      // Refresh so the sync badges and the pending count reflect the run
+      await loadSubscribers()
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   const handleExport = async () => {
     setExporting(true)
@@ -82,21 +191,45 @@ export function NewsletterSubscribersSection() {
             <Mail className="w-6 h-6 text-emerald-600" />
             <h2 className="font-display text-xl font-semibold">Newsletter odběratelé</h2>
           </div>
-          <Button 
-            onClick={handleExport} 
-            disabled={exporting || !stats?.active}
-            variant="secondary"
-            size="small"
-          >
-            <Download className="w-4 h-4" />
-            {exporting ? 'Exportuji...' : 'Export CSV'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => handleSync(false)}
+              disabled={syncing}
+              variant="secondary"
+              size="small"
+            >
+              <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+              {syncing ? 'Synchronizuji...' : 'Synchronizovat se SmartEmailing'}
+            </Button>
+            <Button
+              onClick={() => handleSync(true)}
+              disabled={syncing}
+              variant="secondary"
+              size="small"
+              title="Odešle všechny odběratele znovu - použijte, když se kontakty měnily nebo mazaly přímo ve SmartEmailing"
+            >
+              <RotateCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+              Úplná synchronizace
+            </Button>
+            <Button
+              onClick={handleExport}
+              disabled={exporting || !stats?.active}
+              variant="secondary"
+              size="small"
+            >
+              <Download className="w-4 h-4" />
+              {exporting ? 'Exportuji...' : 'Export CSV'}
+            </Button>
+          </div>
         </div>
+        {syncMessage && (
+          <p className="mt-3 text-sm text-text-subtle">{syncMessage}</p>
+        )}
       </div>
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-3 divide-x divide-grey-100 border-b border-grey-100">
+        <div className="grid grid-cols-2 sm:grid-cols-5 divide-x divide-grey-100 border-b border-grey-100">
           <div className="px-6 py-4 text-center">
             <div className="flex items-center justify-center gap-2 text-text-subtle mb-1">
               <Users className="w-4 h-4" />
@@ -117,6 +250,32 @@ export function NewsletterSubscribersSection() {
               <span className="text-sm">Odhlášení</span>
             </div>
             <p className="text-2xl font-semibold text-text-subtle">{stats.unsubscribed}</p>
+          </div>
+          <div className="px-6 py-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-text-subtle mb-1">
+              <RefreshCw className="w-4 h-4" />
+              <span className="text-sm">Nesynchronizováno</span>
+            </div>
+            <p
+              className={`text-2xl font-semibold ${
+                stats.pendingSync > 0 ? 'text-amber-600' : 'text-text-subtle'
+              }`}
+            >
+              {stats.pendingSync}
+            </p>
+          </div>
+          <div className="px-6 py-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-text-subtle mb-1">
+              <MailX className="w-4 h-4" />
+              <span className="text-sm">Nedoručitelné</span>
+            </div>
+            <p
+              className={`text-2xl font-semibold ${
+                stats.undeliverable > 0 ? 'text-red-600' : 'text-text-subtle'
+              }`}
+            >
+              {stats.undeliverable}
+            </p>
           </div>
         </div>
       )}
@@ -140,6 +299,12 @@ export function NewsletterSubscribersSection() {
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-semibold text-text-subtle uppercase tracking-wider">
                   Stav
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-semibold text-text-subtle uppercase tracking-wider">
+                  Synchronizace
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-semibold text-text-subtle uppercase tracking-wider">
+                  Stav v SmartEmailing
                 </th>
               </tr>
             </thead>
@@ -167,6 +332,12 @@ export function NewsletterSubscribersSection() {
                         Odhlášen
                       </span>
                     )}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <SyncBadge subscriber={subscriber} />
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <ContactStateBadges subscriber={subscriber} />
                   </td>
                 </tr>
               ))}

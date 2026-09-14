@@ -10,9 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/Dialog'
 import { subscribeToNewsletter } from '@/app/actions/newsletter'
-
-// Email validation regex
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+import { parseNewsletterEmail } from '@/lib/schemas/newsletter.schema'
 
 export function NewsletterSignup() {
   const [email, setEmail] = React.useState('')
@@ -24,23 +22,18 @@ export function NewsletterSignup() {
     e.preventDefault()
     setError(null)
 
-    // Client-side validation
-    const trimmedEmail = email.trim()
-    
-    if (!trimmedEmail) {
-      setError('Zadejte prosím e-mailovou adresu')
-      return
-    }
+    // Client-side validation - same schema the server action uses
+    const parsed = parseNewsletterEmail(email)
 
-    if (!EMAIL_REGEX.test(trimmedEmail)) {
-      setError('Zadejte prosím platnou e-mailovou adresu')
+    if (!parsed.success) {
+      setError(parsed.error)
       return
     }
 
     setIsLoading(true)
 
     try {
-      const result = await subscribeToNewsletter(trimmedEmail)
+      const result = await subscribeToNewsletter(parsed.email)
 
       if (result.success) {
         setEmail('')

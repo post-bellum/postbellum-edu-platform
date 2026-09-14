@@ -8,3 +8,4 @@ export * from './auth.schema';
 export * from './lesson.schema';
 export * from './page-content.schema';
 export * from './improvement-suggestion.schema';
+export * from './newsletter.schema';
