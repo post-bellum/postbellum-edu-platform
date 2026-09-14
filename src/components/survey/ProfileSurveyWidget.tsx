@@ -2,6 +2,8 @@
 
 import * as React from 'react'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
+import { useIsAdmin } from '@/lib/supabase/hooks/useIsAdmin'
+import { useSurveyHiddenForMe } from '@/hooks/useSurveyHiddenForMe'
 import { useProfileSurvey } from '@/lib/supabase/hooks/useProfileSurvey'
 import { ProfileSurveyLauncher } from '@/components/survey/ProfileSurveyLauncher'
 import { ProfileSurveyPopup } from '@/components/survey/ProfileSurveyPopup'
@@ -38,6 +40,8 @@ function rememberDismissal() {
  */
 export function ProfileSurveyWidget() {
   const { isLoggedIn, loading: authLoading } = useAuth()
+  const { isAdmin, loading: adminLoading } = useIsAdmin()
+  const { isHidden } = useSurveyHiddenForMe()
   const {
     settings,
     questions,
@@ -57,8 +61,17 @@ export function ProfileSurveyWidget() {
   // widget disappears on close instead of waiting for the next page load
   const [completedNow, setCompletedNow] = React.useState(false)
 
+  // An admin can switch the questionnaire off for themselves in the admin
+  // section, so it does not distract them or end up in the answers
+  const hiddenForAdmin = isAdmin && !adminLoading && isHidden
+
   const isAvailable =
-    isLoggedIn && !authLoading && !isLoading && Boolean(settings?.isActive) && questions.length > 0
+    isLoggedIn &&
+    !authLoading &&
+    !isLoading &&
+    !hiddenForAdmin &&
+    Boolean(settings?.isActive) &&
+    questions.length > 0
 
   // Open on its own once, unless the user dismissed it or already answered
   React.useEffect(() => {

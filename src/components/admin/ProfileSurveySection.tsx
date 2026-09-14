@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/Label'
 import { Switch } from '@/components/ui/Switch'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ProfileQuestionEditor } from '@/components/admin/ProfileQuestionEditor'
+import { useSurveyHiddenForMe } from '@/hooks/useSurveyHiddenForMe'
 import {
   createProfileQuestion,
   deleteProfileQuestion,
@@ -61,6 +62,7 @@ export function ProfileSurveySection() {
   const [saving, setSaving] = React.useState(false)
   const [exporting, setExporting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const { isHidden, setSurveyHiddenForMe } = useSurveyHiddenForMe()
 
   // null = no editor open, 'new' = creating, otherwise the edited question id
   const [editing, setEditing] = React.useState<string | null>(null)
@@ -210,6 +212,25 @@ export function ProfileSurveySection() {
               <p className="text-sm text-text-subtle">
                 Když je zapnutý, přihlášeným uživatelům se nabídne plovoucí dotazník.
                 Vyplnění je dobrovolné a odpovědi si mohou kdykoli změnit.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Switch
+              id="survey-hidden-for-me"
+              checked={isHidden}
+              onCheckedChange={setSurveyHiddenForMe}
+              data-testid="survey-hidden-for-me-switch"
+            />
+            <div>
+              <Label htmlFor="survey-hidden-for-me" className="text-md text-text-strong font-medium">
+                Skrýt dotazník mně
+              </Label>
+              <p className="text-sm text-text-subtle">
+                Plovoucí dotazník se vám přestane nabízet, ať neodpovídáte omylem a nekazíte
+                sesbíraná data. Nastavení platí jen pro tento prohlížeč a ostatních uživatelů se
+                nijak netýká.
               </p>
             </div>
           </div>
