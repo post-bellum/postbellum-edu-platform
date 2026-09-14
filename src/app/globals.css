@@ -97,6 +97,11 @@
   --color-brand-primary-hover: #204f4e;
   --color-mint: #9bffd2;
   --color-mint-light: #f0fff7;
+  /* Button hover fills, flattened from the Figma overlay fills.
+     Figma "type=ultra, state=hover"    = mint + 10% grey-950 overlay -> used by <Button variant="mint">
+     Figma "type=register, state=hover" = grey-950 + 20% white overlay -> used by <Button variant="ultra"> */
+  --color-mint-hover: #9fe3c2;
+  --color-grey-950-hover: #3e4149;
 
   /* Turquoise Scale */
   --color-turquoise-50: #f0fdfa;
@@ -398,6 +403,33 @@
   color: #6b7280;
   padding: 8px 0;
   font-style: italic;
+}
+
+/* Alignment classes are mirrored onto the figure wrapper when a caption exists */
+.lesson-material-content figure.image.img-align-left {
+  float: left;
+  margin: 0.5em 1.5em 1em 0;
+  max-width: 50%;
+}
+
+.lesson-material-content figure.image.img-align-right {
+  float: right;
+  margin: 0.5em 0 1em 1.5em;
+  max-width: 50%;
+}
+
+.lesson-material-content figure.image.img-align-center {
+  float: none;
+  margin: 1.5em auto;
+}
+
+/* The wrapper carries the float/width, the inner img should not */
+.lesson-material-content figure.image img.img-align-left,
+.lesson-material-content figure.image img.img-align-right,
+.lesson-material-content figure.image img.img-align-center {
+  float: none;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 /* Clearfix - only applied to specific elements, not paragraphs (to allow text wrap around floated images) */

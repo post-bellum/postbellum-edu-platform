@@ -32,6 +32,62 @@ const imageUrlSchema = z
   .optional()
 
 /**
+ * Material rich-text content (nullable so clearing the editor removes the text,
+ * leaving a PDF-only material).
+ */
+const materialContentSchema = z
+  .string()
+  .max(150000, 'Obsah může mít maximálně 150000 znaků')
+  .nullable()
+  .optional()
+  .transform((val) => {
+    if (val === undefined) return undefined
+    return val && val.trim() ? sanitizeHTML(val.trim()) : null
+  })
+
+/**
+ * Uploaded material PDF (nullable so the admin can clear it).
+ * `undefined` = field not submitted (leave unchanged), `null` = remove the PDF.
+ */
+const materialPdfUrlSchema = z
+  .string()
+  .max(2000, 'URL PDF může mít maximálně 2000 znaků')
+  .url('Neplatná URL adresa PDF')
+  .nullable()
+  .optional()
+
+const materialPdfFileNameSchema = z
+  .string()
+  .max(255, 'Název souboru může mít maximálně 255 znaků')
+  .transform(sanitizeString)
+  .nullable()
+  .optional()
+
+/**
+ * External link URL validation (http/https only)
+ * Used for the optional clickable link on additional activities.
+ */
+const externalLinkUrlSchema = z
+  .string()
+  .transform((val) => val.replace(/\0/g, '').trim())
+  .pipe(
+    z
+      .string()
+      .max(2000, 'Odkaz může mít maximálně 2000 znaků')
+      .url('Neplatná URL adresa odkazu')
+      .refine((url) => /^https?:\/\//i.test(url), {
+        message: 'Odkaz musí začínat http:// nebo https://',
+      })
+      // Reject characters that could break out of an href attribute.
+      // The URL is intentionally NOT passed through sanitizeInput(), which
+      // would mangle legitimate query strings (it strips `on<word>=` patterns).
+      .refine((url) => !/["'<>`\s]/.test(url), {
+        message: 'Odkaz obsahuje nepovolené znaky',
+      })
+  )
+  .optional()
+
+/**
  * Lesson specification enum
  */
 export const lessonSpecificationSchema = z.enum([
@@ -80,6 +136,11 @@ export const createLessonSchema = z.object({
   lesson_type: z
     .string()
     .max(200, 'Typ lekce může mít maximálně 200 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  author_team: z
+    .string()
+    .max(500, 'Autorský tým může mít maximálně 500 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
   publication_date: z
@@ -148,6 +209,7 @@ export const updateLessonSchema = z.object({
   period: nullableStringSchema(200, 'Období může mít maximálně 200 znaků'),
   target_group: nullableStringSchema(200, 'Cílová skupina může mít maximálně 200 znaků'),
   lesson_type: nullableStringSchema(200, 'Typ lekce může mít maximálně 200 znaků'),
+  author_team: nullableStringSchema(500, 'Autorský tým může mít maximálně 500 znaků'),
   publication_date: nullableDateSchema,
   published: z.boolean().optional(),
   rvp_connection: z
@@ -196,6 +258,7 @@ export function parseFormDataForLesson(formData: FormData, isUpdate = false) {
     period: getOptionalValue('period'),
     target_group: getOptionalValue('target_group'),
     lesson_type: getOptionalValue('lesson_type'),
+    author_team: getOptionalValue('author_team'),
     publication_date: getOptionalValue('publication_date'),
     published: isUpdate && publishedValue === null ? undefined : published,
     rvp_connection: rvpConnection && rvpConnection.trim()
@@ -245,11 +308,9 @@ export const createLessonMaterialSchema = z.object({
     .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
-  content: z
-    .string()
-    .max(150000, 'Obsah může mít maximálně 150000 znaků')
-    .optional()
-    .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
+  content: materialContentSchema,
+  pdf_url: materialPdfUrlSchema,
+  pdf_file_name: materialPdfFileNameSchema,
   specification: requiredSpecificationSchema,
   duration: requiredDurationSchema,
 })
@@ -270,11 +331,9 @@ export const updateLessonMaterialSchema = z.object({
     .max(5000, 'Popis může mít maximálně 5000 znaků')
     .optional()
     .transform((val) => val ? sanitizeString(val) : undefined),
-  content: z
-    .string()
-    .max(150000, 'Obsah může mít maximálně 150000 znaků')
-    .optional()
-    .transform((val) => val && val.trim() ? sanitizeHTML(val.trim()) : undefined),
+  content: materialContentSchema,
+  pdf_url: materialPdfUrlSchema,
+  pdf_file_name: materialPdfFileNameSchema,
   specification: lessonSpecificationSchema.optional(),
   duration: z.union([z.literal(30), z.literal(45), z.literal(90)]).optional(),
 })
@@ -301,6 +360,7 @@ export const createAdditionalActivitySchema = z.object({
     .transform((val) => val ? sanitizeString(val) : undefined),
   image_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
   attachment_type: attachmentTypeSchema.optional(),
+  link_url: externalLinkUrlSchema,
 })
 
 /**
@@ -320,6 +380,8 @@ export const updateAdditionalActivitySchema = z.object({
     .transform((val) => val ? sanitizeString(val) : undefined),
   image_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
   attachment_type: attachmentTypeSchema.optional(),
+  // null clears an existing link; undefined leaves it untouched
+  link_url: externalLinkUrlSchema.nullable(),
 })
 
 /**
@@ -341,11 +403,21 @@ export function parseFormDataForLessonMaterial(formData: FormData) {
     return value ?? ''
   }
   
+  // Nullable fields distinguish "not submitted" (undefined -> leave unchanged)
+  // from "submitted empty" (null -> clear the value in the database).
+  const getNullableValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    if (value === null) return undefined
+    return value.trim() ? value.trim() : null
+  }
+
   return {
     lesson_id: getRequiredValue('lesson_id'),
     title: getRequiredValue('title'),
     description: getOptionalValue('description'),
-    content: getOptionalValue('content'),
+    content: getNullableValue('content'),
+    pdf_url: getNullableValue('pdf_url'),
+    pdf_file_name: getNullableValue('pdf_file_name'),
     specification: getOptionalValue('specification'),
     duration: duration && duration.trim() ? parseInt(duration) : undefined,
   }
@@ -374,6 +446,131 @@ export function parseFormDataForAdditionalActivity(formData: FormData) {
     description: getOptionalValue('description'),
     image_url: getOptionalValue('image_url'),
     attachment_type: getOptionalValue('attachment_type') as 'image' | 'pdf' | undefined,
+    link_url: getOptionalValue('link_url'),
+  }
+}
+
+/**
+ * Memory of Nations profile URL (pametnaroda.cz / memoryofnations.eu)
+ */
+const memoryOfNationsUrlSchema = z
+  .string()
+  .url('Neplatná URL adresa')
+  .refine(
+    (val) => /^https:\/\/(www\.)?(pametnaroda\.cz|memoryofnations\.eu)\//.test(val),
+    { message: 'Musí být odkaz na profil na pametnaroda.cz' }
+  )
+  .optional()
+
+const witnessBirthYearSchema = z
+  .number()
+  .int('Rok narození musí být celé číslo')
+  .min(1850, 'Rok narození musí být alespoň 1850')
+  .max(2100, 'Rok narození může být maximálně 2100')
+  .optional()
+
+const witnessSortOrderSchema = z
+  .number()
+  .int('Pořadí musí být celé číslo')
+  .min(0, 'Pořadí nemůže být negativní')
+  .max(9999, 'Pořadí může být maximálně 9999')
+  .optional()
+
+/**
+ * Create lesson witness schema
+ */
+export const createLessonWitnessSchema = z.object({
+  lesson_id: uuidSchema,
+  name: z
+    .string()
+    .min(1, 'Jméno pamětníka je povinné')
+    .max(200, 'Jméno pamětníka může mít maximálně 200 znaků')
+    .transform(sanitizeString),
+  role_short: z
+    .string()
+    .max(200, 'Krátká role může mít maximálně 200 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  role_full: z
+    .string()
+    .max(500, 'Dlouhá role může mít maximálně 500 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  birth_year: witnessBirthYearSchema,
+  bio: z
+    .string()
+    .max(1800, 'Životopis může mít maximálně 1800 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  portrait_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  memory_of_nations_url: memoryOfNationsUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  sort_order: witnessSortOrderSchema,
+})
+
+/**
+ * Update lesson witness schema
+ */
+export const updateLessonWitnessSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Jméno pamětníka je povinné')
+    .max(200, 'Jméno pamětníka může mít maximálně 200 znaků')
+    .transform(sanitizeString)
+    .optional(),
+  role_short: z
+    .string()
+    .max(200, 'Krátká role může mít maximálně 200 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  role_full: z
+    .string()
+    .max(500, 'Dlouhá role může mít maximálně 500 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  birth_year: witnessBirthYearSchema,
+  bio: z
+    .string()
+    .max(1800, 'Životopis může mít maximálně 1800 znaků')
+    .optional()
+    .transform((val) => val ? sanitizeString(val) : undefined),
+  portrait_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  memory_of_nations_url: memoryOfNationsUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+  sort_order: witnessSortOrderSchema,
+})
+
+/**
+ * Helper to parse FormData into object for lesson witness schemas
+ * Converts empty strings to undefined for proper Zod validation
+ */
+export function parseFormDataForLessonWitness(formData: FormData) {
+  // Helper to convert empty strings to undefined for optional fields
+  // Zod's .optional() expects undefined, not null
+  const getOptionalValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    return value && value.trim() ? value : undefined
+  }
+
+  const getRequiredValue = (key: string) => {
+    const value = formData.get(key) as string | null
+    return value ?? ''
+  }
+
+  // Numeric fields arrive as strings from FormData; NaN is rejected by Zod
+  const getNumericValue = (key: string) => {
+    const value = getOptionalValue(key)
+    return value !== undefined ? Number(value) : undefined
+  }
+
+  return {
+    lesson_id: getRequiredValue('lesson_id'),
+    name: getRequiredValue('name'),
+    role_short: getOptionalValue('role_short'),
+    role_full: getOptionalValue('role_full'),
+    birth_year: getNumericValue('birth_year'),
+    bio: getOptionalValue('bio'),
+    portrait_url: getOptionalValue('portrait_url'),
+    memory_of_nations_url: getOptionalValue('memory_of_nations_url'),
+    sort_order: getNumericValue('sort_order'),
   }
 }
 
@@ -441,6 +638,8 @@ export type CreateLessonMaterialInput = z.infer<typeof createLessonMaterialSchem
 export type UpdateLessonMaterialInput = z.infer<typeof updateLessonMaterialSchema>
 export type CreateAdditionalActivityInput = z.infer<typeof createAdditionalActivitySchema>
 export type UpdateAdditionalActivityInput = z.infer<typeof updateAdditionalActivitySchema>
+export type CreateLessonWitnessInput = z.infer<typeof createLessonWitnessSchema>
+export type UpdateLessonWitnessInput = z.infer<typeof updateLessonWitnessSchema>
 export type CreateUserLessonMaterialInput = z.infer<typeof createUserLessonMaterialSchema>
 export type UpdateUserLessonMaterialInput = z.infer<typeof updateUserLessonMaterialSchema>
 

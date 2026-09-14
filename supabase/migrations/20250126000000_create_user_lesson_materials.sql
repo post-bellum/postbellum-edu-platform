@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS public.user_lesson_materials (
 ALTER TABLE public.user_lesson_materials ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can only view their own materials
+DROP POLICY IF EXISTS "Users can view their own lesson materials" ON public.user_lesson_materials;
 CREATE POLICY "Users can view their own lesson materials"
   ON public.user_lesson_materials
   FOR SELECT
@@ -25,6 +26,7 @@ CREATE POLICY "Users can view their own lesson materials"
   USING (user_id = auth.uid());
 
 -- Policy: Users can create their own materials
+DROP POLICY IF EXISTS "Users can create their own lesson materials" ON public.user_lesson_materials;
 CREATE POLICY "Users can create their own lesson materials"
   ON public.user_lesson_materials
   FOR INSERT
@@ -32,6 +34,7 @@ CREATE POLICY "Users can create their own lesson materials"
   WITH CHECK (user_id = auth.uid());
 
 -- Policy: Users can update their own materials
+DROP POLICY IF EXISTS "Users can update their own lesson materials" ON public.user_lesson_materials;
 CREATE POLICY "Users can update their own lesson materials"
   ON public.user_lesson_materials
   FOR UPDATE
@@ -40,6 +43,7 @@ CREATE POLICY "Users can update their own lesson materials"
   WITH CHECK (user_id = auth.uid());
 
 -- Policy: Users can delete their own materials
+DROP POLICY IF EXISTS "Users can delete their own lesson materials" ON public.user_lesson_materials;
 CREATE POLICY "Users can delete their own lesson materials"
   ON public.user_lesson_materials
   FOR DELETE
@@ -54,6 +58,7 @@ CREATE INDEX IF NOT EXISTS idx_user_lesson_materials_user_lesson ON public.user_
 CREATE INDEX IF NOT EXISTS idx_user_lesson_materials_created_at ON public.user_lesson_materials(created_at DESC);
 
 -- Create trigger for updated_at
+DROP TRIGGER IF EXISTS set_user_lesson_materials_updated_at ON public.user_lesson_materials;
 CREATE TRIGGER set_user_lesson_materials_updated_at
   BEFORE UPDATE ON public.user_lesson_materials
   FOR EACH ROW

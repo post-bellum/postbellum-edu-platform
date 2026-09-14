@@ -16,12 +16,14 @@ CREATE TABLE IF NOT EXISTS public.page_content (
 ALTER TABLE public.page_content ENABLE ROW LEVEL SECURITY;
 
 -- Anyone can read page content (public pages)
+DROP POLICY IF EXISTS "Anyone can read page content" ON public.page_content;
 CREATE POLICY "Anyone can read page content"
   ON public.page_content
   FOR SELECT
   USING (true);
 
 -- Only admins can insert page content
+DROP POLICY IF EXISTS "Admins can insert page content" ON public.page_content;
 CREATE POLICY "Admins can insert page content"
   ON public.page_content
   FOR INSERT
@@ -35,6 +37,7 @@ CREATE POLICY "Admins can insert page content"
   );
 
 -- Only admins can update page content
+DROP POLICY IF EXISTS "Admins can update page content" ON public.page_content;
 CREATE POLICY "Admins can update page content"
   ON public.page_content
   FOR UPDATE
@@ -55,6 +58,7 @@ CREATE POLICY "Admins can update page content"
   );
 
 -- Only admins can delete page content
+DROP POLICY IF EXISTS "Admins can delete page content" ON public.page_content;
 CREATE POLICY "Admins can delete page content"
   ON public.page_content
   FOR DELETE
@@ -76,6 +80,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS set_page_content_updated_at ON public.page_content;
 CREATE TRIGGER set_page_content_updated_at
   BEFORE UPDATE ON public.page_content
   FOR EACH ROW

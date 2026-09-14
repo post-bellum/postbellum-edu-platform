@@ -79,6 +79,12 @@ export function LessonDetailInfo({ lesson, children, variant = 'default' }: Less
             <p>{lesson.lesson_type}</p>
           </InfoBlock>
         )}
+
+        {lesson.author_team && (
+          <InfoBlock label="Autorský tým výukového setu">
+            <p>{lesson.author_team}</p>
+          </InfoBlock>
+        )}
       </div>
 
       {/* Tags */}

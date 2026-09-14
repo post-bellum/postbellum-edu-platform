@@ -2,12 +2,14 @@
 
 import * as React from 'react'
 import { useEditorRef, useEditorSelector } from 'platejs/react'
+import { cn } from '@/lib/utils'
 import { KEYS } from 'platejs'
 import {
   useListToolbarButton,
   useListToolbarButtonState,
 } from '@platejs/list-classic/react'
 import { insertColumnGroup } from '@platejs/layout'
+import { upsertLink } from '@platejs/link'
 import {
   Bold,
   Italic,
@@ -64,9 +66,37 @@ const COLORS = [
 
 interface EditorToolbarProps {
   onInsertImage?: () => void
+  /**
+   * Overrides the sticky offset from the top of the nearest scroll container.
+   * Defaults to `top-20` to sit below the site's sticky nav bar on full page
+   * layouts - pass `top-0` when the editor is embedded in a dialog/modal.
+   */
+  className?: string
 }
 
-export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
+/**
+ * Scroll the current selection's caret into view.
+ *
+ * Slate/Plate only auto-scroll the caret when the DOM selection is out of
+ * sync with `editor.selection` at render time. Calling `editor.tf.focus()`
+ * actually pre-syncs the DOM selection itself, which short-circuits that
+ * mechanism - so after programmatic changes like undo/redo we scroll the
+ * caret into view manually instead of relying on it.
+ */
+function scrollCaretIntoView(editor: ReturnType<typeof useEditorRef>) {
+  if (!editor.selection) return
+  try {
+    const domRange = editor.api.toDOMRange(editor.selection)
+    if (!domRange) return
+    const container = domRange.startContainer
+    const el = container.nodeType === Node.TEXT_NODE ? container.parentElement : (container as Element)
+    el?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  } catch {
+    // Selection may not resolve to a DOM range yet - safe to ignore.
+  }
+}
+
+export function EditorToolbar({ onInsertImage, className }: EditorToolbarProps) {
   const editor = useEditorRef()
 
   // Track active marks using editor.api.marks()
@@ -157,15 +187,17 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
   }
 
   const insertLink = () => {
+    // Selection is lost while window.prompt is open, so read it upfront.
+    const selection = editor.selection
+    const selectedText = selection ? editor.api.string(selection) : ''
+
     const url = window.prompt('Zadejte URL adresu:')
     if (!url) return
-    const text = window.prompt('Text odkazu:', url) || url
+    // Selected text becomes the link text; only ask for it when nothing is selected.
+    const text = selectedText || window.prompt('Text odkazu:', url) || url
 
-    editor.tf.insertNodes({
-      type: 'a',
-      url,
-      children: [{ text }],
-    } as never)
+    if (selection) editor.tf.select(selection)
+    upsertLink(editor, { text, url })
     editor.tf.focus()
   }
 
@@ -177,17 +209,29 @@ export function EditorToolbar({ onInsertImage }: EditorToolbarProps) {
   }
 
   return (
-    <Toolbar className="flex-wrap rounded-t-xl border-gray-200">
+    <Toolbar className={cn('sticky top-20 z-20 flex-wrap rounded-t-xl border-gray-200 shadow-sm', className)}>
       {/* Undo / Redo */}
       <ToolbarButton
         tooltip="Zpět (Ctrl+Z)"
-        onClick={() => editor.tf.undo()}
+        onClick={() => {
+          editor.tf.undo()
+          requestAnimationFrame(() => {
+            editor.tf.focus()
+            scrollCaretIntoView(editor)
+          })
+        }}
       >
         <Undo2 className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         tooltip="Vpřed (Ctrl+Y)"
-        onClick={() => editor.tf.redo()}
+        onClick={() => {
+          editor.tf.redo()
+          requestAnimationFrame(() => {
+            editor.tf.focus()
+            scrollCaretIntoView(editor)
+          })
+        }}
       >
         <Redo2 className="h-4 w-4" />
       </ToolbarButton>

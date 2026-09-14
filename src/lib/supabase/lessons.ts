@@ -291,7 +291,7 @@ export async function getLessonById(
 
     // Fetch related data using the lesson's actual UUID
     // RLS policies on related tables will automatically filter based on lesson published status
-    const [tagsResult, materialsResult, activitiesResult] = await Promise.all([
+    const [tagsResult, materialsResult, activitiesResult, witnessesResult] = await Promise.all([
       supabase
         .from('lesson_tags')
         .select('tags(*)')
@@ -305,6 +305,12 @@ export async function getLessonById(
         .from('additional_activities')
         .select('*')
         .eq('lesson_id', lessonId)
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('lesson_witnesses')
+        .select('*')
+        .eq('lesson_id', lessonId)
+        .order('sort_order', { ascending: true })
         .order('created_at', { ascending: true })
     ])
 
@@ -321,6 +327,7 @@ export async function getLessonById(
       .filter((tag): tag is Tag => tag !== null)
     const materials = materialsResult.data || []
     const activities = activitiesResult.data || []
+    const witnesses = witnessesResult.data || []
 
     return {
       ...lesson,
@@ -328,7 +335,8 @@ export async function getLessonById(
       rvp_connection: lesson.rvp_connection || [],
       tags,
       materials,
-      additional_activities: activities
+      additional_activities: activities,
+      witnesses
     } as LessonWithRelations
   } catch (error) {
     logger.error('Error fetching lesson:', error)

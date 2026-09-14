@@ -109,6 +109,25 @@ import { BlockDraggable } from './plate-ui/block-draggable'
  * All plugins for the teacher editor, with components attached.
  * Order matters: plugins are processed in order.
  */
+/**
+ * One drag-and-drop backend shared by every editor on the page.
+ *
+ * `DndProvider` keeps its manager as a refcounted singleton and, when it owns
+ * the storage itself, throws that singleton away as soon as the last provider
+ * unmounts. Reopening an editor then builds a fresh HTML5Backend, and if the
+ * previous one has not finished tearing down (or a second editor is mounted
+ * alongside), its `setup()` hits the `__isReactDndBackendSetUp` flag and throws
+ * "Cannot have two HTML5 backends at the same time" — which takes the
+ * surrounding dialog down with it. Handing the provider an explicit context
+ * makes it reuse one manager for the lifetime of the tab instead.
+ *
+ * The context must be the real `window`: react-dnd passes it straight to the
+ * backend as its DOM global.
+ */
+function getDndContext(): Window | undefined {
+  return typeof window !== 'undefined' ? window : undefined
+}
+
 export const editorPlugins = [
   // Ensure editor always has at least one paragraph (must be first)
   ForceNonEmptyPlugin,
@@ -224,7 +243,9 @@ export const editorPlugins = [
     render: {
       aboveNodes: BlockDraggable,
       aboveSlate: ({ children }) => (
-        <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+        <DndProvider backend={HTML5Backend} context={getDndContext()}>
+          {children}
+        </DndProvider>
       ),
     },
   }),

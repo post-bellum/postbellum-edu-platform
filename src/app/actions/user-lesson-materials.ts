@@ -52,6 +52,13 @@ export async function copyLessonMaterialAction(sourceMaterialId: string, lessonI
       }
     }
 
+    if (!sourceMaterial.content || !sourceMaterial.content.trim()) {
+      return {
+        success: false,
+        error: 'Tento materiál nemá text k úpravě',
+      }
+    }
+
     // Create the user copy
     const input = {
       source_material_id: sourceMaterialId,

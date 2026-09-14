@@ -5,7 +5,7 @@ import { getAdditionalActivities } from '@/lib/supabase/additional-activities-cl
 import { deleteAdditionalActivityAction } from '@/app/actions/additional-activities'
 import type { AdditionalActivity } from '@/types/lesson.types'
 import { Button } from '@/components/ui/Button'
-import { Plus, Edit, Trash2, FileText } from 'lucide-react'
+import { Plus, Edit, Trash2, FileText, ExternalLink } from 'lucide-react'
 import { AdditionalActivityForm } from './AdditionalActivityForm'
 import {
   Dialog,
@@ -154,6 +154,17 @@ export function AdditionalActivitiesManager({
                   <p className="text-sm text-gray-600 line-clamp-2 mb-2">
                     {activity.description}
                   </p>
+                )}
+                {activity.link_url && (
+                  <a
+                    href={activity.link_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline max-w-full"
+                  >
+                    <ExternalLink className="w-4 h-4 shrink-0" />
+                    <span className="truncate">{activity.link_url}</span>
+                  </a>
                 )}
               </div>
               <div className="flex gap-2">

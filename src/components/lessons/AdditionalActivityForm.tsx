@@ -42,6 +42,7 @@ export function AdditionalActivityForm({
   const [title, setTitle] = React.useState(activity?.title || '')
   const [description, setDescription] = React.useState(activity?.description || '')
   const [imageUrl, setImageUrl] = React.useState(activity?.image_url || '')
+  const [linkUrl, setLinkUrl] = React.useState(activity?.link_url || '')
   const [attachmentType, setAttachmentType] = React.useState<AdditionalActivityAttachmentType | ''>(
     activity?.attachment_type === 'pdf' ? 'pdf' : 'image'
   )
@@ -56,6 +57,7 @@ export function AdditionalActivityForm({
       setTitle(activity?.title || '')
       setDescription(activity?.description || '')
       setImageUrl(activity?.image_url || '')
+      setLinkUrl(activity?.link_url || '')
       setAttachmentType(activity?.attachment_type === 'pdf' ? 'pdf' : 'image')
       setUploadError(null)
     }
@@ -130,6 +132,7 @@ export function AdditionalActivityForm({
     formData.set('description', description)
     formData.set('image_url', imageUrl)
     formData.set('attachment_type', attachmentType || 'image')
+    formData.set('link_url', linkUrl.trim())
     React.startTransition(() => {
       formAction(formData)
     })
@@ -279,6 +282,22 @@ export function AdditionalActivityForm({
               </label>
             )}
             {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="link_url">Odkaz (nepovinné)</Label>
+            <Input
+              id="link_url"
+              name="link_url"
+              type="url"
+              inputMode="url"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              placeholder="https://kahoot.it/..."
+            />
+            <p className="text-xs text-gray-500">
+              Zobrazí se u aktivity jako klikatelné tlačítko. Musí začínat http:// nebo https://.
+            </p>
           </div>
 
           <input type="hidden" name="image_url" value={imageUrl} />

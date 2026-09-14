@@ -3,6 +3,8 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/supabase/admin-helpers'
 import { logger } from '@/lib/logger'
+import { pushPendingSubscribers, reconcileUnsubscribes } from '@/lib/smartemailing/sync'
+import { isSmartEmailingConfigured } from '@/lib/smartemailing/config'
 import type { Database } from '@/types/database.types'
 
 // Use generated database types for type safety
@@ -12,6 +14,10 @@ export interface NewsletterStats {
   total: number
   active: number
   unsubscribed: number
+  /** Subscribers not yet written to the SmartEmailing contact list. */
+  pendingSync: number
+  /** Addresses SmartEmailing cannot deliver to (hard bounce or blacklist). */
+  undeliverable: number
 }
 
 export async function getNewsletterSubscribers(): Promise<{
@@ -43,6 +49,8 @@ export async function getNewsletterSubscribers(): Promise<{
       total: subscribers.length,
       active: subscribers.filter(s => s.is_active).length,
       unsubscribed: subscribers.filter(s => !s.is_active).length,
+      pendingSync: subscribers.filter(s => s.se_pending).length,
+      undeliverable: subscribers.filter(s => s.se_hardbounced || s.se_blacklisted).length,
     }
 
     return {
@@ -55,6 +63,72 @@ export async function getNewsletterSubscribers(): Promise<{
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Chyba při načítání odběratelů',
+    }
+  }
+}
+
+export interface SmartEmailingSyncSummary {
+  pushed: number
+  failed: number
+  reconciled: number
+  requeued: number
+}
+
+/**
+ * Runs the SmartEmailing synchronization on demand from the admin UI: pulls
+ * back unsubscribes made in SmartEmailing, then pushes what is queued.
+ * The hourly/nightly cron does the same thing unattended.
+ *
+ * With `full: true` every subscriber is pushed, not just the queued ones - use
+ * it after contacts were deleted or changed directly in SmartEmailing, which
+ * our queue knows nothing about.
+ */
+export async function syncNewsletterToSmartEmailing(options?: {
+  full?: boolean
+}): Promise<{
+  success: boolean
+  summary?: SmartEmailingSyncSummary
+  error?: string
+}> {
+  try {
+    await requireAdmin()
+
+    if (!isSmartEmailingConfigured()) {
+      return {
+        success: false,
+        error: 'SmartEmailing není nakonfigurován (chybí SMARTEMAILING_* proměnné).',
+      }
+    }
+
+    // Reconcile first: it queues the opt-outs that the push then writes back,
+    // so a full push cannot re-confirm somebody who opted out there.
+    const reconcile = await reconcileUnsubscribes()
+    const push = await pushPendingSubscribers({ all: options?.full === true })
+
+    const summary: SmartEmailingSyncSummary = {
+      pushed: push.pushed,
+      failed: push.failed,
+      reconciled: reconcile.reconciled,
+      requeued: reconcile.requeued,
+    }
+
+    const firstError = push.error ?? reconcile.error
+    if (firstError) {
+      // Partial success is still worth reporting - the counts show what got
+      // through before the API refused.
+      return {
+        success: false,
+        summary,
+        error: `Synchronizace skončila s chybou: ${firstError}`,
+      }
+    }
+
+    return { success: true, summary }
+  } catch (error) {
+    logger.error('Error syncing newsletter to SmartEmailing', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Chyba při synchronizaci',
     }
   }
 }

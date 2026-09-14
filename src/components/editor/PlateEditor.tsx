@@ -32,6 +32,12 @@ interface PlateEditorProps {
   className?: string
   /** Increment this to force the editor to reset with new content */
   resetKey?: number
+  /**
+   * Sticky offset class for the toolbar (e.g. `top-0` inside a dialog, or
+   * `top-20` on a full page below the sticky nav bar). Passed through to
+   * `EditorToolbar`.
+   */
+  toolbarClassName?: string
 }
 
 /**
@@ -59,6 +65,7 @@ export function PlateEditor({
   placeholder = 'Začněte psát...',
   className,
   resetKey = 0,
+  toolbarClassName,
 }: PlateEditorProps) {
   // Wait for client-side hydration before rendering the editor.
   // Slate/Plate produces different DOM on server vs client which causes
@@ -202,7 +209,11 @@ export function PlateEditor({
       <div
         className={cn(
           'plate-editor-wrapper',
-          'border border-gray-200 rounded-xl bg-white overflow-hidden',
+          // No `overflow-hidden` here - it would establish a scroll container
+          // that breaks `position: sticky` on the toolbar below. Corner
+          // clipping instead happens on the toolbar (rounded-t) and the
+          // editor container (rounded-b) individually.
+          'border border-gray-200 rounded-xl bg-white',
           'shadow-lg shadow-gray-200/50',
           'ring-1 ring-gray-100',
           className
@@ -212,13 +223,14 @@ export function PlateEditor({
           editor={editor}
           onChange={({ value }) => syncContent(value)}
         >
-          {/* Toolbar */}
+          {/* Toolbar - sticky so it stays visible while scrolling */}
           <EditorToolbar
             onInsertImage={handleInsertImage}
+            className={toolbarClassName}
           />
 
           {/* Continuous editor - pagination only in preview/PDF */}
-          <EditorContainer className="continuous-editor-container">
+          <EditorContainer className="continuous-editor-container rounded-b-xl">
             <Editor
               placeholder={placeholder}
               className="continuous-editor-content"
@@ -459,17 +471,19 @@ function convertDomToPlate(parent: Node): Array<Record<string, unknown>> {
         const img = el.querySelector('img') as HTMLImageElement | null
         if (img) {
           const width = parseImgWidth(img) ?? parseImgWidth(el as HTMLElement)
-          // Check for alignment class on the img element
-          const className = img.className || ''
+          // Alignment class may sit on the img or on the figure wrapper
+          const className = `${img.className || ''} ${el.className || ''}`
           let align: string = 'center' // default to center
           if (className.includes('img-align-left')) align = 'left'
           else if (className.includes('img-align-right')) align = 'right'
           else if (className.includes('img-align-center')) align = 'center'
+          const captionText = (el.querySelector('figcaption')?.textContent ?? '').trim()
           nodes.push({
             type: 'img',
             url: img.src,
             align,
             ...(width !== undefined && { width }),
+            ...(captionText && { caption: [{ text: captionText }] }),
             children: [{ text: '' }],
           })
         }
@@ -777,7 +791,12 @@ function serializeNode(node: Record<string, unknown>): string {
           imgWidth !== undefined && imgWidth !== null
             ? ` style="width: ${typeof imgWidth === 'number' ? `${imgWidth}px` : imgWidth}"`
             : ''
-        return `<img src="${escapeAttr(url)}"${className ? ` class="${className}"` : ''}${widthStyle} />`
+        const imgHtml = `<img src="${escapeAttr(url)}"${className ? ` class="${className}"` : ''}${widthStyle} />`
+
+        // Wrap in <figure> only when a caption exists, so plain images stay unchanged
+        const captionText = extractCaptionText(node.caption)
+        if (!captionText) return imgHtml
+        return `<figure class="image${className ? ` ${className}` : ''}"${widthStyle}>${imgHtml}<figcaption>${escapeHtml(captionText)}</figcaption></figure>`
       }
     case 'hr':
       return '<hr />'
@@ -796,6 +815,21 @@ function serializeNode(node: Record<string, unknown>): string {
     default:
       return children
   }
+}
+
+/**
+ * Extract plain text from a Plate `caption` value ([{ text: '...' }]).
+ */
+function extractCaptionText(caption: unknown): string {
+  if (!Array.isArray(caption)) return ''
+  const walk = (n: unknown): string => {
+    if (!n || typeof n !== 'object') return ''
+    const node = n as Record<string, unknown>
+    if (typeof node.text === 'string') return node.text
+    if (Array.isArray(node.children)) return node.children.map(walk).join('')
+    return ''
+  }
+  return caption.map(walk).join('').trim()
 }
 
 function serializeText(node: Record<string, unknown>): string {

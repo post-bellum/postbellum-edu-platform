@@ -39,14 +39,16 @@ interface DropdownMenuItemProps {
   children: React.ReactNode
   variant?: 'default' | 'danger'
   disabled?: boolean
+  className?: string
 }
 
-export function DropdownMenuItem({ 
-  onClick, 
-  icon, 
-  children, 
+export function DropdownMenuItem({
+  onClick,
+  icon,
+  children,
   variant = 'default',
-  disabled = false
+  disabled = false,
+  className
 }: DropdownMenuItemProps) {
   return (
     <DropdownMenuPrimitive.Item
@@ -57,7 +59,8 @@ export function DropdownMenuItem({
         'data-highlighted:bg-grey-50',
         variant === 'default' && 'text-text-subtle',
         variant === 'danger' && 'text-red-600 data-highlighted:bg-red-50',
-        disabled && 'opacity-50 cursor-not-allowed'
+        disabled && 'opacity-50 cursor-not-allowed',
+        className
       )}
     >
       {icon && (
@@ -78,9 +81,38 @@ export function DropdownMenuSeparator({ className }: { className?: string }) {
   )
 }
 
-export function DropdownMenuHeader({ children }: { children: React.ReactNode }) {
+interface DropdownMenuHeaderProps {
+  children: React.ReactNode
+  onClick?: () => void | Promise<void>
+  className?: string
+  [key: `data-${string}`]: string | undefined
+}
+
+export function DropdownMenuHeader({ children, onClick, className, ...props }: DropdownMenuHeaderProps) {
+  if (onClick) {
+    return (
+      <DropdownMenuPrimitive.Item
+        onClick={onClick}
+        className={cn(
+          'w-full flex items-center px-2 py-3 rounded-lg font-body text-md font-semibold text-text-strong',
+          'cursor-pointer outline-none transition-colors data-highlighted:bg-grey-50',
+          className
+        )}
+        {...props}
+      >
+        <span className="min-w-0 truncate">{children}</span>
+      </DropdownMenuPrimitive.Item>
+    )
+  }
+
   return (
-    <DropdownMenuPrimitive.Label className="px-2 py-3 font-body text-md font-semibold text-text-strong text-ellipsis overflow-hidden">
+    <DropdownMenuPrimitive.Label
+      className={cn(
+        'px-2 py-3 font-body text-md font-semibold text-text-strong text-ellipsis overflow-hidden',
+        className
+      )}
+      {...props}
+    >
       {children}
     </DropdownMenuPrimitive.Label>
   )

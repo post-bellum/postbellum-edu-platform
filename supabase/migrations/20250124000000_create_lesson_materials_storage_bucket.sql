@@ -13,6 +13,7 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- Policy: Anyone can view/download files from the bucket (public access)
+DROP POLICY IF EXISTS "Public can view lesson materials" ON storage.objects;
 CREATE POLICY "Public can view lesson materials"
   ON storage.objects
   FOR SELECT
@@ -20,6 +21,7 @@ CREATE POLICY "Public can view lesson materials"
   USING (bucket_id = 'lesson-materials');
 
 -- Policy: Authenticated users can upload files
+DROP POLICY IF EXISTS "Authenticated users can upload lesson materials" ON storage.objects;
 CREATE POLICY "Authenticated users can upload lesson materials"
   ON storage.objects
   FOR INSERT
@@ -27,6 +29,7 @@ CREATE POLICY "Authenticated users can upload lesson materials"
   WITH CHECK (bucket_id = 'lesson-materials');
 
 -- Policy: Authenticated users can update their own uploads
+DROP POLICY IF EXISTS "Authenticated users can update lesson materials" ON storage.objects;
 CREATE POLICY "Authenticated users can update lesson materials"
   ON storage.objects
   FOR UPDATE
@@ -36,6 +39,7 @@ CREATE POLICY "Authenticated users can update lesson materials"
 
 -- Policy: Only admins can delete files
 -- This prevents users from accidentally deleting images used in lessons
+DROP POLICY IF EXISTS "Admins can delete lesson materials" ON storage.objects;
 CREATE POLICY "Admins can delete lesson materials"
   ON storage.objects
   FOR DELETE

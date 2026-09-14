@@ -78,6 +78,7 @@ export function MaterialsList({
               variant="secondary" 
               size="medium"
               className="justify-center [&_svg]:text-grey-500 lg:w-full"
+              disabled={!materialsList[0].content && !materialsList[0].pdf_url}
               onClick={() => onView(materialsList[0])}
             >
               <Eye className="w-5 h-5" />
@@ -87,7 +88,10 @@ export function MaterialsList({
               variant="secondary" 
               size="medium"
               className="justify-center [&_svg]:text-grey-500 lg:w-full"
-              disabled={!materialsList[0].content || isExportingPDF === materialsList[0].id}
+              disabled={
+                (!materialsList[0].content && !materialsList[0].pdf_url) ||
+                isExportingPDF === materialsList[0].id
+              }
               onClick={() => onExportPDF(materialsList[0])}
             >
               {isExportingPDF === materialsList[0].id ? (
@@ -106,7 +110,7 @@ export function MaterialsList({
               variant="secondary" 
               size="medium"
               className="justify-center [&_svg]:text-grey-500 lg:w-full"
-              disabled={isCopying === materialsList[0].id}
+              disabled={!materialsList[0].content || isCopying === materialsList[0].id}
               onClick={() => handleEditClick(materialsList[0].id)}
             >
               <Edit className="w-5 h-5" />

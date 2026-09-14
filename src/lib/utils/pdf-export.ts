@@ -14,6 +14,25 @@
  */
 
 import { logger } from '@/lib/logger'
+
+/**
+ * Build a download URL for an admin-uploaded material PDF.
+ *
+ * Supabase serves public files inline; the `download` query param makes storage
+ * send a Content-Disposition attachment header. The HTML `download` attribute
+ * alone would be ignored because storage lives on a different origin.
+ */
+export function buildPdfDownloadUrl(
+  pdfUrl: string,
+  fallbackTitle: string,
+  pdfFileName?: string | null
+): string {
+  const fallbackName = `${fallbackTitle.replace(/[^a-z0-9\u00C0-\u024F.-]/gi, '_')}.pdf`
+  const fileName = pdfFileName || fallbackName
+  const separator = pdfUrl.includes('?') ? '&' : '?'
+  return `${pdfUrl}${separator}download=${encodeURIComponent(fileName)}`
+}
+
 import {
   PAGE_DIMS,
   USABLE_PAGE_WIDTH,
@@ -175,6 +194,41 @@ const PRINT_STYLES = `
     display: block;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  figure.image {
+    display: table;
+    margin: 1.5em auto;
+    max-width: 100%;
+  }
+
+  figure.image img {
+    display: block;
+    margin: 0 auto;
+    float: none;
+    max-width: 100%;
+  }
+
+  figure.image figcaption {
+    display: table-caption;
+    caption-side: bottom;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+    padding: 8px 0;
+    font-style: italic;
+  }
+
+  figure.image.img-align-left {
+    float: left;
+    margin: 0.5em 1.5em 1em 0;
+    max-width: 50%;
+  }
+
+  figure.image.img-align-right {
+    float: right;
+    margin: 0.5em 0 1em 1.5em;
+    max-width: 50%;
   }
 
   table {
@@ -369,6 +423,41 @@ const PDF_CONTENT_STYLES = `
     display: block;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .pdf-page-render figure.image {
+    display: table;
+    margin: 1.5em auto;
+    max-width: 100%;
+  }
+
+  .pdf-page-render figure.image img {
+    display: block;
+    margin: 0 auto;
+    float: none;
+    max-width: 100%;
+  }
+
+  .pdf-page-render figure.image figcaption {
+    display: table-caption;
+    caption-side: bottom;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+    padding: 8px 0;
+    font-style: italic;
+  }
+
+  .pdf-page-render figure.image.img-align-left {
+    float: left;
+    margin: 0.5em 1.5em 1em 0;
+    max-width: 50%;
+  }
+
+  .pdf-page-render figure.image.img-align-right {
+    float: right;
+    margin: 0.5em 0 1em 1.5em;
+    max-width: 50%;
   }
 
   .pdf-page-render table {

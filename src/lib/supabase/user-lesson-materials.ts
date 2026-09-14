@@ -75,7 +75,7 @@ async function generateUniqueMaterialTitle(
     .map(m => m.title)
     .filter(title => {
       const parsed = parseTitleWithIndex(title);
-      return parsed.baseName === baseName;
+      return normalizeTitle(parsed.baseName) === normalizeTitle(baseName);
     });
 
   // If no matches, the title is unique
@@ -84,7 +84,9 @@ async function generateUniqueMaterialTitle(
   }
 
   // Check if the exact title already exists
-  const exactMatch = matchingTitles.find(title => title === requestedTitle);
+  const exactMatch = matchingTitles.find(
+    title => normalizeTitle(title) === normalizeTitle(requestedTitle)
+  );
   if (!exactMatch) {
     return requestedTitle;
   }
@@ -102,6 +104,57 @@ async function generateUniqueMaterialTitle(
   // Otherwise increment the max index
   const nextIndex = maxIndex + 1;
   return `${baseName} (${nextIndex})`;
+}
+
+/**
+ * Titles are compared case-insensitively and ignoring surrounding whitespace,
+ * so "Pracovní list" and "  pracovní LIST " count as the same title.
+ */
+function normalizeTitle(title: string): string {
+  return title.trim().toLocaleLowerCase('cs-CZ')
+}
+
+/**
+ * Get the titles of the current user's materials for a lesson, optionally
+ * excluding one material (used to let a material keep its own title).
+ *
+ * Uniqueness is scoped to (user, lesson) - the same title in two different
+ * lessons is fine, matching how createUserLessonMaterial de-duplicates.
+ */
+export async function getUserMaterialTitlesForLesson(
+  lessonId: string,
+  excludeMaterialId?: string
+): Promise<string[]> {
+  try {
+    const supabase = await createClient()
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      return []
+    }
+
+    let query = supabase
+      .from('user_lesson_materials')
+      .select('title')
+      .eq('user_id', user.id)
+      .eq('lesson_id', lessonId)
+
+    if (excludeMaterialId) {
+      query = query.neq('id', excludeMaterialId)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      logger.error('Error fetching user material titles:', error)
+      return []
+    }
+
+    return (data || []).map(m => m.title)
+  } catch (error) {
+    logger.error('Error fetching user material titles:', error)
+    return []
+  }
 }
 
 /**
@@ -259,6 +312,25 @@ export async function updateUserLessonMaterial(
 ): Promise<UserLessonMaterial> {
   try {
     const supabase = await createClient()
+
+    // Reject a rename that would collide with another material of the same
+    // user in the same lesson (the client checks too, this is authoritative)
+    if (input.title !== undefined) {
+      const { data: current, error: currentError } = await supabase
+        .from('user_lesson_materials')
+        .select('lesson_id')
+        .eq('id', id)
+        .single()
+
+      if (currentError || !current) {
+        throw currentError || new Error('Materiál nebyl nalezen')
+      }
+
+      const siblingTitles = await getUserMaterialTitlesForLesson(current.lesson_id, id)
+      if (siblingTitles.some(title => normalizeTitle(title) === normalizeTitle(input.title!))) {
+        throw new Error('Materiál s tímto názvem už v této lekci existuje')
+      }
+    }
 
     const { data, error } = await supabase
       .from('user_lesson_materials')

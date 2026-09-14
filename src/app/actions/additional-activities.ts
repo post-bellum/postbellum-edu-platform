@@ -60,7 +60,11 @@ export async function updateAdditionalActivityAction(activityId: string, formDat
     }
 
     // Parse FormData into object format expected by Zod
-    const rawData = parseFormDataForAdditionalActivity(formData)
+    // An absent link_url means "clear the link", not "leave unchanged"
+    const rawData = {
+      ...parseFormDataForAdditionalActivity(formData),
+      link_url: (formData.get('link_url') as string | null)?.trim() || null,
+    }
     
     // Validate and sanitize using Zod schema
     const result = updateAdditionalActivitySchema.safeParse(rawData)

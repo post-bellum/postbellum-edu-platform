@@ -7,6 +7,17 @@ import { z } from 'zod';
  * 
  * Note: Uses console for startup logging before logger is available.
  */
+/**
+ * An optional variable where a blank value means "not set". Without this an
+ * empty `FOO=` line (as copied from .env.example) would count as present and
+ * fail a `min(1)` check at startup.
+ */
+const optionalString = () =>
+  z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().min(1).optional()
+  );
+
 export const envSchema = z.object({
   // Public Supabase configuration
   NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL'),
@@ -20,7 +31,43 @@ export const envSchema = z.object({
   
   // Schools registry data URL (required for schools import)
   SCHOOLS_REGISTRY_URL: z.string().url('Invalid schools registry URL'),
-  
+
+  // Public base URL of the deployment, used to build absolute links in
+  // outgoing emails and exports. Optional so local development works without
+  // it; the features that need it log an error and degrade instead.
+  NEXT_PUBLIC_APP_URL: optionalString().refine(
+    (value) => !value || /^https?:\/\//.test(value),
+    'NEXT_PUBLIC_APP_URL must start with http:// or https://'
+  ),
+
+  // Transactional email via Resend (improvement suggestions sent to the admin
+  // inbox). All optional: without them suggestions are still stored in the
+  // database, only the notification email is skipped and recorded as an error.
+  // `optionalString` treats an empty value as unset, so copying .env.example
+  // with blank values does not fail validation.
+  RESEND_API_KEY: optionalString(),
+  // Dedicated admin mailbox(es) that receive the improvement suggestions.
+  // Comma-separated for several recipients.
+  SUGGESTIONS_EMAIL_TO: optionalString(),
+  // Verified Resend sender, e.g. "storyON <noreply@postbellum.cz>"
+  SUGGESTIONS_EMAIL_FROM: optionalString(),
+
+  // SmartEmailing API v3 - the newsletter list that campaigns are sent from.
+  // Supabase stays the source of truth; these credentials only let us push
+  // subscribers there. All optional: without them the app works exactly as
+  // before and every sync attempt is skipped and recorded as pending.
+  SMARTEMAILING_API_USER: optionalString(),
+  SMARTEMAILING_API_KEY: optionalString(),
+  // Numeric ID of the contact list holding the newsletter subscribers.
+  SMARTEMAILING_CONTACTLIST_ID: optionalString().refine(
+    (value) => !value || /^\d+$/.test(value),
+    'SMARTEMAILING_CONTACTLIST_ID must be a number'
+  ),
+  // Shared secret guarding /api/cron/smartemailing-sync (sent by Vercel Cron
+  // as `Authorization: Bearer ...`). Admins can trigger the same route from
+  // the admin UI without it.
+  CRON_SECRET: optionalString(),
+
   // QA Testing Configuration (optional)
   // Pattern to match QA emails (e.g., "\\+qa" matches emails like test+qa@example.com)
   NEXT_PUBLIC_QA_EMAIL_PATTERN: z.string().optional(),

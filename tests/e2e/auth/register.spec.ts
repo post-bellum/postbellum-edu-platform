@@ -27,9 +27,6 @@ test.describe('Teacher Registration Flow', () => {
     const teacherPassword = process.env.TEST_PASSWORD as string;
     await registrationModal.fillTeacherPassword(teacherPassword);
 
-    // And user fill same teacher password to confirm password input
-    await registrationModal.fillConfirmPassword(teacherPassword);
-
     // And user click to button sign up
     await registrationModal.clickSignUpButton();
     await page.waitForTimeout(10000);

@@ -25,10 +25,6 @@ export class RegistrationModal {
     await this.page.getByTestId('register-password-input').fill(password);
   }
 
-  async fillConfirmPassword(password: string): Promise<void> {
-    await this.page.getByTestId('register-confirm-password-input').fill(password);
-  }
-
   async clickPolicyAgreementCheckbox(): Promise<void> {
     // Policy checkbox might not exist in step 1, so check if it exists first
     const checkbox = this.page.getByTestId('register-policy-checkbox');

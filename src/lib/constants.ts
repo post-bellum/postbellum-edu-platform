@@ -2,6 +2,9 @@
  * Application-wide constants
  */
 
+// Number of lesson slots in the homepage "Vybrané lekce" section
+export const HOMEPAGE_LESSONS_COUNT = 4
+
 // Authentication
 export const AUTH_CONSTANTS = {
   PASSWORD_MIN_LENGTH: 8,
@@ -29,6 +32,25 @@ export const CATEGORY_LABELS: Record<string, string> = {
   ngo_worker: 'pracovník/pracovnice v neziskovém a nevládním sektoru',
   public_sector_worker: 'pracovník/pracovnice ve státním sektoru',
   other: 'ostatní',
+} as const
+
+// Profile survey (optional questions in profile settings, managed in admin)
+export const PROFILE_SURVEY_CONSTANTS = {
+  QUESTION_TEXT_MAX_LENGTH: 200,
+  HELP_TEXT_MAX_LENGTH: 300,
+  OPTION_LABEL_MAX_LENGTH: 200,
+  ANSWER_TEXT_MAX_LENGTH: 500,
+  SCALE_LABEL_MAX_LENGTH: 60,
+  LAUNCHER_LABEL_MAX_LENGTH: 60,
+  MAX_OPTIONS_PER_QUESTION: 20,
+} as const
+
+// Improvement suggestions ("Poslat návrh na zlepšení" dialog on lesson detail).
+export const IMPROVEMENT_SUGGESTION_CONSTANTS = {
+  MESSAGE_MIN_LENGTH: 10,
+  MESSAGE_MAX_LENGTH: 2000,
+  THROTTLE_WINDOW_MINUTES: 10,
+  THROTTLE_MAX_SUBMISSIONS: 3,
 } as const
 
 // User Types
