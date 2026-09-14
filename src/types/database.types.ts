@@ -340,25 +340,49 @@ export type Database = {
           email: string
           id: string
           is_active: boolean | null
+          se_blacklisted: boolean
+          se_hardbounced: boolean
+          se_list_status: string | null
+          se_pending: boolean
+          se_sync_error: string | null
+          se_state_checked_at: string | null
+          se_synced_at: string | null
           subscribed_at: string | null
           unsubscribe_token: string
           unsubscribed_at: string | null
+          updated_at: string | null
         }
         Insert: {
           email: string
           id?: string
           is_active?: boolean | null
+          se_blacklisted?: boolean
+          se_hardbounced?: boolean
+          se_list_status?: string | null
+          se_pending?: boolean
+          se_sync_error?: string | null
+          se_state_checked_at?: string | null
+          se_synced_at?: string | null
           subscribed_at?: string | null
           unsubscribe_token?: string
           unsubscribed_at?: string | null
+          updated_at?: string | null
         }
         Update: {
           email?: string
           id?: string
           is_active?: boolean | null
+          se_blacklisted?: boolean
+          se_hardbounced?: boolean
+          se_list_status?: string | null
+          se_pending?: boolean
+          se_sync_error?: string | null
+          se_state_checked_at?: string | null
+          se_synced_at?: string | null
           subscribed_at?: string | null
           unsubscribe_token?: string
           unsubscribed_at?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

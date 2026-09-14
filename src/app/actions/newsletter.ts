@@ -3,36 +3,36 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
-import { headers } from 'next/headers'
+import { parseNewsletterEmail } from '@/lib/schemas/newsletter.schema'
+import { syncSubscriberNow } from '@/lib/smartemailing/sync'
 
-// Simple email validation regex
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-async function getBaseUrl() {
-  const headersList = await headers()
-  const host = headersList.get('host') || 'localhost:3000'
-  const protocol = host.includes('localhost') ? 'http' : 'https'
-  return `${protocol}://${host}`
+/**
+ * Base URL for the unsubscribe links we hand out.
+ *
+ * Taken from the environment rather than the request `Host` header, which a
+ * client controls - the same reasoning as in `exportNewsletterSubscribersCSV`.
+ */
+function getBaseUrl(): string | null {
+  const url = process.env.NEXT_PUBLIC_APP_URL?.trim()
+  if (!url) {
+    logger.error('NEXT_PUBLIC_APP_URL environment variable is not set')
+    return null
+  }
+  return url.replace(/\/+$/, '')
 }
 
 export async function subscribeToNewsletter(email: string) {
   try {
-    // Validate email
-    const trimmedEmail = email.trim().toLowerCase()
-    
-    if (!trimmedEmail) {
+    // Validate and normalize (trim + lowercase) with the schema the signup
+    // form uses, so client and server agree on what is accepted.
+    const parsed = parseNewsletterEmail(email)
+    if (!parsed.success) {
       return {
         success: false,
-        error: 'Zadejte prosím e-mailovou adresu',
+        error: parsed.error,
       }
     }
-    
-    if (!EMAIL_REGEX.test(trimmedEmail)) {
-      return {
-        success: false,
-        error: 'Zadejte prosím platnou e-mailovou adresu',
-      }
-    }
+    const trimmedEmail = parsed.email
 
     // Use admin client to bypass RLS - this is safe because:
     // 1. We validate email format above
@@ -46,12 +46,16 @@ export async function subscribeToNewsletter(email: string) {
     const { data, error } = await supabase
       .from('newsletter_subscribers')
       .upsert(
-        { 
+        {
           email: trimmedEmail,
           is_active: true,
           unsubscribed_at: null,
+          // Queue the SmartEmailing write before attempting it, so a crash
+          // between the two leaves the row for the retry job.
+          se_pending: true,
+          updated_at: new Date().toISOString(),
         },
-        { 
+        {
           onConflict: 'email',
           ignoreDuplicates: false,
         }
@@ -67,10 +71,14 @@ export async function subscribeToNewsletter(email: string) {
       }
     }
 
-    const baseUrl = await getBaseUrl()
+    // Push to the SmartEmailing contact list. Best-effort: a failure only
+    // leaves the row pending for the sync job, the user still succeeds.
+    await syncSubscriberNow(trimmedEmail, true)
+
+    const baseUrl = getBaseUrl()
     return {
       success: true,
-      unsubscribeUrl: data?.unsubscribe_token 
+      unsubscribeUrl: baseUrl && data?.unsubscribe_token
         ? `${baseUrl}/unsubscribe?token=${data.unsubscribe_token}`
         : undefined,
     }
@@ -156,6 +164,8 @@ export async function setMyNewsletterSubscription(subscribe: boolean): Promise<{
           email,
           is_active: true,
           unsubscribed_at: null,
+          se_pending: true,
+          updated_at: new Date().toISOString(),
         },
         {
           onConflict: 'email',
@@ -177,6 +187,8 @@ export async function setMyNewsletterSubscription(subscribe: boolean): Promise<{
         .update({
           is_active: false,
           unsubscribed_at: new Date().toISOString(),
+          se_pending: true,
+          updated_at: new Date().toISOString(),
         })
         .eq('email', email)
 
@@ -189,6 +201,9 @@ export async function setMyNewsletterSubscription(subscribe: boolean): Promise<{
         }
       }
     }
+
+    // Mirror the change into the SmartEmailing contact list (best-effort)
+    await syncSubscriberNow(email, subscribe)
 
     // Keep the per-user consent flag in sync so the two sources don't drift
     const { error: profileError } = await admin
@@ -230,9 +245,11 @@ export async function unsubscribeFromNewsletter(token: string) {
     // Update subscription to inactive
     const { data, error } = await supabase
       .from('newsletter_subscribers')
-      .update({ 
+      .update({
         is_active: false,
         unsubscribed_at: new Date().toISOString(),
+        se_pending: true,
+        updated_at: new Date().toISOString(),
       })
       .eq('unsubscribe_token', token)
       .select('email')
@@ -245,6 +262,9 @@ export async function unsubscribeFromNewsletter(token: string) {
         error: 'Nepodařilo se odhlásit z odběru. Odkaz může být neplatný.',
       }
     }
+
+    // Mirror the opt-out into SmartEmailing so no further campaign reaches them
+    await syncSubscriberNow(data.email, false)
 
     return {
       success: true,

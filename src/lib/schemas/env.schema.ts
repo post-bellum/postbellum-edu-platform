@@ -52,6 +52,22 @@ export const envSchema = z.object({
   // Verified Resend sender, e.g. "storyON <noreply@postbellum.cz>"
   SUGGESTIONS_EMAIL_FROM: optionalString(),
 
+  // SmartEmailing API v3 - the newsletter list that campaigns are sent from.
+  // Supabase stays the source of truth; these credentials only let us push
+  // subscribers there. All optional: without them the app works exactly as
+  // before and every sync attempt is skipped and recorded as pending.
+  SMARTEMAILING_API_USER: optionalString(),
+  SMARTEMAILING_API_KEY: optionalString(),
+  // Numeric ID of the contact list holding the newsletter subscribers.
+  SMARTEMAILING_CONTACTLIST_ID: optionalString().refine(
+    (value) => !value || /^\d+$/.test(value),
+    'SMARTEMAILING_CONTACTLIST_ID must be a number'
+  ),
+  // Shared secret guarding /api/cron/smartemailing-sync (sent by Vercel Cron
+  // as `Authorization: Bearer ...`). Admins can trigger the same route from
+  // the admin UI without it.
+  CRON_SECRET: optionalString(),
+
   // QA Testing Configuration (optional)
   // Pattern to match QA emails (e.g., "\\+qa" matches emails like test+qa@example.com)
   NEXT_PUBLIC_QA_EMAIL_PATTERN: z.string().optional(),
