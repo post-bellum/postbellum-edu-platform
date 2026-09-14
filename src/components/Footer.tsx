@@ -62,6 +62,15 @@ export function Footer() {
                     <ExternalLinkIcon className="size-4 shrink-0" />
                     Vzdělávání Paměti národa
                   </a>
+                  <a
+                    href="https://drive.google.com/drive/folders/1iLibcbf_u1A0SCIUCQLxqheeEZh2AMhI?usp=drive_link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex gap-2 items-center text-brand-primary hover:text-brand-primary-hover transition-colors"
+                  >
+                    <ExternalLinkIcon className="size-4 shrink-0" />
+                    Pro média
+                  </a>
                 </div>
               </div>
             </div>
