@@ -7,7 +7,7 @@ import { GlobalAuthHandler } from '@/components/auth';
 import { ProfileSurveyWidget } from '@/components/survey/ProfileSurveyWidget';
 
 export const metadata: Metadata = {
-  title: 'StoryOn – Vzdělávací platforma',
+  title: 'storyON – Vzdělávací platforma',
   description: 'Platforma StoryOn od Post Bellum pro učitele k objevování a používání učebních materiálů inspirovaných životními příběhy.',
 };
 
