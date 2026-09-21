@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { NewsletterSignup } from '@/components/homepage/NewsletterSignup';
 
 export function ComingSoonHero() {
   return (
@@ -49,6 +50,15 @@ export function ComingSoonHero() {
           fill
           className="object-contain"
           sizes="(max-width: 896px) 100vw, 896px"
+        />
+      </div>
+
+      {/* Newsletter signup */}
+      <div className="mt-12 w-full max-w-[500px]">
+        <NewsletterSignup
+          centered
+          title="Nenechte si ujít spuštění"
+          description="Buďte první, kdo se dozví o spuštění platformy. Dáme vám vědět e-mailem."
         />
       </div>
 
