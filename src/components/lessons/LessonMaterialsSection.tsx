@@ -9,7 +9,7 @@ import { AuthModal } from '@/components/auth'
 import { useAuth } from '@/lib/supabase/hooks/useAuth'
 import { copyLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import { ErrorDialog } from '@/components/ui/ErrorDialog'
-import { exportToPDF } from '@/lib/utils/pdf-export'
+import { exportToPDF, buildPdfDownloadUrl } from '@/lib/utils/pdf-export'
 import { generateLessonUrl } from '@/lib/utils'
 
 interface LessonMaterialsSectionProps {
@@ -26,7 +26,7 @@ const specificationLabels: Record<LessonSpecification, string> = {
 }
 
 const durationLabels: Record<LessonDuration, string> = {
-  30: '30 min',
+  30: '20 min',
   45: '45 min',
   90: '90 min',
 }
@@ -37,7 +37,7 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
   const { isLoggedIn } = useAuth()
   
   const [selectedSpecification, setSelectedSpecification] = React.useState<LessonSpecification>('2nd_grade_elementary')
-  const [selectedDuration, setSelectedDuration] = React.useState<LessonDuration>(30)
+  const [selectedDuration, setSelectedDuration] = React.useState<LessonDuration>(45)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [selectedMaterial, setSelectedMaterial] = React.useState<LessonMaterial | null>(null)
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false)
@@ -82,6 +82,15 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
   }
 
   const handleExportPDF = async (material: LessonMaterial) => {
+    if (material.pdf_url) {
+      window.open(
+        buildPdfDownloadUrl(material.pdf_url, material.title, material.pdf_file_name),
+        '_blank',
+        'noopener,noreferrer'
+      )
+      return
+    }
+
     if (!material.content) return
 
     setIsExportingPDF(material.id)
@@ -186,6 +195,7 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
           onOpenChange={setViewModalOpen}
           title={selectedMaterial.title}
           content={selectedMaterial.content}
+          pdfUrl={selectedMaterial.pdf_url}
         />
       )}
 

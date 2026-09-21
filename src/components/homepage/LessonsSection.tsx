@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { LessonCard } from './LessonCard';
 import { SectionHeadline } from './SectionHeadline';
 import { getLessons } from '@/lib/supabase/lessons';
 import { logger } from '@/lib/logger';
+import { HOMEPAGE_LESSONS_COUNT } from '@/lib/constants';
 import type { Lesson } from '@/types/lesson.types';
 import type { HomepageLessons } from '@/types/page-content.types';
 
@@ -13,20 +14,21 @@ interface LessonsSectionProps {
 }
 
 export function LessonsSection({ content }: LessonsSectionProps) {
-  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [allLessons, setAllLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const featuredIds = content.featuredLessonIds;
 
   useEffect(() => {
     async function fetchLessons() {
       try {
         setError(false);
-        const data = await getLessons({ 
+        const data = await getLessons({
           published_only: true,
-          usePublicClient: true 
+          usePublicClient: true
         });
-        // Take only first 4 lessons for homepage
-        setLessons(data.slice(0, 4));
+        setAllLessons(data);
       } catch (err) {
         logger.error('Error fetching lessons for homepage', err);
         setError(true);
@@ -34,9 +36,17 @@ export function LessonsSection({ content }: LessonsSectionProps) {
         setLoading(false);
       }
     }
-    
+
     fetchLessons();
   }, []);
+
+  const lessons = useMemo(() => {
+    const curated = (featuredIds ?? [])
+      .map((id) => allLessons.find((lesson) => lesson.id === id))
+      .filter((lesson): lesson is Lesson => lesson !== undefined);
+
+    return (curated.length > 0 ? curated : allLessons).slice(0, HOMEPAGE_LESSONS_COUNT);
+  }, [allLessons, featuredIds]);
 
   return (
     <section className="px-5 xl:px-10">
@@ -55,7 +65,7 @@ export function LessonsSection({ content }: LessonsSectionProps) {
         <div className="px-5 xl:px-10">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8 lg:gap-20">
-              {[...Array(4)].map((_, i) => (
+              {[...Array(HOMEPAGE_LESSONS_COUNT)].map((_, i) => (
                 <div key={i} className="flex flex-col gap-4 animate-pulse">
                   <div className="aspect-[379/240] rounded-3xl bg-grey-200" />
                   <div className="flex flex-col gap-3 py-5 flex-1">

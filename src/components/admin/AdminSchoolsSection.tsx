@@ -197,15 +197,6 @@ export function AdminSchoolsSection() {
                 </>
               )}
             </Button>
-            <Button
-              onClick={() => loadSchools(currentPage, debouncedSearchQuery)}
-              disabled={loading}
-              variant="secondary"
-              size="small"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Obnovit
-            </Button>
           </div>
         </div>
       </div>

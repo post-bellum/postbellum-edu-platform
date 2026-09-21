@@ -4,6 +4,7 @@ import { getTags } from '@/lib/supabase/tags'
 import { LessonForm } from '@/components/lessons/LessonForm'
 import { LessonMaterialsManager } from '@/components/lessons/LessonMaterialsManager'
 import { AdditionalActivitiesManager } from '@/components/lessons/AdditionalActivitiesManager'
+import { LessonWitnessesManager } from '@/components/lessons/LessonWitnessesManager'
 import { DeleteLessonButton } from '@/components/lessons/DeleteLessonButton'
 
 interface EditLessonContentProps {
@@ -45,6 +46,16 @@ export async function EditLessonContent({ id }: EditLessonContentProps) {
               initialActivities={lesson.additional_activities || []}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Witnesses Section — full width, the form has more fields than the two above */}
+      <div className="bg-white border border-grey-200 rounded-[28px] shadow-sm overflow-hidden">
+        <div className="px-5 py-7 sm:px-7">
+          <LessonWitnessesManager
+            lessonId={lesson.id}
+            initialWitnesses={lesson.witnesses || []}
+          />
         </div>
       </div>
 

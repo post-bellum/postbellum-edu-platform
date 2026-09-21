@@ -47,6 +47,7 @@ export type Database = {
           id: string
           image_url: string | null
           lesson_id: string
+          link_url: string | null
           title: string
           updated_at: string | null
         }
@@ -57,6 +58,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           lesson_id: string
+          link_url?: string | null
           title: string
           updated_at?: string | null
         }
@@ -67,6 +69,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           lesson_id?: string
+          link_url?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -80,6 +83,57 @@ export type Database = {
           },
         ]
       }
+      improvement_suggestions: {
+        Row: {
+          created_at: string
+          email_error: string | null
+          email_sent_at: string | null
+          id: string
+          lesson_id: string | null
+          lesson_title: string | null
+          message: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          lesson_title?: string | null
+          message: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_error?: string | null
+          email_sent_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          lesson_title?: string | null
+          message?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'improvement_suggestions_lesson_id_fkey'
+            columns: ['lesson_id']
+            isOneToOne: false
+            referencedRelation: 'lessons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'improvement_suggestions_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       lesson_materials: {
         Row: {
           content: string | null
@@ -88,6 +142,8 @@ export type Database = {
           duration: number | null
           id: string
           lesson_id: string
+          pdf_file_name: string | null
+          pdf_url: string | null
           specification: string | null
           title: string
           updated_at: string | null
@@ -99,6 +155,8 @@ export type Database = {
           duration?: number | null
           id?: string
           lesson_id: string
+          pdf_file_name?: string | null
+          pdf_url?: string | null
           specification?: string | null
           title: string
           updated_at?: string | null
@@ -110,6 +168,8 @@ export type Database = {
           duration?: number | null
           id?: string
           lesson_id?: string
+          pdf_file_name?: string | null
+          pdf_url?: string | null
           specification?: string | null
           title?: string
           updated_at?: string | null
@@ -154,8 +214,62 @@ export type Database = {
           },
         ]
       }
+      lesson_witnesses: {
+        Row: {
+          bio: string | null
+          birth_year: number | null
+          created_at: string | null
+          id: string
+          lesson_id: string
+          memory_of_nations_url: string | null
+          name: string
+          portrait_url: string | null
+          role_full: string | null
+          role_short: string | null
+          sort_order: number
+          updated_at: string | null
+        }
+        Insert: {
+          bio?: string | null
+          birth_year?: number | null
+          created_at?: string | null
+          id?: string
+          lesson_id: string
+          memory_of_nations_url?: string | null
+          name: string
+          portrait_url?: string | null
+          role_full?: string | null
+          role_short?: string | null
+          sort_order?: number
+          updated_at?: string | null
+        }
+        Update: {
+          bio?: string | null
+          birth_year?: number | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string
+          memory_of_nations_url?: string | null
+          name?: string
+          portrait_url?: string | null
+          role_full?: string | null
+          role_short?: string | null
+          sort_order?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lesson_witnesses_lesson_id_fkey'
+            columns: ['lesson_id']
+            isOneToOne: false
+            referencedRelation: 'lessons'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       lessons: {
         Row: {
+          author_team: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -174,6 +288,7 @@ export type Database = {
           vimeo_video_url: string | null
         }
         Insert: {
+          author_team?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -192,6 +307,7 @@ export type Database = {
           vimeo_video_url?: string | null
         }
         Update: {
+          author_team?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -224,25 +340,49 @@ export type Database = {
           email: string
           id: string
           is_active: boolean | null
+          se_blacklisted: boolean
+          se_hardbounced: boolean
+          se_list_status: string | null
+          se_pending: boolean
+          se_sync_error: string | null
+          se_state_checked_at: string | null
+          se_synced_at: string | null
           subscribed_at: string | null
           unsubscribe_token: string
           unsubscribed_at: string | null
+          updated_at: string | null
         }
         Insert: {
           email: string
           id?: string
           is_active?: boolean | null
+          se_blacklisted?: boolean
+          se_hardbounced?: boolean
+          se_list_status?: string | null
+          se_pending?: boolean
+          se_sync_error?: string | null
+          se_state_checked_at?: string | null
+          se_synced_at?: string | null
           subscribed_at?: string | null
           unsubscribe_token?: string
           unsubscribed_at?: string | null
+          updated_at?: string | null
         }
         Update: {
           email?: string
           id?: string
           is_active?: boolean | null
+          se_blacklisted?: boolean
+          se_hardbounced?: boolean
+          se_list_status?: string | null
+          se_pending?: boolean
+          se_sync_error?: string | null
+          se_state_checked_at?: string | null
+          se_synced_at?: string | null
           subscribed_at?: string | null
           unsubscribe_token?: string
           unsubscribed_at?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -267,6 +407,156 @@ export type Database = {
           page_slug?: string
           updated_at?: string | null
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      profile_answers: {
+        Row: {
+          answer_text: string | null
+          created_at: string | null
+          id: string
+          option_id: string | null
+          question_id: string
+          scale_value: number | null
+          skipped: boolean
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          answer_text?: string | null
+          created_at?: string | null
+          id?: string
+          option_id?: string | null
+          question_id: string
+          scale_value?: number | null
+          skipped?: boolean
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          answer_text?: string | null
+          created_at?: string | null
+          id?: string
+          option_id?: string | null
+          question_id?: string
+          scale_value?: number | null
+          skipped?: boolean
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'profile_answers_option_id_fkey'
+            columns: ['option_id']
+            isOneToOne: false
+            referencedRelation: 'profile_question_options'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'profile_answers_question_id_fkey'
+            columns: ['question_id']
+            isOneToOne: false
+            referencedRelation: 'profile_questions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'profile_answers_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      profile_question_options: {
+        Row: {
+          created_at: string | null
+          id: string
+          label: string
+          position: number
+          question_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          label: string
+          position?: number
+          question_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          label?: string
+          position?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'profile_question_options_question_id_fkey'
+            columns: ['question_id']
+            isOneToOne: false
+            referencedRelation: 'profile_questions'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      profile_survey_settings: {
+        Row: {
+          id: boolean
+          is_active: boolean
+          launcher_label: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: boolean
+          is_active?: boolean
+          launcher_label?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: boolean
+          is_active?: boolean
+          launcher_label?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profile_questions: {
+        Row: {
+          answer_type: string
+          created_at: string | null
+          help_text: string | null
+          id: string
+          is_active: boolean
+          position: number
+          question_text: string
+          scale_max_label: string | null
+          scale_min_label: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          answer_type: string
+          created_at?: string | null
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          position?: number
+          question_text: string
+          scale_max_label?: string | null
+          scale_min_label?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          answer_type?: string
+          created_at?: string | null
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          position?: number
+          question_text?: string
+          scale_max_label?: string | null
+          scale_min_label?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

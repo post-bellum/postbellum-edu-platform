@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { Check } from 'lucide-react'
@@ -11,25 +13,16 @@ const Checkbox = React.forwardRef<
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      'group peer h-4 w-4 shrink-0 rounded-md border border-grey-400 bg-transparent cursor-pointer transition-colors',
-      'focus-visible:outline-none',
-      'disabled:cursor-not-allowed disabled:opacity-50',
-      'data-[state=checked]:bg-brand-primary data-[state=checked]:border-brand-primary data-[state=checked]:text-white',
-      'relative',
+      'grid place-content-center peer h-4 w-4 shrink-0 rounded-sm border border-primary shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground',
       className
     )}
     {...props}
   >
     <CheckboxPrimitive.Indicator
-      className={cn('flex items-center justify-center text-current')}
+      className={cn('grid place-content-center text-current')}
     >
-      <Check className="h-3 w-3 stroke-[3]" />
+      <Check className="h-4 w-4" />
     </CheckboxPrimitive.Indicator>
-    {/* Focus ring */}
-    <span 
-      className="absolute inset-[-2px] rounded-md border-[3px] border-mint-light opacity-0 group-focus-visible:opacity-100 pointer-events-none" 
-      style={{ filter: 'blur(1px)' }} 
-    />
   </CheckboxPrimitive.Root>
 ))
 Checkbox.displayName = CheckboxPrimitive.Root.displayName

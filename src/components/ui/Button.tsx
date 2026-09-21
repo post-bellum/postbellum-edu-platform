@@ -11,9 +11,9 @@ const buttonVariants = cva(
       variant: {
         // Post Bellum variants
         ultra:
-          'bg-grey-950 text-white hover:bg-mint-light hover:text-grey-950 border border-transparent hover:border-grey-950 disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
+          'bg-grey-950 text-white hover:bg-grey-950-hover border border-transparent disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
         mint:
-          'bg-mint text-grey-950 border border-grey-950 hover:bg-mint-light hover:shadow-lg transition-all duration-200 disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
+          'bg-mint text-grey-950 border border-grey-950 hover:bg-mint-hover transition-colors duration-200 disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
         primary:
           'bg-brand-primary text-white hover:bg-brand-primary-hover disabled:bg-grey-50 disabled:text-grey-300 disabled:border disabled:border-grey-100',
         secondary:
@@ -27,16 +27,16 @@ const buttonVariants = cva(
         destructive:
           'bg-red-600 text-white hover:bg-red-700',
         outline:
-          'bg-white text-text-strong border border-grey-300 hover:bg-grey-50',
+          'bg-white text-text-strong border border-grey-300 hover:bg-grey-50 disabled:bg-grey-50 disabled:text-grey-300 disabled:border-grey-100',
         ghost: 'hover:bg-grey-100 text-text-strong',
         link: 'text-brand-primary underline-offset-4 hover:underline hover:text-brand-primary-hover',
       },
       size: {
         // Post Bellum sizes
         // Asymmetric vertical padding compensates for Tablet Gothic font sitting slightly high
-        large: 'h-[52px] px-7 pt-[10px] pb-[11px] text-lg leading-7 rounded-full',
-        medium: 'h-12 px-5 pt-[7px] pb-[9px] text-lg leading-7 rounded-full',
-        small: 'h-10 px-4 pt-[4px] pb-[5px] text-base leading-7 rounded-full',
+        large: 'h-[52px] px-7 pt-[9px] pb-[11px] text-lg leading-7 rounded-full',
+        medium: 'h-12 px-5 pt-[6px] pb-[9px] text-lg leading-7 rounded-full',
+        small: 'h-10 px-4 pt-[3px] pb-[5px] text-base leading-7 rounded-full',
         // Legacy sizes (mapped to Post Bellum)
         default: 'h-12 px-5 pt-[11px] pb-[9px] text-lg leading-7 rounded-full',
         sm: 'h-10 px-4 pt-[5px] pb-[5px] text-base leading-7 rounded-full',

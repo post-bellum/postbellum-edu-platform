@@ -3,18 +3,18 @@ import { Mail } from 'lucide-react'
 
 interface TeamMemberCardProps {
   name: string
-  role: string
+  role?: string
   imageUrl?: string
   email?: string
 }
 
 export function TeamMemberCard({ name, role, imageUrl, email }: TeamMemberCardProps) {
   return (
-    <div className="relative flex flex-col items-center gap-10 px-5 py-8 bg-grey-50 border border-[rgba(12,17,29,0.05)] rounded-[28px] h-full min-h-[244px]">
+    <div className="relative flex flex-col items-center justify-center gap-10 px-5 py-8 bg-grey-50 border border-[rgba(12,17,29,0.05)] rounded-[28px] h-full min-h-[244px]">
       {/* Avatar and Info */}
       <div className="flex flex-col items-center gap-4 w-full">
-        <div className="w-20 h-20 rounded-full border-[1.25px] border-grey-950 bg-grey-200 overflow-hidden shrink-0">
-          {imageUrl ? (
+        {imageUrl && (
+          <div className="w-20 h-20 rounded-full border-[1.25px] border-grey-950 bg-grey-200 overflow-hidden shrink-0">
             <Image
               src={imageUrl}
               alt={name}
@@ -22,21 +22,19 @@ export function TeamMemberCard({ name, role, imageUrl, email }: TeamMemberCardPr
               height={80}
               className="w-full h-full object-cover"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-grey-400 text-xs">
-              Foto
-            </div>
-          )}
-        </div>
+          </div>
+        )}
         
         {/* Name and Role */}
         <div className="flex flex-col items-center gap-2 text-center w-full">
           <span className="font-body text-md font-semibold text-text-strong leading-[1.4]">
             {name}
           </span>
-          <span className="font-body text-sm text-text-subtle leading-[1.4]">
-            {role}
-          </span>
+          {role && (
+            <span className="font-body text-sm text-text-subtle leading-[1.4]">
+              {role}
+            </span>
+          )}
         </div>
       </div>
 

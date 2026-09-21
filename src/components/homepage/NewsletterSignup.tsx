@@ -10,9 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/Dialog'
 import { subscribeToNewsletter } from '@/app/actions/newsletter'
-
-// Email validation regex
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+import { parseNewsletterEmail } from '@/lib/schemas/newsletter.schema'
 
 export function NewsletterSignup() {
   const [email, setEmail] = React.useState('')
@@ -24,23 +22,18 @@ export function NewsletterSignup() {
     e.preventDefault()
     setError(null)
 
-    // Client-side validation
-    const trimmedEmail = email.trim()
-    
-    if (!trimmedEmail) {
-      setError('Zadejte prosím e-mailovou adresu')
-      return
-    }
+    // Client-side validation - same schema the server action uses
+    const parsed = parseNewsletterEmail(email)
 
-    if (!EMAIL_REGEX.test(trimmedEmail)) {
-      setError('Zadejte prosím platnou e-mailovou adresu')
+    if (!parsed.success) {
+      setError(parsed.error)
       return
     }
 
     setIsLoading(true)
 
     try {
-      const result = await subscribeToNewsletter(trimmedEmail)
+      const result = await subscribeToNewsletter(parsed.email)
 
       if (result.success) {
         setEmail('')
@@ -60,7 +53,7 @@ export function NewsletterSignup() {
       <div className="flex-1 flex flex-col gap-5 items-start max-w-full md:max-w-[500px] w-full">
         <div className="flex flex-col gap-3 items-start px-3 w-full">
           <h3 className="font-display text-2xl font-semibold leading-none text-text-strong w-full">
-            Nechte mě vědět o novinkách
+            Dejte mi vědět o novinkách
           </h3>
           <p className="font-body text-xs sm:text-sm leading-[1.4] text-text-subtle w-full">
             Buďte první, kdo se dozví o nové lekci inspirované životními příběhy.

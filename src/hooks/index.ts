@@ -2,5 +2,4 @@
  * Custom Hooks
  */
 
-export { useRichTextEditor } from './useRichTextEditor'
-
+// Legacy useRichTextEditor hook removed -- now using Plate.js usePlateEditor

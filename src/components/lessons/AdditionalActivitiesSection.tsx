@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/Dialog'
-import { Download, ImageIcon } from 'lucide-react'
+import { Download, ExternalLink, ImageIcon } from 'lucide-react'
 
 interface AdditionalActivitiesSectionProps {
   activities: AdditionalActivity[]
@@ -25,7 +25,7 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
   const [previewTitle, setPreviewTitle] = React.useState<string>('')
   const [isQrCode, setIsQrCode] = React.useState(false)
 
-  const openPreview = async (url: string, title: string, activity: AdditionalActivity) => {
+  const openPreview = async (url: string, title: string) => {
     // Preload image to detect QR code before opening modal
     const img = new Image()
     img.src = url
@@ -89,13 +89,16 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
             className="bg-grey-100 border border-black/5 rounded-[28px] px-7 py-10"
           >
             <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1 space-y-4">
+              <div className="flex-1 min-w-0 space-y-4">
                 <h3 className="text-lg font-semibold text-text-strong leading-display">
                   {activity.title}
                 </h3>
 
                 {activity.description && (
-                  <p className="text-text-subtle text-lg leading-headline">
+                  <p
+                    className="w-full max-w-full min-w-0 text-text-subtle text-lg leading-headline"
+                    style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}
+                  >
                     {activity.description}
                   </p>
                 )}
@@ -129,14 +132,25 @@ export function AdditionalActivitiesSection({ activities }: AdditionalActivities
                         variant="secondary"
                         size="medium"
                         className="w-full"
-                        onClick={() => openPreview(activity.image_url!, activity.title, activity)}
+                        onClick={() => openPreview(activity.image_url!, activity.title)}
                       >
                         <ImageIcon className="w-5 h-5 mr-2" />
                         Zvětšit
                       </Button>
                     </>
                   )
-                ) : (
+                ) : null}
+
+                {activity.link_url ? (
+                  <Button variant="secondary" size="medium" className="w-full" asChild>
+                    <a href={activity.link_url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-5 h-5 mr-2" />
+                      Otevřít odkaz
+                    </a>
+                  </Button>
+                ) : null}
+
+                {!activity.image_url && !activity.link_url && (
                   <Button variant="secondary" size="medium" className="w-full" disabled>
                     Bez odkazu
                   </Button>

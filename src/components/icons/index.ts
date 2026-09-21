@@ -78,6 +78,12 @@ export {
   Cog6ToothIcon,
   ArrowRightStartOnRectangleIcon,
   MenuTwoLinesIcon,
+  MailIcon,
+  ExternalLinkIcon,
+  FacebookIcon,
+  YoutubeIcon,
+  InstagramIcon,
+  LinkedinIcon,
 } from './BrandIcons'
 
 // ============================================================================

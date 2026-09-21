@@ -11,6 +11,7 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- Public read access
+DROP POLICY IF EXISTS "Public can view page content images" ON storage.objects;
 CREATE POLICY "Public can view page content images"
   ON storage.objects
   FOR SELECT
@@ -18,6 +19,7 @@ CREATE POLICY "Public can view page content images"
   USING (bucket_id = 'page-content');
 
 -- Only admins can upload
+DROP POLICY IF EXISTS "Admins can upload page content images" ON storage.objects;
 CREATE POLICY "Admins can upload page content images"
   ON storage.objects
   FOR INSERT
@@ -32,6 +34,7 @@ CREATE POLICY "Admins can upload page content images"
   );
 
 -- Only admins can update
+DROP POLICY IF EXISTS "Admins can update page content images" ON storage.objects;
 CREATE POLICY "Admins can update page content images"
   ON storage.objects
   FOR UPDATE
@@ -54,6 +57,7 @@ CREATE POLICY "Admins can update page content images"
   );
 
 -- Only admins can delete
+DROP POLICY IF EXISTS "Admins can delete page content images" ON storage.objects;
 CREATE POLICY "Admins can delete page content images"
   ON storage.objects
   FOR DELETE

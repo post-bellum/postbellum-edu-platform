@@ -8,6 +8,7 @@ DROP POLICY IF EXISTS "Lesson materials are viewable by everyone" ON public.less
 DROP POLICY IF EXISTS "Additional activities are viewable by everyone" ON public.additional_activities;
 
 -- New policy: Public can only view lesson_tags for published lessons
+DROP POLICY IF EXISTS "Public can view lesson_tags for published lessons" ON public.lesson_tags;
 CREATE POLICY "Public can view lesson_tags for published lessons"
   ON public.lesson_tags
   FOR SELECT
@@ -21,6 +22,7 @@ CREATE POLICY "Public can view lesson_tags for published lessons"
   );
 
 -- Policy: Authenticated users can view all lesson_tags
+DROP POLICY IF EXISTS "Authenticated users can view all lesson_tags" ON public.lesson_tags;
 CREATE POLICY "Authenticated users can view all lesson_tags"
   ON public.lesson_tags
   FOR SELECT
@@ -28,6 +30,7 @@ CREATE POLICY "Authenticated users can view all lesson_tags"
   USING (true);
 
 -- New policy: Public can only view lesson_materials for published lessons
+DROP POLICY IF EXISTS "Public can view lesson_materials for published lessons" ON public.lesson_materials;
 CREATE POLICY "Public can view lesson_materials for published lessons"
   ON public.lesson_materials
   FOR SELECT
@@ -41,6 +44,7 @@ CREATE POLICY "Public can view lesson_materials for published lessons"
   );
 
 -- Policy: Authenticated users can view all lesson_materials
+DROP POLICY IF EXISTS "Authenticated users can view all lesson_materials" ON public.lesson_materials;
 CREATE POLICY "Authenticated users can view all lesson_materials"
   ON public.lesson_materials
   FOR SELECT
@@ -48,6 +52,7 @@ CREATE POLICY "Authenticated users can view all lesson_materials"
   USING (true);
 
 -- New policy: Public can only view additional_activities for published lessons
+DROP POLICY IF EXISTS "Public can view additional_activities for published lessons" ON public.additional_activities;
 CREATE POLICY "Public can view additional_activities for published lessons"
   ON public.additional_activities
   FOR SELECT
@@ -61,6 +66,7 @@ CREATE POLICY "Public can view additional_activities for published lessons"
   );
 
 -- Policy: Authenticated users can view all additional_activities
+DROP POLICY IF EXISTS "Authenticated users can view all additional_activities" ON public.additional_activities;
 CREATE POLICY "Authenticated users can view all additional_activities"
   ON public.additional_activities
   FOR SELECT

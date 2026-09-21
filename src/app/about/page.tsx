@@ -43,7 +43,7 @@ export default async function AboutPage() {
         />
 
         {/* Pedagogical Principles */}
-        <PrinciplesCarousel principles={content.principles.items} />
+        <PrinciplesCarousel sectionTitle={content.principles.sectionTitle} principles={content.principles.items} />
 
         {/* Second Illustration */}
         <Illustration

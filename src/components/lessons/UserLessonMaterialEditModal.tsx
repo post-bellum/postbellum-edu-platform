@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
-import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { PlateEditor } from '@/components/editor/PlateEditor'
 import { updateUserLessonMaterialAction } from '@/app/actions/user-lesson-materials'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 
@@ -81,7 +81,9 @@ export function UserLessonMaterialEditModal({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="title">Název</Label>
+            <Label htmlFor="title">
+              Název <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="title"
               value={title}
@@ -94,12 +96,13 @@ export function UserLessonMaterialEditModal({
           <div className="flex-1 overflow-hidden flex flex-col min-h-0">
             <Label className="mb-2">Obsah</Label>
             <div className="flex-1 overflow-y-auto">
-              <RichTextEditor
+              <PlateEditor
                 content={content}
                 onChange={setContent}
                 placeholder="Obsah materiálu..."
                 className="min-h-[400px]"
                 resetKey={editorResetKey}
+                toolbarClassName="top-0"
               />
             </div>
           </div>

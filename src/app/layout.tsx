@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'StoryOn - Již brzy',
+  title: 'storyON - Již brzy',
   description: 'Připravujeme pro vás něco speciálního. Brzy zde najdete platformu pro vzdělávání a sdílení příběhů.',
 };
 

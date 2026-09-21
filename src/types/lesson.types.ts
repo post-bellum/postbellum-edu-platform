@@ -19,6 +19,7 @@ export interface Lesson {
   period: string | null
   target_group: string | null
   lesson_type: string | null
+  author_team: string | null
   publication_date: string | null // ISO date string
   published: boolean
   created_by: string | null
@@ -38,6 +39,10 @@ export interface LessonMaterial {
   title: string
   description: string | null
   content: string | null
+  /** Admin-uploaded PDF served by the download button; NULL falls back to generating from content */
+  pdf_url: string | null
+  /** Original file name of the uploaded PDF, used as the download file name */
+  pdf_file_name: string | null
   specification: LessonSpecification | null
   duration: LessonDuration | null
   created_at: string
@@ -53,6 +58,22 @@ export interface AdditionalActivity {
   description: string | null
   image_url: string | null
   attachment_type: AdditionalActivityAttachmentType | null
+  link_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface LessonWitness {
+  id: string
+  lesson_id: string
+  name: string
+  role_short: string | null // Short role shown on the card, e.g. "Poslankyně"
+  role_full: string | null // Full role shown in the detail modal
+  birth_year: number | null // Rendered as "*1953"
+  bio: string | null // Short biography (max 1800 chars) shown in the detail modal
+  portrait_url: string | null
+  memory_of_nations_url: string | null // Profile on pametnaroda.cz
+  sort_order: number
   created_at: string
   updated_at: string
 }
@@ -61,6 +82,7 @@ export interface LessonWithRelations extends Lesson {
   tags?: Tag[]
   materials?: LessonMaterial[]
   additional_activities?: AdditionalActivity[]
+  witnesses?: LessonWitness[]
 }
 
 // Input types are now defined in @/lib/schemas/lesson.schema.ts using Zod
@@ -72,6 +94,8 @@ export type {
   UpdateLessonMaterialInput,
   CreateAdditionalActivityInput,
   UpdateAdditionalActivityInput,
+  CreateLessonWitnessInput,
+  UpdateLessonWitnessInput,
   CreateUserLessonMaterialInput,
   UpdateUserLessonMaterialInput,
 } from '@/lib/schemas/lesson.schema'

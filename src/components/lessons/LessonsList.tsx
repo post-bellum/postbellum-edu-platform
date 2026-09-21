@@ -36,7 +36,9 @@ export async function LessonsList() {
       {lessons.length === 0 ? (
         <div className="text-center py-24 border border-grey-200 rounded-3xl bg-grey-50/50">
           <p className="text-text-subtle mb-6 text-lg">Zatím nejsou žádné lekce</p>
-          <AdminControls showNewButton isAdmin={admin} />
+          <div className="max-w-xs mx-auto">
+            <AdminControls showNewButton isAdmin={admin} />
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-14 lg:gap-10">

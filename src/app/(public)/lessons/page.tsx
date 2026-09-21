@@ -2,7 +2,10 @@ import { Suspense } from 'react'
 import { LessonsList } from '@/components/lessons/LessonsList'
 import { DeletedLessonFeedback } from '@/components/lessons/DeletedLessonFeedback'
 
-// Public route - can be statically generated
+// LessonsList uses isAdmin() which needs cookies - must be dynamically rendered
+export const dynamic = 'force-dynamic'
+
+// Public route - shows published lessons; admin sees unpublished via client check
 // Uses public client (no cookies), RLS handles filtering to published lessons only
 // Admin controls are loaded client-side
 

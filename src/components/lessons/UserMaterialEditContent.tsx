@@ -3,12 +3,12 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Eye, Trash2, Check, Loader2, Download } from 'lucide-react'
+import { ArrowLeft, Eye, Trash2, Check, Loader2, Download, Save } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { FeedbackModal } from '@/components/ui/FeedbackModal'
-import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { PlateEditor } from '@/components/editor/PlateEditor'
 import { LessonMaterialViewModal } from './LessonMaterialViewModal'
 import { MaterialEditSidebar } from './MaterialEditSidebar'
 import { Breadcrumbs } from './Breadcrumbs'
@@ -16,6 +16,7 @@ import {
   updateUserLessonMaterialAction,
   deleteUserLessonMaterialAction,
 } from '@/app/actions/user-lesson-materials'
+import { uploadEmbeddedImages } from '@/lib/supabase/storage'
 import type { UserLessonMaterial, LessonWithRelations } from '@/types/lesson.types'
 import { exportToPDF } from '@/lib/utils/pdf-export'
 import { logger } from '@/lib/logger'
@@ -24,7 +25,11 @@ import { generateLessonUrlFromLesson } from '@/lib/utils'
 interface UserMaterialEditContentProps {
   material: UserLessonMaterial
   lesson: LessonWithRelations
+  /** Titles of the user's other materials in this lesson - must stay unique */
+  siblingTitles?: string[]
 }
+
+const normalizeTitle = (title: string) => title.trim().toLocaleLowerCase('cs-CZ')
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -34,6 +39,7 @@ const AUTO_SAVE_DELAY_MS = 1000
 export function UserMaterialEditContent({
   material: initialMaterial,
   lesson,
+  siblingTitles = [],
 }: UserMaterialEditContentProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -45,6 +51,9 @@ export function UserMaterialEditContent({
   const [title, setTitle] = React.useState(initialMaterial.title)
   const [content, setContent] = React.useState(initialMaterial.content || '')
   const [saveStatus, setSaveStatus] = React.useState<SaveStatus>('idle')
+  const [saveError, setSaveError] = React.useState<string | null>(null)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false)
+  const [lastSaveWasManual, setLastSaveWasManual] = React.useState(false)
   const [viewModalOpen, setViewModalOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -68,6 +77,24 @@ export function UserMaterialEditContent({
   const lastSavedRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
   const latestDraftRef = React.useRef({ title: initialMaterial.title, content: initialMaterial.content || '' })
   const isDeletedRef = React.useRef(false) // Flag to prevent auto-save after deletion
+  const manualSaveRef = React.useRef(false) // Set while a save was triggered by the Save button
+
+  // Titles already used by the user's other materials in this lesson.
+  // Mirrored into a ref so saveChanges stays referentially stable.
+  const takenTitles = React.useMemo(
+    () => new Set(siblingTitles.map(normalizeTitle)),
+    [siblingTitles]
+  )
+  const takenTitlesRef = React.useRef(takenTitles)
+  React.useEffect(() => {
+    takenTitlesRef.current = takenTitles
+  }, [takenTitles])
+
+  const titleError = title.trim().length === 0
+    ? 'Název je povinný.'
+    : takenTitles.has(normalizeTitle(title))
+      ? 'Materiál s tímto názvem už v této lekci máte.'
+      : null
 
   const saveChanges = React.useCallback(async (newTitle: string, newContent: string) => {
     // Skip if material was deleted
@@ -75,31 +102,76 @@ export function UserMaterialEditContent({
       return
     }
 
+    // Title must be present and unique within the lesson - don't send invalid
+    // data to the server, the inline message tells the user what to fix
+    if (
+      newTitle.trim().length === 0 ||
+      takenTitlesRef.current.has(normalizeTitle(newTitle))
+    ) {
+      setSaveStatus('idle')
+      return
+    }
+
     // Skip if nothing changed
     if (newTitle === lastSavedRef.current.title && newContent === lastSavedRef.current.content) {
+      setHasUnsavedChanges(false)
       return
     }
 
     setSaveStatus('saving')
+    setSaveError(null)
 
-    const formData = new FormData()
-    formData.set('title', newTitle)
-    formData.set('content', newContent)
+    try {
+      // Upload any base64 images embedded by Word/Google Docs paste before saving.
+      // Without this the raw data: URLs can easily exceed the 5 MB body limit and
+      // cause Next.js to abort the request before the server action even runs.
+      const processedContent = await uploadEmbeddedImages(newContent)
 
-    const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
+      const formData = new FormData()
+      formData.set('title', newTitle)
+      formData.set('content', processedContent)
 
-    // Check again if material was deleted during the request
-    if (isDeletedRef.current) {
-      return
-    }
+      const result = await updateUserLessonMaterialAction(initialMaterial.id, formData)
 
-    if (result.success) {
-      setSaveStatus('saved')
-      lastSavedRef.current = { title: newTitle, content: newContent }
-      // Reset to idle after 2 seconds
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    } else {
+      // Check again if material was deleted during the request
+      if (isDeletedRef.current) {
+        return
+      }
+
+      if (result.success) {
+        setSaveStatus('saved')
+        setLastSaveWasManual(manualSaveRef.current)
+        manualSaveRef.current = false
+        lastSavedRef.current = { title: newTitle, content: newContent }
+        // Edits made while the request was in flight are still unsaved
+        setHasUnsavedChanges(
+          latestDraftRef.current.title !== newTitle ||
+          latestDraftRef.current.content !== newContent
+        )
+        // Reset to idle after 2 seconds
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        setSaveStatus('error')
+        manualSaveRef.current = false
+        setSaveError(result.error || 'Neznámá chyba')
+      }
+    } catch (error) {
+      if (isDeletedRef.current) return
       setSaveStatus('error')
+      manualSaveRef.current = false
+      const message = error instanceof Error ? error.message : String(error)
+      if (
+        message.includes('Body exceeded') ||
+        message.includes('body size') ||
+        message.includes('payload too large') ||
+        // Next.js production server action errors when body limit is hit
+        message.includes('Server Components render') ||
+        message.includes('FUNCTION_PAYLOAD_TOO_LARGE')
+      ) {
+        setSaveError('Obsah je příliš velký. Zkuste zmenšit obrázky nebo zkrátit text.')
+      } else {
+        setSaveError(message || 'Neznámá chyba při ukládání')
+      }
     }
   }, [initialMaterial.id])
 
@@ -165,6 +237,7 @@ export function UserMaterialEditContent({
     const newTitle = e.target.value
     setTitle(newTitle)
     latestDraftRef.current = { ...latestDraftRef.current, title: newTitle }
+    setHasUnsavedChanges(true)
     scheduleSave()
   }
 
@@ -172,8 +245,43 @@ export function UserMaterialEditContent({
   const handleContentChange = (newContent: string) => {
     setContent(newContent)
     latestDraftRef.current = { ...latestDraftRef.current, content: newContent }
+    setHasUnsavedChanges(true)
     scheduleSave()
   }
+
+  // Explicit save - skips the debounce and saves right away. Stays available
+  // even when auto-save already persisted everything; it just confirms.
+  const handleManualSave = React.useCallback(() => {
+    manualSaveRef.current = true
+
+    const isUpToDate =
+      latestDraftRef.current.title === lastSavedRef.current.title &&
+      latestDraftRef.current.content === lastSavedRef.current.content
+
+    if (isUpToDate) {
+      manualSaveRef.current = false
+      setSaveStatus('saved')
+      setLastSaveWasManual(true)
+      setHasUnsavedChanges(false)
+      setTimeout(() => setSaveStatus('idle'), 2000)
+      return Promise.resolve()
+    }
+
+    return flushPendingSave()
+  }, [flushPendingSave])
+
+  // Ctrl/Cmd+S saves without waiting for the debounce
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        void handleManualSave()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleManualSave])
 
   // Cleanup and save on unmount if there are unsaved changes
   React.useEffect(() => {
@@ -218,7 +326,7 @@ export function UserMaterialEditContent({
           message: result.error || 'Nepodařilo se smazat materiál',
         })
       }
-    } catch (error) {
+    } catch {
       setFeedbackModal({
         open: true,
         type: 'error',
@@ -249,6 +357,13 @@ export function UserMaterialEditContent({
   }, [title, content])
 
   const getSaveStatusDisplay = () => {
+    if (isExportingPDF) {
+      return (
+        <span className="flex items-center gap-1 text-gray-500 text-sm">
+          Exportuji...
+        </span>
+      )
+    }
     switch (saveStatus) {
       case 'saving':
         return (
@@ -261,17 +376,19 @@ export function UserMaterialEditContent({
         return (
           <span className="flex items-center gap-1 text-green-600 text-sm">
             <Check className="w-4 h-4" />
-            Uloženo automaticky
+            {lastSaveWasManual ? 'Uloženo' : 'Uloženo automaticky'}
           </span>
         )
       case 'error':
         return (
-          <span className="text-red-600 text-sm">
-            Chyba při ukládání
+          <span className="text-red-600 text-sm" title={saveError || undefined}>
+            Chyba při ukládání{saveError ? `: ${saveError}` : ''}
           </span>
         )
       default:
-        return null
+        return hasUnsavedChanges ? (
+          <span className="text-gray-500 text-sm">Neuložené změny</span>
+        ) : null
     }
   }
 
@@ -305,20 +422,39 @@ export function UserMaterialEditContent({
 
       {/* Title and Actions - Full Width Header */}
       <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-        <div className="w-full max-w-[860px] shrink-0">
+        <div className="w-full max-w-[630px] shrink-0">
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Název
+            Název <span className="text-red-500">*</span>
           </label>
           <Input
             id="title"
             value={title}
             onChange={handleTitleChange}
             placeholder="Název materiálu"
+            required
+            aria-invalid={titleError !== null}
+            aria-describedby={titleError ? 'title-error' : undefined}
           />
+          {titleError && (
+            <p id="title-error" className="mt-1 text-sm text-red-600">
+              {titleError}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
           {getSaveStatusDisplay()}
+
+          <Button
+            size="sm"
+            className="h-12"
+            onClick={() => void handleManualSave()}
+            disabled={titleError !== null}
+            title={titleError ?? 'Uložit změny (Ctrl+S)'}
+          >
+            <Save className="w-4 h-4" />
+            Uložit
+          </Button>
 
           <Button
             variant="outline"
@@ -337,17 +473,8 @@ export function UserMaterialEditContent({
             onClick={handleExportPDF}
             disabled={!content || isExportingPDF}
           >
-            {isExportingPDF ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Exportuji...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                Stáhnout PDF
-              </>
-            )}
+            <Download className="w-4 h-4" />
+            Stáhnout PDF
           </Button>
 
           {exportError && (
@@ -371,7 +498,7 @@ export function UserMaterialEditContent({
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Main Editor - Left Side */}
         <div className="flex-1 lg:flex-2 lg:w-0">
-          <RichTextEditor
+          <PlateEditor
             content={content}
             onChange={handleContentChange}
             placeholder="Obsah materiálu..."

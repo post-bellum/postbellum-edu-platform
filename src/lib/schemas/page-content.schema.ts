@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { sanitizeInput, sanitizeHTML } from '@/lib/sanitize'
+import { HOMEPAGE_LESSONS_COUNT } from '@/lib/constants'
 
 const sanitizeString = (val: string) => sanitizeInput(val.trim())
 
@@ -26,6 +27,11 @@ const homepageFeaturesSchema = z.object({
 const homepageLessonsSchema = z.object({
   sectionTitle: z.string().min(1).max(200).transform(sanitizeString),
   sectionDescription: z.string().min(1).max(2000).transform(sanitizeString),
+  featuredLessonIds: z
+    .array(z.string().uuid())
+    .max(HOMEPAGE_LESSONS_COUNT)
+    .optional()
+    .default([]),
 })
 
 const homepageTestimonialSchema = z.object({
@@ -56,7 +62,7 @@ export const homepageContentSchema = z.object({
 
 const aboutTeamMemberSchema = z.object({
   name: z.string().min(1).max(200).transform(sanitizeString),
-  role: z.string().min(1).max(500).transform(sanitizeString),
+  role: z.string().max(500).optional().default('').transform(sanitizeString),
   imageUrl: z.string().max(500).optional().default(''),
   email: z.string().max(200).optional().default(''),
 })
@@ -116,7 +122,7 @@ export const aboutContentSchema = z.object({
 
 const termsSectionSchema = z.object({
   title: z.string().min(1).max(200).transform(sanitizeString),
-  content: z.string().min(1).max(50000).transform(sanitizeHTML),
+  content: z.string().min(1).max(150000).transform(sanitizeHTML),
 })
 
 export const termsContentSchema = z.object({

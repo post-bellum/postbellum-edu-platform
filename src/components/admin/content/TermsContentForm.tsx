@@ -3,7 +3,7 @@
 import { ContentFormSection } from './ContentFormSection'
 import { ArrayEditor } from './ArrayEditor'
 import { TextInput, TextAreaInput } from './FormField'
-import { RichTextEditor } from '@/components/editor/RichTextEditor'
+import { PlateEditor } from '@/components/editor/PlateEditor'
 import type { TermsContent, TermsSection } from '@/types/page-content.types'
 
 interface TermsContentFormProps {
@@ -44,9 +44,9 @@ export function TermsContentForm({ content, onChange }: TermsContentFormProps) {
               />
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-grey-700">Obsah (rich text)</label>
-                <RichTextEditor
+                <PlateEditor
                   content={item.content}
-                  onChange={(html) => onItemChange({ ...item, content: html })}
+                  onChange={(html: string) => onItemChange({ ...item, content: html })}
                   className="min-h-[300px] [&_.tox-tinymce]:!h-[400px]"
                 />
               </div>

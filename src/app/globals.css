@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@plugin "tailwind-scrollbar-hide";
 
 /* ============================================
    Adobe Typekit Fonts
@@ -10,11 +13,11 @@
   /* ============================================
      PRIMITIVES - Typography
      ============================================ */
-  
+
   /* Font Families */
   --font-display: 'tablet-gothic-narrow', system-ui, sans-serif;
   --font-body: 'tablet-gothic-wide', system-ui, sans-serif;
-  
+
   /* Font Sizes */
   --text-4xl: 44px;
   --text-3xl: 32px;
@@ -25,17 +28,17 @@
   --text-md: 16px;
   --text-sm: 14px;
   --text-xs: 12px;
-  
+
   /* Line Heights */
   --leading-display: 1.2;
   --leading-headline: 1.4;
   --leading-body: 1.5;
   --leading-body-sm: 1.4;
-  
+
   /* ============================================
      PRIMITIVES - Colors
      ============================================ */
-  
+
   /* Grey Scale (from Figma neutral/grey-*) */
   --color-grey-25: #fcfcfd;
   --color-grey-50: #f9fafb;
@@ -49,14 +52,14 @@
   --color-grey-800: #182230;
   --color-grey-900: #101828;
   --color-grey-950: #0c111d;
-  
+
   /* Surface Colors */
   --color-surface: #ffffff;
-  
+
   /* Text Colors (semantic) */
   --color-text-strong: #0c111d;
   --color-text-subtle: #475467;
-  
+
   /* ============================================
      PRIMITIVES - Spacing
      ============================================ */
@@ -69,7 +72,7 @@
   --space-3xl: 20px;
   --space-4xl: 24px;
   --space-5xl: 28px;
-  
+
   /* ============================================
      PRIMITIVES - Border Radius
      ============================================ */
@@ -79,14 +82,14 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
-  
+
   /* ============================================
      PRIMITIVES - Focus States
      ============================================ */
   --color-focus: #9bffd2;
   --focus-ring-width: 3px;
   --focus-ring-blur: 1px;
-  
+
   /* ============================================
      SEMANTIC - Brand Colors
      ============================================ */
@@ -94,7 +97,12 @@
   --color-brand-primary-hover: #204f4e;
   --color-mint: #9bffd2;
   --color-mint-light: #f0fff7;
-  
+  /* Button hover fills, flattened from the Figma overlay fills.
+     Figma "type=ultra, state=hover"    = mint + 10% grey-950 overlay -> used by <Button variant="mint">
+     Figma "type=register, state=hover" = grey-950 + 20% white overlay -> used by <Button variant="ultra"> */
+  --color-mint-hover: #9fe3c2;
+  --color-grey-950-hover: #3e4149;
+
   /* Turquoise Scale */
   --color-turquoise-50: #f0fdfa;
   --color-turquoise-100: #ccfbf1;
@@ -108,8 +116,6 @@
   --color-turquoise-900: #134e4a;
 
 }
-
-
 
 /* Prose styles for rendered content */
 .prose {
@@ -246,6 +252,12 @@
   line-height: 1.2;
 }
 
+.lesson-material-content h1.document-title {
+  font-size: 36px;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+}
+
 .lesson-material-content h2 {
   font-family: var(--font-display);
   font-size: 24px;
@@ -302,6 +314,11 @@
 
 .lesson-material-content li {
   margin: 0.5em 0;
+}
+
+.lesson-material-content li::marker {
+  font-family: system-ui, sans-serif;
+  font-size: 1em;
 }
 
 .lesson-material-content a {
@@ -388,6 +405,33 @@
   font-style: italic;
 }
 
+/* Alignment classes are mirrored onto the figure wrapper when a caption exists */
+.lesson-material-content figure.image.img-align-left {
+  float: left;
+  margin: 0.5em 1.5em 1em 0;
+  max-width: 50%;
+}
+
+.lesson-material-content figure.image.img-align-right {
+  float: right;
+  margin: 0.5em 0 1em 1.5em;
+  max-width: 50%;
+}
+
+.lesson-material-content figure.image.img-align-center {
+  float: none;
+  margin: 1.5em auto;
+}
+
+/* The wrapper carries the float/width, the inner img should not */
+.lesson-material-content figure.image img.img-align-left,
+.lesson-material-content figure.image img.img-align-right,
+.lesson-material-content figure.image img.img-align-center {
+  float: none;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
 /* Clearfix - only applied to specific elements, not paragraphs (to allow text wrap around floated images) */
 .lesson-material-content .clearfix::after {
   content: "";
@@ -437,6 +481,20 @@
   text-decoration: underline;
 }
 
+.lesson-material-content blockquote {
+  border-left: 4px solid #d1d5db;
+  margin: 1em 0;
+  padding-left: 1em;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.lesson-material-content mark {
+  background-color: oklch(0.852 0.199 91.936 / 0.3);
+  color: inherit;
+  padding: 0.1em 0;
+}
+
 /* ============================================
    Homepage Animations
    ============================================ */
@@ -483,3 +541,19 @@ a[class*="rounded-full"][class*="flex"] {
     transform: translateY(1px);
   }
 }
+
+:root {
+  --highlight: oklch(0.852 0.199 91.936);
+
+}
+
+.dark {
+  --highlight: oklch(0.852 0.199 91.936);
+
+}
+
+@theme inline {
+  --color-highlight: var(--highlight);
+
+}
+
