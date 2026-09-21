@@ -33,11 +33,12 @@ export function AdditionalActivitiesManager({
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [activityToDelete, setActivityToDelete] = React.useState<AdditionalActivity | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
-  const [successModalOpen, setSuccessModalOpen] = React.useState(false)
-  const [successModalConfig, setSuccessModalConfig] = React.useState<{
+  const [feedbackModalOpen, setFeedbackModalOpen] = React.useState(false)
+  const [feedbackModalConfig, setFeedbackModalConfig] = React.useState<{
+    type: 'success' | 'error'
     title: string
     message: string
-  }>({ title: '', message: '' })
+  }>({ type: 'success', title: '', message: '' })
 
   const loadActivities = React.useCallback(async () => {
     try {
@@ -75,17 +76,35 @@ export function AdditionalActivitiesManager({
     setIsDeleting(true)
     try {
       const deletedTitle = activityToDelete.title
-      await deleteAdditionalActivityAction(activityToDelete.id, lessonId)
+      const result = await deleteAdditionalActivityAction(activityToDelete.id, lessonId)
       setDeleteDialogOpen(false)
       setActivityToDelete(null)
-      setSuccessModalConfig({
-        title: 'Aktivita byla smazána',
-        message: `Aktivita "${deletedTitle}" byla úspěšně odstraněna.`,
-      })
-      setSuccessModalOpen(true)
+      if (result?.success) {
+        setFeedbackModalConfig({
+          type: 'success',
+          title: 'Aktivita byla smazána',
+          message: `Aktivita "${deletedTitle}" byla úspěšně odstraněna.`,
+        })
+      } else {
+        logger.error('Error deleting activity:', result?.error)
+        setFeedbackModalConfig({
+          type: 'error',
+          title: 'Aktivitu se nepodařilo smazat',
+          message: result?.error || 'Zkuste to prosím znovu.',
+        })
+      }
+      setFeedbackModalOpen(true)
       loadActivities()
     } catch (error) {
       logger.error('Error deleting activity:', error)
+      setDeleteDialogOpen(false)
+      setActivityToDelete(null)
+      setFeedbackModalConfig({
+        type: 'error',
+        title: 'Aktivitu se nepodařilo smazat',
+        message: 'Zkuste to prosím znovu.',
+      })
+      setFeedbackModalOpen(true)
     } finally {
       setIsDeleting(false)
     }
@@ -93,13 +112,14 @@ export function AdditionalActivitiesManager({
 
   const handleFormSuccess = React.useCallback(() => {
     const isCreating = !editingActivity
-    setSuccessModalConfig({
+    setFeedbackModalConfig({
+      type: 'success',
       title: isCreating ? 'Aktivita byla vytvořena' : 'Aktivita byla uložena',
       message: isCreating 
         ? 'Nová aktivita byla úspěšně přidána k lekci.'
         : 'Změny v aktivitě byly úspěšně uloženy.',
     })
-    setSuccessModalOpen(true)
+    setFeedbackModalOpen(true)
     loadActivities()
   }, [loadActivities, editingActivity])
 
@@ -125,7 +145,7 @@ export function AdditionalActivitiesManager({
           {activities.map((activity) => (
             <div
               key={activity.id}
-              className="border border-gray-200 rounded-lg p-4 flex items-start gap-4"
+              className="border border-gray-200 rounded-lg p-4 flex flex-wrap items-start gap-4"
             >
               {activity.image_url && (
                 <div className="shrink-0 relative">
@@ -148,7 +168,7 @@ export function AdditionalActivitiesManager({
                   )}
                 </div>
               )}
-              <div className="flex-1">
+              <div className="flex-1 basis-48 min-w-0">
                 <h3 className="font-semibold mb-1">{activity.title}</h3>
                 {activity.description && (
                   <p className="text-sm text-gray-600 line-clamp-2 mb-2">
@@ -167,7 +187,7 @@ export function AdditionalActivitiesManager({
                   </a>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 shrink-0 ml-auto">
                 <Button
                   variant="outline"
                   size="sm"
@@ -226,11 +246,11 @@ export function AdditionalActivitiesManager({
       </Dialog>
 
       <FeedbackModal
-        open={successModalOpen}
-        onOpenChange={setSuccessModalOpen}
-        type="success"
-        title={successModalConfig.title}
-        message={successModalConfig.message}
+        open={feedbackModalOpen}
+        onOpenChange={setFeedbackModalOpen}
+        type={feedbackModalConfig.type}
+        title={feedbackModalConfig.title}
+        message={feedbackModalConfig.message}
       />
     </div>
   )
