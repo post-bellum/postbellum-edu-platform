@@ -34,6 +34,7 @@ import {
   Type,
   Link,
   Columns2,
+  CircleHelp,
 } from 'lucide-react'
 
 import {
@@ -43,6 +44,7 @@ import {
   ToolbarDropdown,
   ToolbarDropdownItem,
 } from './plate-ui/toolbar'
+import { EditorHelpDialog } from './EditorHelpDialog'
 
 // ============================================================================
 // Color palette for text color
@@ -98,6 +100,7 @@ function scrollCaretIntoView(editor: ReturnType<typeof useEditorRef>) {
 
 export function EditorToolbar({ onInsertImage, className }: EditorToolbarProps) {
   const editor = useEditorRef()
+  const [helpOpen, setHelpOpen] = React.useState(false)
 
   // Track active marks using editor.api.marks()
   const isBold = useEditorSelector(
@@ -348,6 +351,17 @@ export function EditorToolbar({ onInsertImage, className }: EditorToolbarProps) 
       </ToolbarButton>
       <TableGridPicker onInsert={insertTable} />
 
+      {/* Help */}
+      <ToolbarButton
+        tooltip="Nápověda k editoru"
+        className="ml-auto gap-1.5 text-gray-600 cursor-pointer"
+        onClick={() => setHelpOpen(true)}
+      >
+        <CircleHelp className="h-4 w-4" />
+        <span>Nápověda</span>
+      </ToolbarButton>
+
+      <EditorHelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
     </Toolbar>
   )
 }
