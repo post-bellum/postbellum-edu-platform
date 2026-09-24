@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { useActionState } from 'react'
 import {
   createAdditionalActivityAction,
   updateAdditionalActivityAction,
@@ -48,6 +47,8 @@ export function AdditionalActivityForm({
   )
   const [isUploading, setIsUploading] = React.useState(false)
   const [uploadError, setUploadError] = React.useState<string | null>(null)
+  const [submitError, setSubmitError] = React.useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const fileInputId = React.useId()
 
@@ -60,25 +61,9 @@ export function AdditionalActivityForm({
       setLinkUrl(activity?.link_url || '')
       setAttachmentType(activity?.attachment_type === 'pdf' ? 'pdf' : 'image')
       setUploadError(null)
+      setSubmitError(null)
     }
   }, [open, activity])
-
-  const action = isEditing
-    ? async (_prevState: unknown, formData: FormData) => {
-        return updateAdditionalActivityAction(activity.id, formData)
-      }
-    : async (_prevState: unknown, formData: FormData) => {
-        return createAdditionalActivityAction(formData)
-      }
-
-  const [state, formAction] = useActionState(action, null)
-
-  React.useEffect(() => {
-    if (state?.success) {
-      onOpenChange(false)
-      onSuccess?.()
-    }
-  }, [state, onOpenChange, onSuccess])
 
   const handleFile = React.useCallback(async (file: File) => {
     const allowed = STORAGE_LIMITS.ALLOWED_ACTIVITY_FILE_TYPES as readonly string[]
@@ -124,7 +109,7 @@ export function AdditionalActivityForm({
     setUploadError(null)
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     formData.set('lesson_id', lessonId)
@@ -133,9 +118,23 @@ export function AdditionalActivityForm({
     formData.set('image_url', imageUrl)
     formData.set('attachment_type', attachmentType || 'image')
     formData.set('link_url', linkUrl.trim())
-    React.startTransition(() => {
-      formAction(formData)
-    })
+    setSubmitError(null)
+    setIsSubmitting(true)
+    try {
+      const result = isEditing
+        ? await updateAdditionalActivityAction(activity.id, formData)
+        : await createAdditionalActivityAction(formData)
+      if (result.success) {
+        onOpenChange(false)
+        onSuccess?.()
+      } else {
+        setSubmitError(result.error ?? 'Zkuste to prosím znovu.')
+      }
+    } catch {
+      setSubmitError('Zkuste to prosím znovu.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isPdf = attachmentType === 'pdf'
@@ -159,9 +158,9 @@ export function AdditionalActivityForm({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {state?.error && (
+          {submitError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {state.error}
+              {submitError}
             </div>
           )}
 
@@ -311,7 +310,7 @@ export function AdditionalActivityForm({
             >
               Zrušit
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={isSubmitting || isUploading}>
               {isEditing ? 'Uložit změny' : 'Vytvořit aktivitu'}
             </Button>
           </DialogFooter>
