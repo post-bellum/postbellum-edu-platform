@@ -36,7 +36,7 @@ export function NewsletterSection({
               htmlFor="newsletter-toggle"
               className="text-base font-semibold text-black leading-[1.4] cursor-pointer"
             >
-              Odebírat e-maily od StoryOn
+              Odebírat e-maily od storyON
             </Label>
             {isSubscribed ? (
               <span className="flex items-center gap-1 text-sm text-brand-primary leading-[1.4]">
