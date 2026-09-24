@@ -135,7 +135,7 @@ export function LessonWitnessesSection({ witnesses }: LessonWitnessesSectionProp
         <div
           aria-hidden
           className={cn(
-            'sm:hidden pointer-events-none absolute left-0 top-0 bottom-5 w-20 bg-linear-to-r from-white to-transparent transition-opacity',
+            'pointer-events-none absolute left-0 top-0 bottom-5 w-20 bg-linear-to-r from-white to-transparent transition-opacity',
             canScrollLeft ? 'opacity-100' : 'opacity-0'
           )}
         />
