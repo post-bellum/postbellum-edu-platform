@@ -60,10 +60,14 @@ export async function updateAdditionalActivityAction(activityId: string, formDat
     }
 
     // Parse FormData into object format expected by Zod
-    // An absent link_url means "clear the link", not "leave unchanged"
+    // Empty optional fields mean "clear the value", not "leave unchanged"
+    const getClearableValue = (key: string) =>
+      (formData.get(key) as string | null)?.trim() || null
     const rawData = {
       ...parseFormDataForAdditionalActivity(formData),
-      link_url: (formData.get('link_url') as string | null)?.trim() || null,
+      description: getClearableValue('description'),
+      image_url: getClearableValue('image_url'),
+      link_url: getClearableValue('link_url'),
     }
     
     // Validate and sanitize using Zod schema

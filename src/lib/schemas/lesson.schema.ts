@@ -373,14 +373,15 @@ export const updateAdditionalActivitySchema = z.object({
     .max(500, 'Název aktivity může mít maximálně 500 znaků')
     .transform(sanitizeString)
     .optional(),
+
   description: z
     .string()
     .max(5000, 'Popis může mít maximálně 5000 znaků')
+    .nullable()
     .optional()
-    .transform((val) => val ? sanitizeString(val) : undefined),
-  image_url: imageUrlSchema.transform((val) => val ? sanitizeString(val) : undefined),
+    .transform((val) => val ? sanitizeString(val) : val),
+  image_url: imageUrlSchema.nullable().transform((val) => val ? sanitizeString(val) : val),
   attachment_type: attachmentTypeSchema.optional(),
-  // null clears an existing link; undefined leaves it untouched
   link_url: externalLinkUrlSchema.nullable(),
 })
 
