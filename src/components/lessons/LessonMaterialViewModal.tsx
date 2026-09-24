@@ -19,8 +19,6 @@ interface LessonMaterialViewModalProps {
   pdfUrl?: string | null
 }
 
-type PreviewTab = 'text' | 'pdf'
-
 export function LessonMaterialViewModal({
   open,
   onOpenChange,
@@ -28,15 +26,9 @@ export function LessonMaterialViewModal({
   content,
   pdfUrl,
 }: LessonMaterialViewModalProps) {
-  const hasText = !!content
+  // PDF takes precedence; text is only a fallback for materials without one
+  // (e.g. user-edited copies).
   const hasPdf = !!pdfUrl
-  const [tab, setTab] = React.useState<PreviewTab>(hasText ? 'text' : 'pdf')
-
-  // Default to whichever source exists whenever the modal is reopened for
-  // another material.
-  React.useEffect(() => {
-    if (open) setTab(hasText ? 'text' : 'pdf')
-  }, [open, hasText])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,30 +40,8 @@ export function LessonMaterialViewModal({
           </DialogDescription>
         </DialogHeader>
 
-        {hasText && hasPdf && (
-          <div className="inline-flex self-start bg-grey-100 rounded-full p-1">
-            {([
-              ['text', 'Text k úpravě'],
-              ['pdf', 'PDF ke stažení'],
-            ] as const).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setTab(value)}
-                className={`px-6 h-9 rounded-full text-sm transition-all cursor-pointer whitespace-nowrap ${
-                  tab === value
-                    ? 'bg-brand-primary text-white shadow-sm font-semibold'
-                    : 'text-grey-600 hover:text-grey-950'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
-
         <div className="flex-1 overflow-y-auto">
-          {tab === 'pdf' && hasPdf ? (
+          {hasPdf ? (
             <div className="flex flex-col gap-2 h-full min-h-[60vh]">
               <iframe
                 src={pdfUrl as string}
@@ -87,7 +57,7 @@ export function LessonMaterialViewModal({
                 Nezobrazuje se náhled? Otevřít PDF v novém okně
               </a>
             </div>
-          ) : hasText ? (
+          ) : content ? (
             <PagedPreview title={title} content={content as string} paginate={false} />
           ) : (
             <p className="text-gray-500 text-center py-8">
