@@ -39,17 +39,25 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { ParagraphPlugin, createPlatePlugin } from 'platejs/react'
 
+const NEUTRAL_BACKGROUND_COLORS = new Set([
+  'transparent',
+  'white',
+  '#fff',
+  '#ffffff',
+  'rgb(255, 255, 255)',
+  'rgba(0, 0, 0, 0)',
+])
+
+export function isNeutralBackgroundColor(color: string): boolean {
+  return NEUTRAL_BACKGROUND_COLORS.has(color.trim().toLowerCase())
+}
+
 // Custom Title plugin (renders as a large h1, bigger than Nadpis 1)
 const TitlePlugin = createPlatePlugin({
   key: 'title',
   node: { isElement: true, type: 'title' },
 })
 
-/**
- * Ensures the editor always contains at least one paragraph.
- * Without this, CMD+A → Delete removes all blocks and the editor collapses.
- * Uses Slate's normalizeNode — the standard way to enforce document constraints.
- */
 const ForceNonEmptyPlugin = createPlatePlugin({
   key: 'forceNonEmpty',
   extendEditor: ({ editor }) => {
@@ -211,7 +219,18 @@ export const editorPlugins = [
 
   // Font styling (renders color/backgroundColor marks as inline styles)
   FontColorPlugin,
-  FontBackgroundColorPlugin,
+  FontBackgroundColorPlugin.extend({
+    parsers: {
+      html: {
+        deserializer: {
+          parse: ({ element, type }) =>
+            isNeutralBackgroundColor(element.style.backgroundColor)
+              ? undefined
+              : { [type]: element.style.backgroundColor },
+        },
+      },
+    },
+  }),
 
   // Node IDs (required for DnD and block selection)
   NodeIdPlugin,

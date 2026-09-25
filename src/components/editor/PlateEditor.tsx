@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/Dialog'
 import { Button } from '@/components/ui/Button'
 
-import { editorPlugins } from './plate-plugins'
+import { editorPlugins, isNeutralBackgroundColor } from './plate-plugins'
 import { EditorContainer, Editor } from './plate-ui/editor'
 import { EditorToolbar } from './EditorToolbar'
 import './page-styles.css'
@@ -594,7 +594,7 @@ function convertInlineChildren(parent: Node): Array<Record<string, unknown>> {
       case 'span': {
         const marks: Record<string, unknown> = {}
         if (el.style.color) marks.color = el.style.color
-        if (el.style.backgroundColor) marks.backgroundColor = el.style.backgroundColor
+        if (el.style.backgroundColor && !isNeutralBackgroundColor(el.style.backgroundColor)) marks.backgroundColor = el.style.backgroundColor
         if (el.style.fontWeight && (el.style.fontWeight === 'bold' || parseInt(el.style.fontWeight) >= 600)) {
           marks.bold = true
         }
