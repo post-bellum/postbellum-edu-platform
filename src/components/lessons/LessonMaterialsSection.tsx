@@ -180,11 +180,11 @@ export function LessonMaterialsSection({ materials, lessonId, lessonTitle, lesso
         groupedMaterials={groupedMaterials}
         isExportingPDF={isExportingPDF}
         isCopying={isCopying}
-        onView={(material) => requireAuth(() => {
+        onView={(material) => {
           setSelectedMaterial(material)
           setViewModalOpen(true)
-        })}
-        onExportPDF={(material) => requireAuth(() => handleExportPDF(material))}
+        }}
+        onExportPDF={handleExportPDF}
         onCopy={(materialId) => requireAuth(() => handleCopyMaterial(materialId))}
       />
 
