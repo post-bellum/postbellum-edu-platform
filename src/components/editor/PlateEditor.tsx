@@ -229,8 +229,7 @@ export function PlateEditor({
             className={toolbarClassName}
           />
 
-          {/* Continuous editor - pagination only in preview/PDF */}
-          <EditorContainer className="continuous-editor-container rounded-b-xl">
+          <EditorContainer className="continuous-editor-container isolate rounded-b-xl">
             <Editor
               placeholder={placeholder}
               className="continuous-editor-content"
