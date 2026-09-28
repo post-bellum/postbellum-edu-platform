@@ -1,16 +1,14 @@
 'use server'
 
+import { cache } from 'react'
 import { createClient } from './server'
+import { getUser } from './auth-helpers'
 import { logger } from '@/lib/logger'
 
-/**
- * Check if the current user is an admin
- * @returns true if user is admin, false otherwise
- */
-export async function isAdmin(): Promise<boolean> {
+const getIsAdmin = cache(async (): Promise<boolean> => {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getUser()
     
     if (!user) return false
     
@@ -30,6 +28,10 @@ export async function isAdmin(): Promise<boolean> {
     logger.error('Error checking admin status:', error)
     return false
   }
+})
+
+export async function isAdmin(): Promise<boolean> {
+  return getIsAdmin()
 }
 
 /**

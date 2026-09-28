@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from './server'
+import { getUser } from './auth-helpers'
 import { logger } from '@/lib/logger'
 import type { UserLessonMaterial } from '@/types/lesson.types'
 import type {
@@ -128,8 +129,8 @@ export async function getUserMaterialTitlesForLesson(
   try {
     const supabase = await createClient()
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
+    const user = await getUser()
+    if (!user) {
       return []
     }
 
@@ -165,8 +166,8 @@ export async function getAllUserLessonMaterials(): Promise<Array<UserLessonMater
     const supabase = await createClient()
     
     // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
+    const user = await getUser()
+    if (!user) {
       // Not logged in - return empty array
       return []
     }
@@ -208,8 +209,8 @@ export async function getUserLessonMaterials(lessonId: string): Promise<UserLess
     const supabase = await createClient()
     
     // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
+    const user = await getUser()
+    if (!user) {
       // Not logged in - return empty array
       return []
     }
@@ -268,8 +269,8 @@ export async function createUserLessonMaterial(
     const supabase = await createClient()
     
     // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
+    const user = await getUser()
+    if (!user) {
       throw new Error('Musíte být přihlášeni pro vytvoření materiálu')
     }
 
