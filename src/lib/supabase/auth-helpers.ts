@@ -2,9 +2,11 @@ import { createClient } from './server';
 import { redirect } from 'next/navigation';
 import { authConfig } from './config';
 import { cache } from 'react';
+import { isAuthSessionMissingError } from '@supabase/supabase-js';
 import { logger } from '@/lib/logger';
 
-// Cache the user data for the duration of the request
+// Cache the user data for the duration of the request, so every server helper
+// rendered in the same request shares one Supabase Auth round trip
 export const getUser = cache(async () => {
   const supabase = await createClient();
   const {
@@ -13,7 +15,10 @@ export const getUser = cache(async () => {
   } = await supabase.auth.getUser();
 
   if (error) {
-    logger.error('Error fetching user', error);
+    // A missing session just means an anonymous visitor
+    if (!isAuthSessionMissingError(error)) {
+      logger.error('Error fetching user', error);
+    }
     return null;
   }
 

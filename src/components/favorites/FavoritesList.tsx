@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { getUser } from '@/lib/supabase/auth-helpers'
 import { getUserFavoriteLessonIds } from '@/lib/supabase/favorites'
 import { getLessonsByIds } from '@/lib/supabase/lessons'
 import { LessonCard } from '@/components/lessons/LessonCard'
@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Bookmark } from 'lucide-react'
 
 export async function FavoritesList() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
   
   if (!user) {
     redirect('/')

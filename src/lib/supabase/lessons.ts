@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from './server'
+import { getUser } from './auth-helpers'
 import { createPublicClient } from './public'
 import { requireAdmin } from './admin-helpers'
 import { logger } from '@/lib/logger'
@@ -352,7 +353,7 @@ export async function createLesson(input: CreateLessonInput): Promise<Lesson> {
 
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getUser()
     
     if (!user) {
       throw new Error('User must be authenticated')

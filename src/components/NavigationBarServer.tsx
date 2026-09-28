@@ -1,10 +1,9 @@
 import { NavigationBar } from './NavigationBar'
-import { createClient } from '@/lib/supabase/server'
+import { getUser } from '@/lib/supabase/auth-helpers'
 import { getFavoriteCount } from '@/lib/supabase/favorites'
 
 export async function NavigationBarServer() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
   
   let favoriteCount = 0
   let userEmail: string | null = null

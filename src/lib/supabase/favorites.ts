@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from './server'
+import { getUser } from './auth-helpers'
 import { logger } from '@/lib/logger'
 
 /**
@@ -9,7 +10,7 @@ import { logger } from '@/lib/logger'
 export async function isLessonFavorited(lessonId: string): Promise<boolean> {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getUser()
     
     if (!user) return false
 
@@ -38,7 +39,7 @@ export async function isLessonFavorited(lessonId: string): Promise<boolean> {
 export async function getUserFavoriteLessonIds(): Promise<string[]> {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getUser()
     
     if (!user) return []
 
@@ -66,7 +67,7 @@ export async function getUserFavoriteLessonIds(): Promise<string[]> {
 export async function getFavoriteCount(): Promise<number> {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getUser()
     
     if (!user) return 0
 
@@ -93,7 +94,7 @@ export async function getFavoriteCount(): Promise<number> {
 export async function addFavorite(lessonId: string): Promise<void> {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getUser()
     
     if (!user) {
       throw new Error('User must be authenticated')
@@ -122,7 +123,7 @@ export async function addFavorite(lessonId: string): Promise<void> {
 export async function removeFavorite(lessonId: string): Promise<void> {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getUser()
     
     if (!user) {
       throw new Error('User must be authenticated')
