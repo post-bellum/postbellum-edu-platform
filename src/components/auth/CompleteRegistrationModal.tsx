@@ -37,7 +37,7 @@ const NON_TEACHER_OPTIONS = [
 ] as const
 
 export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationModalProps) {
-  const [userType, setUserType] = React.useState<'teacher' | 'not-teacher'>('not-teacher')
+  const [userType, setUserType] = React.useState<'teacher' | 'not-teacher'>('teacher')
   const [displayName, setDisplayName] = React.useState('')
   const [schoolName, setSchoolName] = React.useState('')
   const [category, setCategory] = React.useState<string>('')
@@ -177,7 +177,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
               )}
             </span>
             <span className="flex-1 font-normal select-none text-base leading-[1.5] text-text-subtle text-left">
-              Jsem učitel
+              Jsem vyučující
             </span>
           </button>
           <button
@@ -201,7 +201,7 @@ export function CompleteRegistrationModal({ onSuccess }: CompleteRegistrationMod
               )}
             </span>
             <span className="flex-1 font-normal select-none text-base leading-[1.5] text-text-subtle text-left">
-              Nejsem učitel
+              Nejsem vyučující
             </span>
           </button>
         </div>
