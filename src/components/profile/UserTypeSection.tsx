@@ -7,7 +7,6 @@ interface UserTypeSectionProps {
 }
 
 export function UserTypeSection({ userType }: UserTypeSectionProps) {
-  // Override disabled checked styling to keep green background
   const radioClassName = 'data-[state=checked]:disabled:bg-brand-primary data-[state=checked]:disabled:border-brand-primary'
 
   return (
@@ -22,7 +21,7 @@ export function UserTypeSection({ userType }: UserTypeSectionProps) {
             data-testid="user-type-teacher" 
           />
           <Label htmlFor="teacher-display" className="font-normal text-base text-text-subtle leading-[1.5]">
-            Jsem učitel
+            Jsem vyučující
           </Label>
         </div>
         <div className="flex-1 flex items-center gap-2 rounded-2xl bg-grey-100 px-5 py-3">
@@ -34,7 +33,7 @@ export function UserTypeSection({ userType }: UserTypeSectionProps) {
             data-testid="user-type-not-teacher" 
           />
           <Label htmlFor="not-teacher-display" className="font-normal text-base text-text-subtle leading-[1.5]">
-            Nejsem učitel
+            Nejsem vyučující
           </Label>
         </div>
       </div>

@@ -6,7 +6,7 @@ import type { PageSlug } from '@/types/page-content.types'
 const subTabs: { id: PageSlug; label: string }[] = [
   { id: 'homepage', label: 'Hlavní strana' },
   { id: 'about', label: 'O projektu' },
-  { id: 'terms', label: 'Smluvní podmínky' },
+  { id: 'terms', label: 'Podmínky služby' },
 ]
 
 interface PageContentSubTabsProps {
