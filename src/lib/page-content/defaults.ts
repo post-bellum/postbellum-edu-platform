@@ -231,7 +231,7 @@ export const DEFAULT_ABOUT_CONTENT: AboutContent = {
 // =============================================
 
 export const DEFAULT_TERMS_CONTENT: TermsContent = {
-  pageTitle: 'Smluvní podmínky',
+  pageTitle: 'Podmínky služby',
   metaDescription:
     'Všeobecné podmínky užívání a zásady ochrany osobních údajů portálu storyON organizace POST BELLUM, z. ú.',
   sections: [

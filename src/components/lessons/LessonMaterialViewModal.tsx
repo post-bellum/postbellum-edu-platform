@@ -29,6 +29,11 @@ export function LessonMaterialViewModal({
   // PDF takes precedence; text is only a fallback for materials without one
   // (e.g. user-edited copies).
   const hasPdf = !!pdfUrl
+  // Open params hide the browser viewer's toolbar and thumbnail sidebar and fit
+  // the page to width. Honored by Chrome/Edge; other browsers ignore them.
+  const pdfPreviewUrl = hasPdf
+    ? `${(pdfUrl as string).split('#')[0]}#toolbar=0&navpanes=0&view=FitH`
+    : null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -44,7 +49,7 @@ export function LessonMaterialViewModal({
           {hasPdf ? (
             <div className="flex flex-col gap-2 h-full min-h-[60vh]">
               <iframe
-                src={pdfUrl as string}
+                src={pdfPreviewUrl as string}
                 title={`Náhled PDF: ${title}`}
                 className="w-full flex-1 min-h-[60vh] rounded-lg border border-gray-200 bg-gray-50"
               />
