@@ -22,6 +22,7 @@ export interface Lesson {
   author_team: string | null
   publication_date: string | null // ISO date string
   published: boolean
+  sort_order: number // Manual catalog position set by admins, lower comes first
   created_by: string | null
   created_at: string
   updated_at: string
