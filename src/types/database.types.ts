@@ -281,6 +281,7 @@ export type Database = {
           published: boolean
           rvp_connection: string[] | null
           short_id: string | null
+          sort_order: number
           target_group: string | null
           thumbnail_url: string | null
           title: string
@@ -300,6 +301,7 @@ export type Database = {
           published?: boolean
           rvp_connection?: string[] | null
           short_id?: string | null
+          sort_order?: number
           target_group?: string | null
           thumbnail_url?: string | null
           title: string
@@ -319,6 +321,7 @@ export type Database = {
           published?: boolean
           rvp_connection?: string[] | null
           short_id?: string | null
+          sort_order?: number
           target_group?: string | null
           thumbnail_url?: string | null
           title?: string

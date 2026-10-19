@@ -87,8 +87,9 @@ export async function getLessons(filters?: {
         filteredLessons = filteredLessons.filter(l => l.target_group === filters.target_group)
       }
       
-      // Sort by publication_date and created_at
+      // Sort by manual order, then publication_date and created_at
       const sortedLessons = filteredLessons.sort((a, b) => {
+        if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order
         const dateA = a.publication_date || a.created_at
         const dateB = b.publication_date || b.created_at
         return new Date(dateB).getTime() - new Date(dateA).getTime()
@@ -107,6 +108,7 @@ export async function getLessons(filters?: {
     let query = supabase
       .from('lessons')
       .select('*')
+      .order('sort_order', { ascending: true })
       .order('publication_date', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
 
@@ -196,6 +198,7 @@ export async function getLessonsByIds(
       .from('lessons')
       .select('*')
       .in('id', ids)
+      .order('sort_order', { ascending: true })
       .order('publication_date', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
 
@@ -364,12 +367,21 @@ export async function createLesson(input: CreateLessonInput): Promise<Lesson> {
     // Generate short ID for SEO-friendly URLs (10 chars, like Medium)
     const shortId = generateShortId()
 
+    // New lessons go to the top of the catalog
+    const { data: first } = await supabase
+      .from('lessons')
+      .select('sort_order')
+      .order('sort_order', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+
     // Create lesson with short_id
     const { data: lesson, error: lessonError } = await supabase
       .from('lessons')
       .insert({
         ...lessonData,
         short_id: shortId,
+        sort_order: (first?.sort_order ?? 1) - 1,
         created_by: user.id,
         rvp_connection: input.rvp_connection || []
       })

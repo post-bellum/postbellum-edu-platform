@@ -8,6 +8,7 @@ import {
   getLessons,
 } from '@/lib/supabase/lessons'
 import { requireAdmin } from '@/lib/supabase/admin-helpers'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/logger'
 import { isValidUUID } from '@/lib/validation'
 import {
@@ -157,6 +158,70 @@ export async function deleteLessonAction(lessonId: string) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Chyba při mazání lekce',
+    }
+  }
+}
+
+/**
+ * Move a lesson one place up or down in the catalog
+ */
+export async function moveLessonAction(lessonId: string, direction: 'up' | 'down') {
+  try {
+    if (!lessonId || !isValidUUID(lessonId)) {
+      return { success: false, error: 'Neplatné ID lekce' }
+    }
+
+    await requireAdmin()
+
+    const supabase = createAdminClient()
+
+    const { data, error } = await supabase
+      .from('lessons')
+      .select('id, sort_order')
+      .order('sort_order', { ascending: true })
+      .order('publication_date', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
+
+    if (error || !data) {
+      logger.error('Error loading lesson order', error)
+      return { success: false, error: 'Nepodařilo se načíst pořadí lekcí' }
+    }
+
+    const index = data.findIndex((lesson) => lesson.id === lessonId)
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+
+    if (index === -1 || targetIndex < 0 || targetIndex >= data.length) {
+      return { success: true }
+    }
+
+    const reordered = [...data]
+    const [moved] = reordered.splice(index, 1)
+    reordered.splice(targetIndex, 0, moved)
+
+    // Rewrite positions so they stay a dense 0..n-1 sequence
+    for (const [sortOrder, lesson] of reordered.entries()) {
+      if (lesson.sort_order === sortOrder) continue
+
+      const { error: updateError } = await supabase
+        .from('lessons')
+        .update({ sort_order: sortOrder })
+        .eq('id', lesson.id)
+
+      if (updateError) {
+        logger.error('Error reordering lessons', updateError)
+        return { success: false, error: 'Nepodařilo se změnit pořadí lekcí' }
+      }
+    }
+
+    revalidatePath('/lessons')
+    revalidatePath('/')
+
+    return { success: true }
+  } catch (error) {
+    logger.error('Error reordering lessons', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Chyba při změně pořadí',
     }
   }
 }

@@ -3,10 +3,11 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { BookOpen, Plus, Eye, FileCheck, FileX, Pencil, Trash2 } from 'lucide-react'
-import { 
-  getAdminLessons, 
+import { BookOpen, Plus, Eye, FileCheck, FileX, Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react'
+import {
+  getAdminLessons,
   deleteLessonAction,
+  moveLessonAction,
   type AdminLessonsStats 
 } from '@/app/actions/lessons'
 import { generateLessonUrlFromLesson } from '@/lib/utils'
@@ -32,6 +33,10 @@ export function AdminLessonsSection() {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [lessonToDelete, setLessonToDelete] = React.useState<LessonWithRelations | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
+
+  // Catalog reordering state
+  const [isMoving, setIsMoving] = React.useState(false)
+  const [moveError, setMoveError] = React.useState<string | null>(null)
 
   const loadLessons = React.useCallback(async () => {
     const result = await getAdminLessons()
@@ -71,6 +76,24 @@ export function AdminLessonsSection() {
       logger.error('Error deleting lesson:', error)
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleMove = async (lessonId: string, direction: 'up' | 'down') => {
+    setIsMoving(true)
+    setMoveError(null)
+    try {
+      const result = await moveLessonAction(lessonId, direction)
+      if (result.success) {
+        await loadLessons()
+      } else {
+        setMoveError(result.error || 'Nepodařilo se změnit pořadí lekcí')
+      }
+    } catch (error) {
+      logger.error('Error reordering lessons:', error)
+      setMoveError('Nepodařilo se změnit pořadí lekcí')
+    } finally {
+      setIsMoving(false)
     }
   }
 
@@ -141,6 +164,13 @@ export function AdminLessonsSection() {
           </div>
         )}
 
+        {lessons.length > 1 && (
+          <div className="px-6 py-3 border-b border-grey-100 text-sm text-text-subtle">
+            Pořadí v tabulce odpovídá pořadí v katalogu. Šipkami ho můžete změnit, nové lekce se řadí na začátek.
+            {moveError && <p className="text-red-600 mt-1">{moveError}</p>}
+          </div>
+        )}
+
         {/* Lessons List */}
         <div className="max-h-[500px] overflow-y-auto">
           {lessons.length === 0 ? (
@@ -178,7 +208,7 @@ export function AdminLessonsSection() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-grey-100">
-                {lessons.map((lesson) => (
+                {lessons.map((lesson, index) => (
                   <tr key={lesson.id} className="hover:bg-grey-50">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
@@ -213,6 +243,24 @@ export function AdminLessonsSection() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleMove(lesson.id, 'up')}
+                          disabled={index === 0 || isMoving}
+                          className="p-2 rounded-lg text-grey-600 hover:bg-grey-100 disabled:opacity-30 transition-colors cursor-pointer"
+                          title="Posunout v katalogu nahoru"
+                        >
+                          <ArrowUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMove(lesson.id, 'down')}
+                          disabled={index === lessons.length - 1 || isMoving}
+                          className="p-2 rounded-lg text-grey-600 hover:bg-grey-100 disabled:opacity-30 transition-colors cursor-pointer"
+                          title="Posunout v katalogu dolů"
+                        >
+                          <ArrowDown className="w-4 h-4" />
+                        </button>
                         <Button
                           asChild
                           variant="ghost"
