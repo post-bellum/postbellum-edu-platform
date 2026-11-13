@@ -10,11 +10,12 @@ import { logger } from '@/lib/logger'
 interface OTPModalProps {
   email: string
   password?: string // For QA bypass
+  existingAccount?: boolean
   onSuccess: () => void
   onBack: () => void
 }
 
-export function OTPModal({ email, password, onSuccess, onBack }: OTPModalProps) {
+export function OTPModal({ email, password, existingAccount = false, onSuccess, onBack }: OTPModalProps) {
   const router = useRouter()
   const [otp, setOtp] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
@@ -81,7 +82,7 @@ export function OTPModal({ email, password, onSuccess, onBack }: OTPModalProps) 
     setResendSuccess(false)
     
     try {
-      const { error: resendError } = await resendOTP(email)
+      const { error: resendError } = await resendOTP(email, existingAccount)
       
       if (resendError) {
         setError(getErrorMessage(resendError))

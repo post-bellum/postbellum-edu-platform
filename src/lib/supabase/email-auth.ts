@@ -87,10 +87,49 @@ export async function signUpWithEmail(email: string, password: string) {
       throw error
     }
 
-    return { data, error: null }
+    // Supabase answers a sign-up for an already registered (confirmed) email
+    // with an obfuscated user that has no identities, and sends no email.
+    // Send that person a sign-in code instead, so they learn they already
+    // have an account. The UI must not show any difference between the two
+    // cases (account enumeration) - the caller only uses the flag to pick the
+    // right "resend" flow.
+    const existingAccount = data.user?.identities?.length === 0
+    if (existingAccount) {
+      await sendExistingAccountEmail(email)
+    }
+
+    return { data, error: null, existingAccount }
   } catch (error) {
     logger.error('Sign up error', error)
     return { data: null, error }
+  }
+}
+
+/**
+ * Sends the "you already have an account" email to a registered address.
+ *
+ * Uses Supabase's Magic Link template (signInWithOtp), which the app does not
+ * use for anything else, so the template is reworded for this case. The email
+ * carries a 6-digit code the user can enter in the OTP step to sign in.
+ *
+ * Never throws and never reports failure to the caller: a visible error here
+ * (e.g. a rate limit) would reveal that the account exists.
+ */
+async function sendExistingAccountEmail(email: string) {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+    if (error) {
+      logger.warn('Existing account email not sent', error)
+    }
+  } catch (error) {
+    logger.warn('Existing account email not sent', error)
   }
 }
 
@@ -164,8 +203,12 @@ export async function verifyOTP(email: string, token: string, _password?: string
 /**
  * Resend OTP code
  * For QA emails, skips actual email sending
+ *
+ * `existingAccount` comes from signUpWithEmail: for an already registered
+ * email, Supabase silently ignores a sign-up resend, so the "already have an
+ * account" email is sent again instead.
  */
-export async function resendOTP(email: string) {
+export async function resendOTP(email: string, existingAccount = false) {
   try {
     // Skip resend for QA emails - they don't need the actual email
     const qaConfig = getQAConfig()
@@ -173,7 +216,12 @@ export async function resendOTP(email: string) {
       logger.info('QA email resend skipped', { email, otpCode: qaConfig.otpCode })
       return { data: { messageId: 'qa-bypass' }, error: null }
     }
-    
+
+    if (existingAccount) {
+      await sendExistingAccountEmail(email)
+      return { data: {}, error: null }
+    }
+
     const supabase = createClient()
     
     const { data, error } = await supabase.auth.resend({

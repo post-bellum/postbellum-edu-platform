@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger'
 
 interface RegisterModalProps {
   onSwitchToLogin: () => void
-  onSuccess: (email: string, password: string) => void
+  onSuccess: (email: string, password: string, existingAccount: boolean) => void
   returnTo?: string
 }
 
@@ -74,15 +74,15 @@ export function RegisterModal({ onSwitchToLogin, onSuccess, returnTo }: Register
       }
 
       // Register with Supabase
-      const { error: signUpError } = await signUpWithEmail(email, password)
-      
+      const { error: signUpError, existingAccount } = await signUpWithEmail(email, password)
+
       if (signUpError) {
         setError(getErrorMessage(signUpError))
         return
       }
 
       // After successful registration, move to OTP verification
-      onSuccess(email, password)
+      onSuccess(email, password, existingAccount ?? false)
     } catch (error) {
       logger.error('Registration error', error)
       setError('Při registraci došlo k chybě. Zkuste to prosím znovu.')

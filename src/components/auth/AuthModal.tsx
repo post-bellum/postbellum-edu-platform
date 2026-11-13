@@ -26,6 +26,7 @@ export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo 
   const [step, setStep] = React.useState<AuthStep>(defaultStep)
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
+  const [existingAccount, setExistingAccount] = React.useState(false)
 
   // Reset to default step when modal opens
   React.useEffect(() => {
@@ -41,10 +42,15 @@ export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo 
     router.refresh()
   }
 
-  const handleRegisterSuccess = (registrationEmail: string, registrationPassword: string) => {
+  const handleRegisterSuccess = (
+    registrationEmail: string,
+    registrationPassword: string,
+    registrationExistingAccount: boolean,
+  ) => {
     // After registration, go to OTP verification
     setEmail(registrationEmail)
     setPassword(registrationPassword) // Store password for QA bypass
+    setExistingAccount(registrationExistingAccount)
     setStep('otp')
   }
 
@@ -92,6 +98,7 @@ export function AuthModal({ open, onOpenChange, defaultStep = 'login', returnTo 
           <OTPModal
             email={email}
             password={password}
+            existingAccount={existingAccount}
             onSuccess={handleOTPSuccess}
             onBack={() => setStep('register')}
           />
